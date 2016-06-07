@@ -1,4 +1,4 @@
-module tile_mod;
+module mahjong.domain.tile;
 
 import std.stdio;
 import std.string;
@@ -6,12 +6,11 @@ import std.random;
 import std.conv;
 
 import enumlist;
-import graphics;
-import mahjong;
-import ai;
-import meta;
-import player;
-import objects;
+import mahjong.graphics.graphics;
+import mahjong.engine.mahjong;
+import mahjong.engine.ai;
+import mahjong.domain.metagame;
+import mahjong.domain.player;
 
 import dsfml.graphics;
 

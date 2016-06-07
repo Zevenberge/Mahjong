@@ -5,11 +5,10 @@ import dsfml.window;
 import std.stdio;
 import std.file;
 
-import mahjong;
+import mahjong.engine.mahjong;
 import enumlist;
-import objects;
-import yakus;
-import graphics;
+import mahjong.engine.yaku;
+import mahjong.graphics.graphics;
 
 string fontRegfile = "fonts/LiberationSans-Regular.ttf";
 string fontBoldfile = "fonts/LiberationSans-Bold.ttf";

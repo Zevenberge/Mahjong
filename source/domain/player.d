@@ -1,4 +1,4 @@
-module player;
+module mahjong.domain.player;
 
 import std.stdio;
 import std.string;
@@ -6,13 +6,13 @@ import std.random;
 import std.conv;
 
 import enumlist;
-import graphics;
-import mahjong;
-import ai;
-import meta;
-import objects;
-import tile_mod;
-import wall;
+import mahjong.graphics.graphics;
+import mahjong.engine.mahjong;
+import mahjong.engine.ai;
+import mahjong.domain.ingame;
+import mahjong.domain.metagame;
+import mahjong.domain.tile;
+import mahjong.domain.wall;
 
 import dsfml.graphics;
 
@@ -259,7 +259,7 @@ class Player
      return new Player(name, iconTexture, icon, avatar);
    }
 
-   string toString() const
+   override string toString() const
    {
      return(format("%s-san",name));
    }

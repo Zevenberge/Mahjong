@@ -1,20 +1,20 @@
+module mahjong.graphics.graphics;
+
 import dsfml.graphics;
 import dsfml.window;
-import std.stdio;
-import std.math;
+import std.experimental.logger;
 import std.file;
-import std.parallelism;
-import core.thread;
+import std.math;
 
-import mahjong;
 import enumlist;
-import objects;
-import player;
-import yakus;
-import ai;
-import board;
-import meta;
-import tile_mod;
+import mahjong.domain.board;
+import mahjong.domain.metagame;
+import mahjong.domain.player;
+import mahjong.domain.tile;
+import mahjong.engine.ai;
+import mahjong.engine.mahjong;
+import mahjong.engine.yaku;
+import mahjong.graphics.mainmenu;
 
 void gamewindow(RenderWindow window)
 { /*
@@ -212,7 +212,7 @@ void textureFromImage(ref Texture texture, Image image, int x, int y, int w, int
    auto range = IntRect(x,y,w,h);
    if(!texture.loadFromImage(image, range))
    {
-     writeln("Texture not loaded.");
+     error("Texture not loaded.");
      load(texture);
    }
    texture.setSmooth(true);
@@ -259,8 +259,7 @@ body
 {
       if(!texture.loadFromFile(texturefile, IntRect(x0, y0, size_x, size_y))) // If the size is specified, load only that partition.
       {
-        writeln("File ", texturefile, " not found or out of bounds.");
-        writeln("Swapping in default texture...");
+        error("File ", texturefile, " not found or out of bounds. Swapping in default texture.");
         texture.loadFromFile(defaultTexture);
         return false;
       }
@@ -271,7 +270,7 @@ bool load(T) (ref T texture, string texturefile)
 {
   if(!texture.loadFromFile(texturefile))
   {
-     writeln("File ", texturefile, " not found.");
+     error("File ", texturefile, " not found.");
      return false;
   }
   return true;
@@ -339,9 +338,9 @@ void alignBottom(ref Sprite sprite, FloatRect box)
 {
   auto size = sprite.getGlobalBounds();
   sprite.position = Vector2f(box.left, (box.top + box.height - size.height));
-  writeln("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
+  trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
   CenterSprite(sprite, "horizontal", box.left, box.top, box.width, box.height);
-  writeln("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
+  trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
 
 void setTitle(Text title, dstring text)
@@ -519,6 +518,50 @@ void setTileInSquare(ref Tile tile, const int amountOfTiles, const float undersh
    rotateToPlayer(tile, playLoc);
 }
 
+FloatRect calcGlobalBounds(T) (T opts)
+{
+    /*
+      Get the rectangular global bounds of a given system.
+    */
+    FloatRect bounds;
+    if(opts.length == 0)
+    {
+      bounds.top = 0;
+      bounds.left = 0;
+      bounds.height = 0;
+      bounds.width = 0;
+      return bounds;
+    }
+    bounds.top = float.max;
+    bounds.left = float.max;
+    bounds.height = 0;
+    bounds.width = 0;
+    foreach(opt; opts)
+    {
+       auto localBounds = opt.getGlobalBounds; // Nice naming, eh?
+       if(localBounds.left < bounds.left)
+       {
+          bounds.left = localBounds.left;
+       }
+       if(localBounds.top < bounds.top)
+       {
+          bounds.top = localBounds.top;
+       }
+    }
+    foreach(opt; opts)
+    {
+       auto localBounds = opt.getGlobalBounds; // Nice naming, eh?
+       if((localBounds.left + localBounds.width - bounds.left) > bounds.width)
+       {
+          bounds.width = localBounds.left + localBounds.width - bounds.left;
+       }
+       if((localBounds.top + localBounds.height - bounds.top) > bounds.height)
+       {
+          bounds.height = localBounds.top + localBounds.height - bounds.top;
+       }
+    }
+    return bounds;
+}
 
 
 

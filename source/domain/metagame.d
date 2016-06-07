@@ -1,20 +1,18 @@
-module meta;
+module mahjong.domain.metagame;
 
 import std.stdio;
 import std.string;
 import std.random;
 import std.conv;
+import dsfml.graphics;
 
 import enumlist;
-import graphics;
-import mahjong;
-import ai;
-import objects;
-import player;
-import tile_mod;
-import wall;
-
-import dsfml.graphics;
+import mahjong.graphics.graphics;
+import mahjong.engine.mahjong;
+import mahjong.engine.ai;
+import mahjong.domain.player;
+import mahjong.domain.tile;
+import mahjong.domain.wall;
 
 class Metagame
 {

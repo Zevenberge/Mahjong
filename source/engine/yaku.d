@@ -1,4 +1,4 @@
-module yakus;
+module mahjong.engine.yaku;
 
 import std.stdio;
 import std.string;
@@ -9,11 +9,9 @@ import std.random;
 import std.process;
 import std.conv;
 import std.file;
-// TODO: prune the import list
 
-import enumlist; // File that contains all of the enum constants.
-import objects; // File that contains all of the structs/classes.
-import tile_mod;
+import enumlist; 
+import mahjong.domain.tile;
 
 class yaku
 { 

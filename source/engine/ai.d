@@ -1,9 +1,10 @@
+module mahjong.engine.ai;
+
 import std.stdio;
 import std.random;
 
-import objects;
-import mahjong;
-import tile_mod;
+import mahjong.engine.mahjong;
+import mahjong.domain.tile;
 
 class aiRandom
 {

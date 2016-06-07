@@ -1,13 +1,13 @@
-module board;
+module mahjong.domain.board;
 
 import std.stdio;
 
 import enumlist;
-import graphics;
-import mahjong;
-import ai;
-import objects;
-import meta;
+import mahjong.engine.mahjong;
+import mahjong.engine.ai;
+import mahjong.domain.metagame;
+import mahjong.graphics.graphics;
+import mahjong.graphics.menu;
 
 import dsfml.graphics;
 

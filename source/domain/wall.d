@@ -1,14 +1,13 @@
-module wall;
+module mahjong.domain.wall;
 
 import std.random;
 import std.stdio;
 import std.conv;
 
-import objects;
 import enumlist;
-import mahjong;
-import tile_mod;
-import graphics;
+import mahjong.engine.mahjong;
+import mahjong.domain.tile;
+import mahjong.graphics.graphics;
 
 import dsfml.graphics;
 
