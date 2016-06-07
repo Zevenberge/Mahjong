@@ -1,0 +1,10 @@
+{
+	"name": "mahjong",
+	"description": "A D mahjong game.",
+	"copyright": "Copyright © 2015, marco",
+	"authors": ["marco"],
+	"lflags" : ["-L/usr/local/lib/dsfml"],
+	"dependencies": {
+		"dsfml": "~master"
+	}
+}

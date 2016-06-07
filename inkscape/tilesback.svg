@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 744.09448819 1052.3622047"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="tilesback.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient3360">
+      <stop
+         style="stop-color:#c83737;stop-opacity:1;"
+         offset="0"
+         id="stop3362" />
+      <stop
+         style="stop-color:#c83737;stop-opacity:0;"
+         offset="1"
+         id="stop3364" />
+    </linearGradient>
+    <filter
+       inkscape:label="Soft Colors"
+       inkscape:menu="Color"
+       inkscape:menu-tooltip="Adds a colorizable edges glow inside objects and pictures"
+       style="color-interpolation-filters:sRGB;"
+       id="filter3338">
+      <feColorMatrix
+         type="saturate"
+         values="1"
+         result="result91"
+         id="feColorMatrix3340" />
+      <feComposite
+         in2="result91"
+         result="result15"
+         operator="arithmetic"
+         k2="0.4"
+         k1="0.3"
+         k3="0.3"
+         id="feComposite3342" />
+      <feGaussianBlur
+         in="result15"
+         result="result8"
+         stdDeviation="5"
+         id="feGaussianBlur3344" />
+      <feColorMatrix
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 50 0 "
+         id="feColorMatrix3346" />
+      <feComposite
+         in2="SourceGraphic"
+         operator="in"
+         result="result13"
+         id="feComposite3348" />
+      <feComposite
+         in2="result13"
+         k3="0.3"
+         k1="0.3"
+         k2="0.4"
+         operator="arithmetic"
+         in="result15"
+         result="result6"
+         id="feComposite3350" />
+      <feFlood
+         flood-color="rgb(128,172,0)"
+         flood-opacity="1"
+         result="result10"
+         id="feFlood3352" />
+      <feBlend
+         in2="result10"
+         result="result12"
+         in="result6"
+         mode="darken"
+         id="feBlend3354" />
+      <feBlend
+         in2="result6"
+         result="result14"
+         mode="screen"
+         id="feBlend3356" />
+      <feComposite
+         in2="SourceGraphic"
+         in="result14"
+         operator="in"
+         id="feComposite3358" />
+    </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3360"
+       id="linearGradient3366"
+       x1="140"
+       y1="360.93362"
+       x2="1185.7144"
+       y2="592.36218"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.35"
+     inkscape:cx="-322.14286"
+     inkscape:cy="520"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1680"
+     inkscape:window-height="1001"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:url(#linearGradient3366);filter:url(#filter3338);fill-opacity:1"
+       id="rect3336"
+       width="131.42857"
+       height="194.28571"
+       x="180"
+       y="303.79077" />
+  </g>
+</svg>
