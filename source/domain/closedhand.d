@@ -6,8 +6,8 @@ import mahjong.domain.hand;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.mahjong;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.graphics;
-import enumlist;
 
 class ClosedHand : Hand
 {

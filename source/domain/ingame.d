@@ -3,11 +3,12 @@ module mahjong.domain.ingame;
 import std.experimental.logger;
 import dsfml.graphics.renderwindow;
 import mahjong.domain.closedhand;
+import mahjong.domain.enums.tile;
 import mahjong.domain.openhand;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.mahjong;
-import enumlist;
+import mahjong.graphics.enums.kanji;
 
 class Ingame
 { 
@@ -76,10 +77,10 @@ class Ingame
     */
     bool isTenpai = false;
     auto tile = new Tile;
-    for(int t = types.min; t <= types.max; ++t)
+    for(int t = Types.min; t <= Types.max; ++t)
     {
       tile.type = t;
-      for(int i = characters.min; i <= characters.max; ++i)
+      for(int i = Numbers.min; i <= Numbers.max; ++i)
       {
         tile.value = i;
         Tile[] temphand = closedHand.tiles ~ tile;
@@ -135,7 +136,7 @@ class Ingame
     {
       if(isNagashiMangan)
       {
-        info(cast(kanji)location, " has lost Nagashi Mangan!");
+        info(cast(Kanji)location, " has lost Nagashi Mangan!");
       }
       isNagashiMangan = false;
     }

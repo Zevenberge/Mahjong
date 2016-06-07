@@ -7,9 +7,9 @@ import dsfml.graphics.rect;
 import dsfml.graphics.renderwindow;
 import dsfml.graphics.sprite;
 import dsfml.graphics.texture;
+import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.graphics;
 import mahjong.graphics.menu;
-import enumlist;
 
 class MainMenu : Menu
 {

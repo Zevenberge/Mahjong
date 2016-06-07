@@ -5,14 +5,20 @@ import std.string;
 import std.random;
 import std.conv;
 
-import enumlist;
-import mahjong.graphics.graphics;
-import mahjong.engine.mahjong;
-import mahjong.engine.ai;
+import mahjong.domain.enums.game;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
+import mahjong.engine.ai;
+import mahjong.engine.enums.game;
+import mahjong.engine.mahjong;
+import mahjong.graphics.cache.font;
+import mahjong.graphics.enums.game;
+import mahjong.graphics.enums.geometry;
+import mahjong.graphics.enums.kanji;
+import mahjong.graphics.enums.resources;
+import mahjong.graphics.graphics;
 
 import dsfml.graphics;
 
@@ -190,7 +196,7 @@ class Player
 
   void placeWindsDisplay()
   {
-    windsDisplay.setString(to!dstring(cast(kanji)game.location));
+    windsDisplay.setString(to!dstring(cast(Kanji)game.location));
     FloatRect bgSize = icon.getGlobalBounds();
     alignTopLeft(windsDisplay, bgSize);
   }
@@ -367,7 +373,7 @@ class Player
        float[2] position;
        tile.setRotation(0);
        FloatRect tileSize = tile.getGlobalBounds();
-       if((tile.origin != origin.wall) && (tile.origin != game.location))
+       if((tile.origin != Origin.wall) && (tile.origin != game.location))
        { // This is the tile that should be rotated.
          tile.setRotation(90);
          position[0] = rightB;
@@ -395,7 +401,7 @@ class Player
     int j = 0;
     foreach(tile; pon)
     {
-      if((tile.origin != origin.wall) && (tile.origin != game.location))
+      if((tile.origin != Origin.wall) && (tile.origin != game.location))
       { // Neither a tile from the wall nor from himself.
         if(tile.origin == ((game.location + AmountOfPlayers - 1) % AmountOfPlayers)) // If the tile is from the previous player.
         {

@@ -6,14 +6,17 @@ import std.experimental.logger;
 import std.file;
 import std.math;
 
-import enumlist;
 import mahjong.domain.board;
+import mahjong.domain.enums.game;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.ai;
 import mahjong.engine.mahjong;
 import mahjong.engine.yaku;
+import mahjong.graphics.cache.font;
+import mahjong.graphics.enums.geometry;
+import mahjong.graphics.enums.resources;
 import mahjong.graphics.mainmenu;
 
 void gamewindow(RenderWindow window)

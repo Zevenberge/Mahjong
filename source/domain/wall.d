@@ -4,9 +4,12 @@ import std.random;
 import std.stdio;
 import std.conv;
 
-import enumlist;
-import mahjong.engine.mahjong;
+import mahjong.domain.enums.game;
+import mahjong.domain.enums.tile;
+import mahjong.domain.enums.wall;
 import mahjong.domain.tile;
+import mahjong.engine.mahjong;
+import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.graphics;
 
 import dsfml.graphics;
@@ -72,12 +75,12 @@ class Wall
    }
    private void initialiseBamboo()
    {
-     for(int j = bamboos.min; j <= bamboos.max; ++j)
+     for(int j = Numbers.min; j <= Numbers.max; ++j)
      {
         for(int i = 0; i < 4; ++i)
         {
-          tiles ~= new Tile(types.bamboo, j);
-          if(j == bamboos.five && i == 0)
+          tiles ~= new Tile(Types.bamboo, j);
+          if(j == Numbers.five && i == 0)
              ++tiles[$-1].dora;
         }
      }

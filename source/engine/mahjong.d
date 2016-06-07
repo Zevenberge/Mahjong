@@ -1,6 +1,6 @@
 module mahjong.engine.mahjong;
 
-import std.stdio;
+import std.experimental.logger;
 import std.string;
 import std.range;
 import std.uni;
@@ -10,9 +10,9 @@ import std.process;
 import std.conv; 
 import std.file;
 
-
-import enumlist; 
+import mahjong.domain.enums.tile;
 import mahjong.domain.tile;
+import mahjong.engine.enums.game;
 import mahjong.engine.yaku; 
 
 import dsfml.graphics;
@@ -143,7 +143,7 @@ dchar[] define_tiles()
 
 int get_type(dchar stone, out int value)
 {
-   dchar[] tiles = define_tiles(); // Always load the default tile set such that the correct characters are compared!!
+   dchar[] tiles = define_tiles(); // Always load the default tile set such that the correct Numbers are compared!!
    int tile_number=0;
    int typeOfTile;
    foreach(face; stride(tiles,1))
@@ -152,23 +152,23 @@ int get_type(dchar stone, out int value)
      {
       switch (tile_number) {
       case 0: .. case 3:
-            typeOfTile = types.wind;
+            typeOfTile = Types.wind;
             value = tile_number;
             break;
       case 4: .. case 6:
-            typeOfTile = types.dragon;
+            typeOfTile = Types.dragon;
             value = tile_number - 4;
             break;
       case 7: .. case 15:
-            typeOfTile = types.character;
+            typeOfTile = Types.character;
             value = tile_number - 7;
             break;
       case 16: .. case 24:
-            typeOfTile = types.bamboo;
+            typeOfTile = Types.bamboo;
             value = tile_number - 16;
             break;
       case 25: .. case 33:
-            typeOfTile = types.ball;
+            typeOfTile = Types.ball;
             value = tile_number - 25;
             break;
       default:
@@ -194,7 +194,7 @@ unittest{
       assert(stone.value==winds.east);
    } else if (stone.face == '🀏')
    {  assert(stone.type==types.character);
-      assert(stone.value==characters.nine);
+      assert(stone.value==Numbers.nine);
    }
  }
  writeln(" The tiles are correctly labelled.");
@@ -345,24 +345,24 @@ body
     
     switch(i){
     case 0: .. case 3: // Winds
-         honour.type = types.wind;
+         honour.type = Types.wind;
          honour.value = i;
          break;
     case 4: .. case 6: // Dragons
-         honour.type = types.dragon;
-         honour.value = i % (winds.max + 1);
+         honour.type = Types.dragon;
+         honour.value = i % (Winds.max + 1);
          break;
     case 7, 8:         // Characters
-         honour.type = types.character;
-         honour.value = isOdd(i) ? characters.one : characters.nine;
+         honour.type = Types.character;
+         honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
          break;
     case 9, 10:        // Bamboos
-         honour.type = types.bamboo;
-         honour.value = isOdd(i) ? bamboos.one : bamboos.nine;
+         honour.type = Types.bamboo;
+         honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
          break;
     case 11, 12:       // Balls
-         honour.type = types.ball;
-         honour.value = isOdd(i) ? balls.one : balls.nine;
+         honour.type = Types.ball;
+         honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
          break;
     default:
          assert(false);
@@ -405,7 +405,7 @@ pairs --- pons  --- chis                <- finds a pair
   Tile[] tempmahj = mahjong_hand.dup;
   if(pairs < 1)
   { // Check if there is a pair, but only if there is not yet a pair.
-    is_set = scan_equals(temphand, tempmahj, pairs, set.pair);
+    is_set = scan_equals(temphand, tempmahj, pairs, Set.pair);
     is_mahjong = scan_progression(hand, temphand, mahjong_hand, tempmahj, chis, pairs, pons, is_set);
     if(is_mahjong) {
     return is_mahjong;
@@ -418,7 +418,7 @@ pairs --- pons  --- chis                <- finds a pair
   temphand = hand.dup;
   tempmahj = mahjong_hand.dup;
     // Check if there is a pon.
-    is_set = scan_equals(temphand, tempmahj, pons, set.pon);
+    is_set = scan_equals(temphand, tempmahj, pons, Set.pon);
     is_mahjong = scan_progression(hand, temphand, mahjong_hand, tempmahj, chis, pairs, pons, is_set);
     if(is_mahjong) {
     return is_mahjong;
@@ -469,7 +469,7 @@ bool scan_chis(ref Tile[] hand, ref Tile[] final_hand, ref int chis)
 { /*
      This subroutine checks whether there is a chi hidden in the beginning of the hand. It should also take into account that there could be doubles, i.e. 1-2-2-2-3. Subtract the chi from the initial hand.
   */
-  if(hand[0].type < types.character)  // If the tile is a wind or a dragon, then abort the function.
+  if(hand[0].type < Types.character)  // If the tile is a wind or a dragon, then abort the function.
   { return false; }
 
   Tile[] mutehand = hand.dup; // Create a back-up of the hand that can be mutated at will.
@@ -573,31 +573,32 @@ if(hand.length > distance)
 }
 unittest // Check whether the example hands are seen as mahjong hands.
 {
+	import std.stdio;
    writeln("Checking the example hands...");
    test_hands("nine_gates", true);
    test_hands("example_hands", true);
    test_hands("unlegit_hands", false);
    writeln(" The function reads the example hands correctly.");
 
-}
-void test_hands(string filename, const bool is_hand)
-{
-  for( int line_number = 1; ; ++line_number)
-{   Tile[] hand;
-   dchar[] hand_faces;
-   readline(filename, hand_faces, line_number);
-   if(hand_faces.length != 14) {break;}
-   label_tiles(hand, hand_faces);
-   sort_hand(hand);
-   bool is_mahjong;
-   is_mahjong = scan_hand(hand);
-   assert(is_equal(is_mahjong, is_hand));
-   write("The mahjong is ", is_mahjong, ".  ");
-   foreach(stone; hand) {write(stone);}
-   writeln();
-}
-   writeln();
+	void test_hands(string filename, const bool is_hand)
+	{
+	  for( int line_number = 1; ; ++line_number)
+	{   Tile[] hand;
+	   dchar[] hand_faces;
+	   readline(filename, hand_faces, line_number);
+	   if(hand_faces.length != 14) {break;}
+	   label_tiles(hand, hand_faces);
+	   sort_hand(hand);
+	   bool is_mahjong;
+	   is_mahjong = scan_hand(hand);
+	   assert(is_equal(is_mahjong, is_hand));
+	   write("The mahjong is ", is_mahjong, ".  ");
+	   foreach(stone; hand) {write(stone);}
+	   writeln();
+	}
+	   writeln();
 
+	}
 }
 
 void sort_hand(ref Tile[] hand)
@@ -658,47 +659,49 @@ unittest
   assert(tileB == tileAdup);
 
 }
-
-void readline(string filename, ref dchar[] output, int line_number)
-{ /*
-     Read a line from a file in dchar[] format. For example, read the example hands for unit testing.
-  */
-  assert(line_number > 0);
-  if(exists(filename))
- { 
-  int i=1;
-  File file = File(filename,"r");
-  while(!file.eof())
+version(unittest)
 {
-  string line = chomp(file.readln());
-  if (line_number == i)
-  { foreach(face; stride(line,1)){
-     output ~= face;
-    }
-   break;
-  }
-  i++;
-}
-  if (line_number > i)
-  { writeln("The file is not that large."); }
- } else {
-   throw new Exception("The file does not exist.");
- }
+	void readline(string filename, ref dchar[] output, int line_number)
+	{ /*
+		 Read a line from a file in dchar[] format. For example, read the example hands for unit testing.
+	  */
+		  assert(line_number > 0);
+		  if(exists(filename))
+		 { 
+		  int i=1;
+		  File file = File(filename,"r");
+		  while(!file.eof())
+		{
+		  string line = chomp(file.readln());
+		  if (line_number == i)
+		  { foreach(face; stride(line,1)){
+			 output ~= face;
+			}
+		   break;
+		  }
+		  i++;
+		}
+		  if (line_number > i)
+		  { writeln("The file is not that large."); }
+		 } else {
+		   throw new Exception("The file does not exist.");
+	 }
+	}
 }
 
 void print_tiles(Tile[] wall)
 {
    for(int i=0; i<5; ++i)
    {
-     switch (cast(types)wall[i].type){
-        case types.dragon:
-        writeln(wall[i].face, " is a ", cast(types)wall[i].type, " with value ", cast(dragons)wall[i].value, ".");
+     switch (cast(Types)wall[i].type){
+        case Types.dragon:
+        trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", cast(Dragons)wall[i].value, ".");
         break;
-        case types.wind:
-        writeln(wall[i].face, " is a ", cast(types)wall[i].type, " with value ", cast(winds)wall[i].value, ".");
+        case Types.wind:
+        trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", cast(Winds)wall[i].value, ".");
         break;
         default:
-        writeln(wall[i].face, " is a ", cast(types)wall[i].type, " with value ", wall[i].value+1, ".");
+        trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", wall[i].value+1, ".");
      }
    }
 }
@@ -719,7 +722,7 @@ assert(!isOdd(8));
 
 bool isHonour(const ref Tile tile)
 {
-  if(tile.type < types.character)
+  if(tile.type < Types.character)
   {
     return true;
   }
@@ -745,9 +748,9 @@ unittest
 
 bool isTerminal(Tile tile)
 {
-  if(tile.type > types.dragon)
+  if(tile.type > Types.dragon)
   {
-    if((tile.value == characters.one) || (tile.value == characters.nine))
+    if((tile.value == Numbers.one) || (tile.value == Numbers.nine))
     {
       return true;
     }
@@ -758,29 +761,29 @@ unittest
 {
   auto tile = new Tile;
   tile.type = types.character;
-  tile.value = characters.one;
+  tile.value = Numbers.one;
   assert(isTerminal(tile));
-  tile.value = characters.two;
+  tile.value = Numbers.two;
   assert(!isTerminal(tile));
-  tile.value = characters.three;
+  tile.value = Numbers.three;
   assert(!isTerminal(tile));
-  tile.value = characters.four;
+  tile.value = Numbers.four;
   assert(!isTerminal(tile));
-  tile.value = characters.five;
+  tile.value = Numbers.five;
   assert(!isTerminal(tile));
-  tile.value = characters.six;
+  tile.value = Numbers.six;
   assert(!isTerminal(tile));
-  tile.value = characters.seven;
+  tile.value = Numbers.seven;
   assert(!isTerminal(tile));
-  tile.value = characters.eight;
+  tile.value = Numbers.eight;
   assert(!isTerminal(tile));
-  tile.value = characters.nine;
+  tile.value = Numbers.nine;
   assert(isTerminal(tile));
   tile.type = types.wind;
-  tile.value = winds.east;
+  tile.value = Winds.east;
   assert(!isTerminal(tile));
   tile.type = types.dragon;
-  tile.value = dragons.green;
+  tile.value = Dragons.green;
   assert(!isTerminal(tile));
 }
 
@@ -860,5 +863,5 @@ bool isConnected(const ref Tile[] hand, const ref Tile tile)
 
 void message(const dchar[] mail)
 { // Write a message to the desired output.
-  writeln(mail);
+  info(mail);
 }

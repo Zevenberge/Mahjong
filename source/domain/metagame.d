@@ -1,18 +1,24 @@
 module mahjong.domain.metagame;
 
-import std.stdio;
+import std.experimental.logger;
 import std.string;
 import std.random;
 import std.conv;
 import dsfml.graphics;
 
-import enumlist;
-import mahjong.graphics.graphics;
-import mahjong.engine.mahjong;
-import mahjong.engine.ai;
+import mahjong.domain.enums.game;
+import mahjong.domain.enums.tile;
+import mahjong.domain.enums.wall;
 import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
+import mahjong.engine.ai;
+import mahjong.engine.enums.game;
+import mahjong.engine.mahjong;
+import mahjong.graphics.enums.game;
+import mahjong.graphics.enums.kanji;
+import mahjong.graphics.enums.resources;
+import mahjong.graphics.graphics;
 
 class Metagame
 {
@@ -90,7 +96,7 @@ class Metagame
      for(int i=0; i < AmountOfPlayers;++i)
       {
       // TODO: Idea: Make a number of preset profiles that can be loaded. E.g. player1avatar = Sakura.avatar;
-        writeln("Constructing player ", i);
+        trace("Constructing player ", i);
         auto player = new Player;
         player.playLoc = (this.gameMode == GameMode.Bamboo ) ? 2*i : i;
         player.loadIcon(defaultTexture);
@@ -100,7 +106,7 @@ class Metagame
         player.loadPointsDisplay();
         player.loadWindsDisplay();
         player.updatePoints();
-        writeln(player.name);
+        trace(player.name);
         players ~= player;
       }
    }
@@ -141,7 +147,7 @@ class Metagame
      int i;
      foreach(player; players)
      {
-       if(player.game.location == winds.east)
+       if(player.game.location == Winds.east)
        {
          Turn = i;
          phase = Phase.draw;
@@ -168,8 +174,8 @@ class Metagame
      if(status == Status.newGame)
      {
        // TODO: add shiny effects to display that the game is starting.
-       writeln("Starting new game...");
-       writeln("Good luck!");
+       info("Starting new game...");
+       info("Good luck!");
        status = Status.running;
      }
    }
@@ -196,7 +202,7 @@ class Metagame
      if((status == Status.running) && (status != Status.mahjong) && scanHand)
      { // TODO: Make this function actually do something.
        flipOverWinningTiles();
-       writeln("Congratz!");
+       info("Congratz!");
        status = Status.mahjong;
      }
    }
@@ -298,7 +304,7 @@ class Metagame
        {
          // Go ro results screen.
          status = Status.mahjong;
-         writeln("Nagashi Mangan!");
+         info("Nagashi Mangan!");
        }
      }
    }
@@ -309,7 +315,7 @@ class Metagame
        if(player.isTenpai)
        {
          player.showHand;
-         writeln(cast(kanji)player.getWind, " is tenpai!");
+         info(cast(Kanji)player.getWind, " is tenpai!");
        }
        else
        {
@@ -422,7 +428,7 @@ class Metagame
      {
         if(players[i % AmountOfPlayers].isPonnable(discard))
         {
-          writeln(cast(playerLocation)(i % AmountOfPlayers), " could have ponned that one.");
+          trace(cast(playerLocation)(i % AmountOfPlayers), " could have ponned that one.");
           break;
         }
      }
@@ -444,7 +450,7 @@ class Metagame
         {
            _ronnable = true;
            canClaimTile ~= pl;
-           writeln(cast(playerLocation) pl , "can ron it!"); 
+           trace(cast(playerLocation) pl , "can ron it!"); 
         }
      }
 

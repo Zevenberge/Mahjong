@@ -6,9 +6,10 @@ import dsfml.graphics.renderwindow;
 import dsfml.graphics.text;
 import dsfml.system.vector2;
 
+import mahjong.graphics.cache.font;
+import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.graphics;
 import mahjong.graphics.selectable;
-import enumlist;
 
 class Menu : Selectable!Text
 {

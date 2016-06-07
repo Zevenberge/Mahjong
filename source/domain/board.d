@@ -1,11 +1,13 @@
 module mahjong.domain.board;
 
-import std.stdio;
+import std.experimental.logger;
 
-import enumlist;
+import mahjong.domain.enums.game;
+import mahjong.domain.metagame;
 import mahjong.engine.mahjong;
 import mahjong.engine.ai;
-import mahjong.domain.metagame;
+import mahjong.graphics.enums.geometry;
+import mahjong.graphics.enums.resources;
 import mahjong.graphics.graphics;
 import mahjong.graphics.menu;
 
@@ -71,17 +73,17 @@ class Board
     this.window = window;
     renderBg;
     meta = new Metagame;
-writeln("Created the metagame.");
+	trace("Created the metagame.");
     meta.setMode(gameMode);
-writeln("Set the game mode.");
+	trace("Set the game mode.");
     meta.setAmountOfPlayers(AmountOfPlayers);
-writeln("Set the amount of players");
+	trace("Set the amount of players");
     meta.constructPlayers(blankStickTexture);
-writeln("Constructed the players.");
+	trace("Constructed the players.");
     meta.setTilesTexture;
-writeln("Set the tiles texture.");
+	trace("Set the tiles texture.");
     setPauseMenu;
-writeln("Constructed the pause menu.");
+	trace("Constructed the pause menu.");
   }
 
   /*
@@ -182,7 +184,7 @@ writeln("Constructed the pause menu.");
   }
   private void checkClick(const ref Event event)
   {  //TODO: Implement clicks -> discards and clicks -> enter options.
-    writeln("Clickerty click.");
+    trace("Clickerty click.");
   }
   private void checkGeneralButtons(const ref Event event)
   {

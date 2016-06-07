@@ -2,10 +2,11 @@ module mahjong.domain.openhand;
 
 import dsfml.graphics;
 
-import enumlist;
-import mahjong.domain.tile;
+import mahjong.domain.enums.game;
 import mahjong.domain.metagame;
+import mahjong.domain.tile;
 import mahjong.engine.mahjong;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.graphics;
 
 class OpenHand

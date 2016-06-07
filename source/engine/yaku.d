@@ -10,9 +10,10 @@ import std.process;
 import std.conv;
 import std.file;
 
-import enumlist; 
 import mahjong.domain.tile;
+import mahjong.engine.enums.hands;
 
+enum yakus {iihan = 1, ryanan = 2, sanhan = 3, uhan = 5, yakuman = 13, double_yakuman = 26};
 class yaku
 { 
 
@@ -40,7 +41,7 @@ class yaku
       This function checks the amount of yakus. The amount of doras will be checked in a different function.
     */
     if(isNagashiMangan)  // Nagashi mangan is the special case.
-    { return enumlist.yakus.uhan; }
+    { return yakus.uhan; }
   
     bool isOpen = false;
     if(open_hand.length > 0)

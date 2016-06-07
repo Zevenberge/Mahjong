@@ -1,9 +1,9 @@
 module mahjong.graphics.selectable;
 
 import dsfml.graphics;
+import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.graphics;
 import mahjong.graphics.selection;
-import enumlist;
 
 class Selectable(T)
 {

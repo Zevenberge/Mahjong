@@ -5,12 +5,14 @@ import std.string;
 import std.random;
 import std.conv;
 
-import enumlist;
-import mahjong.graphics.graphics;
-import mahjong.engine.mahjong;
-import mahjong.engine.ai;
+import mahjong.domain.enums.tile;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
+import mahjong.engine.ai;
+import mahjong.engine.enums.game;
+import mahjong.engine.mahjong;
+import mahjong.graphics.enums.geometry;;
+import mahjong.graphics.graphics;
 
 import dsfml.graphics;
 
@@ -23,7 +25,7 @@ class Tile
    size_t ID; // Unique tile ID
 
    int dora = 0;
-   int origin = enumlist.origin.wall; // Origin of the tile in in-game winds.
+   int origin = Origin.wall; // Origin of the tile in in-game winds.
    private bool _isOpen = false;
 
    private Sprite sprite;
@@ -90,26 +92,26 @@ class Tile
      IntRect bounds;
      bounds.width = tile.width;
      bounds.height = tile.height;
-     if(type < types.character) // We have an honour.
+     if(type < Types.character) // We have an honour.
      {
        bounds.top = tile.y0;
-       if(type == types.season)
+       if(type == Types.season)
        {
-         bounds.left = tile.x0 + (value - seasons.min) * tile.dx;
+         bounds.left = tile.x0 + (value - Seasons.min) * tile.dx;
        }
-       if(type == types.wind)
+       if(type == Types.wind)
        {
-         bounds.left = tile.x0 + (value - winds.min + (seasons.max - seasons.min + 1)) * tile.dx;
+         bounds.left = tile.x0 + (value - Winds.min + (Seasons.max - Seasons.min + 1)) * tile.dx;
        }
-       if(type == types.dragon)
+       if(type == Types.dragon)
        {
-         bounds.left = tile.x0 + (value - dragons.min + (seasons.max - seasons.min + 1 + winds.max - winds.min + 1)) * tile.dx;
+         bounds.left = tile.x0 + (value - Dragons.min + (Seasons.max - Seasons.min + 1 + Winds.max - Winds.min + 1)) * tile.dx;
        }
      }
      else // We have a series.
      {
-        bounds.top  = tile.y0 + (type - types.character + 1) * tile.dy;
-        bounds.left = tile.x0 + (value - characters.min + 1) * tile.dx;
+        bounds.top  = tile.y0 + (type - Types.character + 1) * tile.dy;
+        bounds.left = tile.x0 + (value - Numbers.min + 1) * tile.dx;
      }
      return bounds;
    }

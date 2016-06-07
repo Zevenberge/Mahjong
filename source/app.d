@@ -6,13 +6,11 @@ import std.stdio;
 import std.file;
 
 import mahjong.engine.mahjong;
-import enumlist;
 import mahjong.engine.yaku;
+import mahjong.graphics.cache.font;
+import mahjong.graphics.enums.geometry;
+import mahjong.graphics.enums.resources;
 import mahjong.graphics.graphics;
-
-string fontRegfile = "fonts/LiberationSans-Regular.ttf";
-string fontBoldfile = "fonts/LiberationSans-Bold.ttf";
-string fontItfile = "fonts/LiberationSans-Italic.ttf";
 
 
 void main(string[] args)
@@ -30,7 +28,7 @@ void main(string[] args)
 
 
   // Define the window plus all default options.
-  auto window = new RenderWindow(VideoMode(width,height),"Kinjin Mahjong");
+  auto window = new RenderWindow(VideoMode(width,height),"Dlang Mahjong");
   window.setFramerateLimit(60);
 
   // Have some kind of a title screen. Why? I have no idea; everyone does it!
