@@ -1,6 +1,6 @@
 module mahjong.graphics.opts.opts;
 
-Opts activeOpts;
+Opts drawingOpts;
 
 interface Opts
 {
@@ -8,5 +8,6 @@ interface Opts
 	float tileWidth();
 	float iconSpacing();
 	uint iconSize();
-	
+	int initialScore();
+	int criticalScore();
 }

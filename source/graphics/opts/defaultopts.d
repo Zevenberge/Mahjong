@@ -20,4 +20,12 @@ class DefaultOpts : Opts
 	{
 		return 150;
 	}
+	int initialScore()
+	{
+		return 30_000;
+	}
+	int criticalScore()
+	{
+		return 10_000;
+	}
 }

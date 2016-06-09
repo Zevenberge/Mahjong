@@ -5,6 +5,7 @@ import std.experimental.logger;
 import mahjong.domain.enums.game;
 import mahjong.domain.metagame;
 import mahjong.engine.mahjong;
+import mahjong.engine.opts.opts;
 import mahjong.engine.ai;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
@@ -65,7 +66,7 @@ class Board
     window.display;
   }
 
-  void setUp(ref RenderWindow window, const int gameMode = GameMode.Riichi, const int AmountOfPlayers = amountOfPlayers.normal)
+  void setUp(ref RenderWindow window, const int gameMode = GameMode.Riichi)
   {
     setTable;
     setSticksImg;
@@ -75,8 +76,6 @@ class Board
     meta = new Metagame;
 	trace("Created the metagame.");
     meta.setMode(gameMode);
-	trace("Set the game mode.");
-    meta.setAmountOfPlayers(AmountOfPlayers);
 	trace("Set the amount of players");
     meta.constructPlayers(blankStickTexture);
 	trace("Constructed the players.");

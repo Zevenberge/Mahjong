@@ -298,39 +298,31 @@ void alignTopLeft(T) (ref T sprite, const ref FloatRect box)
   sprite.position = Vector2f(box.left, box.top);
 }
 
-void center(T) (ref T sprite, string direction, const float x0 = 0, const float h0 = 0, const float w = width, const float h = height)
-in
+void center(T) (T sprite, CenterDirection direction, const FloatRect rect)
 {
-  if((direction != "horizontal") && (direction != "vertical") && (direction != "both"))
-  {
-    throw new Exception("The input should be horizontal, vertical or both. Written like exactly that!");
-  }
+	center!T(sprite, direction, rect.left, rect.top, rect.width, rect.height);
 }
-body
+void center(T) (T sprite, CenterDirection direction, const float x0 = 0, const float h0 = 0, const float w = width, const float h = height)
 {
   FloatRect size = sprite.getGlobalBounds();
-  if((direction == "horizontal") || (direction == "both"))
+  if(direction != CenterDirection.Vertical)
   {
     float xpos = x0 + (w - size.width)/2.;
     sprite.position = Vector2f(xpos,size.top);
-    if(direction == "horizontal")
-    {
-      return; 
-    }
   }
 
-  if((direction == "vertical") || (direction == "both"))
+  if(direction != CenterDirection.Horizontal)
   {
     float ypos = h0 + (h - size.height)/2.;
-    if(direction =="both")
+    if(direction == CenterDirection.Both)
     {
       size = sprite.getGlobalBounds(); // Correct for the change that is already made.
     }
     sprite.position = Vector2f(size.left,ypos);
   }
 }
-alias CenterSprite = center!(Sprite);
-alias CenterText = center!(Text);
+//alias centerSprite = center!(Sprite);
+//alias centerText = center!(Text);
 
 void alignBottom(ref Sprite sprite, FloatRect box)
 {

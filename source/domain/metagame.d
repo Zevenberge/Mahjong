@@ -13,8 +13,10 @@ import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.ai;
+import mahjong.graphics.drawing.player;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
+import mahjong.engine.opts.opts;
 import mahjong.graphics.enums.game;
 import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
@@ -26,7 +28,6 @@ class Metagame
      Preparation of the game.
    */
 
-   int AmountOfPlayers = amountOfPlayers.normal;
    int gameMode = GameMode.Riichi;
    Player[] players; //The droids playing
    Wall wall;
@@ -39,10 +40,7 @@ class Metagame
       this.gameMode = gameMode;
       setDeadWallLength();
    }
-   @property setAmountOfPlayers(const int aop)
-   {
-      this.AmountOfPlayers = aop;
-   }
+   
    @property setDeadWallLength()
    {
       switch(gameMode)
@@ -72,7 +70,7 @@ class Metagame
    {
      foreach(player; players) // Re-initialise the players' game.
      { 
-       player.firstGame(initialWind % AmountOfPlayers);
+       player.firstGame(initialWind % gameOpts.amountOfPlayers);
        ++initialWind;
      }
    }
@@ -80,7 +78,7 @@ class Metagame
    void reset()
    { 
      wall = new Wall(gameMode, tilesTexture);
-     int initialWind = uniform(0, AmountOfPlayers); 
+     int initialWind = uniform(0, gameOpts.amountOfPlayers); 
      setPlayers(initialWind);
    }
 
@@ -93,19 +91,12 @@ class Metagame
 
    void constructPlayers(ref Texture stickTexture)
    { // FIXME: Encapsulate this in the player class.
-     for(int i=0; i < AmountOfPlayers;++i)
+     for(int i=0; i < gameOpts.amountOfPlayers;++i)
       {
       // TODO: Idea: Make a number of preset profiles that can be loaded. E.g. player1avatar = Sakura.avatar;
         trace("Constructing player ", i);
         auto player = new Player;
         player.playLoc = (this.gameMode == GameMode.Bamboo ) ? 2*i : i;
-        player.loadIcon(defaultTexture);
-        player.placeIcon();
-        player.loadPointsBg(stickTexture);
-        player.placePointsBg();
-        player.loadPointsDisplay();
-        player.loadWindsDisplay();
-        player.updatePoints();
         trace(player.name);
         players ~= player;
       }
@@ -147,7 +138,7 @@ class Metagame
      int i;
      foreach(player; players)
      {
-       if(player.game.location == Winds.east)
+       if(player.game.wind == Winds.east)
        {
          Turn = i;
          phase = Phase.draw;
@@ -271,7 +262,7 @@ class Metagame
    void nextTurn()
    {
      ++Turn;
-     Turn = Turn % AmountOfPlayers;
+     Turn = Turn % gameOpts.amountOfPlayers;
    }
 
    /*
@@ -345,7 +336,7 @@ class Metagame
      drawSelections(window);
      foreach(player;players)
      {
-       player.drawWindow(window);
+       player.draw(window);
      }
    }
    private void drawSelections(ref RenderWindow window)
@@ -424,11 +415,11 @@ class Metagame
         Checks whether a discard can be ponned and returns the player location (.bottom, .right, .etc). If the tile cannot be ponned, it returns a -1.
      */
      // Start checking for pons at next player.
-     for(int i = Turn+1; i < Turn + AmountOfPlayers; ++i)
+     for(int i = Turn+1; i < Turn + gameOpts.amountOfPlayers; ++i)
      {
-        if(players[i % AmountOfPlayers].isPonnable(discard))
+        if(players[i % gameOpts.amountOfPlayers].isPonnable(discard))
         {
-          trace(cast(playerLocation)(i % AmountOfPlayers), " could have ponned that one.");
+          trace(cast(playerLocation)(i % gameOpts.amountOfPlayers), " could have ponned that one.");
           break;
         }
      }
@@ -443,9 +434,9 @@ class Metagame
      // Start checking for rons at the next player.
      _ronnable = false;
      canClaimTile = [];
-     for(int i = Turn + 1; i < Turn + AmountOfPlayers; ++i)
+     for(int i = Turn + 1; i < Turn + gameOpts.amountOfPlayers; ++i)
      {
-        int pl = i % AmountOfPlayers;
+        int pl = i % gameOpts.amountOfPlayers;
         if(players[pl].isRonnable(discard))
         {
            _ronnable = true;
