@@ -1,6 +1,7 @@
 module mahjong.graphics.selectable;
 
 import dsfml.graphics;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.graphics;
 import mahjong.graphics.selection;

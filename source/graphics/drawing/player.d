@@ -6,11 +6,13 @@ import std.uuid;
 
 import dsfml.graphics;
 import mahjong.domain.player;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.openhand;
 import mahjong.graphics.enums.font;
+import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.graphics;
 import mahjong.graphics.opts.opts;
@@ -18,9 +20,14 @@ import mahjong.graphics.opts.opts;
 alias drawPlayer = draw;
 void draw(Player player, RenderTarget view)
 {
+	PlayerVisuals visual;
 	if(player.id !in players)
 	{
-		
+		visual.initialise(defaultTexture, player.score, player.getWind.to!Kanji.to!string);
+	}
+	else
+	{
+		visual = players[player.id];
 	}
 	player.game.drawIngame(view);
 }
@@ -29,7 +36,8 @@ private PlayerVisuals[UUID] players;
 
 private struct PlayerVisuals
 {
-	private:
+	private
+	{
 		RenderTexture _renderTexture;
 		Sprite _sprite;
 		Texture _iconTexture;
@@ -85,20 +93,21 @@ private struct PlayerVisuals
 		
 		void initialiseSprite()
 		{
-			_sprite = new Sprite(_renderTexture);
+			_sprite = new Sprite(_renderTexture.getTexture);
 			_sprite.pix2scale(width);
 			placeSprite;
 		}
 		
 		void placeSprite()
 		{
-			_sprite.pix2scale(iconSize);
+			_sprite.pix2scale(drawingOpts.iconSize);
 			// TODO: Rotate for the various players.
 			_sprite.position = Vector2f(
 				width - (drawingOpts.iconSize + drawingOpts.iconSpacing),
-				height - iconSize
+				height - drawingOpts.iconSize
 			);
 		}
+	}
 	
 	public:
 		void draw(RenderTarget view)
@@ -141,6 +150,7 @@ private struct PlayerVisuals
 			_renderTexture.draw(_scoreLabel);
 			_renderTexture.draw(_score);
 			_renderTexture.draw(_wind);
+			_renderTexture.display;
 		}
 } 
 

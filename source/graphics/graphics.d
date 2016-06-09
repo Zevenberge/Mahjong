@@ -13,8 +13,12 @@ import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.ai;
 import mahjong.engine.mahjong;
+import mahjong.engine.opts.bambooopts;
+import mahjong.engine.opts.defaultopts;
+import mahjong.engine.opts.opts;
 import mahjong.engine.yaku;
 import mahjong.graphics.cache.font;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.mainmenu;
@@ -25,6 +29,7 @@ void gamewindow(RenderWindow window)
   */
 
   auto board = new Board;
+  gameOpts = new DefaultOpts;
   board.setUp(window);
   board.mainLoop;
 }
@@ -35,7 +40,8 @@ void bamboowindow(RenderWindow window)
   */
 
   auto board = new Board;
-  board.setUp(window, GameMode.Bamboo, amountOfPlayers.bamboo);
+  gameOpts = new BambooOpts;
+  board.setUp(window);
   board.mainLoop;
 }
 
@@ -168,7 +174,7 @@ void titlescreen(RenderWindow window)
   auto logo = new Sprite;
   load(logoTexture, logo, logofile);
   logo.position = Vector2f(0,0); 
-  CenterSprite(logo, "both");
+  center(logo, CenterDirection.Both,0);
 
   // Gradually make the logo more visible.
   ubyte opacity = 0;
@@ -287,13 +293,13 @@ void load(ref Texture texture)
   center!(T)(sprite, direction, box.left, box.height, box.width, box.height);
 }*/
 
-void alignLeft(T) (ref T sprite, const ref FloatRect box)
+void alignLeft(T) (T sprite, const FloatRect box)
 {
   sprite.position = Vector2f(box.left, box.top);
   center(sprite, "vertical", box.left, box.top, box.width, box.height);
 }
 
-void alignTopLeft(T) (ref T sprite, const ref FloatRect box)
+void alignTopLeft(T) (T sprite, const FloatRect box)
 {
   sprite.position = Vector2f(box.left, box.top);
 }
@@ -324,12 +330,12 @@ void center(T) (T sprite, CenterDirection direction, const float x0 = 0, const f
 //alias centerSprite = center!(Sprite);
 //alias centerText = center!(Text);
 
-void alignBottom(ref Sprite sprite, FloatRect box)
+void alignBottom(Sprite sprite, FloatRect box)
 {
   auto size = sprite.getGlobalBounds();
   sprite.position = Vector2f(box.left, (box.top + box.height - size.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
-  CenterSprite(sprite, "horizontal", box.left, box.top, box.width, box.height);
+  center(sprite, CenterDirection.Horizontal, box.left, box.top, box.width, box.height);
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
 
@@ -343,7 +349,7 @@ void setTitle(Text title, dstring text)
   title.setCharacterSize(48);
   title.setColor(Color.Black);
   title.position = Vector2f(200,20);
-  CenterText(title, "horizontal");
+  center(title, CenterDirection.Horizontal,0);
 }
 
 /*void setMenuOption(Text opt, dstring text, Font fontIt, float ypos=100)
@@ -488,7 +494,7 @@ void addRotateToPlayer(ref Tile tile, const ref int playLoc)
    tile.addRotateToPlayer(playLoc);
 }
 
-void setTileInSquare(ref Tile tile, const int amountOfTiles, const float undershootInTiles, const int nthTile, const int playLoc = 0)
+/*void setTileInSquare(ref Tile tile, const int amountOfTiles, const float undershootInTiles, const int nthTile, const int playLoc = 0)
 {
    tile.setRotation(0);
    auto pos = CENTER;
@@ -496,7 +502,7 @@ void setTileInSquare(ref Tile tile, const int amountOfTiles, const float undersh
    moveToPlayer(pos, movement, playLoc);
    tile.setPosition(pos);
    rotateToPlayer(tile, playLoc);
-}
+}*/
 
 FloatRect calcGlobalBounds(T) (T opts)
 {

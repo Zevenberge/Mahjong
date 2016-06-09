@@ -77,7 +77,7 @@ class Metagame
 
    void reset()
    { 
-     wall = new Wall(gameMode, tilesTexture);
+     wall = new Wall();
      int initialWind = uniform(0, gameOpts.amountOfPlayers); 
      setPlayers(initialWind);
    }

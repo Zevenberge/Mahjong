@@ -24,7 +24,7 @@ class Menu : Selectable!Text
         setColor(Color.Black);
         position = Vector2f(200,0);
      }   
-     CenterText(opt,"horizontal");
+     center(opt, CenterDirection.Horizontal);
      opts ~= opt;
    }
 
@@ -47,7 +47,7 @@ class Menu : Selectable!Text
        float ypos;
        ypos = MenuTop + (size.height + MenuSpacing)*i;
        opt.position = Vector2f(0, ypos);
-       CenterText(opt, "horizontal");
+       center(opt, CenterDirection.Horizontal);
        ++i;
      } 
    }

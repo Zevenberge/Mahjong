@@ -55,6 +55,11 @@ deprecated FloatRect getGlobalBounds(const Tile tile)
 	if(tile.id !in _sprites) return FloatRect();
 	return _sprites[tile.id].getGlobalBounds;
 }
+deprecated void setPosition(Tile tile, Vector2f pos)
+{
+	_sprites[tile.id].position(pos);
+}
+
 
 private Sprite getOpenSprite(const Tile tile)
 {

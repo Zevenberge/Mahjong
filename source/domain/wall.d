@@ -9,6 +9,9 @@ import mahjong.domain.enums.tile;
 import mahjong.domain.enums.wall;
 import mahjong.domain.tile;
 import mahjong.engine.mahjong;
+import mahjong.engine.opts.opts;
+import mahjong.graphics.drawing.ingame;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.graphics;
 
@@ -21,19 +24,11 @@ class Wall
    private int amountOfKans = 0;
    private int gameMode;
 
-   this(const int gameMode, ref Texture tilesTexture)
+   this()
    {
-      this.tilesTexture = tilesTexture;
-      this.gameMode = gameMode;
+      this.gameMode = gameOpts.gameMode;
    }
 
-   private void getSprites()
-   {
-     foreach(tile; tiles)
-     {
-       tile.getSprite(tilesTexture);
-     }
-   }
 
    @property public size_t length()
    {
@@ -44,7 +39,6 @@ class Wall
    {
       this.amountOfKans = 0;
       initialise();
-      getSprites();
       shuffle();
       place();
       diceToStartPoint();
@@ -124,7 +118,7 @@ class Wall
 
    private void placeWall()
    {
-     int widthOfWall = cast(int)length / (2*amountOfPlayers.normal);
+     int widthOfWall = cast(int)length / (2*gameOpts.amountOfPlayers);
      auto size = tiles[0].getGlobalBounds;
      float undershoot = size.height/size.width;
 
@@ -132,7 +126,7 @@ class Wall
       {
          auto position = CENTER;
          auto movement = calculatePositionInSquare(widthOfWall, undershoot, 
-                          i % widthOfWall, size);
+                          Vector2i(i % widthOfWall,0), size);
          int wallSide = getWallSide(i, widthOfWall);
          moveToPlayer(position, movement, wallSide );
          placeBottomTile(tiles[$-1 - (2*i+1)],position);
@@ -226,7 +220,7 @@ class Wall
    }
    private int calculateWallShift(int diceRoll)
    {
-      alias plyrs = amountOfPlayers.normal;
+      auto plyrs = gameOpts.amountOfPlayers;
       int wallSide = (diceRoll-1)%plyrs;
       return ((plyrs - wallSide-1) % plyrs) * to!int(length)/plyrs;
    }
