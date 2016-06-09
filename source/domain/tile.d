@@ -1,9 +1,10 @@
 module mahjong.domain.tile;
 
 import std.stdio;
-import std.string;
-import std.random;
 import std.conv;
+import std.random;
+import std.string;
+import std.uuid;
 
 import mahjong.domain.enums.tile;
 import mahjong.domain.metagame;
@@ -11,36 +12,63 @@ import mahjong.domain.player;
 import mahjong.engine.ai;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
-import mahjong.graphics.enums.geometry;;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.graphics;
 
 import dsfml.graphics;
 
 
 class Tile
- { // FIXME: Increase encapsulation.
-   dchar face; // The unicode face of the tile. TODO: remove dependacy on unicode face.
-   int type;  // Winds, dragons, etc
-   int value; // East - North, Green - White, one  - nine.
-   size_t ID; // Unique tile ID
+{ // FIXME: Increase encapsulation.
+	dchar face; // The unicode face of the tile. TODO: remove dependacy on unicode face.
+	int type;  // Winds, dragons, etc
+	int value; // East - North, Green - White, one  - nine.
+	UUID id;
 
-   int dora = 0;
-   int origin = Origin.wall; // Origin of the tile in in-game winds.
-   private bool _isOpen = false;
+	int dora = 0;
+	int origin = Origin.wall; // Origin of the tile in in-game winds.
+	private bool _isOpen = false;
 
-   private Sprite sprite;
-   private Sprite backSprite;
+    private Sprite sprite;
+    private Sprite backSprite;
 
-   this()
-   {
-   }
-   this(int type, int value)
-   {
-     this.type = type;
-     this.value = value;
-   } 
+    this()
+    {
+		id = randomUUID;
+    }
+   
+    this(int type, int value)
+    {
+   		this();
+    	this.type = type;
+    	this.value = value;
+    } 
+   
+	bool isHonour() @property pure const
+    {
+   		return type < Types.character;
+    }
 
-   public FloatRect getGlobalBounds()
+    void close() 
+    {
+   		this._isOpen = false;
+    }
+    
+    void open() 
+    {
+     	this._isOpen = true;
+    }
+
+    bool isOpen() @property pure const
+    {
+      	return this._isOpen;
+    }
+
+    override string toString() const
+    {
+     	return(to!string(face));
+    }
+   /+public FloatRect getGlobalBounds()
    {
      return sprite.getGlobalBounds;
    }
@@ -76,7 +104,7 @@ class Tile
    }
   
    public void getSprite(ref Texture tiles)
-   { // TODO: Get the back also.
+   { 
      getFrontSprite(tiles);
      getBackSprite(tiles);
    }
@@ -89,31 +117,31 @@ class Tile
    }
    private IntRect getSpriteBounds()
    {
-     IntRect bounds;
-     bounds.width = tile.width;
-     bounds.height = tile.height;
-     if(type < Types.character) // We have an honour.
-     {
-       bounds.top = tile.y0;
-       if(type == Types.season)
-       {
-         bounds.left = tile.x0 + (value - Seasons.min) * tile.dx;
-       }
-       if(type == Types.wind)
-       {
-         bounds.left = tile.x0 + (value - Winds.min + (Seasons.max - Seasons.min + 1)) * tile.dx;
-       }
-       if(type == Types.dragon)
-       {
-         bounds.left = tile.x0 + (value - Dragons.min + (Seasons.max - Seasons.min + 1 + Winds.max - Winds.min + 1)) * tile.dx;
-       }
-     }
-     else // We have a series.
-     {
-        bounds.top  = tile.y0 + (type - Types.character + 1) * tile.dy;
-        bounds.left = tile.x0 + (value - Numbers.min + 1) * tile.dx;
-     }
-     return bounds;
+		IntRect bounds;
+		bounds.width = tile.width;
+		bounds.height = tile.height;
+		if(type < Types.character) // We have an honour.
+		{
+			bounds.top = tile.y0;
+			if(type == Types.season)
+			{
+				 bounds.left = tile.x0 + (value - Seasons.min) * tile.dx;
+			}
+			if(type == Types.wind)
+			{
+				 bounds.left = tile.x0 + (value - Winds.min + (Seasons.max - Seasons.min + 1)) * tile.dx;
+			}
+			if(type == Types.dragon)
+			{
+				 bounds.left = tile.x0 + (value - Dragons.min + (Seasons.max - Seasons.min + 1 + Winds.max - Winds.min + 1)) * tile.dx;
+			}
+		}
+		else // We have a series.
+		{
+			bounds.top  = tile.y0 + (type - Types.character + 1) * tile.dy;
+			bounds.left = tile.x0 + (value - Numbers.min + 1) * tile.dx;
+		}
+		return bounds; 
    }
    private void getBackSprite(ref Texture tiles)
    { // FIXME
@@ -151,24 +179,7 @@ class Tile
    private void drawClosed(ref RenderWindow window)
    {
      window.draw(this.backSprite);
-   }
-
-   @property public void close()
-   {
-     this._isOpen = false;
-   }
-   @property public void open()
-   {
-     this._isOpen = true;
-   }
-
-   @property public bool isOpen()
-   {
-      return this._isOpen;
-   }
-
-   override string toString() const
-   {
-     return(to!string(face));
-   }
+   }+/
+   
+   
  }

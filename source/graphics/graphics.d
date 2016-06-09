@@ -253,12 +253,7 @@ void load(ref Texture texture, ref Sprite sprite, string texturefile,
 }
 
 bool loadTexture ( ref Texture texture, string texturefile,
-         uint x0, uint y0, uint size_x, uint size_y)
-in
-{
-  assert(size_x * size_y > 0);
-}
-body
+         uint x0 = 0, uint y0 = 0, uint size_x = 0, uint size_y = 0)
 {
       if(!texture.loadFromFile(texturefile, IntRect(x0, y0, size_x, size_y))) // If the size is specified, load only that partition.
       {
@@ -501,16 +496,6 @@ void addRotateToPlayer(ref Tile tile, const ref int playLoc)
    tile.addRotateToPlayer(playLoc);
 }
 
-Vector2f calculatePositionInSquare(const int amountOfTiles, const float undershootInTiles, const int nthTile, const FloatRect sizeOfTile)
-{ /*
-     This function calculates the position of the nth tile with in the bottom player quadrant. This function assumes that the amountOfTiles tiles form a square with an undershoot in tiles. Please note that it is the responsibility of the caller to ensure that nthTile < amountOfTiles.
-     Furthermore, this function assumes an unrotated tile. It returns the draw position of the tile with respect to the center of the board. Unrotated tiles will therefore be displaye next to each other.
-  */
-  float delta = (amountOfTiles - undershootInTiles)* sizeOfTile.width /2; // Distance from the center to the inner line of the square.
-  auto movement = Vector2f(-delta, delta);
-  movement.x += sizeOfTile.width * nthTile;
-  return movement;
-}
 void setTileInSquare(ref Tile tile, const int amountOfTiles, const float undershootInTiles, const int nthTile, const int playLoc = 0)
 {
    tile.setRotation(0);

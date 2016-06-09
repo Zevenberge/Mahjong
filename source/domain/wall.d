@@ -44,7 +44,6 @@ class Wall
    {
       this.amountOfKans = 0;
       initialise();
-      giveIDs();
       getSprites();
       shuffle();
       place();
@@ -95,16 +94,6 @@ class Wall
       set_up_wall(tiles);
    }
    
-   private void giveIDs()
-   { // FIXME: See if this can be resolved by comparing the addresses rather than an arbitrarily set value.
-       size_t ID = 0;
-       foreach(tile; tiles)
-       {
-         tile.ID = ID;
-         ++ID;
-       }
-   }
-
    private void shuffle()
    in
    {

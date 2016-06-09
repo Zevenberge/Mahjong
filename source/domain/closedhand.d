@@ -1,103 +1,76 @@
 module mahjong.domain.closedhand;
 
+import std.algorithm.iteration;
 import dsfml.graphics;
 import dsfml.system.vector2;
 import mahjong.domain.hand;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.mahjong;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.graphics;
 
 class ClosedHand : Hand
 {
-  void place(const int playLoc)
-  {
-    /*
-       Place the closed hand between two avatars.
-    */
-    sort_hand(tiles);
-    int i = 0;
-    foreach(stone; tiles)
-    { 
-      stone.setPosition(calculatePosition(tiles.length, playLoc, i));
-      stone.rotateToPlayer(playLoc);
-      ++i;
-    }
-  }
+	void sortHand()
+	{
+		sort_hand(tiles);
+	}
 
-  private Vector2f calculatePosition(const size_t amountOfTiles, const int playLoc, const int i)
-  {
-    float[2] position = [width/2, height/2];
-    float centering = (width - iconSpacing - amountOfTiles * tile.displayWidth)/2.; // Center the hand between two avatars
-    float[2] movement;
-    movement[0] = centering + i * tile.displayWidth - position[0];
-    movement[1] = height/2 - iconSize; // Align the top of the tiles with the top of the own avatar.
-    moveToPlayer(position, movement, playLoc);
-    return Vector2f(position[0], position[1]);
-  }
+	void closeHand()
+	{
+		tiles.each!(t => t.close);
+	}
 
-  public void closeHand()
-  {
-     foreach(tile; tiles)
-     {
-        tile.close;
-     }
-  }
-  public void showHand()
-  {
-     foreach(tile; tiles)
-     {
-        tile.open;
-     }
-  }
-  
-  public void drawTile(ref Wall wall)
-  {
-    tiles ~= wall.drawTile;
-    selectDrawnTile();
-  }
-  public Tile getLastTile()
-  {
-    return tiles[$-1];
-  }
+	void showHand()
+	{
+		tiles.each!(t => t.open);
+	}
 
-  public void draw(ref RenderWindow window, const int playLoc)
-  {
-     place(playLoc);
-     selectOpt();
-     foreach(tile; tiles)
-     {
-       tile.draw(window);
-     }
-  }
+	void drawTile(ref Wall wall)
+	{
+		tiles ~= wall.drawTile;
+		selectDrawnTile();
+	}
+	
+	Tile getLastTile()
+	{
+		return tiles[$-1];
+	}
 
-  public void selectDrawnTile()
-  {
-     auto drawnTile = tiles[$-1];
-     sort_hand(tiles);
-     for(int i = 0; i < tiles.length; ++i)
-     {
-       if(is_identical(tiles[i], drawnTile))
-       {
-          changeOpt(i);
-          break;
-       }
-     }
-  }
+	void drawOpt(RenderTarget window)
+	{ // TODO: responsibility of controller.
+		selectOpt();
+		window.draw(selection.visual);
+	}
 
-  public void open()
-  {
-    foreach(tile; tiles)
-    {
-       tile.open;
-    }
-  }
-  public void close()
-  {
-    foreach(tile; tiles)
-    {
-       tile.close;
-    }
-  }
+	void selectDrawnTile()
+	{
+		auto drawnTile = tiles[$-1];
+		sort_hand(tiles);
+		for(int i = 0; i < tiles.length; ++i)
+		{
+			if(is_identical(tiles[i], drawnTile))
+			{
+				changeOpt(i);
+				break;
+			}
+		}
+	}
+
+	void open()
+	{
+		foreach(tile; tiles)
+		{
+			tile.open;
+		}
+	}
+	void close()
+	{
+		foreach(tile; tiles)
+		{
+			tile.close;
+		}
+	}
 }

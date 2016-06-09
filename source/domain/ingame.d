@@ -26,17 +26,17 @@ class Ingame
   int pons=0; // Amount of open pons.
   int chis=0; // Amount of open chis.
 
-  this(int wind)
-  {
-    this.location = wind;
-    this.closedHand = new ClosedHand;
-    this.openHand = new OpenHand;
-  }
+	this(int wind)
+	{
+		this.location = wind;
+		this.closedHand = new ClosedHand;
+		this.openHand = new OpenHand;
+	}
 
-  public int getWind()
-  {
-    return location;
-  }
+	public int getWind()
+	{
+		return location;
+	}
 
 
 /*
@@ -169,34 +169,20 @@ class Ingame
      return last_tile;
   }
 
-  public void closeHand()
-  {
-    closedHand.closeHand;
-  }
-  public void showHand()
-  {
-    closedHand.showHand;
-  }
-  public void drawTile(ref Wall wall)
-  {
-    closedHand.drawTile(wall);
-    last_tile = closedHand.getLastTile;
-  }
-/*
-   Graphical drawing.
-*/
-  public void draw(ref RenderWindow window, const int playLoc)
-  {
-     closedHand.draw(window, playLoc);
-     openHand.draw(window);
-     drawDiscards(window);
-  }
-  private void drawDiscards(ref RenderWindow window)
-  {
-     foreach(tile; discards)
-     {
-        tile.draw(window);
-     }
-  }
+	void closeHand()
+	{
+		closedHand.closeHand;
+	}
+	
+	void showHand()
+	{
+		closedHand.showHand;
+	}
+	
+	void drawTile(ref Wall wall)
+	{
+		closedHand.drawTile(wall);
+		last_tile = closedHand.getLastTile;
+	}
 
 }

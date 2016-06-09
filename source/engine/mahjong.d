@@ -99,16 +99,6 @@ void label_tiles(ref Tile[] tiles, dchar[] faces)
    
 }
 
-void give_IDs(ref Tile[] wall)
-{
-  size_t ID = 0;
-  foreach(tile; wall)
-  {
-    tile.ID = ID;
-    ++ID;
-  }
-}
-
 void define_doras(ref Tile[] wall)
 in
 {
@@ -249,7 +239,7 @@ unittest{
 
 bool is_identical(const ref Tile tileA, const ref Tile tileB)
 {
-  if((tileA.ID == tileB.ID) && is_equal(tileA,tileB))
+  if((tileA.id == tileB.id) && is_equal(tileA,tileB))
   {
     return true;
   }

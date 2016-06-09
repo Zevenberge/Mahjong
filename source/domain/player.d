@@ -120,44 +120,6 @@ class Player
   public void discard(T) (T disc)
   {
      game.discard(disc);
-     placeDiscard;
-  }
-
-  Vector2i getDiscardIndex()
-  {
-    size_t amountOfDiscards = game.discards.length;
-    int x = 0, y = 0;
-    if(amountOfDiscards > (discardLines-1)*discardsPerLine)
-    {
-       y = discardLines-1;
-       x = to!int(amountOfDiscards - (discardLines-1)*discardsPerLine - 1);
-    }
-    else
-    {
-      x = (amountOfDiscards-1) % discardsPerLine;
-      y = to!int((amountOfDiscards-1) / discardsPerLine); // Should implicitely be floor()
-    }
-    return Vector2i(x,y);
-  }
-
-  private void placeDiscard()
-  {
-    if(game.discards.length > 0)
-    { /*
-        The discards embed a square in the center of the board. To reduce the area of the square, present an undershoot. The undershoot represents the amount of tiles that are placed to the left of the square (as seen from the player). First, we calculate the center. We then calculate the corner of the encapsulated square by trigeonometric functions. We then displace this corner to the beginning of the discard pile. Based on a few defined constants, we then calculate the topleft corner of the tile.
-      */
-      auto tile = getLastDiscard;
-      tile.setRotation(0);
-      auto tileSize = tile.getGlobalBounds;
-      auto tileIndex = getDiscardIndex();
-      auto movement = calculatePositionInSquare(
-               discardsPerLine, discardUndershoot, tileIndex.x, tileSize);
-      movement.y += tileIndex.y * tileSize.height;
-      auto position = CENTER;
-      moveToPlayer(position, movement, playLoc);
-      tile.setPosition(position);
-      tile.rotateToPlayer(playLoc); // Rotation of the tile.    
-    } 
   }
 
   void placeRiichi()

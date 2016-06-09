@@ -6,6 +6,7 @@ import mahjong.domain.enums.game;
 import mahjong.domain.metagame;
 import mahjong.domain.tile;
 import mahjong.engine.mahjong;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.graphics;
 
@@ -122,17 +123,7 @@ class OpenHand
   }
   body
   {
-    return calcGlobalBounds(tiles[][i]);
-  }
-
-  public void draw(ref RenderWindow window)
-  {
-     foreach(set; tiles)
-     {
-       foreach(tile; set)
-       {
-         tile.draw(window);
-       }
-     }
+  	//TODO: refactor this when ponning is implemented.
+    return FloatRect();//return calcGlobalBounds(tiles[][i]);
   }
 }

@@ -45,7 +45,7 @@ class Board
   void setBlankStick()
   {
     blankStickTexture = new Texture;
-    textureFromImage(blankStickTexture, sticksImg, stick.x0, stick.y0, stick.width, stick.height);
+    textureFromImage(blankStickTexture, sticksImg, stick.left, stick.top, stick.width, stick.height);
   }
 
   void setTable()
