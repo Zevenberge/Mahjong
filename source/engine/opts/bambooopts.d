@@ -9,6 +9,10 @@ class BambooOpts : DefaultOpts
 	{
 		return 2;
 	}
+	override int deadWallLength()
+	{
+		return 0;
+	}
 	override GameMode gameMode()
 	{
 		return GameMode.Bamboo;

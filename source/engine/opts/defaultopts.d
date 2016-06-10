@@ -9,12 +9,16 @@ class DefaultOpts : Opts
 	{
 		return 4;
 	}
-	int initialScore()
+	int deadWallLength()
 	{
-		return 30_000;
+		return 14;
 	}
 	GameMode gameMode()
 	{
 		return GameMode.Riichi;
+	}
+	int initialScore()
+	{
+		return 30_000;
 	}
 }

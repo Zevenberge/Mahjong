@@ -6,6 +6,7 @@ Opts gameOpts;
 
 interface Opts
 {
+	int deadWallLength();
 	int amountOfPlayers();
 	int initialScore();
 	GameMode gameMode();

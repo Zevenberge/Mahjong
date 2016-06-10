@@ -14,6 +14,7 @@ import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.ai;
 import mahjong.graphics.drawing.player;
+import mahjong.graphics.drawing.wall;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts.opts;
@@ -61,16 +62,23 @@ class Metagame
    		info("Moving to the next round");
      setPlayers(players[playerLocation.bottom].getWind);
    }
-   void setPlayers(int initialWind)
-   {
-   		info("Setting up the game");
-     setPlayersGame(initialWind);
-     	trace("Setting up the wall.");
-     wall.reset();
-     distributeTiles;
-     firstTurn;
-     status = Status.newGame;
-   }
+	void setPlayers(int initialWind)
+	{
+		status = Status.setUp;
+		info("Setting up the game");
+		setPlayersGame(initialWind);
+		trace("Setting up the wall.");
+		wall.setUp;
+		info("Preparations are finished.");
+	}
+	void beginGame()
+	{
+		wall.dice;
+		distributeTiles;
+		firstTurn;
+		status = Status.newGame;
+
+	}
    private void setPlayersGame(int initialWind)
    {
      foreach(player; players) // Re-initialise the players' game.

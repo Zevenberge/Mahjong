@@ -23,3 +23,4 @@ enum tileSelectionSize = Vector2f(tile.displayWidth + 2*selectionMargin, tile.di
 enum wallMargin = 2;
 
 enum CenterDirection { Horizontal, Vertical, Both };
+enum Operator {Plus, Minus};
