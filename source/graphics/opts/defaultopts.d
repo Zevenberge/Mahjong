@@ -2,7 +2,7 @@ module mahjong.graphics.opts.defaultopts;
 
 import mahjong.graphics.opts.opts;
 
-class DefaultOpts : Opts
+class DefaultDrawingOpts : Opts
 {
 	float rotationPerPlayer()
 	{

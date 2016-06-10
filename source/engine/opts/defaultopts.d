@@ -3,7 +3,7 @@ module mahjong.engine.opts.defaultopts;
 import mahjong.domain.enums.game;
 import mahjong.engine.opts.opts;
 
-class DefaultOpts : Opts
+class DefaultGameOpts : Opts
 {
 	int amountOfPlayers()
 	{

@@ -3,7 +3,7 @@ module mahjong.engine.opts.bambooopts;
 import mahjong.domain.enums.game;
 import mahjong.engine.opts.defaultopts;
 
-class BambooOpts : DefaultOpts
+class BambooOpts : DefaultGameOpts
 {
 	override int amountOfPlayers()
 	{

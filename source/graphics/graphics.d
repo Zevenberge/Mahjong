@@ -22,6 +22,7 @@ import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.mainmenu;
+import mahjong.graphics.opts.defaultopts;
 import mahjong.graphics.opts.opts;
 
 void gamewindow(RenderWindow window)
@@ -30,7 +31,8 @@ void gamewindow(RenderWindow window)
   */
 
   auto board = new Board;
-  gameOpts = new DefaultOpts;
+  gameOpts = new DefaultGameOpts;
+  drawingOpts = new DefaultDrawingOpts;
   board.setUp(window);
   board.mainLoop;
 }
@@ -42,6 +44,7 @@ void bamboowindow(RenderWindow window)
 
   auto board = new Board;
   gameOpts = new BambooOpts;
+  drawingOpts = new DefaultDrawingOpts;
   board.setUp(window);
   board.mainLoop;
 }
@@ -464,12 +467,12 @@ void moveToPlayer(ref float[2] location, const float[2] movement, const int play
    location[1] += sin(theta) * movement[0] + cos(theta) * movement[1];
 }
 
-void rotateToPlayer(ref float rotation, const ref int playLoc)
+void rotateToPlayer(ref float rotation, const int playLoc)
 {
    rotation = 0;
    addRotateToPlayer(rotation, playLoc);
 }
-void rotateToPlayer(ref Sprite sprite, const ref int playLoc)
+void rotateToPlayer(ref Sprite sprite, const int playLoc)
 {
    float rotation = sprite.rotation;
    rotateToPlayer(rotation, playLoc);
@@ -485,11 +488,11 @@ void rotateToPlayer(const Tile tile, const int playLoc)
 	tile.setCoords(coords);
 }
 
-void addRotateToPlayer(ref float rotation, const ref int playLoc)
+void addRotateToPlayer(ref float rotation, const int playLoc)
 {
    rotation += (360 - 90 * playLoc) % 360;
 }
-void addRotateToPlayer(ref Sprite sprite, const ref int playLoc)
+void addRotateToPlayer(ref Sprite sprite, const int playLoc)
 {
    float rotation = sprite.rotation;
    addRotateToPlayer(rotation, playLoc);

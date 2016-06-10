@@ -7,6 +7,7 @@ import mahjong.domain.metagame;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts.opts;
 import mahjong.engine.ai;
+import mahjong.graphics.drawing.game;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.graphics;

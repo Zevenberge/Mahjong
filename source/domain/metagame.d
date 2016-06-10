@@ -37,7 +37,7 @@ class Metagame
 
    Texture tilesTexture;
 
-   @property setMode(const int gameMode)
+@property setMode(const int gameMode)
    {
    		trace("Setting the game mode.");
       this.gameMode = gameMode;
@@ -188,13 +188,13 @@ class Metagame
    {
      if(phase == Phase.draw)
      {
-       draw;
+       drawTile;
        checkMahjong;
        phase = Phase.select;
      }
    }
 
-   private void draw()
+   private void drawTile()
    { // Not to be confused wit the graphical drawing.
      players[Turn].drawTile(wall);
      if(Turn == playerLocation.bottom)
@@ -329,29 +329,7 @@ class Metagame
    }
 
 
-   /*
-     Subroutines regarding the drawing of the window.
-   */
 
-   public void drawGame(ref RenderWindow window)
-   {
-     drawWall(window);
-     drawPlayers(window);
-   }
-
-   private void drawWall(ref RenderWindow window)
-   {
-     wall.draw(window);
-   }
-
-   private void drawPlayers(ref RenderWindow window)
-   {
-     drawSelections(window);
-     foreach(player;players)
-     {
-       player.draw(window);
-     }
-   }
    private void drawSelections(ref RenderWindow window)
    { // TODO: Encapsulate this.
      if((status == Status.running) && !claimable)
