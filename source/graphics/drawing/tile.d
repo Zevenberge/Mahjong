@@ -14,60 +14,105 @@ import mahjong.graphics.graphics;
 alias drawTile = draw;
 void draw(const Tile tile, RenderTarget view)
 {
-	Sprite sprite;
-	if(tile.isOpen)
-	{
-		sprite = getOpenSprite(tile);
-	}
-	else
-	{
-		sprite = getClosedSprite;
-	}
-	auto coords = getCoords(tile);
-	sprite.position = coords.vector;
-	sprite.rotation = coords.rotation;
-	view.draw(sprite);
+	getTileVisuals(tile).draw(tile, view);
 }
 
 void clearTileCache()
 {
-	_sprites.clear;
-	_coords.clear;
+	_tiles.clear;
 	trace("Cleared tiles cache");
 }
 
 void setCoords(const Tile tile, FloatCoords coords)
 {
-	_coords[tile.id] = coords;
+	getTileVisuals(tile).setCoords(coords);
 }
 
 FloatCoords getCoords(const Tile tile)
 {
-	if(tile.id !in _coords)
-	{
-		return FloatCoords.init;
-	}
-	return _coords[tile.id];
+	trace("Getting coords for tile");
+	return getTileVisuals(tile).getCoords;
 }
 
 deprecated FloatRect getGlobalBounds(const Tile tile) 
 {
-	if(tile.id !in _sprites) return FloatRect();
-	return _sprites[tile.id].getGlobalBounds;
+	return  getTileVisuals(tile).getGlobalBounds;
 }
 deprecated void setPosition(Tile tile, Vector2f pos)
 {
-	_sprites[tile.id].position(pos);
+	trace("Setting the position of the tile");
+	auto coords = getCoords(tile);
+	trace("Retreived the old coordinates");
+	coords.x = pos.x;
+	coords.y = pos.y;
+	setCoords(tile, coords);
+	trace("Set the new coords.");
 }
 
-
-private Sprite getOpenSprite(const Tile tile)
+private class TileVisuals
 {
-	if(tile.id !in _sprites)
+	private Sprite _sprite;
+	private FloatCoords _coords;
+	
+	void initialise(const Tile stone)
 	{
-		return initialiseNewSprite(tile);
+		trace("Initialising tile visual for tile ", stone.id);
+		loadTilesTexture;
+		_sprite = new Sprite(tilesTexture);
+		_sprite.textureRect = getTextureRect(stone);
+		_sprite.pix2scale(tile.displayWidth);
+		trace("Initialised tile visual for tile ", stone.id);
 	}
-	return _sprites[tile.id];
+	
+	void setCoords(FloatCoords coords)
+	{
+		_coords = coords;
+	}
+	
+	FloatCoords getCoords()
+	{
+		trace("Coords getter called");
+		return _coords;
+	}
+	
+	FloatRect getGlobalBounds()
+	{
+		_sprite.position = _coords.vector;
+		_sprite.rotation = _coords.rotation;
+		return _sprite.getGlobalBounds;
+	}
+	
+	void draw(const Tile tile, RenderTarget view)
+	{
+		Sprite sprite;
+		if(tile.isOpen)
+		{
+			sprite = _sprite; 
+		}
+		else
+		{
+			sprite = getClosedSprite;
+		}
+		sprite.position = _coords.vector;
+		sprite.rotation = _coords.rotation;
+		view.draw(sprite);
+	}
+}
+
+private TileVisuals getTileVisuals(const Tile tile)
+{
+	trace("Getting tile visuals for tile");
+	//auto visual = tile.id in _tiles;
+	if(tile.id !in _tiles)
+	{
+		trace("Generating new tiles visual for \n", tile.id);
+		auto tileVisuals = new TileVisuals;
+		tileVisuals.initialise(tile);
+		_tiles[tile.id] = tileVisuals;
+		return tileVisuals;
+	}
+	trace("Returning old tile visual for \n", tile.id);
+	return _tiles[tile.id];
 }
 
 private Sprite getClosedSprite()
@@ -77,16 +122,6 @@ private Sprite getClosedSprite()
 		return initialiseNewBackSprite;
 	}
 	return _backSprite;
-}
-
-private Sprite initialiseNewSprite(const Tile stone)
-{
-	loadTilesTexture;
-	auto sprite = new Sprite(tilesTexture);
-	sprite.textureRect = getTextureRect(stone);
-	sprite.pix2scale(tile.displayWidth);
-	_sprites[stone.id] = sprite;
-	return sprite;
 }
 
 private IntRect getTextureRect(const Tile stone)
@@ -134,14 +169,16 @@ private IntRect getBackSpriteBounds()
 
 private void loadTilesTexture()
 {
+	trace("Retreiving tiles texture");
 	if(tilesTexture is null)
 	{
+		info("Loading tiles texture into cache");
+		tilesTexture = new Texture;
 		tilesTexture.loadFromFile(tilesFile);
 	}
 }
 
-private FloatCoords[UUID] _coords;
-private Sprite[UUID] _sprites;
+private TileVisuals[UUID] _tiles;
 private Sprite _backSprite;
 
 

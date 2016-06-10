@@ -18,6 +18,7 @@ import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts.opts;
 import mahjong.graphics.enums.game;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.graphics;
@@ -37,6 +38,7 @@ class Metagame
 
    @property setMode(const int gameMode)
    {
+   		trace("Setting the game mode.");
       this.gameMode = gameMode;
       setDeadWallLength();
    }
@@ -56,11 +58,14 @@ class Metagame
 
    void nextRound()
    {
+   		info("Moving to the next round");
      setPlayers(players[playerLocation.bottom].getWind);
    }
    void setPlayers(int initialWind)
    {
+   		info("Setting up the game");
      setPlayersGame(initialWind);
+     	trace("Setting up the wall.");
      wall.reset();
      distributeTiles;
      firstTurn;

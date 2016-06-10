@@ -1,5 +1,6 @@
 module mahjong.domain.wall;
 
+import std.experimental.logger;
 import std.random;
 import std.stdio;
 import std.conv;
@@ -12,6 +13,7 @@ import mahjong.engine.mahjong;
 import mahjong.engine.opts.opts;
 import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.tile;
+import mahjong.graphics.enums.game;;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.graphics;
 
@@ -26,6 +28,7 @@ class Wall
 
    this()
    {
+   		trace("Constructing the wall");
       this.gameMode = gameOpts.gameMode;
    }
 
@@ -37,12 +40,17 @@ class Wall
 
    public void reset()
    {
+   		trace("Resetting the wall");
       this.amountOfKans = 0;
       initialise();
+      	trace("Initialized the wall");
       shuffle();
+      	trace("Shuffled the wall");
       place();
+      	trace("Placed the tiles");
       diceToStartPoint();
       flipFirstDoraIndicator();
+      	info("Wall is ready to go.");
    }
 
    public void setUp(const int gameMode)
@@ -118,23 +126,32 @@ class Wall
 
    private void placeWall()
    {
+   		info("Placing wall.");
      int widthOfWall = cast(int)length / (2*gameOpts.amountOfPlayers);
-     auto size = tiles[0].getGlobalBounds;
-     float undershoot = size.height/size.width;
+     	trace("Width of the wall is ", widthOfWall);
+     auto size = TileSize;
+     float undershoot = TileSize.y/TileSize.x;
 
+		trace("Setting up wall tiles.");
       for(int i = 0; i < (tiles.length/2); ++i)
       {
+      	 trace("Placing tile pair  ",i);
          auto position = CENTER;
          auto movement = calculatePositionInSquare(widthOfWall, undershoot, 
-                          Vector2i(i % widthOfWall,0), size);
+                          Vector2i(i % widthOfWall,0), FloatRect(0, 0, size.x, size.y));
          int wallSide = getWallSide(i, widthOfWall);
+         trace("The tile is on the ", cast(playerLocation)wallSide, " side");
          moveToPlayer(position, movement, wallSide );
+         trace("Moved the tile to its side");
          placeBottomTile(tiles[$-1 - (2*i+1)],position);
          placeTopTile(tiles[$-1 - (2*i)],position);
+         trace("Placed the bottom and top tile");
          tiles[$-1 - 2*i].rotateToPlayer(wallSide);
          tiles[$-1 - (2*i+1)].rotateToPlayer(wallSide);
+         trace("Rotated the tiles. Finished placing the tile");
          // TODO: Let the draw functions draw the correct tiles first.
       }
+      	info("Built the wall");
    }
    private int getWallSide(int i, int widthOfWall)
    {
@@ -143,6 +160,7 @@ class Wall
    
    private void placeBambooWall()
    {
+   		info("Placing bamboo wall.");
       /*
           We want the wall to be placed in the middle. The wall should be taken from the left side. Therefore, start placing them at the right hand side.
           After distributing the tiles to the players, only 10 tiles are left. Center them.

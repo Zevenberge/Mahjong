@@ -22,6 +22,7 @@ import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.mainmenu;
+import mahjong.graphics.opts.opts;
 
 void gamewindow(RenderWindow window)
 { /*
@@ -474,9 +475,14 @@ void rotateToPlayer(ref Sprite sprite, const ref int playLoc)
    rotateToPlayer(rotation, playLoc);
    sprite.rotation = rotation;
 }
-void rotateToPlayer(ref Tile tile, const ref int playLoc)
+void rotateToPlayer(const Tile tile, const int playLoc)
 {
-   tile.rotateToPlayer(playLoc);
+	trace("Rotating tile ", tile.id," to player");
+	auto coords = tile.getCoords;
+	trace("Obtained the coords of tile ", tile.id);
+	trace("Is drawing opts null? ", drawingOpts is null);
+	coords.rotation = playLoc * drawingOpts.rotationPerPlayer;
+	tile.setCoords(coords);
 }
 
 void addRotateToPlayer(ref float rotation, const ref int playLoc)
@@ -489,9 +495,13 @@ void addRotateToPlayer(ref Sprite sprite, const ref int playLoc)
    addRotateToPlayer(rotation, playLoc);
    sprite.rotation = rotation;
 }
-void addRotateToPlayer(ref Tile tile, const ref int playLoc)
+void addRotateToPlayer(const Tile tile, const int playLoc)
 {
-   tile.addRotateToPlayer(playLoc);
+	auto coords = tile.getCoords;
+	trace("Obtained the coords of tile ", tile.id);
+	trace("Is drawing opts set? ", drawingOpts is null);
+	coords.rotation += playLoc * drawingOpts.rotationPerPlayer;
+	tile.setCoords(coords);
 }
 
 /*void setTileInSquare(ref Tile tile, const int amountOfTiles, const float undershootInTiles, const int nthTile, const int playLoc = 0)
