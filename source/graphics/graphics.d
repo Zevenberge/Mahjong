@@ -21,7 +21,7 @@ import mahjong.graphics.cache.font;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
-import mahjong.graphics.mainmenu;
+import mahjong.graphics.menu.mainmenu;
 import mahjong.graphics.opts.defaultopts;
 import mahjong.graphics.opts.opts;
 

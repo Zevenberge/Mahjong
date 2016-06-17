@@ -1,5 +1,6 @@
 module mahjong.graphics.opts.defaultopts;
 
+import dsfml.graphics;
 import mahjong.graphics.opts.opts;
 
 class DefaultDrawingOpts : Opts
@@ -27,5 +28,21 @@ class DefaultDrawingOpts : Opts
 	int criticalScore()
 	{
 		return 10_000;
+	}
+	Vector2i screenSize()
+	{
+		return Vector2i(900,900);
+	}
+	string screenHeader()
+	{
+		return "Mahjong";
+	}
+	int menuFontSize()
+	{
+		return 32;
+	}
+	Color menuFontColor()
+	{
+		return Color.Black;
 	}
 }

@@ -1,10 +1,18 @@
 module mahjong.domain.hand;
 
-import mahjong.graphics.drawing.tile;
-import mahjong.graphics.selectable;
+import std.signals;
 import mahjong.domain.tile;
 
-class Hand : Selectable!Tile
+class Hand 
 {
-   alias tiles = opts;
+	Tile[] tiles;
+	
+	void addTile(Tile tile)
+	{
+		tiles ~= tile;
+		emit(tile);
+	}
+	
+	mixin Signal!(Tile);
+	
 }

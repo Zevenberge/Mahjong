@@ -1,6 +1,9 @@
 module mahjong.domain.ingame;
 
+import std.algorithm.iteration;
+import std.array;
 import std.experimental.logger;
+import std.uuid;
 import mahjong.domain.closedhand;
 import mahjong.domain.enums.tile;
 import mahjong.domain.openhand;
@@ -125,6 +128,19 @@ class Ingame
 /*
    Discard things you no longer need.
 */
+	void discard(UUID discardId)
+	{
+		size_t index;
+		foreach(i, t; closedHand.tiles)
+		{
+			if(t.id == discardId)
+			{
+				index = i;
+				break;
+			}
+		}
+		discard(index);
+	}
 
 	void discard(ulong discardedNr)
 	{    

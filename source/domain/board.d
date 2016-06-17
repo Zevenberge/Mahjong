@@ -11,7 +11,7 @@ import mahjong.graphics.drawing.game;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.graphics;
-import mahjong.graphics.menu;
+import mahjong.graphics.menu.menu;
 
 import dsfml.graphics;
 
@@ -75,13 +75,6 @@ class Board
     this.window = window;
     renderBg;
     meta = new Metagame;
-	trace("Created the metagame.");
-    meta.setMode(gameMode);
-	trace("Set the amount of players");
-    meta.constructPlayers(blankStickTexture);
-	trace("Constructed the players.");
-    meta.setTilesTexture;
-	trace("Set the tiles texture.");
     setPauseMenu;
 	trace("Constructed the pause menu.");
   }

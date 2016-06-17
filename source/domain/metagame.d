@@ -4,7 +4,7 @@ import std.experimental.logger;
 import std.string;
 import std.random;
 import std.conv;
-import dsfml.graphics;
+import std.uuid;
 
 import mahjong.domain.enums.game;
 import mahjong.domain.enums.tile;
@@ -30,41 +30,25 @@ class Metagame
      Preparation of the game.
    */
 
-   int gameMode = GameMode.Riichi;
-   Player[] players; //The droids playing
-   Wall wall;
-   int deadWallLength = .deadWallLength;
+	Player currentPlayer() { return players[_turn]; }
+	Player[] players; //The droids playing
+	Wall wall;
 
-   Texture tilesTexture;
-
-@property setMode(const int gameMode)
-   {
-   		trace("Setting the game mode.");
-      this.gameMode = gameMode;
-      setDeadWallLength();
-   }
-   
-   @property setDeadWallLength()
-   {
-      switch(gameMode)
-      {
-         case(GameMode.Bamboo):
-            this.deadWallLength = .bambooDeadWall;
-            break;
-         default:
-            this.deadWallLength = .deadWallLength;
-            break;
-      }
-   }
-
-   void nextRound()
-   {
-   		info("Moving to the next round");
-     setPlayers(players[playerLocation.bottom].getWind);
-   }
-	void setPlayers(int initialWind)
+	void initialise()
 	{
-		status = Status.setUp;
+		info("Initialising metagame");
+		constructPlayers;
+		setPlayers(uniform(0, gameOpts.amountOfPlayers));
+		info("Initialised metagame");
+	}
+	void nextRound()
+	{
+		info("Moving to the next round");
+		setPlayers(players[playerLocation.bottom].getWind);
+	}
+	private void setPlayers(int initialWind)
+	{
+		_status = Status.SetUp;
 		info("Setting up the game");
 		setPlayersGame(initialWind);
 		trace("Setting up the wall.");
@@ -76,7 +60,7 @@ class Metagame
 		wall.dice;
 		distributeTiles;
 		firstTurn;
-		status = Status.newGame;
+		_status = Status.NewGame;
 
 	}
    private void setPlayersGame(int initialWind)
@@ -95,27 +79,20 @@ class Metagame
      setPlayers(initialWind);
    }
 
-   void setTilesTexture()
-   {
-     tilesTexture = new Texture;
-     loadTexture(tilesTexture, tilesFile);
-     reset();
-   }
-
-   void constructPlayers(ref Texture stickTexture)
+   private void constructPlayers()
    { // FIXME: Encapsulate this in the player class.
      for(int i=0; i < gameOpts.amountOfPlayers;++i)
       {
       // TODO: Idea: Make a number of preset profiles that can be loaded. E.g. player1avatar = Sakura.avatar;
         trace("Constructing player ", i);
         auto player = new Player;
-        player.playLoc = (this.gameMode == GameMode.Bamboo ) ? 2*i : i;
+        player.playLoc = i;
         trace(player.name);
         players ~= player;
       }
    }
 
-   void distributeTiles()
+   private void distributeTiles()
    {
      for(int i = 0; i < 12/tilesAtOnce; ++i)
      {
@@ -138,13 +115,11 @@ class Metagame
      The game itself.
    */
 
-   private int Turn = 0; // Whose turn it is.
-   private int status = Status.newGame;
-   private bool pause = false; //FIXME: make the metagame independent of the pause function
+   private int _turn = 0; // Whose turn it is.
+   private int _status = Status.NewGame;
+   private bool _pause = false; //FIXME: make the metagame independent of the pause function
 
-   private enum Phase {draw, select, discard, end}
-   private int phase = Phase.draw;
-   private Tile discard;
+   private Phase _phase = Phase.Draw;
 
    private void firstTurn() // Start at East.
    {
@@ -153,107 +128,69 @@ class Metagame
      {
        if(player.game.wind == Winds.east)
        {
-         Turn = i;
-         phase = Phase.draw;
+         _turn = i;
+         _phase = Phase.Draw;
          break;
        }
        ++i;
      }
    }
 
-   public void gameLoop()
+   void gameLoop()
    {
      startGame;
-     if(status == Status.running)
+     if(_status == Status.Running)
      {
        endPhase;
-       discardPhase;
-       selectPhase;
-       drawPhase;
      }
    }
 
    private void startGame()
    {
-     if(status == Status.newGame)
+     if(_status == Status.NewGame)
      {
        // TODO: add shiny effects to display that the game is starting.
        info("Starting new game...");
        info("Good luck!");
-       status = Status.running;
+       _status = Status.Running;
      }
    }
 
-   private void drawPhase()
-   {
-     if(phase == Phase.draw)
-     {
-       drawTile;
-       checkMahjong;
-       phase = Phase.select;
-     }
-   }
-
-   private void drawTile()
-   { // Not to be confused wit the graphical drawing.
-     players[Turn].drawTile(wall);
-     if(Turn == playerLocation.bottom)
-        players[Turn].showHand;
-   }
-
-   private void checkMahjong()
-   {
-     if((status == Status.running) && (status != Status.mahjong) && scanHand)
-     { // TODO: Make this function actually do something.
-       flipOverWinningTiles();
-       info("Congratz!");
-       status = Status.mahjong;
-     }
-   }
-
-   private void selectPhase()
-   { // Only for the AI. If the human player needs to select, this is done via event input.
-     if((phase == Phase.select) && (Turn != playerLocation.bottom))
-     {
-       activateAI;
-       phase = Phase.discard;
-     }
-   }
-
-   private void activateAI()
-   {
-     // If it is not the human player's turn and the game is running, activate the AI.
-     if((status == Status.running) && (Turn != playerLocation.bottom))
-     {// FIXME: Make the AI functions static calculations!
-       auto ai = new aiRandom;
-       discard = ai.Discard(players[Turn].game.closedHand.tiles);
-     }
-     // TODO: make profiles embedded in the player class with AI objects in them.
-   }
-
-   private void discardPhase()
-   {
-     if(phase == Phase.discard)
-     {
-       discardTile(discard);
-       discard = null;
-       phase = Phase.end;
-     }
-   }
+	void drawTile()
+	{ 
+		currentPlayer.drawTile(wall);
+		if(_turn == playerLocation.bottom)
+		{currentPlayer.showHand;}
+		_phase = Phase.Discard;
+	}
+	
+	void tsumo()
+	{
+		flipOverWinningTiles();
+		if(hasMahjong)
+		{
+			info("Player ", cast(Kanji)currentPlayer.getWind, " won");
+		}
+		else
+		{
+			info("Player ", cast(Kanji)currentPlayer.getWind, " chombo'd");
+		}
+		_status = Status.Mahjong;
+	}
 
    int[] discardTile(T) (T discard)
    {
-     players[Turn].discard(discard);
-     return isPonnable(players[Turn].getLastDiscard);
+     currentPlayer.discard(discard);
+     return isPonnable(currentPlayer.getLastDiscard);
    }
 
    private void endPhase()
    {  //FIXME: should not be called when there is a claimable tile.
-     if(phase == Phase.end)
+     if(_phase == Phase.End)
      {
        if(advanceTurn)
        {
-         phase = Phase.draw;
+         _phase = Phase.Draw;
        }
      }
    }
@@ -274,29 +211,15 @@ class Metagame
 
    void nextTurn()
    {
-     ++Turn;
-     Turn = Turn % gameOpts.amountOfPlayers;
+     ++_turn;
+     _turn = _turn % gameOpts.amountOfPlayers;
    }
 
-   /*
-      Group everything that has interaction with the player.
-   */
 
-   public void checkGameButtons(const ref Event event)
-   {
-     if(players[playerLocation.bottom].game.closedHand.navigate(event.key.code))
-     {
-       if((status == Status.running) && (Turn == playerLocation.bottom))
-       {
-         discard = players[playerLocation.bottom].game.closedHand.tiles[players[playerLocation.bottom].game.closedHand.selection.position];
-         phase = Phase.discard;
-       }
-     }
-   }
 
    private void exhaustiveDraw()
    {
-     status = Status.exhaustiveDraw;
+     _status = Status.ExhaustiveDraw;
      checkNagashiMangan;
      checkTenpai;
    }
@@ -307,7 +230,7 @@ class Metagame
        if(player.isNagashiMangan)
        {
          // Go ro results screen.
-         status = Status.mahjong;
+         _status = Status.Mahjong;
          info("Nagashi Mangan!");
        }
      }
@@ -328,48 +251,25 @@ class Metagame
      }
    }
 
+	bool isPhase(Phase phase)
+	{
+		return _phase == phase;
+	}
 
-
-   private void drawSelections(ref RenderWindow window)
-   { // TODO: Encapsulate this.
-     if((status == Status.running) && !claimable)
-     {
-       window.draw(players[playerLocation.bottom].game.closedHand.selection.visual);
-     }
-
-     if((status == Status.running) && (playerLocation.bottom.isIn(canClaimTile)))
-     {
-       players[playerLocation.bottom].game.openHand.drawSelections(window);
-     }
-   }  
+	bool isTurn(UUID playerId)
+	{
+		return currentPlayer.id == playerId;
+	}
 
    /*
      Random useful functions.
    */
 
-   private bool scanHand()
+   private bool hasMahjong()
    {
-     return players[Turn].isMahjong;
+     return currentPlayer.isMahjong;
    }
-/*
-   bool requirePlayerInteraction()
-   { //FIXME: Either implement this or throw it away.
-      bool interaction = false;
-      if((Turn == playerLocation.bottom) && !claimable) // If it is the players turn and noone is claiming a tile. 
-      {
-         interaction = true;
-         return interaction;
-      }
-      if((Turn != playerLocation.bottom) && claimable)
-      {
-         if(canClaimTile == playerLocation.bottom) // If the player can claim a tile.
-         {
-           interaction = true;
-         }
-      }
-      return interaction;
-   }
-*/
+
    private void flipOverWinningTiles()
    {
      foreach(player; players)
@@ -406,7 +306,7 @@ class Metagame
         Checks whether a discard can be ponned and returns the player location (.bottom, .right, .etc). If the tile cannot be ponned, it returns a -1.
      */
      // Start checking for pons at next player.
-     for(int i = Turn+1; i < Turn + gameOpts.amountOfPlayers; ++i)
+     for(int i = _turn+1; i < _turn + gameOpts.amountOfPlayers; ++i)
      {
         if(players[i % gameOpts.amountOfPlayers].isPonnable(discard))
         {
@@ -425,7 +325,7 @@ class Metagame
      // Start checking for rons at the next player.
      _ronnable = false;
      canClaimTile = [];
-     for(int i = Turn + 1; i < Turn + gameOpts.amountOfPlayers; ++i)
+     for(int i = _turn + 1; i < _turn + gameOpts.amountOfPlayers; ++i)
      {
         int pl = i % gameOpts.amountOfPlayers;
         if(players[pl].isRonnable(discard))
