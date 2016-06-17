@@ -5,8 +5,8 @@ import dsfml.window;
 import std.experimental.logger;
 import std.file;
 import std.math;
+import std.range;
 
-import mahjong.domain.board;
 import mahjong.domain.enums.game;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
@@ -26,118 +26,6 @@ import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.opts.defaultopts;
 import mahjong.graphics.opts.opts;
 
-void gamewindow(RenderWindow window)
-{ /*
-    This is going to be the main window in which things happen. This is a continuous interrupt of the main menu. The main manu function will still be active. When the game window closes, the main menu will resume.
-  */
-
-  auto board = new Board;
-  gameOpts = new DefaultGameOpts;
-  drawingOpts = new DefaultDrawingOpts;
-  board.setUp(window);
-  board.mainLoop;
-}
-
-void bamboowindow(RenderWindow window)
-{ /*
-    This is going to be the main window in which things happen. This is a continuous interrupt of the main menu. The main manu function will still be active. When the game window closes, the main menu will resume.
-  */
-
-  auto board = new Board;
-  gameOpts = new BambooOpts;
-  drawingOpts = new DefaultDrawingOpts;
-  board.setUp(window);
-  board.mainLoop;
-}
-
-void chinesewindow(RenderWindow window)
-{ /*
-    Have a temporary background image!
-  */
-  auto title = new Text;
-  setTitle(title,"Coming soon!");
-
-  string bgfile = "res/china_small.png";
-  auto BgTexture = new Texture;
-  auto Bg        = new Sprite;
-  load(BgTexture, Bg, bgfile);
-  pix2scale(Bg,width,height);
-
-  while(window.isOpen())
-  {
-
-    Event event;
-    while (window.pollEvent(event))
-    {
-       if(event.type == event.EventType.KeyPressed)
-       {
-          goto end;
-        }
-       if(event.type == event.EventType.Closed)
-       {
-           window.close();
-       }
-    }
-   window.clear;
-   window.draw(Bg);
-   window.draw(title);
-   window.display;
-   }
-
-   end:
-}
-
-void titlescreen(RenderWindow window)
-{
-  // Set a solid color as the background.
-  auto bg = new RectangleShape(Vector2f(width,height));
-  bg.fillColor = Color.Green;
-  bg.position = Vector2f(0,0);
-
-  // Construct the text-based title.
-  auto title = new Text;
-  setTitle(title,"Kinjin Mahjong"); 
-
-  // Load the title image. For now, we will use Kinjin's logo.
-  string logofile = "res/logo.png";
-  auto logoTexture = new Texture;
-  auto logo = new Sprite;
-  load(logoTexture, logo, logofile);
-  logo.position = Vector2f(0,0); 
-  center(logo, CenterDirection.Both,0);
-
-  // Gradually make the logo more visible.
-  ubyte opacity = 0;
-
-  while(window.isOpen())
-  {
-    Event event;
-
-    logo.color = Color(255,255,255,opacity); // Start out transparant
-   
-    while (window.pollEvent(event))
-    {
-       if(event.type == event.EventType.Closed)
-       {
-           window.close();
-       }
-    }
-    window.clear;    
- 
-    // Draw stuff here.
-    window.draw(bg);
-    window.draw(title);
-    window.draw(logo);
-
-    window.display;
-
-    ++opacity;
-    if (opacity == 255)
-    {  
-      break;  
-    }
-  }
-}
 
 void spriteFromImage(ref Texture texture, ref Sprite sprite, Image image, int x, int y, int w, int h)
 {
@@ -464,10 +352,21 @@ FloatRect calcGlobalBounds(T) (T opts)
 
 void spaceMenuItems(T : MenuItem)(T[] menuItems)
 {
-	
+	if(menuItems.empty) return;
+	auto size = menuItems.front.name.getGlobalBounds;
+	foreach(i, item; menuItems)
+	{
+		auto ypos = drawingOpts.menuTop + (size.height * drawingOpts.menuSpacing) * i;
+		item.name.position = Vector2f(0, ypos);
+		center(item.name, CenterDirection.Horizontal);
+		++i;
+	}
 }
 
-
+Vector2f toVector2f(Vector2i v)
+{
+	return Vector2f(v.x, v.y);
+}
 
 
 

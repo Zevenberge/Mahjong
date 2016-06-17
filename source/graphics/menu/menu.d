@@ -1,5 +1,7 @@
 module mahjong.graphics.menu.menu;
 
+import std.experimental.logger;
+
 import dsfml.graphics.color;
 import dsfml.graphics.rect;
 import dsfml.graphics.rendertarget;
@@ -56,5 +58,48 @@ class Menu : Selectable!MenuItem
    
 	private Text _title;
 }
+
+Menu getPauseMenu()
+{
+	if(_pauseMenu is null)
+	{
+		composePauseMenu;
+	}
+	return _pauseMenu;
+}
+private Menu _pauseMenu;
+private void composePauseMenu()
+{
+	info("Composing pause menu");
+	_pauseMenu = new Menu("");
+	with(_pauseMenu)
+	{
+		addOption(new MenuItem("Continue", &continueGame));
+		addOption(new MenuItem("New Game", &newGame));
+		addOption(new MenuItem("Quit", &quitGame));
+	}
+	_pauseMenu.opts.spaceMenuItems;
+	info("Composed pause menu");
+}
+
+private void continueGame()
+{
+	trace("Continuing game");
+}
+
+private void newGame()
+{
+	trace("Starting new game");
+}
+
+private void quitGame()
+{
+	trace("Quitting game");
+}
+
+
+
+
+
 
 

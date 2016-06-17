@@ -1,17 +1,25 @@
-module mangareader.graphics.ui;
+module mahjong.graphics.ui;
 
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
+import mahjong.graphics.menu.mainmenu;
 import mahjong.graphics.opts.defaultopts;
 import mahjong.graphics.opts.opts;
 
 void run()
 {
+	trace("Setting drawing options");
 	drawingOpts = new DefaultDrawingOpts;
+	trace("Creating window.");
 	auto window = new RenderWindow(VideoMode(drawingOpts.screenSize.x, 
 							drawingOpts.screenSize.y), drawingOpts.screenHeader);
+	window.setFramerateLimit(60);
+	trace("Creating main menu");
+	auto mainMenu = getMainMenu;
+	trace("Creating initial controller");
+	controller = new MainMenuController(window, mainMenu);
 	try
 	{
 		windowLoop: while(window.isOpen)

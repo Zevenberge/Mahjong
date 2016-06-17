@@ -4,7 +4,9 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.menucontrollerbase;
+import mahjong.graphics.graphics;
 import mahjong.graphics.menu.menu;
+import mahjong.graphics.opts.opts;
 
 class MenuController : MenuControllerBase!Menu
 {
@@ -13,11 +15,15 @@ class MenuController : MenuControllerBase!Menu
 		trace("Creating menu controller");
 		super(window, menu);
 		_innerController = pausedController;
+		_haze = new RectangleShape(drawingOpts.screenSize.toVector2f);
+		_haze.fillColor = Color(126,126,126,126);
 	}
 	
 	override void draw()
 	{
 		_innerController.draw;
+		_window.draw(_haze);
+		_menu.draw(_window);
 	}
 	
 	protected override bool menuClosed()
@@ -28,4 +34,5 @@ class MenuController : MenuControllerBase!Menu
 	private:
 		Controller _innerController;
 		Menu _menu;
+		RectangleShape _haze;
 }

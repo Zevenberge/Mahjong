@@ -87,6 +87,7 @@ private void composeMainMenu()
 		addOption(new MainMenuItem("Quit", 
 				&quit, quitFile, IntRect(150,0,700,700)));
 	}
+	_menu.opts.spaceMenuItems;
 	info("Composed main menu;");
 }
 
