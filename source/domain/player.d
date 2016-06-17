@@ -1,28 +1,14 @@
 module mahjong.domain.player;
 
-import std.conv;
-import std.random;
-import std.stdio;
 import std.string;
 import std.uuid;
 
 import mahjong.domain.enums.game;
 import mahjong.domain.ingame;
-import mahjong.domain.metagame;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
-import mahjong.engine.ai;
-import mahjong.engine.enums.game;
-import mahjong.engine.mahjong;
 import mahjong.engine.opts.opts;
-import mahjong.graphics.cache.font;
-import mahjong.graphics.enums.game;
-import mahjong.graphics.enums.geometry;
-import mahjong.graphics.enums.kanji;
-import mahjong.graphics.enums.resources;
-import mahjong.graphics.graphics;
 
-import dsfml.graphics;
 
 
 class Player

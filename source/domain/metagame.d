@@ -1,7 +1,6 @@
 module mahjong.domain.metagame;
 
 import std.experimental.logger;
-import std.string;
 import std.random;
 import std.conv;
 import std.signals;
@@ -13,17 +12,11 @@ import mahjong.domain.enums.wall;
 import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
-import mahjong.engine.ai;
-import mahjong.graphics.drawing.player;
-import mahjong.graphics.drawing.wall;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts.opts;
 import mahjong.graphics.enums.game;
-import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.kanji;
-import mahjong.graphics.enums.resources;
-import mahjong.graphics.graphics;
 
 class Metagame
 {

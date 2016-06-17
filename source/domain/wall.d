@@ -4,7 +4,6 @@ import std.algorithm.mutation;
 import std.conv;
 import std.experimental.logger;
 import std.random;
-import std.uuid;
 
 import mahjong.domain.enums.game;
 import mahjong.domain.enums.tile;

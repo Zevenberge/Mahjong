@@ -2,14 +2,9 @@ module mahjong.domain.closedhand;
 
 import std.algorithm.iteration;
 import std.signals;
-import dsfml.graphics;
-import dsfml.system.vector2;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.mahjong;
-import mahjong.graphics.drawing.tile;
-import mahjong.graphics.enums.geometry;
-import mahjong.graphics.graphics;
 
 class ClosedHand
 {

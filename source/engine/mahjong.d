@@ -15,54 +15,6 @@ import mahjong.domain.tile;
 import mahjong.engine.enums.game;
 import mahjong.engine.yaku; 
 
-import dsfml.graphics;
-
-/*void getWallSprites(ref Tile[] wall, ref Texture tilesTexture)
-{
-  foreach(tile; wall)
-  {
-    tile.getSprite(tilesTexture);
-  }
-}
-
-void setUpWall(ref Tile[] wall, ref Texture tilesTexture, const int gameMode)
-{
-   initialiseWall(wall, gameMode);
-   give_IDs(wall);
-   getWallSprites(wall, tilesTexture);
-   shuffle_wall(wall);
-}
-
-void initialiseWall(ref Tile[] wall, const int gameMode)
-{
-  switch(gameMode)
-  {
-     case GameMode.Bamboo:
-       initialiseBambooWall(wall);
-       break;
-     default:
-       initialiseNormalWall(wall);
-       break;
-  } 
-}
-
-void initialiseBambooWall(ref Tile[] wall)
-{
-   for(int j = bamboos.min; j <= bamboos.max; ++j)
-   {
-      for(int i = 0; i < 4; ++i)
-      {
-        wall ~= new Tile(types.bamboo, j);
-      }
-   }
-}
-
-void initialiseNormalWall(ref Tile[] wall)
-{ // FIXME: Remove the dependence on the 'legacy' functions and rebuild them nicely.
-  // TODO: Use enumloop hax to get the whole wall.
-   set_up_wall(wall);
-}*/
-
 void set_up_wall(ref Tile[] wall, int dups = 4)
 {
    for(int i = 0; i < dups; ++i)

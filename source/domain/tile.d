@@ -1,22 +1,10 @@
 module mahjong.domain.tile;
 
-import std.stdio;
 import std.conv;
-import std.random;
-import std.string;
 import std.uuid;
 
 import mahjong.domain.enums.tile;
-import mahjong.domain.metagame;
-import mahjong.domain.player;
-import mahjong.engine.ai;
 import mahjong.engine.enums.game;
-import mahjong.engine.mahjong;
-import mahjong.graphics.enums.geometry;
-import mahjong.graphics.graphics;
-
-import dsfml.graphics;
-
 
 class Tile
 { // FIXME: Increase encapsulation.
@@ -28,9 +16,6 @@ class Tile
 	int dora = 0;
 	int origin = Origin.wall; // Origin of the tile in in-game winds.
 	private bool _isOpen = false;
-
-    private Sprite sprite;
-    private Sprite backSprite;
 
     this()
     {
