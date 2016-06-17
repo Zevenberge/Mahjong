@@ -22,6 +22,7 @@ import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.menu.mainmenu;
+import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.opts.defaultopts;
 import mahjong.graphics.opts.opts;
 
@@ -54,7 +55,7 @@ void chinesewindow(RenderWindow window)
     Have a temporary background image!
   */
   auto title = new Text;
-  setTitle(title,"Coming soon!"d);
+  setTitle(title,"Coming soon!");
 
   string bgfile = "res/china_small.png";
   auto BgTexture = new Texture;
@@ -86,81 +87,6 @@ void chinesewindow(RenderWindow window)
    end:
 }
 
-void mainmenu(RenderWindow window)
-{
-  // Set a solid color as the background.
-  auto bg = new RectangleShape(Vector2f(width,height));
-  bg.fillColor = Color.Green;
-  bg.position = Vector2f(0,0);
-
-  auto MenuTitle = new Text;
-  setTitle(MenuTitle,"Main menu"d);
-
-  auto menu = new MainMenu;
-  enum options {riichi=0, bamboo, eightPlayer, chinese, quit}
-  with(menu)
-  {
-    addOption("Riichi Mahjong"d, riichiFile, IntRect(314,0,2*width,2*height));
-    addOption("Bamboo Battle"d,  bambooFile, IntRect(314,0,4*width,4*height));
-    addOption("Thunder Thrill"d,  eightPlayerFile, IntRect(100,0,768,768));
-    addOption("Simple Mahjong"d, chineseFile, IntRect(314,0,2*width,2*height));
-    addOption("Quit"d, quitFile, IntRect(150,0,700,700));
-
-    construct;
-    selection.position = options.riichi;
-    selectOpt;
-  }
-
-  while(window.isOpen())
-  {
-
-    Event event;
-    while (window.pollEvent(event))
-    {
-       if(event.type == event.EventType.KeyPressed)
-       {
-          if(menu.navigate(event.key.code))
-          {
-             switch(menu.selection.position) 
-             {
-               case options.riichi:
-                 gamewindow(window);
-                 break;
-               case options.bamboo:
-                 bamboowindow(window);
-                 break;
-               case options.eightPlayer:
-                 //TODO
-                 break;
-               case options.chinese:
-                 chinesewindow(window);
-                 break;
-               case options.quit:
-                 window.close();
-                 break;
-               default:
-                 assert(false);
-             }
-          }
-       }
-       if(event.type == event.EventType.Closed)
-       {
-           window.close();
-       }
-    }
-    menu.changeMenuBackground;
-
-    window.clear;    
- 
-    // Draw stuff here.
-    window.draw(bg);
-    menu.draw(window);
-    window.draw(MenuTitle);
-    window.display;
-  }
-
-}
-
 void titlescreen(RenderWindow window)
 {
   // Set a solid color as the background.
@@ -170,7 +96,7 @@ void titlescreen(RenderWindow window)
 
   // Construct the text-based title.
   auto title = new Text;
-  setTitle(title,"Kinjin Mahjong"d); 
+  setTitle(title,"Kinjin Mahjong"); 
 
   // Load the title image. For now, we will use Kinjin's logo.
   string logofile = "res/logo.png";
@@ -230,22 +156,6 @@ void textureFromImage(ref Texture texture, Image image, int x, int y, int w, int
    }
    texture.setSmooth(true);
 }
-
-/*void load(ref Texture texture, ref Sprite sprite, ref IntRect rect)
-{
-  sprite.setTexture(texture);
-  sprite.textureRect = rect;
-}
-
-void load(ref Texture texture, ref Sprite sprite, int x0, int y0, int w, int h)
-{
-  auto rect = new IntRect;
-  rect.left = x0;
-  rect.top = y0;
-  rect.width = w;
-  rect.height = h;
-  load(texture, sprite, rect);
-}*/
 
 void load(ref Texture texture, ref Sprite sprite, string texturefile,
          uint x0 = 0, uint y0 = 0, uint size_x = 0, uint size_y = 0)
@@ -343,7 +253,7 @@ void alignBottom(Sprite sprite, FloatRect box)
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
 
-void setTitle(Text title, dstring text)
+void setTitle(Text title, string text)
 {
   /*
     Have a function that takes care of a uniform style for all title fields.
@@ -507,16 +417,6 @@ void addRotateToPlayer(const Tile tile, const int playLoc)
 	tile.setCoords(coords);
 }
 
-/*void setTileInSquare(ref Tile tile, const int amountOfTiles, const float undershootInTiles, const int nthTile, const int playLoc = 0)
-{
-   tile.setRotation(0);
-   auto pos = CENTER;
-   auto movement = calculatePositionInSquare(amountOfTiles, undershootInTiles, nthTile, tile.getGlobalBounds);
-   moveToPlayer(pos, movement, playLoc);
-   tile.setPosition(pos);
-   rotateToPlayer(tile, playLoc);
-}*/
-
 FloatRect calcGlobalBounds(T) (T opts)
 {
     /*
@@ -562,7 +462,10 @@ FloatRect calcGlobalBounds(T) (T opts)
     return bounds;
 }
 
-
+void spaceMenuItems(T : MenuItem)(T[] menuItems)
+{
+	
+}
 
 
 

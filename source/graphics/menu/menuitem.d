@@ -1,6 +1,10 @@
 module mahjong.graphics.menu.menuitem;
 
+import std.experimental.logger;
 import dsfml.graphics;
+import mahjong.graphics.cache.font;
+import mahjong.graphics.enums.geometry;
+import mahjong.graphics.graphics;
 import mahjong.graphics.opts.opts;
 
 class MenuItem
@@ -8,6 +12,7 @@ class MenuItem
 	alias Action = void function();
 	this(string displayName, Action action)
 	{
+		trace("Constructing menu item ", displayName);
 		func = action;
 		setText(displayName);
 	}
@@ -16,24 +21,27 @@ class MenuItem
 	{
 		target.draw(name);
 	}
-		
-	private:
-		Text name;
-		Action func;
-		void setText(string displayName)
-		{
-			auto text = new Text;
-			with(text)
-			{
-				setFont(menuFont);
-				setString(text);
-				setCharacterSize(drawingOpts.menuFontSize);
-				setColor(drawingOpts.menuFontColor);
-				position = Vector2f(200,0);
-			}   
-			center(text, CenterDirection.Horizontal);
-		}
 	
+	FloatRect getGlobalBounds()
+	{
+		return name.getGlobalBounds;
+	}
+		
+	Text name;
+	Action func;
+	private void setText(string displayName)
+	{
+		auto text = new Text;
+		with(text)
+		{
+			setFont(menuFont);
+			setString(displayName);
+			setCharacterSize(drawingOpts.menuFontSize);
+			setColor(drawingOpts.menuFontColor);
+			position = Vector2f(200,0);
+		}   
+		center(text, CenterDirection.Horizontal);
+	}
 }
 
 class MainMenuItem : MenuItem

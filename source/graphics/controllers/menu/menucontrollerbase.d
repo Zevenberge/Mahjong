@@ -7,7 +7,6 @@ abstract class MenuControllerBase(TMenu) : Controller
 {
 	this(RenderWindow window, TMenu menu)
 	{
-		trace("Creating Main Menu controller");
 		super(window);
 		_menu = menu;
 	}

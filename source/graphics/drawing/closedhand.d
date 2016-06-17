@@ -14,11 +14,6 @@ import mahjong.graphics.opts.opts;
 alias drawClosedHand = draw;
 void draw(ClosedHand hand, RenderTarget view)
 {	
-	hand.sortHand; // Defensive sort.
-	
-	//TODO: responsibility of controller
-	hand.drawOpt(view);
-	
 	auto cnt = hand.tiles.length;
 	foreach(i, tile; hand.tiles)
 	{

@@ -2,7 +2,7 @@ module mahjong.graphics.menu.menu;
 
 import dsfml.graphics.color;
 import dsfml.graphics.rect;
-import dsfml.graphics.renderwindow;
+import dsfml.graphics.rendertarget;
 import dsfml.graphics.text;
 import dsfml.system.vector2;
 
@@ -12,8 +12,14 @@ import mahjong.graphics.graphics;
 import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.selections.selectable;
 
-class Menu : Selectable!Text
+class Menu : Selectable!MenuItem
 {
+	this(string title)
+	{
+		_title = new Text;
+		_title.setTitle(title);
+	}
+	
 	void addOption(MenuItem item)
 	{
 		opts ~= item;
@@ -26,38 +32,29 @@ class Menu : Selectable!Text
    }
    body
    {
-     /*
-       Take care of the layout of the menu. For now, let all menus begin at a set height and be centered.
-     */
-     enum MenuTop = 250; // Distance to the top of the screen.
-     enum MenuSpacing = 20; // Distance between two text boxes.
-     FloatRect size = opts[0].getGlobalBounds();
-     uint i = 0;
-     foreach(opt; opts)
-     {
-       float ypos;
-       ypos = MenuTop + (size.height + MenuSpacing)*i;
-       opt.position = Vector2f(0, ypos);
-       center(opt, CenterDirection.Horizontal);
-       ++i;
-     } 
+   		spaceMenuItems(opts);
+     
    }
 
 
-   void draw(ref RenderWindow window)
-   {
-      drawSelection(window);
-      drawOpts(window);
-   }
-  void drawSelection(ref RenderWindow window)
-  {
-     window.draw(selection.visual);
-  }
-  void drawOpts(ref RenderWindow window)
-   {
-     foreach(opt; opts)
-     {
-       window.draw(opt);
-     }
-   }
+	void draw(RenderTarget window)
+	{
+		drawSelection(window);
+		drawOpts(window);
+	}
+	void drawSelection(RenderTarget window)
+	{
+		window.draw(selection.visual);
+	}
+	void drawOpts(RenderTarget window)
+	{
+		foreach(opt; opts)
+		{
+			opt.draw(window);
+		}
+	}
+   
+	private Text _title;
 }
+
+

@@ -2,14 +2,14 @@ module mahjong.graphics.selections.selectablehand;
 
 import std.conv;
 import dsfml.graphics;
-import mahjong.domain.hand;
+import mahjong.domain.closedhand;
 import mahjong.domain.tile;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.selections.selectable;
 
 class SelectableHand : Selectable!Tile
 {
-	this(Hand hand)
+	this(ClosedHand hand)
 	{
 		_hand = hand;
 		_hand.connect(&newTileAdded);
@@ -22,13 +22,13 @@ class SelectableHand : Selectable!Tile
 		{
 			if(tile.id == newTile.id)
 			{
-				changeOpts(i.to!int);
+				changeOpt(i.to!int);
 				break;
 			}
 		}
 	}
 	
-	private Hand _hand;
+	private ClosedHand _hand;
 	
 	void draw(RenderTarget target)
 	{

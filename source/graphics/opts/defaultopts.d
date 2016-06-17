@@ -45,4 +45,21 @@ class DefaultDrawingOpts : Opts
 	{
 		return Color.Black;
 	}
+	int menuTop()
+	{
+		return 250;
+	}
+	int menuSpacing()
+	{
+		return 20;
+	}
 }
+
+
+
+
+
+
+
+
+

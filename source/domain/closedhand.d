@@ -1,9 +1,9 @@
 module mahjong.domain.closedhand;
 
 import std.algorithm.iteration;
+import std.signals;
 import dsfml.graphics;
 import dsfml.system.vector2;
-import mahjong.domain.hand;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.mahjong;
@@ -11,8 +11,18 @@ import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.graphics;
 
-class ClosedHand : Hand
+class ClosedHand
 {
+	Tile[] tiles;
+	
+	void addTile(Tile tile)
+	{
+		tiles ~= tile;
+		emit(tile);
+	}
+	
+	mixin Signal!(Tile);
+	
 	void sortHand()
 	{
 		sort_hand(tiles);
@@ -30,33 +40,13 @@ class ClosedHand : Hand
 
 	void drawTile(ref Wall wall)
 	{
-		tiles ~= wall.drawTile;
-		selectDrawnTile();
+		addTile(wall.drawTile);
+		
 	}
 	
 	Tile getLastTile()
 	{
 		return tiles[$-1];
-	}
-
-	void drawOpt(RenderTarget window)
-	{ // TODO: responsibility of controller.
-		selectOpt();
-		window.draw(selection.visual);
-	}
-
-	void selectDrawnTile()
-	{
-		auto drawnTile = tiles[$-1];
-		sort_hand(tiles);
-		for(int i = 0; i < tiles.length; ++i)
-		{
-			if(is_identical(tiles[i], drawnTile))
-			{
-				changeOpt(i);
-				break;
-			}
-		}
 	}
 
 	void open()

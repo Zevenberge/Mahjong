@@ -17,7 +17,7 @@ abstract class Controller
 		{
 			case Closed:
 				return true;
-			case Key:
+			case KeyReleased:
 				return handleKeyEvent(event.key);
 			default:
 				return false;

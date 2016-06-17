@@ -17,4 +17,6 @@ interface Opts
 	
 	int menuFontSize();
 	Color menuFontColor();
+	int menuTop();
+	int menuSpacing();
 }
