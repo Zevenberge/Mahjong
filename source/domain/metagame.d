@@ -4,6 +4,7 @@ import std.experimental.logger;
 import std.string;
 import std.random;
 import std.conv;
+import std.signals;
 import std.uuid;
 
 import mahjong.domain.enums.game;
@@ -45,7 +46,11 @@ class Metagame
 	{
 		info("Moving to the next round");
 		setPlayers(players[playerLocation.bottom].getWind);
+		emit;
 	}
+	
+	mixin Signal!();
+	
 	private void setPlayers(int initialWind)
 	{
 		_status = Status.SetUp;

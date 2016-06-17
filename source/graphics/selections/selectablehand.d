@@ -1,10 +1,10 @@
 module mahjong.graphics.selections.selectablehand;
 
 import std.conv;
+import std.range;
 import dsfml.graphics;
 import mahjong.domain.closedhand;
 import mahjong.domain.tile;
-import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.selections.selectable;
 
 class SelectableHand : Selectable!Tile
@@ -32,7 +32,7 @@ class SelectableHand : Selectable!Tile
 	
 	void draw(RenderTarget target)
 	{
+		if(opts.empty) return;
 		selection.draw(target);
-		_hand.draw(target);
 	}
 }

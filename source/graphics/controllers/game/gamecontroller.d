@@ -2,10 +2,12 @@ module mahjong.graphics.controllers.game.gamecontroller;
 
 import std.experimental.logger;
 import dsfml.graphics;
+import mahjong.domain.player;
 import mahjong.engine.gamefront;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
+import mahjong.graphics.selections.selectablehand;
 
 abstract class GameController : Controller
 {
@@ -13,6 +15,7 @@ abstract class GameController : Controller
 	{
 		super(window);
 		_gameFronts = gameFronts;
+		_ownGameFront.connect(&createSelectableHand);
 	}
 	
 	override void draw()
@@ -41,4 +44,18 @@ abstract class GameController : Controller
 	{
 		return _gameFronts[0];
 	}
+	
+	private void createSelectableHand(Player player)
+	{
+		_hand = new SelectableHand(player.game.closedHand);
+	}
+	
+	private SelectableHand _hand;
 }
+
+
+
+
+
+
+

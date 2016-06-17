@@ -1,10 +1,13 @@
 module mahjong.engine.gamefront;
 
+import std.algorithm.iteration;
 import std.experimental.logger;
+import std.signals;
 import std.uuid;
 
 import mahjong.domain.enums.game;
 import mahjong.domain.metagame;
+import mahjong.domain.player;
 import mahjong.engine.enums.game;
 import mahjong.engine.opts.bambooopts;
 import mahjong.engine.opts.defaultopts;
@@ -23,6 +26,7 @@ class GameFront
 	{
 		trace("Constructing game front");
 		this.metagame = metagame;
+		metagame.connect(&gameStarted);
 		this.playerId = playerId;
 	}
 	
@@ -83,6 +87,17 @@ class GameFront
 	private bool isAllowed(Phase phase)
 	{
 		return isTurn && metagame.isPhase(phase);
+	}
+	private Player owningPlayer()
+	{
+		return metagame.players.filter!(p => p.id == playerId).front;
+	}
+	
+	mixin Signal!Player;
+	private void gameStarted()
+	{
+		trace("Game started");
+		emit(owningPlayer);
 	}
 }
 
