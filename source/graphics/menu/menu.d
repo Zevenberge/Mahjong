@@ -39,6 +39,12 @@ class Menu : Selectable!MenuItem
    }
 
 
+	void configureGeometry()
+	{
+		opts.spaceMenuItems;
+		changeOpt(0);
+	}
+	
 	void draw(RenderTarget window)
 	{
 		drawSelection(window);
@@ -79,7 +85,7 @@ private void composePauseMenu()
 		addOption(new MenuItem("Quit", &quitGame));
 	}
 	trace("Constructed all options.");
-	_pauseMenu.opts.spaceMenuItems;
+	_pauseMenu.configureGeometry;
 	info("Composed pause menu");
 }
 

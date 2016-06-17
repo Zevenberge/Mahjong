@@ -43,7 +43,14 @@ class MainMenu : Selectable!MainMenuItem
       }
    }
 
-	void drawBg(RenderTarget target)
+	private void drawOpts(RenderTarget target)
+	{
+		foreach(opt; opts)
+		{
+			opt.draw(target);
+		}
+	}
+	private void drawBg(RenderTarget target)
 	{
 		changeMenuBackground;
 		foreach(opt; opts)
@@ -55,6 +62,14 @@ class MainMenu : Selectable!MainMenuItem
 	{
 		drawBg(target);
 		selection.draw(target);
+		drawOpts(target);
+		target.draw(_title);
+	}
+	
+	void configureGeometry()
+	{
+		opts.spaceMenuItems;
+		changeOpt(0);
 	}
 	
 	private Text _title;
@@ -89,7 +104,7 @@ private void composeMainMenu()
 				&quit, quitFile, IntRect(150,0,700,700)));
 	}
 	trace("Constructed all options.");
-	_menu.opts.spaceMenuItems;
+	_menu.configureGeometry;
 	info("Composed main menu;");
 }
 

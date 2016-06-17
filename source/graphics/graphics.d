@@ -28,25 +28,6 @@ import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.opts.defaultopts;
 import mahjong.graphics.opts.opts;
 
-
-void spriteFromImage(ref Texture texture, ref Sprite sprite, Image image, int x, int y, int w, int h)
-{
-   textureFromImage(texture, image, x, y, w, h);
-   texture.setSmooth(true);
-   sprite.setTexture(texture);
-}
-
-void textureFromImage(ref Texture texture, Image image, int x, int y, int w, int h)
-{
-   auto range = IntRect(x,y,w,h);
-   if(!texture.loadFromImage(image, range))
-   {
-     error("Texture not loaded.");
-     load(texture);
-   }
-   texture.setSmooth(true);
-}
-
 void load(ref Texture texture, ref Sprite sprite, string texturefile,
          uint x0 = 0, uint y0 = 0, uint size_x = 0, uint size_y = 0)
 {
@@ -150,7 +131,7 @@ void setTitle(Text title, string text)
 }
 
 
-void pix2scale(ref Sprite sprite, float x, float y = -1)
+void pix2scale(Sprite sprite, float x, float y = -1)
 out
 {
   FloatRect size = sprite.getGlobalBounds();
@@ -327,7 +308,8 @@ void spaceMenuItems(T : MenuItem)(T[] menuItems)
 	auto size = menuItems.front.name.getGlobalBounds;
 	foreach(i, item; menuItems)
 	{
-		auto ypos = drawingOpts.menuTop + (size.height * drawingOpts.menuSpacing) * i;
+		auto ypos = drawingOpts.menuTop + (size.height + drawingOpts.menuSpacing) * i;
+		trace("Y position of ", item.description, " is ", ypos);
 		item.name.position = Vector2f(0, ypos);
 		center(item.name, CenterDirection.Horizontal);
 		++i;

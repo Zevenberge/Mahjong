@@ -15,6 +15,7 @@ class MenuItem
 		trace("Constructing menu item ", displayName);
 		func = action;
 		setText(displayName);
+		description = displayName;
 	}
 
 	void draw(RenderTarget target)
@@ -27,6 +28,7 @@ class MenuItem
 		return name.getGlobalBounds;
 	}
 		
+	string description;
 	Text name;
 	Action func;
 	private void setText(string displayName)
@@ -54,7 +56,9 @@ class MainMenuItem : MenuItem
 		super(displayName, action);
 		auto texture = new Texture;
 		texture.loadFromFile(resourceFile, textureRect);
+		texture.setSmooth(true);
 		background = new Sprite(texture);
+		background.pix2scale(drawingOpts.screenSize.x, drawingOpts.screenSize.y);
 	}
 	
 	void drawBg(RenderTarget target)
