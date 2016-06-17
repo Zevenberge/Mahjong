@@ -41,6 +41,7 @@ class MenuItem
 			position = Vector2f(200,0);
 		}   
 		center(text, CenterDirection.Horizontal);
+		name = text;
 	}
 }
 

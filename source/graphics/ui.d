@@ -20,6 +20,7 @@ void run()
 	auto mainMenu = getMainMenu;
 	trace("Creating initial controller");
 	controller = new MainMenuController(window, mainMenu);
+	trace("Starting application loop");
 	try
 	{
 		windowLoop: while(window.isOpen)

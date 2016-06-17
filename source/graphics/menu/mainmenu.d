@@ -23,6 +23,7 @@ class MainMenu : Selectable!MainMenuItem
 	void addOption(MainMenuItem item)
 	{ 
 		opts ~= item;
+		opacities ~= 0;
 	}
 
    private void changeMenuBackground()
@@ -32,7 +33,7 @@ class MainMenu : Selectable!MainMenuItem
    }
    private void changeOpacity()
    {
-     .changeOpacity(opacities, to!int(opts.length), selection.position);
+     .changeOpacity(opacities, selection.position);
    }
    private void applyColors()
    {
@@ -87,6 +88,7 @@ private void composeMainMenu()
 		addOption(new MainMenuItem("Quit", 
 				&quit, quitFile, IntRect(150,0,700,700)));
 	}
+	trace("Constructed all options.");
 	_menu.opts.spaceMenuItems;
 	info("Composed main menu;");
 }

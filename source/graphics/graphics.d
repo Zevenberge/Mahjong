@@ -2,6 +2,8 @@ module mahjong.graphics.graphics;
 
 import dsfml.graphics;
 import dsfml.window;
+import std.algorithm.comparison;
+import std.conv;
 import std.experimental.logger;
 import std.file;
 import std.math;
@@ -90,11 +92,6 @@ void load(ref Texture texture)
    load(texture, defaultTexture);
 }
 
-/*void center(T) (ref T sprite, string direction, const ref FloatRect box)
-{
-  center!(T)(sprite, direction, box.left, box.height, box.width, box.height);
-}*/
-
 void alignLeft(T) (T sprite, const FloatRect box)
 {
   sprite.position = Vector2f(box.left, box.top);
@@ -129,8 +126,6 @@ void center(T) (T sprite, CenterDirection direction, const float x0 = 0, const f
     sprite.position = Vector2f(size.left,ypos);
   }
 }
-//alias centerSprite = center!(Sprite);
-//alias centerText = center!(Text);
 
 void alignBottom(Sprite sprite, FloatRect box)
 {
@@ -154,17 +149,6 @@ void setTitle(Text title, string text)
   center(title, CenterDirection.Horizontal,0);
 }
 
-/*void setMenuOption(Text opt, dstring text, Font fontIt, float ypos=100)
-{
-  /*
-    Have a function that takes care of a uniform style for all menu fields.
-  /
-  opt.setFont(fontIt);
-  opt.setString(text);
-  opt.setCharacterSize(32);
-  opt.setColor(Color.Black);
-  opt.position = Vector2f(200,ypos);
-}*/
 
 void pix2scale(ref Sprite sprite, float x, float y = -1)
 out
@@ -195,36 +179,22 @@ body
   }
 }
 
-void changeOpacity(ref ubyte[] opacities, const int numOpts, const int position)
+void changeOpacity(ref ubyte[] opacities, const int position)
 {
     /*
       Change the opacity of background images for a more or less fluid transition.
     */
-    for(int opt = 0; opt < numOpts;++opt)
-    {
-      if(opt == position)
-      {
-         if(opacities[opt]+10<256)
-         {
-           opacities[opt] += 10;
-         }
-         else
-         {
-           opacities[opt] = 255;
-         }
-      }
-      else
-      {
-         if(opacities[opt]-10>0)
-         {
-           opacities[opt] -= 10;
-         }
-         else
-         {
-           opacities[opt] = 0;
-         }
-      }
-    }
+	for(int opt = 0; opt < opacities.length;++opt)
+	{
+		if(opt == position)
+		{
+			opacities[opt] = min(opacities[opt]+10, 255).to!ubyte;
+		}
+		else
+		{
+			opacities[opt] = max(opacities[opt]-10, 0).to!ubyte;
+		}
+	}
 }
 
 
@@ -352,6 +322,7 @@ FloatRect calcGlobalBounds(T) (T opts)
 
 void spaceMenuItems(T : MenuItem)(T[] menuItems)
 {
+	trace("Arranging the menu items");
 	if(menuItems.empty) return;
 	auto size = menuItems.front.name.getGlobalBounds;
 	foreach(i, item; menuItems)
@@ -361,6 +332,7 @@ void spaceMenuItems(T : MenuItem)(T[] menuItems)
 		center(item.name, CenterDirection.Horizontal);
 		++i;
 	}
+	trace("Arranged the manu items");
 }
 
 Vector2f toVector2f(Vector2i v)

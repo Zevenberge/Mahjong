@@ -78,6 +78,7 @@ private void composePauseMenu()
 		addOption(new MenuItem("New Game", &newGame));
 		addOption(new MenuItem("Quit", &quitGame));
 	}
+	trace("Constructed all options.");
 	_pauseMenu.opts.spaceMenuItems;
 	info("Composed pause menu");
 }
