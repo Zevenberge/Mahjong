@@ -127,6 +127,7 @@ private void startThunderThrill()
 	info("Opening placeholder screen");
 	controller = new PlaceholderController(controller.getWindow, 
 		"Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650));
+	trace("Swapped controller");
 }
 
 private void startSimpleMahjong()
@@ -136,11 +137,13 @@ private void startSimpleMahjong()
 	info("Opening placeholder screen");
 	controller = new PlaceholderController(controller.getWindow, 
 		"Coming soon.", chineseBg, IntRect(0, 0, 900, 900));
+	trace("Swapped controller");
 }
 
 private void quit()
 {
 	info("Quit selected");
+	controller.getWindow.close;
 }
 
 
