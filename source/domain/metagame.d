@@ -249,6 +249,10 @@ class Metagame
      }
    }
 
+	Phase phase()
+	{
+		return _phase;
+	}
 	bool isPhase(Phase phase)
 	{
 		return _phase == phase;

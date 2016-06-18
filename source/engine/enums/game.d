@@ -6,3 +6,4 @@ enum Origin {wall=-1, east = PlayerWinds.east, south, west, north};
 enum Status {Running, NewGame, AbortiveDraw, ExhaustiveDraw, Mahjong, SetUp};
 enum Action {Claim, Deny, Discard};
 enum Phase {Draw, Discard, End};
+enum Interaction {None, Draw, Discard}

@@ -4,6 +4,7 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.enums.geometry;
+import mahjong.graphics.conv;
 import mahjong.graphics.graphics;
 import mahjong.graphics.opts.opts;
 

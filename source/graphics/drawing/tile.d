@@ -6,6 +6,7 @@ import dsfml.graphics;
 import mahjong.domain.enums.tile;
 import mahjong.domain.tile;
 import mahjong.graphics.cache.texture;
+import mahjong.graphics.conv;
 import mahjong.graphics.coords;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;

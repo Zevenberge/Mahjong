@@ -11,7 +11,7 @@ import mahjong.graphics.selections.selectablehand;
 
 abstract class GameController : Controller
 {
-	this(RenderWindow window, GameFront[] gameFronts)
+	protected this(RenderWindow window, GameFront[] gameFronts)
 	{
 		super(window);
 		_gameFronts = gameFronts;

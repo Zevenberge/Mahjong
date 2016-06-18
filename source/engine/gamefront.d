@@ -41,7 +41,7 @@ class GameFront
 	
 	void draw()
 	{
-		if(!isAllowed(Phase.Draw)) return;
+		if(!isAllowed(Interaction.Draw)) return;
 		trace("Drawing tile");
 		metagame.drawTile;
 	}
@@ -68,13 +68,13 @@ class GameFront
 	
 	void tsumo()
 	{
-		if(!isAllowed(Phase.Discard)) return;
+		if(!isAllowed(Interaction.Discard)) return;
 		trace("Tsumo");
 	}
 	
 	void discard(UUID tile)
 	{
-		if(!isAllowed(Phase.Discard)) return;
+		if(!isAllowed(Interaction.Discard)) return;
 		trace("Discarding tile ", tile);
 		metagame.discardTile(tile);
 	}
@@ -84,11 +84,28 @@ class GameFront
 		return metagame.isTurn(playerId);
 	}
 	
-	private bool isAllowed(Phase phase)
+	Interaction requiredInteraction()
 	{
-		return isTurn && metagame.isPhase(phase);
+		if(!isTurn)
+		{
+			return Interaction.None;
+		}
+		switch(metagame.phase) with(Phase)
+		{
+			case Draw:
+				return Interaction.Draw;
+			case Discard:
+				return Interaction.Discard;
+			default:
+				return Interaction.None;
+		}
 	}
-	private Player owningPlayer()
+	
+	private bool isAllowed(Interaction action)
+	{
+		return action == requiredInteraction;
+	}
+	Player owningPlayer()
 	{
 		return metagame.players.filter!(p => p.id == playerId).front;
 	}

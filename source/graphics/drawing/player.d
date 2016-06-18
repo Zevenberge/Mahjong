@@ -14,6 +14,7 @@ import mahjong.graphics.drawing.openhand;
 import mahjong.graphics.enums.font;
 import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
+import mahjong.graphics.conv;
 import mahjong.graphics.graphics;
 import mahjong.graphics.opts.opts;
 
