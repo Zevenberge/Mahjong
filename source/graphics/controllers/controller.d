@@ -2,13 +2,18 @@ module mahjong.graphics.controllers.controller;
 
 import dsfml.graphics;
 
-abstract class Controller
+class Controller
 {
 	protected RenderWindow _window;
 	
 	protected this(RenderWindow window)
 	{
 		_window = window;
+	}
+	
+	final RenderWindow getWindow()
+	{
+		return _window;
 	}
 	
 	final bool handleEvent(Event event)

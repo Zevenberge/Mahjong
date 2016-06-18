@@ -4,7 +4,6 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
-import mahjong.graphics.menu.mainmenu;
 import mahjong.graphics.opts.defaultopts;
 import mahjong.graphics.opts.opts;
 
@@ -16,10 +15,9 @@ void run()
 	auto window = new RenderWindow(VideoMode(drawingOpts.screenSize.x, 
 							drawingOpts.screenSize.y), drawingOpts.screenHeader);
 	window.setFramerateLimit(60);
-	trace("Creating main menu");
-	auto mainMenu = getMainMenu;
+	
 	trace("Creating initial controller");
-	controller = new MainMenuController(window, mainMenu);
+	controller = getMainMenuController(window);
 	trace("Starting application loop");
 	try
 	{

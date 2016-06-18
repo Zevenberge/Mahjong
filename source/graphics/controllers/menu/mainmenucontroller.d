@@ -18,8 +18,13 @@ class MainMenuController : MenuControllerBase!MainMenu
 	{
 		return true;
 	}
-		
 }
 
+MainMenuController getMainMenuController(RenderWindow window)
+{
+	trace("Creating main menu");
+	auto mainMenu = getMainMenu;
+	return new MainMenuController(window, mainMenu);
+}
 
 

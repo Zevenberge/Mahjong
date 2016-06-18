@@ -4,6 +4,8 @@ import std.conv;
 import std.experimental.logger;
 
 import dsfml.graphics;
+import mahjong.graphics.controllers.controller;
+import mahjong.graphics.controllers.placeholdercontroller;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.enums.resources;;
 import mahjong.graphics.graphics;
@@ -121,11 +123,19 @@ private void startBambooBattle()
 private void startThunderThrill()
 {
 	info("Thunder thrill selected");
+	controller.roundUp();
+	info("Opening placeholder screen");
+	controller = new PlaceholderController(controller.getWindow, 
+		"Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650));
 }
 
 private void startSimpleMahjong()
 {
 	info("Simple mahjong selected");
+	controller.roundUp();
+	info("Opening placeholder screen");
+	controller = new PlaceholderController(controller.getWindow, 
+		"Coming soon.", chineseBg, IntRect(0, 0, 900, 900));
 }
 
 private void quit()
