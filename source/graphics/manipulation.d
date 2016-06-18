@@ -306,7 +306,7 @@ void spaceMenuItems(T : MenuItem)(T[] menuItems)
 	auto size = menuItems.front.name.getGlobalBounds;
 	foreach(i, item; menuItems)
 	{
-		auto ypos = drawingOpts.menuTop + (size.height + drawingOpts.menuSpacing) * i;
+		auto ypos = styleOpts.menuTop + (size.height + styleOpts.menuSpacing) * i;
 		trace("Y position of ", item.description, " is ", ypos);
 		item.name.position = Vector2f(0, ypos);
 		center(item.name, CenterDirection.Horizontal);

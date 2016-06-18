@@ -10,10 +10,10 @@ import mahjong.graphics.opts.opts;
 void run()
 {
 	trace("Setting drawing options");
-	drawingOpts = new DefaultDrawingOpts;
+	styleOpts = new DefaultStyleOpts;
 	trace("Creating window.");
-	auto window = new RenderWindow(VideoMode(drawingOpts.screenSize.x, 
-							drawingOpts.screenSize.y), drawingOpts.screenHeader);
+	auto window = new RenderWindow(VideoMode(styleOpts.screenSize.x, 
+					styleOpts.screenSize.y), styleOpts.screenHeader);
 	window.setFramerateLimit(60);
 	
 	trace("Creating initial controller");

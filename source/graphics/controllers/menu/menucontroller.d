@@ -15,7 +15,7 @@ class MenuController : MenuControllerBase!Menu
 		trace("Creating menu controller");
 		super(window, menu);
 		_innerController = pausedController;
-		_haze = new RectangleShape(drawingOpts.screenSize.toVector2f);
+		_haze = new RectangleShape(styleOpts.screenSize.toVector2f);
 		_haze.fillColor = Color(126,126,126,126);
 	}
 	

@@ -39,8 +39,8 @@ class MenuItem
 		{
 			setFont(menuFont);
 			setString(displayName);
-			setCharacterSize(drawingOpts.menuFontSize);
-			setColor(drawingOpts.menuFontColor);
+			setCharacterSize(styleOpts.menuFontSize);
+			setColor(styleOpts.menuFontColor);
 			position = Vector2f(200,0);
 		}   
 		center(text, CenterDirection.Horizontal);
@@ -59,7 +59,7 @@ class MainMenuItem : MenuItem
 		texture.loadFromFile(resourceFile, textureRect);
 		texture.setSmooth(true);
 		background = new Sprite(texture);
-		background.pix2scale(drawingOpts.screenSize.x, drawingOpts.screenSize.y);
+		background.pix2scale(styleOpts.screenSize.x, styleOpts.screenSize.y);
 	}
 	
 	void drawBg(RenderTarget target)

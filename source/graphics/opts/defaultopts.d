@@ -29,6 +29,11 @@ class DefaultDrawingOpts : Opts
 	{
 		return 10_000;
 	}
+	
+}
+
+class DefaultStyleOpts : StyleOpts
+{
 	Vector2i screenSize()
 	{
 		return Vector2i(900,900);

@@ -12,9 +12,14 @@ interface Opts
 	uint iconSize();
 	int initialScore();
 	int criticalScore();
+}
+
+StyleOpts styleOpts;
+
+interface StyleOpts
+{
 	Vector2i screenSize();
 	string screenHeader();
-	
 	int menuFontSize();
 	Color menuFontColor();
 	int menuTop();

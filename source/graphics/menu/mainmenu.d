@@ -13,6 +13,9 @@ import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.enums.resources;;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.menu.menuitem;
+import mahjong.graphics.opts.bambooopts;
+import mahjong.graphics.opts.defaultopts;
+import mahjong.graphics.opts.opts;
 import mahjong.graphics.selections.selectable;
 
 class MainMenu : Selectable!MainMenuItem
@@ -116,12 +119,14 @@ private void composeMainMenu()
 private void startRiichiMahjong()
 {
 	info("Riichi mahjong selected");
+	drawingOpts = new DefaultDrawingOpts;
 	startGame(GameMode.Riichi);
 }
 
 private void startBambooBattle()
 {
 	info("Bamboo battle selected");
+	drawingOpts = new BambooDrawingOpts;
 	startGame(GameMode.Bamboo);
 }
 

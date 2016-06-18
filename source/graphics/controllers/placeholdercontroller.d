@@ -45,7 +45,7 @@ class PlaceholderController : Controller
 		auto texture = new Texture;
 		texture.loadFromFile(filename, area);
 		_background = new Sprite(texture);
-		auto size = drawingOpts.screenSize;
+		auto size = styleOpts.screenSize;
 		_background.pix2scale(size.x, size.y);
 		
 	}
