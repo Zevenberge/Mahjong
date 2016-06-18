@@ -12,7 +12,7 @@ import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.game;;
 import mahjong.graphics.enums.geometry;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 
 alias drawWall = draw;
 void draw(Wall wall, RenderTarget view)

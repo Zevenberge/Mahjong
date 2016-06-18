@@ -13,7 +13,7 @@ class SinglePlayerController : GameController
 {
 	this(RenderWindow window, GameFront[] gameFronts)
 	{
-		trace("Constructing single player controller.");
+		trace("Constructing single player controller. Got ", gameFronts.length, " players");
 		super(window, gameFronts);
 		initialiseAI;
 	}

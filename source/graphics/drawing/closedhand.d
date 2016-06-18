@@ -8,7 +8,6 @@ import mahjong.domain.tile;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
-import mahjong.graphics.graphics;
 import mahjong.graphics.opts.opts;
 
 alias drawClosedHand = draw;

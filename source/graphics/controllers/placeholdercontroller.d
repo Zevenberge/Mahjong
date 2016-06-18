@@ -5,7 +5,7 @@ import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
 import mahjong.graphics.conv;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 import mahjong.graphics.opts.opts;
 
 class PlaceholderController : Controller

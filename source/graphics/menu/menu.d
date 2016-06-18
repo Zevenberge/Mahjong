@@ -10,7 +10,7 @@ import dsfml.system.vector2;
 
 import mahjong.graphics.cache.font;
 import mahjong.graphics.enums.geometry;;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.selections.selectable;
 

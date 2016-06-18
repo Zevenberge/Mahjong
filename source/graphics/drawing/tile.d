@@ -10,7 +10,7 @@ import mahjong.graphics.conv;
 import mahjong.graphics.coords;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 
 alias drawTile = draw;
 void draw(const Tile tile, RenderTarget view)
@@ -102,8 +102,6 @@ private class TileVisuals
 
 private TileVisuals getTileVisuals(const Tile tile)
 {
-	trace("Getting tile visuals for tile");
-	//auto visual = tile.id in _tiles;
 	if(tile.id !in _tiles)
 	{
 		trace("Generating new tiles visual for \n", tile.id);
@@ -112,7 +110,6 @@ private TileVisuals getTileVisuals(const Tile tile)
 		_tiles[tile.id] = tileVisuals;
 		return tileVisuals;
 	}
-	trace("Returning old tile visual for \n", tile.id);
 	return _tiles[tile.id];
 }
 

@@ -8,7 +8,7 @@ import mahjong.domain.tile;
 import mahjong.engine.mahjong;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 
 class OpenHand
 {

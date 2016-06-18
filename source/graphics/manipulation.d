@@ -1,4 +1,4 @@
-module mahjong.graphics.graphics;
+module mahjong.graphics.manipulation;
 
 import dsfml.graphics;
 import dsfml.window;
@@ -6,6 +6,7 @@ import std.algorithm.comparison;
 import std.conv;
 import std.experimental.logger;
 import std.file;
+import std.format;
 import std.math;
 import std.range;
 
@@ -20,6 +21,7 @@ import mahjong.engine.opts.defaultopts;
 import mahjong.engine.opts.opts;
 import mahjong.engine.yaku;
 import mahjong.graphics.cache.font;
+import mahjong.graphics.conv;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
@@ -270,6 +272,31 @@ FloatRect calcGlobalBounds(T) (T opts)
        }
     }
     return bounds;
+}
+
+void setRotationAroundCenter(Sprite sprite, float rotation)
+body
+{
+	auto center = sprite.getCenter;
+	sprite.rotation = rotation;
+	auto delta = center - sprite.getCenter;
+	sprite.move(delta);
+}
+
+Vector2f getCenter(Sprite sprite)
+{
+	auto bounds = sprite.getGlobalBounds;
+	return Vector2f(
+		bounds.left + bounds.width/2.,
+		bounds.top + bounds.height/2.
+	);
+}
+
+Vector2f getSize(Sprite sprite)
+{
+	auto local = sprite.getLocalBounds;
+	auto scale = sprite.scale;
+	return Vector2f(local.width * scale.x, local.height * scale.y);
 }
 
 void spaceMenuItems(T : MenuItem)(T[] menuItems)

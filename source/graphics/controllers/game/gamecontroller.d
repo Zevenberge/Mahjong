@@ -7,6 +7,8 @@ import mahjong.engine.gamefront;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
+import mahjong.graphics.drawing.player;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.selections.selectablehand;
 
 abstract class GameController : Controller
@@ -36,7 +38,12 @@ abstract class GameController : Controller
 			default:
 		}
 		return false;
-		
+	}
+	
+	override void roundUp()
+	{
+		clearPlayerCache;
+		clearTileCache;
 	}
 	
 	protected GameFront[] _gameFronts;

@@ -1,6 +1,7 @@
 module mahjong.graphics.conv;
 
 import std.conv;
+import std.math;
 import dsfml.graphics;
 
 
@@ -33,8 +34,19 @@ body
   }
 }
 
+Vector2i toVector2i(Vector2f v)
+{
+	return Vector2i(v.x.to!int, v.y.to!int);
+}
+
 Vector2f toVector2f(Vector2i v)
 {
 	return Vector2f(v.x, v.y);
+}
+
+float toRadians(float rotation)
+{
+	enum factor = PI/180.;
+	return rotation * factor;
 }
 

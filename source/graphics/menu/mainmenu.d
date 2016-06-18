@@ -4,11 +4,14 @@ import std.conv;
 import std.experimental.logger;
 
 import dsfml.graphics;
+import mahjong.domain.enums.game;
+import mahjong.engine.gamefront;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.placeholdercontroller;
+import mahjong.graphics.controllers.game.singleplayercontroller;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.enums.resources;;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.selections.selectable;
 
@@ -113,11 +116,21 @@ private void composeMainMenu()
 private void startRiichiMahjong()
 {
 	info("Riichi mahjong selected");
+	startGame(GameMode.Riichi);
 }
 
 private void startBambooBattle()
 {
 	info("Bamboo battle selected");
+	startGame(GameMode.Bamboo);
+}
+
+private void startGame(GameMode gameMode)
+{
+	auto console = ConsoleFront.boot;
+	auto gameFronts = console.setUp(gameMode);
+	controller = new SinglePlayerController(controller.getWindow, gameFronts);
+	trace("Swapped controller");
 }
 
 private void startThunderThrill()

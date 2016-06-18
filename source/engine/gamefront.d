@@ -142,13 +142,13 @@ class ConsoleFront
 	}
 	
 	/++
-		
+		Sets up the game given the game mode. Afterwards, the returned GameFronts should
+		not be bothered by the what game mode they are in.	
 	+/
 	GameFront[] setUp(GameMode gameMode)
 	{
 		info("Booting game with game mode ", gameMode);
-		setGameOptions(gameMode);
-		auto metagame = new Metagame;
+		auto metagame = setGameOptions(gameMode);
 		info("Initialising game");
 		metagame.initialise;
 		info("Initialised game");
@@ -161,21 +161,20 @@ class ConsoleFront
 		return gameFronts;
 	}
 	
-	private void setGameOptions(GameMode gameMode)
+	private Metagame setGameOptions(GameMode gameMode)
 	{
 		trace("Setting game options");
 		final switch(gameMode) with (GameMode)
 		{
 			case Riichi:
 				gameOpts = new DefaultGameOpts;
-				break;
+				return new Metagame;
 			case Bamboo:
 				gameOpts = new BambooOpts;
-				break;
+				return new BambooMetagame;
 			case EightPlayer:
 				gameOpts = new EightPlayerOpts;
-				break;
+				return new EightPlayerMetagame;
 		}
-		trace("Set game opts");
 	}
 }

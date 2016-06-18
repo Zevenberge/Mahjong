@@ -5,7 +5,7 @@ import std.experimental.logger;
 import etc.linux.memoryerror;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.enums.resources;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 import mahjong.graphics.ui;
 
 

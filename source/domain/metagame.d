@@ -32,6 +32,7 @@ class Metagame
 	{
 		info("Initialising metagame");
 		constructPlayers;
+		trace("Constructed players");
 		setPlayers(uniform(0, gameOpts.amountOfPlayers));
 		info("Initialised metagame");
 	}
@@ -50,6 +51,7 @@ class Metagame
 		info("Setting up the game");
 		setPlayersGame(initialWind);
 		trace("Setting up the wall.");
+		wall = getWall;
 		wall.setUp;
 		info("Preparations are finished.");
 	}
@@ -72,10 +74,14 @@ class Metagame
 
    void reset()
    { 
-     wall = new Wall();
      int initialWind = uniform(0, gameOpts.amountOfPlayers); 
      setPlayers(initialWind);
    }
+   
+	protected Wall getWall()
+	{
+		return new Wall;
+	}
 
    private void constructPlayers()
    { // FIXME: Encapsulate this in the player class.
@@ -343,3 +349,22 @@ class Metagame
      return canClaimTile;
    } 
 }
+
+class BambooMetagame : Metagame
+{
+	override Wall getWall()
+	{
+		return new BambooWall;
+	}
+}
+
+class EightPlayerMetagame : Metagame
+{
+	override Wall getWall()
+	{
+		return new EightPlayerWall;
+	}
+}
+
+
+

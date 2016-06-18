@@ -15,25 +15,35 @@ import mahjong.graphics.enums.font;
 import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.conv;
-import mahjong.graphics.graphics;
+import mahjong.graphics.manipulation;
 import mahjong.graphics.opts.opts;
 
 alias drawPlayer = draw;
-void draw(Player player, RenderTarget view)
+void draw(Player player, RenderTarget view, float rotation)
 {
 	PlayerVisuals visual;
-	if(player.id !in players)
+	if(player.id !in _players)
 	{
-		visual.initialise(defaultTexture, player.score, player.getWind.to!Kanji.to!string);
+		trace("Adding new player.");
+		visual.initialise(defaultTexture, player.score, 
+			player.getWind.to!Kanji.to!string, rotation);
+		_players[player.id] = visual;
 	}
 	else
 	{
-		visual = players[player.id];
+		visual = _players[player.id];
 	}
+	visual.draw(view);
 	player.game.drawIngame(view);
 }
 
-private PlayerVisuals[UUID] players;
+void clearPlayerCache()
+{
+	_players.clear;
+	trace("Cleared player cache");
+}
+
+private PlayerVisuals[UUID] _players;
 
 private struct PlayerVisuals
 {
@@ -104,24 +114,25 @@ private struct PlayerVisuals
 			info("Initialised wind");
 		}
 		
-		void initialiseSprite()
+		void initialiseSprite(float rotation)
 		{
 			info("Initialising player sprite");
+			redrawTexture;
 			_sprite = new Sprite(_renderTexture.getTexture);
 			_sprite.pix2scale(width);
-			placeSprite;
+			placeSprite(rotation);
 			info("Initialized player sprite");
 		}
 		
-		void placeSprite()
+		void placeSprite(float rotation)
 		{
 			trace("Placing sprite");
 			_sprite.pix2scale(drawingOpts.iconSize);
-			// TODO: Rotate for the various players.
 			_sprite.position = Vector2f(
 				width - (drawingOpts.iconSize + drawingOpts.iconSpacing),
 				height - drawingOpts.iconSize
 			);
+			_sprite.setRotationAroundCenter(-rotation);
 			trace("Placed the sprite");
 		}
 	}
@@ -132,7 +143,7 @@ private struct PlayerVisuals
 			view.draw(_sprite);
 		}
 		
-		void initialise(string iconFile, int score, string wind)
+		void initialise(string iconFile, int score, string wind, float rotation)
 		{
 			info("Initialising player visuals");
 			initialiseNewTexture;
@@ -140,7 +151,7 @@ private struct PlayerVisuals
 			initialiseScoreLabel;
 			initialiseScore(score);
 			initialiseWind(wind);
-			initialiseSprite;
+			initialiseSprite(rotation);
 			info("Initialised player visuals");
 		}
 		
