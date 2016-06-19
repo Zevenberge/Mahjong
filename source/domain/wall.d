@@ -18,10 +18,10 @@ class Wall
 	Tile[] tiles;
    private int amountOfKans = 0;
 
-   this()
-   {
-   		trace("Constructing the wall");
-   }
+	this()
+	{
+		trace("Constructing the wall");
+	}
 
 
    @property public size_t length()
@@ -113,12 +113,13 @@ class Wall
 /*
    In-game functions.
 */
-   public Tile drawTile()
-   { // Not to be confused with the graphical draw functions.
-      Tile drawnTile = tiles[0];
-      tiles = tiles[1 .. $];
-      return drawnTile;
-   }
+	Tile drawTile()
+	{ 
+		Tile drawnTile = tiles[0];
+		tiles = tiles[1 .. $];
+		return drawnTile;
+	}
+
    public Tile drawKanTile()
    { // Not to be confused with the graphical draw functions nor the normal draw. In addition, this function also flips the dora indictor.
       flipDoraIndicator;

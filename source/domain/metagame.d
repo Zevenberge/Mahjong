@@ -125,7 +125,6 @@ class Metagame
 
    private int _turn = 0; // Whose turn it is.
    private int _status = Status.SetUp;
-   private bool _pause = false; //FIXME: make the metagame independent of the pause function
 
    private Phase _phase = Phase.Draw;
 
@@ -148,8 +147,6 @@ class Metagame
 	void drawTile()
 	{ 
 		currentPlayer.drawTile(wall);
-		if(_turn == playerLocation.bottom)
-		{currentPlayer.showHand;}
 		_phase = Phase.Discard;
 	}
 	
