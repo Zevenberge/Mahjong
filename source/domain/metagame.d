@@ -63,7 +63,7 @@ class Metagame
 	{
 		wall.dice;
 		distributeTiles;
-		//firstTurn;
+		setFirstTurn;
 		_status = Status.Running;
 
 	}
@@ -123,26 +123,27 @@ class Metagame
      The game itself.
    */
 
-   private int _turn = 0; // Whose turn it is.
-   private int _status = Status.SetUp;
+	private int _turn = 0; 
+	private Status _status = Status.SetUp;
+	const Status status() @property
+	{
+		return _status;
+	}
 
-   private Phase _phase = Phase.Draw;
+	private Phase _phase = Phase.Draw;
 
-
-   private void firstTurn() // Start at East.
-   {
-     int i;
-     foreach(player; players)
-     {
-       if(player.game.wind == Winds.east)
-       {
-         _turn = i;
-         _phase = Phase.Draw;
-         break;
-       }
-       ++i;
-     }
-   }
+	private void setFirstTurn() 
+	{
+		foreach(i, player; players)
+		{
+			if(player.game.wind == Winds.east)
+			{
+				_turn = i.to!int;
+				_phase = Phase.Draw;
+				break;
+			}
+		}
+	}
 
 	void drawTile()
 	{ 
@@ -164,51 +165,39 @@ class Metagame
 		_status = Status.Mahjong;
 	}
 
-   int[] discardTile(T) (T discard)
-   {
-     currentPlayer.discard(discard);
-     return isPonnable(currentPlayer.getLastDiscard);
-   }
+	void discardTile(UUID discard)
+	{
+		currentPlayer.discard(discard);
+		nextTurn;
+	}
+	
+	private void nextTurn()
+	{
+		if(isExhaustiveDraw)
+		{
+			info("Exhaustive draw reached.");
+			exhaustiveDraw;
+		}
+		else
+		{
+			trace("Advancing turn.");
+			_phase = Phase.Draw;
+			_turn = (_turn + 1) % gameOpts.amountOfPlayers;
+		}
+	}
 
-   private void endPhase()
-   {  //FIXME: should not be called when there is a claimable tile.
-     if(_phase == Phase.End)
-     {
-       if(advanceTurn)
-       {
-         _phase = Phase.Draw;
-       }
-     }
-   }
+	private bool isExhaustiveDraw()
+	{
+		return wall.length <= deadWallLength;
+	}
 
-   bool advanceTurn()
-   {
-     if(wall.length > deadWallLength)
-     {
-       nextTurn();
-       return true;
-     }
-     else
-     {
-       exhaustiveDraw;
-       return false;
-     }
-   }
-
-   void nextTurn()
-   {
-     ++_turn;
-     _turn = _turn % gameOpts.amountOfPlayers;
-   }
-
-
-
-   private void exhaustiveDraw()
-   {
-     _status = Status.ExhaustiveDraw;
-     checkNagashiMangan;
-     checkTenpai;
-   }
+	private void exhaustiveDraw()
+	{
+		_status = Status.ExhaustiveDraw;
+		checkNagashiMangan;
+		checkTenpai;
+	}
+   
    private void checkNagashiMangan()
    {
      foreach(player; players)

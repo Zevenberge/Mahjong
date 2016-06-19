@@ -1,5 +1,6 @@
 module mahjong.engine.ai;
 
+import std.experimental.logger;
 import std.random;
 import std.uuid;
 
@@ -14,9 +15,11 @@ class AI
 		final switch(_front.requiredInteraction) with (Interaction)
 		{
 			case Draw:
+				trace("AI: Drawing tile from the wall");
 				draw;
 				break;
 			case Discard:
+				trace("AI: Discarding tile");
 				discard;
 				break;
 			case None:

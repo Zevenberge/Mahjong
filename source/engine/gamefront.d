@@ -85,9 +85,14 @@ class GameFront
 		return metagame.isTurn(playerId);
 	}
 	
+	bool isRunning()
+	{
+		return metagame.status == Status.Running;
+	}
+	
 	Interaction requiredInteraction()
 	{
-		if(!isTurn)
+		if(!isTurn || !isRunning)
 		{
 			return Interaction.None;
 		}
