@@ -37,6 +37,9 @@ abstract class GameController : Controller
 			case Left:
 				selectPrevious;
 				break;
+			case Down:
+				drawTile;
+				break;
 			case Right:
 				selectNext;
 				break;
@@ -102,6 +105,12 @@ abstract class GameController : Controller
 		trace("Selecting next tile");
 		_hand.selectNext;
 		
+	}
+	
+	private void drawTile()
+	{
+		trace("Drawing tile from wall");
+		_ownGameFront.draw;
 	}
 	
 	private void discard()
