@@ -19,7 +19,7 @@ abstract class GameController : Controller
 	{
 		super(window);
 		_gameFronts = gameFronts;
-		_ownGameFront.connect(&createSelectableHand);
+		connectSelectableHand;
 	}
 	
 	override void draw()
@@ -71,6 +71,17 @@ abstract class GameController : Controller
 		auto pauseController = new MenuController(_window, this, pauseMenu);
 	}
 	
+	private void connectSelectableHand()
+	{
+		trace("Connecting selectable hand to hand creation");
+		_ownGameFront.connect(&createSelectableHand);
+		auto player = _ownGameFront.owningPlayer;
+		if(player !is null && player.game !is null && player.game.closedHand !is null)
+		{
+			_hand = new SelectableHand(player.game.closedHand);
+		}
+	}
+	
 	private void createSelectableHand(Player player)
 	{
 		trace("Creating selectable hand.");
@@ -80,12 +91,14 @@ abstract class GameController : Controller
 	private void selectPrevious()
 	{
 		if(_hand is null) return;
+		trace("Selecting previous tile");
 		_hand.selectPrevious;
 	}
 	
 	private void selectNext()
 	{
 		if(_hand is null) return;
+		trace("Selecting next tile");
 		_hand.selectNext;
 		
 	}
