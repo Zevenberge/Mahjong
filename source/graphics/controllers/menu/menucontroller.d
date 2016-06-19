@@ -31,6 +31,11 @@ class MenuController : MenuControllerBase!Menu
 		return false;
 	}
 	
+	void closeMenu()
+	{
+		controller = _innerController;
+	}
+	
 	private:
 		Controller _innerController;
 		Menu _menu;

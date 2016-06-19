@@ -25,9 +25,13 @@ class Metagame
    */
 
 	Player currentPlayer() { return players[_turn]; }
-	Player[] players; //The droids playing
+	Player[] players; 
 	Wall wall;
 
+	bool hasStarted()
+	{
+		return _status != Status.NewGame;
+	}
 	void initialise()
 	{
 		info("Initialising metagame");
@@ -47,7 +51,7 @@ class Metagame
 	
 	private void setPlayers(int initialWind)
 	{
-		_status = Status.SetUp;
+		_status = Status.NewGame;
 		info("Setting up the game");
 		setPlayersGame(initialWind);
 		trace("Setting up the wall.");
@@ -59,8 +63,8 @@ class Metagame
 	{
 		wall.dice;
 		distributeTiles;
-		firstTurn;
-		_status = Status.NewGame;
+		//firstTurn;
+		_status = Status.Running;
 
 	}
    private void setPlayersGame(int initialWind)
@@ -120,10 +124,11 @@ class Metagame
    */
 
    private int _turn = 0; // Whose turn it is.
-   private int _status = Status.NewGame;
+   private int _status = Status.SetUp;
    private bool _pause = false; //FIXME: make the metagame independent of the pause function
 
    private Phase _phase = Phase.Draw;
+
 
    private void firstTurn() // Start at East.
    {
@@ -137,26 +142,6 @@ class Metagame
          break;
        }
        ++i;
-     }
-   }
-
-   void gameLoop()
-   {
-     startGame;
-     if(_status == Status.Running)
-     {
-       endPhase;
-     }
-   }
-
-   private void startGame()
-   {
-     if(_status == Status.NewGame)
-     {
-       // TODO: add shiny effects to display that the game is starting.
-       info("Starting new game...");
-       info("Good luck!");
-       _status = Status.Running;
      }
    }
 

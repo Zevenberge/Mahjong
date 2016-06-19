@@ -24,6 +24,7 @@ class SinglePlayerController : GameController
 		{
 			ai.interact;
 		}
+		_ownGameFront.start;
 	}
 	
 	private void initialiseAI()

@@ -11,6 +11,7 @@ import dsfml.system.vector2;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.manipulation;
+import mahjong.graphics.menu.creation.pausemenu;
 import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.selections.selectable;
 
@@ -26,18 +27,6 @@ class Menu : Selectable!MenuItem
 	{
 		opts ~= item;
 	}
-
-   void construct()
-   in
-   {
-     assert(opts.length > 0);
-   }
-   body
-   {
-   		spaceMenuItems(opts);
-     
-   }
-
 
 	void configureGeometry()
 	{
@@ -67,44 +56,8 @@ class Menu : Selectable!MenuItem
 
 Menu getPauseMenu()
 {
-	if(_pauseMenu is null)
-	{
-		composePauseMenu;
-	}
-	return _pauseMenu;
+	return composePauseMenu;
 }
-private Menu _pauseMenu;
-private void composePauseMenu()
-{
-	info("Composing pause menu");
-	_pauseMenu = new Menu("");
-	with(_pauseMenu)
-	{
-		addOption(new MenuItem("Continue", &continueGame));
-		addOption(new MenuItem("New Game", &newGame));
-		addOption(new MenuItem("Quit", &quitGame));
-	}
-	trace("Constructed all options.");
-	_pauseMenu.configureGeometry;
-	info("Composed pause menu");
-}
-
-private void continueGame()
-{
-	trace("Continuing game");
-}
-
-private void newGame()
-{
-	trace("Starting new game");
-}
-
-private void quitGame()
-{
-	trace("Quitting game");
-}
-
-
 
 
 

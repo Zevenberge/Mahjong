@@ -35,6 +35,7 @@ class GameFront
 	
 	void start()
 	{
+		if(metagame.hasStarted) return;
 		trace("Starting metagame");
 		metagame.beginGame;
 	}
