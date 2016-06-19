@@ -26,6 +26,7 @@ abstract class GameController : Controller
 	{
 		_window.clear;
 		drawGameBg(_window);
+		if(_hand !is null) _hand.draw(_window);
 		_ownGameFront.metagame.draw(_window);
 	}
 	
