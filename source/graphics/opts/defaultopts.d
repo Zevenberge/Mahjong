@@ -7,7 +7,7 @@ class DefaultDrawingOpts : Opts
 {
 	float rotationPerPlayer()
 	{
-		return 90;
+		return -90;
 	}
 	float tileWidth()
 	{
