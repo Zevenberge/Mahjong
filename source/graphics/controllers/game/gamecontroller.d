@@ -73,6 +73,7 @@ abstract class GameController : Controller
 	{
 		auto pauseMenu = getPauseMenu;
 		auto pauseController = new MenuController(_window, this, pauseMenu);
+		controller = pauseController;
 	}
 	
 	private void connectSelectableHand()

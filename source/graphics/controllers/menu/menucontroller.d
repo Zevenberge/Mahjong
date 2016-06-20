@@ -38,6 +38,5 @@ class MenuController : MenuControllerBase!Menu
 	
 	private:
 		Controller _innerController;
-		Menu _menu;
 		RectangleShape _haze;
 }

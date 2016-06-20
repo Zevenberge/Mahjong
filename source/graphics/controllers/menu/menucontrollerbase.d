@@ -41,7 +41,7 @@ abstract class MenuControllerBase(TMenu) : Controller
 	
 	override void yield() {}
 	
-	private TMenu _menu;
+	protected TMenu _menu;
 	
 	protected void optionSelected()
 	{
