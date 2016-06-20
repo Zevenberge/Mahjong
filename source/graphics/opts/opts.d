@@ -1,6 +1,8 @@
 module mahjong.graphics.opts.opts;
 
 import dsfml.graphics;
+import mahjong.domain.wall;
+import mahjong.graphics.enums.geometry;
 
 Opts drawingOpts;
 
@@ -8,12 +10,17 @@ interface Opts
 {
 	float rotationPerPlayer();
 	float tileWidth();
+	final Vector2f tileSize()
+	{
+		return Vector2f(tileWidth, tileWidth * TileSize.y / TileSize.x);
+	}
 	float iconSpacing();
 	uint iconSize();
 	int initialScore();
 	int criticalScore();
 	int amountOfDiscardLines();
 	int amountOfDiscardsPerLine();
+	void initialiseWall(Wall wall);
 }
 
 StyleOpts styleOpts;

@@ -183,6 +183,7 @@ void moveToPlayer(ref Vector2f location, const Vector2f movement, const int play
 }
 void moveToPlayer(ref float[2] location, const float[2] movement, const int playLoc)
 {
+trace("Movement is [", movement[0], ",", movement[1],"]" );
    float theta = 2 * PI - PI/2 * playLoc;
 
    location[0] += cos(theta) * movement[0] - sin(theta) * movement[1];

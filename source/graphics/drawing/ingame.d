@@ -2,6 +2,7 @@ module mahjong.graphics.drawing.ingame;
 
 import std.algorithm.iteration;
 import std.conv;
+import std.experimental.logger;
 import std.range;
 import dsfml.graphics;
 import mahjong.domain.ingame;

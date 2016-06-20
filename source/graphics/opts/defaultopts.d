@@ -1,6 +1,8 @@
 module mahjong.graphics.opts.defaultopts;
 
 import dsfml.graphics;
+import mahjong.domain.wall;
+import mahjong.graphics.drawing.wall;
 import mahjong.graphics.opts.opts;
 
 class DefaultDrawingOpts : Opts
@@ -37,6 +39,12 @@ class DefaultDrawingOpts : Opts
 	int amountOfDiscardsPerLine()
 	{
 		return 6;
+	}
+	void initialiseWall(Wall wall)
+	in{}
+	body
+	{
+		initialiseTiles(wall);
 	}
 }
 

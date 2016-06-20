@@ -4,6 +4,7 @@ import std.algorithm.mutation;
 import std.conv;
 import std.experimental.logger;
 import std.random;
+import std.uuid;
 
 import mahjong.domain.enums.game;
 import mahjong.domain.enums.tile;
@@ -15,12 +16,14 @@ import mahjong.engine.opts.opts;
 
 class Wall
 {
+	UUID id;
 	Tile[] tiles;
    private int amountOfKans = 0;
 
 	this()
 	{
 		trace("Constructing the wall");
+		id = randomUUID;
 	}
 
 

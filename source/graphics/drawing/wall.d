@@ -3,6 +3,7 @@ module mahjong.graphics.drawing.wall;
 import std.algorithm.iteration;
 import std.experimental.logger;
 import std.range;
+import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
@@ -13,13 +14,26 @@ import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.game;;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.manipulation;
+import mahjong.graphics.opts.opts;
 
 alias drawWall = draw;
 void draw(Wall wall, RenderTarget view)
 {
+	initialiseWall(wall);
 	wall.tiles.filter!(t => !t.isOpen).each!(t => t.drawTile(view));
 	wall.tiles.filter!(t => t.isOpen).each!(t => t.drawTile(view));
 }
+
+private void initialiseWall(Wall wall)
+{
+	if(_initialisedWall != wall.id)
+	{
+		_initialisedWall = wall.id;
+		drawingOpts.initialiseWall(wall);
+	}
+}
+
+private UUID _initialisedWall;
 
 void initialiseTiles(Wall wall)
 {
@@ -27,26 +41,21 @@ void initialiseTiles(Wall wall)
 
 	int widthOfWall = cast(int)wall.tiles.length / (2*gameOpts.amountOfPlayers);
 	trace("Width of the wall is ", widthOfWall);
-	auto size = TileSize;
+	auto size = drawingOpts.tileSize;
 	float undershoot = TileSize.y/TileSize.x;
 
 	trace("Setting up wall tiles.");
 	for(int i = 0; i < (wall.tiles.length/2); ++i)
 	{
-		trace("Placing tile pair  ",i);
 		auto position = CENTER;
 		auto movement = calculatePositionInSquare(widthOfWall, undershoot, 
 			Vector2i(i % widthOfWall,0), FloatRect(0, 0, size.x, size.y));
 		int wallSide = getWallSide(i, widthOfWall);
-		trace("The tile is on the ", cast(playerLocation)wallSide, " side");
 		moveToPlayer(position, movement, wallSide );
-		trace("Moved the tile to its side");
 		placeBottomTile(wall.tiles[$-1 - (2*i+1)],position);
 		placeTopTile(wall.tiles[$-1 - (2*i)],position);
-		trace("Placed the bottom and top tile");
 		wall.tiles[$-1 - 2*i].rotateToPlayer(wallSide);
 		wall.tiles[$-1 - (2*i+1)].rotateToPlayer(wallSide);
-		trace("Rotated the tiles. Finished placing the tile");
 	}
 	info("Built the wall");
 }
@@ -58,9 +67,11 @@ void initialiseTiles(BambooWall wall)
 	auto position = getOutermostBambooPosition;
 	for(int i = 0; i < (wall.tiles.length/2); ++i)
 	{
+		trace(position);
 		placeBottomTile(wall.tiles[$-1 - 2*i],position);
 		placeTopTile(wall.tiles[$-2 - 2*i],position);
-		position.x -= TileSize.x; 
+		position.x -= drawingOpts.tileWidth; 
+		
 	}
 	info("Placed all tiles in the wall.");
 }
@@ -79,7 +90,7 @@ private void placeTopTile(const Tile tile, const Vector2f position)
 private void modifyTilePosition(const Tile tile, const Vector2f position, const Operator sign)
 {
 	Vector2f pos = position;
-	switch(sign) with(Operator)
+	final switch(sign) with(Operator)
 	{
 		case Plus:
 			pos.y += wallMargin;
@@ -87,8 +98,6 @@ private void modifyTilePosition(const Tile tile, const Vector2f position, const 
 		case Minus:
 			pos.y -= wallMargin;
 			break;
-		default:
-			assert(false);
 	}
 	tile.setCoords(FloatCoords(pos.x, pos.y, 0));
 }
