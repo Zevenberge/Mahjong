@@ -10,8 +10,6 @@ enum selectionMargin = 5;
 enum openMargin {edge = 15, avatar = 5};
 
 // discard constants
-enum discardsPerLine = 6;
-enum discardLines = 3;
 enum discardUndershoot = 1.3;
 
 //enum stick {width = 399, height = 72};

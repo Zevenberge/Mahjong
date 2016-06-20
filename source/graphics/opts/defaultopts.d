@@ -30,6 +30,14 @@ class DefaultDrawingOpts : Opts
 		return 10_000;
 	}
 	
+	int amountOfDiscardLines()
+	{
+		return 3;
+	}
+	int amountOfDiscardsPerLine()
+	{
+		return 6;
+	}
 }
 
 class DefaultStyleOpts : StyleOpts

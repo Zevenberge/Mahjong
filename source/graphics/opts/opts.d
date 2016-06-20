@@ -12,6 +12,8 @@ interface Opts
 	uint iconSize();
 	int initialScore();
 	int criticalScore();
+	int amountOfDiscardLines();
+	int amountOfDiscardsPerLine();
 }
 
 StyleOpts styleOpts;
