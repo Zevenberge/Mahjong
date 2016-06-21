@@ -16,7 +16,6 @@ Menu composePauseMenu()
 	with(_pauseMenu)
 	{
 		addOption(new MenuItem("Continue", &continueGame));
-		//addOption(new MenuItem("New Game", &newGame));
 		addOption(new MenuItem("Quit", &quitGame));
 	}
 	trace("Constructed all options.");
@@ -35,12 +34,7 @@ private void continueGame()
 	}
 	trace("Closed menu");
 }
-/+
-private void newGame()
-{
-	trace("Starting new game");
-}
-+/
+
 private void quitGame()
 {
 	trace("Quitting game");
