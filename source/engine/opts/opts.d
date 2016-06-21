@@ -7,6 +7,8 @@ Opts gameOpts;
 interface Opts
 {
 	int deadWallLength();
+	int kanBuffer();
+	int maxAmountOfKans();
 	int amountOfPlayers();
 	int initialScore();
 	GameMode gameMode();

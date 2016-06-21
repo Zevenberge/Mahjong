@@ -148,7 +148,7 @@ class Wall
 
 	public bool canStillKan()
 	{
-		return tiles.length > deadWallLength + kanBuffer && amountOfKans < 4;
+		return tiles.length > gameOpts.deadWallLength + gameOpts.kanBuffer && amountOfKans < gameOpts.maxAmountOfKans;
 	}
 }
 

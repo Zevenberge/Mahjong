@@ -13,6 +13,14 @@ class DefaultGameOpts : Opts
 	{
 		return 14;
 	}
+	int kanBuffer()
+	{
+		return 0;
+	}
+	int maxAmountOfKans()
+	{
+		return 4;
+	}
 	GameMode gameMode()
 	{
 		return GameMode.Riichi;
