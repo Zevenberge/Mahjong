@@ -21,17 +21,11 @@ void set_up_wall(ref Tile[] wall, int dups = 4)
    {
      initialise_wall(wall);
    }
- //  give_IDs(wall);
    define_doras(wall);
- //  shuffle_wall(wall);
 }
 
 void initialise_wall(ref Tile[] wall) //Optionally change the amount of duplicates in the wall.
 {
-   /*
-     This subroutine will initialise the wall with the standard set of mahjong tiles. It does not take into account doras.
-   */
-   
    dchar[] tiles = define_tiles(); // First load all mahjong tiles.
    label_tiles(wall, tiles);
 }
@@ -226,7 +220,7 @@ out {assert(hand.length > 0);}
 body{ /*
     See if the current hand is a legit mahjong hand.
       */
-  sort_hand(hand);
+  sortHand(hand);
   bool is_mahjong=false;
   // Run a dedicated scan for the weird hands, like Thirteen Orphans and Seven pairs, but only if the hand has exactly 14 tiles.
   if(hand.length == 14) 
@@ -543,7 +537,7 @@ unittest // Check whether the example hands are seen as mahjong hands.
 	}
 }
 
-void sort_hand(ref Tile[] hand)
+void sortHand(ref Tile[] hand)
 {  /*
     Sort the tiles in the hand. Arrange them by their type and their value.
    */

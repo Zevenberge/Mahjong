@@ -21,6 +21,16 @@ void draw(ClosedHand hand, RenderTarget view)
 	}
 }
 
+void placeHand(ClosedHand hand)
+{
+	auto cnt = hand.tiles.length;
+	foreach(i, tile; hand.tiles)
+	{
+		tile.setCoords(FloatCoords(calculatePosition(cnt, i.to!int)));
+	}
+	
+}
+
 private Vector2f calculatePosition(const size_t amountOfTiles, const int number)
 {
 	Vector2f position = Vector2f(width/2., height/2.);

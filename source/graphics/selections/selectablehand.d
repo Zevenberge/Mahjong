@@ -6,6 +6,8 @@ import std.range;
 import dsfml.graphics;
 import mahjong.domain.closedhand;
 import mahjong.domain.tile;
+import mahjong.engine.mahjong;
+import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.selections.selectable;
 
 class SelectableHand : Selectable!Tile
@@ -19,6 +21,8 @@ class SelectableHand : Selectable!Tile
 	private void newTileAdded(Tile newTile)
 	{
 		trace("Adding new tile to selectable hand.");
+		_hand.tiles.sortHand;
+		_hand.placeHand;
 		opts = _hand.tiles;
 		foreach(i, tile; opts)
 		{

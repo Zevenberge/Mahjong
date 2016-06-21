@@ -5,6 +5,7 @@ import std.signals;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.mahjong;
+import mahjong.share.range;
 
 class ClosedHand
 {
@@ -15,12 +16,17 @@ class ClosedHand
 		tiles ~= tile;
 		emit(tile);
 	}
+
+	void removeTile(Tile tile)
+	{
+		tiles.remove!((a,b)=> a.id == b.id)(tile);
+	}
 	
 	mixin Signal!(Tile);
 	
 	void sortHand()
 	{
-		sort_hand(tiles);
+		.sortHand(tiles);
 	}
 
 	void closeHand()
