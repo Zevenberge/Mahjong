@@ -188,7 +188,7 @@ class Metagame
 
 	private bool isExhaustiveDraw()
 	{
-		return wall.length <= deadWallLength;
+		return wall.length <= gameOpts.deadWallLength;
 	}
 
 	private void exhaustiveDraw()
