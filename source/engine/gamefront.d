@@ -71,6 +71,7 @@ class GameFront
 	{
 		if(!isAllowed(Interaction.Discard)) return;
 		trace("Tsumo");
+		metagame.tsumo;
 	}
 	
 	void discard(UUID tile)

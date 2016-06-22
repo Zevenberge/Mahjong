@@ -157,12 +157,13 @@ class Metagame
 		if(hasMahjong)
 		{
 			info("Player ", cast(Kanji)currentPlayer.getWind, " won");
+			_status = Status.Mahjong;
 		}
 		else
 		{
 			info("Player ", cast(Kanji)currentPlayer.getWind, " chombo'd");
+			_status = Status.AbortiveDraw;
 		}
-		_status = Status.Mahjong;
 	}
 
 	void discardTile(UUID discard)
