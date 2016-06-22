@@ -1,42 +1,44 @@
 module mahjong.domain.ingame;
 
+import std.algorithm.iteration;
+import std.array;
 import std.experimental.logger;
-import dsfml.graphics.renderwindow;
+import std.uuid;
 import mahjong.domain.closedhand;
 import mahjong.domain.enums.tile;
 import mahjong.domain.openhand;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
+import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
-import mahjong.graphics.enums.kanji;
 
 class Ingame
 { 
-  // Ingame variables.
-  int location = -1; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.location >= 0).
-  ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
-  OpenHand openHand; // The open pons/chis/kans 
-  Tile[]  discards; // All of the personal discards.
-  private Tile last_tile;  // The last tile, to determine whether or not this is a tsumo or a ron.
-  bool isNagashiMangan = true;
-  bool isRiichi = false;
-  bool isDoubleRiichi = false;
-  bool isFirstTurn = true;
-  bool isTenpai = false;
-  int pons=0; // Amount of open pons.
-  int chis=0; // Amount of open chis.
+	// Ingame variables.
+	int wind = -1; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
+	OpenHand openHand; // The open pons/chis/kans 
+	Tile[]  discards; // All of the personal discards.
+	private Tile last_tile;  // The last tile, to determine whether or not this is a tsumo or a ron.
+	bool isNagashiMangan = true;
+	bool isRiichi = false;
+	bool isDoubleRiichi = false;
+	bool isFirstTurn = true;
+	bool isTenpai = false;
+	int pons=0; // Amount of open pons.
+	int chis=0; // Amount of open chis.
 
-  this(int wind)
-  {
-    this.location = wind;
-    this.closedHand = new ClosedHand;
-    this.openHand = new OpenHand;
-  }
+	this(int wind)
+	{
+		this.wind = wind;
+		closedHand = new ClosedHand;
+		openHand = new OpenHand;
+	}
 
-  public int getWind()
-  {
-    return location;
-  }
+	int getWind()
+	{
+		return wind;
+	}
 
 
 /*
@@ -126,40 +128,53 @@ class Ingame
 /*
    Discard things you no longer need.
 */
+	void discard(UUID discardId)
+	{
+		size_t index;
+		foreach(i, t; closedHand.tiles)
+		{
+			if(t.id == discardId)
+			{
+				index = i;
+				break;
+			}
+		}
+		discard(index);
+	}
 
-  void discard(ulong discardedNr)
-  {    
-    take_out_tile(closedHand.tiles, discards, discardedNr);
-    discards[$-1].origin = location; // Sets the tile to be from the player who discarded it.
-    discards[$-1].open;
-    if( (!isHonour(discards[$-1])) && (!isTerminal(discards[$-1])) )
-    {
-      if(isNagashiMangan)
-      {
-        info(cast(Kanji)location, " has lost Nagashi Mangan!");
-      }
-      isNagashiMangan = false;
-    }
-  }
-  void discard(Tile discardedTile)
-  {
-     ulong i = 0;
-     bool found = false;
-     foreach(tile; closedHand.tiles)
-     {
-        if(is_identical(tile,discardedTile))
-        {
-           found = true;
-           discard(i);
-           break;
-        }
-        ++i;
-     }
-     if(!found)
-     {
-        throw new Exception("Identical tiles not found!");
-     }
-  }
+	void discard(ulong discardedNr)
+	{    
+		take_out_tile(closedHand.tiles, discards, discardedNr);
+		discards[$-1].origin = wind; // Sets the tile to be from the player who discarded it.
+		discards[$-1].open;
+		if( (!isHonour(discards[$-1])) && (!isTerminal(discards[$-1])) )
+		{
+			if(isNagashiMangan)
+			{
+				info(cast(PlayerWinds)wind, " has lost Nagashi Mangan!");
+			}
+			isNagashiMangan = false;
+		}
+	}
+	void discard(Tile discardedTile)
+	{
+		ulong i = 0;
+		bool found = false;
+		foreach(tile; closedHand.tiles)
+		{
+			if(is_identical(tile,discardedTile))
+			{
+				found = true;
+				discard(i);
+				break;
+			}
+			++i;
+		}
+		if(!found)
+		{
+			throw new Exception("Identical tiles not found!");
+		}
+	}
   public ref Tile getLastDiscard()
   {
      return discards[$-1];
@@ -169,34 +184,20 @@ class Ingame
      return last_tile;
   }
 
-  public void closeHand()
-  {
-    closedHand.closeHand;
-  }
-  public void showHand()
-  {
-    closedHand.showHand;
-  }
-  public void drawTile(ref Wall wall)
-  {
-    closedHand.drawTile(wall);
-    last_tile = closedHand.getLastTile;
-  }
-/*
-   Graphical drawing.
-*/
-  public void draw(ref RenderWindow window, const int playLoc)
-  {
-     closedHand.draw(window, playLoc);
-     openHand.draw(window);
-     drawDiscards(window);
-  }
-  private void drawDiscards(ref RenderWindow window)
-  {
-     foreach(tile; discards)
-     {
-        tile.draw(window);
-     }
-  }
+	void closeHand()
+	{
+		closedHand.closeHand;
+	}
+	
+	void showHand()
+	{
+		closedHand.showHand;
+	}
+	
+	void drawTile(ref Wall wall)
+	{
+		closedHand.drawTile(wall);
+		last_tile = closedHand.getLastTile;
+	}
 
 }

@@ -15,71 +15,17 @@ import mahjong.domain.tile;
 import mahjong.engine.enums.game;
 import mahjong.engine.yaku; 
 
-import dsfml.graphics;
-
-/*void getWallSprites(ref Tile[] wall, ref Texture tilesTexture)
-{
-  foreach(tile; wall)
-  {
-    tile.getSprite(tilesTexture);
-  }
-}
-
-void setUpWall(ref Tile[] wall, ref Texture tilesTexture, const int gameMode)
-{
-   initialiseWall(wall, gameMode);
-   give_IDs(wall);
-   getWallSprites(wall, tilesTexture);
-   shuffle_wall(wall);
-}
-
-void initialiseWall(ref Tile[] wall, const int gameMode)
-{
-  switch(gameMode)
-  {
-     case GameMode.Bamboo:
-       initialiseBambooWall(wall);
-       break;
-     default:
-       initialiseNormalWall(wall);
-       break;
-  } 
-}
-
-void initialiseBambooWall(ref Tile[] wall)
-{
-   for(int j = bamboos.min; j <= bamboos.max; ++j)
-   {
-      for(int i = 0; i < 4; ++i)
-      {
-        wall ~= new Tile(types.bamboo, j);
-      }
-   }
-}
-
-void initialiseNormalWall(ref Tile[] wall)
-{ // FIXME: Remove the dependence on the 'legacy' functions and rebuild them nicely.
-  // TODO: Use enumloop hax to get the whole wall.
-   set_up_wall(wall);
-}*/
-
 void set_up_wall(ref Tile[] wall, int dups = 4)
 {
    for(int i = 0; i < dups; ++i)
    {
      initialise_wall(wall);
    }
- //  give_IDs(wall);
    define_doras(wall);
- //  shuffle_wall(wall);
 }
 
 void initialise_wall(ref Tile[] wall) //Optionally change the amount of duplicates in the wall.
 {
-   /*
-     This subroutine will initialise the wall with the standard set of mahjong tiles. It does not take into account doras.
-   */
-   
    dchar[] tiles = define_tiles(); // First load all mahjong tiles.
    label_tiles(wall, tiles);
 }
@@ -97,16 +43,6 @@ void label_tiles(ref Tile[] tiles, dchar[] faces)
      tiles ~= tile;
    }
    
-}
-
-void give_IDs(ref Tile[] wall)
-{
-  size_t ID = 0;
-  foreach(tile; wall)
-  {
-    tile.ID = ID;
-    ++ID;
-  }
 }
 
 void define_doras(ref Tile[] wall)
@@ -249,7 +185,7 @@ unittest{
 
 bool is_identical(const ref Tile tileA, const ref Tile tileB)
 {
-  if((tileA.ID == tileB.ID) && is_equal(tileA,tileB))
+  if((tileA.id == tileB.id) && is_equal(tileA,tileB))
   {
     return true;
   }
@@ -284,7 +220,7 @@ out {assert(hand.length > 0);}
 body{ /*
     See if the current hand is a legit mahjong hand.
       */
-  sort_hand(hand);
+  sortHand(hand);
   bool is_mahjong=false;
   // Run a dedicated scan for the weird hands, like Thirteen Orphans and Seven pairs, but only if the hand has exactly 14 tiles.
   if(hand.length == 14) 
@@ -601,7 +537,7 @@ unittest // Check whether the example hands are seen as mahjong hands.
 	}
 }
 
-void sort_hand(ref Tile[] hand)
+void sortHand(ref Tile[] hand)
 {  /*
     Sort the tiles in the hand. Arrange them by their type and their value.
    */
