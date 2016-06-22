@@ -60,7 +60,7 @@ class MainMenuItem : MenuItem
 		texture.loadFromFile(resourceFile, textureRect);
 		texture.setSmooth(true);
 		background = new Sprite(texture);
-		background.pix2scale(styleOpts.gameScreenSize.x, styleOpts.gameScreenSize.y);
+		background.pix2scale(styleOpts.screenSize.x, styleOpts.screenSize.y);
 	}
 	
 	void drawBg(RenderTarget target)

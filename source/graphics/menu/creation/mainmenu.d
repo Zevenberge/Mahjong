@@ -79,7 +79,7 @@ private void startSimpleMahjong()
 	controller.roundUp();
 	info("Opening placeholder screen");
 	controller = new PlaceholderController(controller.getWindow, 
-		"Coming soon.", chineseBg, IntRect(0, 0, 900, 900));
+		"Coming soon.", chineseBg, IntRect(0, 0, 900, 1000));
 	trace("Swapped controller");
 }
 
