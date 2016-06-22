@@ -33,9 +33,10 @@ void placeHand(ClosedHand hand)
 
 private Vector2f calculatePosition(const size_t amountOfTiles, const int number)
 {
-	Vector2f position = Vector2f(width/2., height/2.);
+	auto screen = styleOpts.gameScreenSize;
+	auto position = styleOpts.center;
 	// Center the hand between two avatars
-	float centering = (width - drawingOpts.iconSpacing - amountOfTiles * tile.displayWidth) / 2.;
+	float centering = (screen.x - drawingOpts.iconSpacing - amountOfTiles * tile.displayWidth) / 2.;
 	Vector2f movement = Vector2f(
 		centering + number * tile.displayWidth - position.x,
 		position.y - drawingOpts.iconSize

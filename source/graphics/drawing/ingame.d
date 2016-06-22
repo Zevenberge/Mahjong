@@ -38,7 +38,7 @@ private void placeDiscards(Ingame ingame)
 						drawingOpts.amountOfDiscardsPerLine, 
 						discardUndershoot,
 						tileIndex, tileSize);
-		auto position = CENTER;
+		auto position = styleOpts.center;
 		tile.setCoords(FloatCoords(position+movement, 0));
 	}
 }

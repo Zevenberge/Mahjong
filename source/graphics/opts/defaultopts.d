@@ -52,6 +52,11 @@ class DefaultStyleOpts : StyleOpts
 {
 	Vector2i screenSize()
 	{
+		return Vector2i(900,1000);
+	}
+	
+	Vector2i gameScreenSize()
+	{
 		return Vector2i(900,900);
 	}
 	string screenHeader()

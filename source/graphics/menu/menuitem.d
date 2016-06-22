@@ -43,7 +43,8 @@ class MenuItem
 			setColor(styleOpts.menuFontColor);
 			position = Vector2f(200,0);
 		}   
-		center(text, CenterDirection.Horizontal);
+		center(text, CenterDirection.Horizontal, 
+			FloatRect(0,0, styleOpts.screenSize.x, styleOpts.screenSize.y));
 		name = text;
 	}
 }
@@ -59,7 +60,7 @@ class MainMenuItem : MenuItem
 		texture.loadFromFile(resourceFile, textureRect);
 		texture.setSmooth(true);
 		background = new Sprite(texture);
-		background.pix2scale(styleOpts.screenSize.x, styleOpts.screenSize.y);
+		background.pix2scale(styleOpts.gameScreenSize.x, styleOpts.gameScreenSize.y);
 	}
 	
 	void drawBg(RenderTarget target)

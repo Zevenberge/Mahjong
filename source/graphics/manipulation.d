@@ -88,10 +88,11 @@ void alignTopLeft(T) (T sprite, const FloatRect box)
 
 void center(T) (T sprite, CenterDirection direction, const FloatRect rect)
 {
-	center!T(sprite, direction, rect.left, rect.top, rect.width, rect.height);
-}
-void center(T) (T sprite, CenterDirection direction, const float x0 = 0, const float h0 = 0, const float w = width, const float h = height)
-{
+	auto x0 = rect.left;
+	auto h0 = rect.top;
+	auto w = rect.width;
+	auto h = rect.height;
+	
   FloatRect size = sprite.getGlobalBounds();
   if(direction != CenterDirection.Vertical)
   {
@@ -115,7 +116,8 @@ void alignBottom(Sprite sprite, FloatRect box)
   auto size = sprite.getGlobalBounds();
   sprite.position = Vector2f(box.left, (box.top + box.height - size.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
-  center(sprite, CenterDirection.Horizontal, box.left, box.top, box.width, box.height);
+  center(sprite, CenterDirection.Horizontal, 
+  	FloatRect(box.left, box.top, box.width, box.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
 
@@ -124,12 +126,16 @@ void setTitle(Text title, string text)
   /*
     Have a function that takes care of a uniform style for all title fields.
   */
-  title.setFont(titleFont);
-  title.setString(text);
-  title.setCharacterSize(48);
-  title.setColor(Color.Black);
-  title.position = Vector2f(200,20);
-  center(title, CenterDirection.Horizontal,0);
+  with(title)
+  {
+  	setFont(titleFont);
+  	setString(text);
+  	setCharacterSize(48);
+  	setColor(Color.Black);
+  	position = Vector2f(200,20);
+  }
+  auto size = styleOpts.gameScreenSize;
+  center(title, CenterDirection.Horizontal, FloatRect(0, 0, size.x, size.y));
 }
 
 
@@ -305,12 +311,14 @@ void spaceMenuItems(T : MenuItem)(T[] menuItems)
 	trace("Arranging the menu items");
 	if(menuItems.empty) return;
 	auto size = menuItems.front.name.getGlobalBounds;
+	auto screenSize = styleOpts.screenSize;
 	foreach(i, item; menuItems)
 	{
 		auto ypos = styleOpts.menuTop + (size.height + styleOpts.menuSpacing) * i;
 		trace("Y position of ", item.description, " is ", ypos);
 		item.name.position = Vector2f(0, ypos);
-		center(item.name, CenterDirection.Horizontal);
+		center(item.name, CenterDirection.Horizontal, 
+			FloatRect(0, 0, screenSize.x, screenSize.y));
 		++i;
 	}
 	trace("Arranged the manu items");

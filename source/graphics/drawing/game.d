@@ -42,8 +42,9 @@ private RenderTexture getPlayerTexture()
 {
 	if(_playerTexture is null)
 	{
+		auto screen = styleOpts.gameScreenSize;
 		_playerTexture = new RenderTexture();
-		_playerTexture.create(width, height);
+		_playerTexture.create(screen.x, screen.y);
 		_playerSprite = new Sprite(_playerTexture.getTexture);
 	}
 	return _playerTexture;

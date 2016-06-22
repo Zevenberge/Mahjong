@@ -4,7 +4,6 @@ import std.conv;
 import std.math;
 import dsfml.graphics;
 
-
 void pix2scale(Sprite sprite, float x, float y = -1)
 out
 {

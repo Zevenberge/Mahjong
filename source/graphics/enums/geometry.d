@@ -3,9 +3,6 @@ module mahjong.graphics.enums.geometry;
 import dsfml.graphics.rect;
 import dsfml.system.vector2;
 
-enum width = 900; //Width of application window
-enum height = 900; //Height of application window
-Vector2f CENTER = Vector2f(width/2, height/2);
 enum selectionMargin = 5;
 enum openMargin {edge = 15, avatar = 5};
 
