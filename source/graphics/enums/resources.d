@@ -15,5 +15,6 @@ enum fontRegfile = "fonts/LiberationSans-Regular.ttf";
 enum fontBoldfile = "fonts/LiberationSans-Bold.ttf";
 enum fontItfile = "fonts/LiberationSans-Italic.ttf";
 enum fontKanjifile = "fonts/WrittenKanji.ttf";
+enum fontTypedKanji = "fonts/Harenosora.otf";
 alias menuFontfile = fontItfile;
 alias titleFontfile = fontBoldfile;
