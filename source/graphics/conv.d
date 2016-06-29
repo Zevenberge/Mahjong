@@ -3,6 +3,7 @@ module mahjong.graphics.conv;
 import std.conv;
 import std.math;
 import dsfml.graphics;
+import mahjong.graphics.enums.kanji;
 
 void pix2scale(Sprite sprite, float x, float y = -1)
 out
@@ -49,3 +50,15 @@ float toRadians(float rotation)
 	return rotation * factor;
 }
 
+string toKanji(uint number)
+{
+	char[] builder;
+	do
+	{
+		auto digit = number - floor(number/10.)*10;
+		builder = digit.to!Numbers.to!string  ~ builder;
+		number /= 10;
+	}
+	while(number > 0);
+	return builder.to!string;
+}

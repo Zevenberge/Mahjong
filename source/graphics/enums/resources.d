@@ -8,6 +8,7 @@ enum bambooFile = "res/bamboo.png";
 enum eightPlayerFile = "res/eightplayer.png";
 enum eightPlayerChaos = "res/chaos.png";
 enum quitFile = "res/quit.png";
+enum infoBgFile = "res/info.png";
 enum tableFile = "res/wood.png";
 enum sticksFile = "res/riichisticks.png";
 enum tilesFile = "res/tilesscan.png";

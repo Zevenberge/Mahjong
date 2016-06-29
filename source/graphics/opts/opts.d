@@ -35,6 +35,10 @@ interface StyleOpts
 		return gameScreenSize.toVector2f/2;
 	}
 	string screenHeader();
+	int gameInfoFontSize();
+	Color gameInfoFontColor();
+	int memoFontSize();
+	Color memoFontColor();
 	int menuFontSize();
 	Color menuFontColor();
 	int menuTop();

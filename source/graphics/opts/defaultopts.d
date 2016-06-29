@@ -63,6 +63,22 @@ class DefaultStyleOpts : StyleOpts
 	{
 		return "Mahjong";
 	}
+	int gameInfoFontSize()
+	{
+		return 48;
+	}
+	Color gameInfoFontColor()
+	{
+		return Color(0, 0, 0, 200);
+	}
+	int memoFontSize()
+	{
+		return 20;
+	}
+	Color memoFontColor()
+	{
+		return Color.Black;
+	}
 	int menuFontSize()
 	{
 		return 32;

@@ -27,6 +27,8 @@ class Metagame
 	Player currentPlayer() { return players[_turn]; }
 	Player[] players; 
 	Wall wall;
+	PlayerWinds leadingWind;
+	uint round;
 
 	bool hasStarted()
 	{
@@ -52,6 +54,8 @@ class Metagame
 	private void setPlayers(int initialWind)
 	{
 		_status = Status.NewGame;
+		leadingWind = PlayerWinds.east;
+		round = 1;
 		info("Setting up the game");
 		setPlayersGame(initialWind);
 		trace("Setting up the wall.");
