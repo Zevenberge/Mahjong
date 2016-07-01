@@ -93,22 +93,17 @@ void center(T) (T sprite, CenterDirection direction, const FloatRect rect)
 	auto w = rect.width;
 	auto h = rect.height;
 	
-  FloatRect size = sprite.getGlobalBounds();
-  if(direction != CenterDirection.Vertical)
-  {
-    float xpos = x0 + (w - size.width)/2.;
-    sprite.position = Vector2f(xpos,size.top);
-  }
-
-  if(direction != CenterDirection.Horizontal)
-  {
-    float ypos = h0 + (h - size.height)/2.;
-    if(direction == CenterDirection.Both)
-    {
-      size = sprite.getGlobalBounds(); // Correct for the change that is already made.
-    }
-    sprite.position = Vector2f(size.left,ypos);
-  }
+	auto size = sprite.getGlobalBounds();
+	auto pos = Vector2f(size.left, size.top);
+	if(direction != CenterDirection.Vertical)
+	{
+		pos.x = x0 + (w - size.width)/2.;
+	}
+	if(direction != CenterDirection.Horizontal)
+	{
+		pos.y = h0 + (h - size.height)/2.;
+	}
+	sprite.position = pos;
 }
 
 void alignBottom(Sprite sprite, FloatRect box)
