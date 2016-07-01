@@ -86,15 +86,15 @@ void alignTopLeft(T) (T sprite, const FloatRect box)
   sprite.position = Vector2f(box.left, box.top);
 }
 
-void center(T) (T sprite, CenterDirection direction, const FloatRect rect)
+void center(T)(T sprite, CenterDirection direction, const FloatRect rect)
 {
 	auto x0 = rect.left;
 	auto h0 = rect.top;
 	auto w = rect.width;
 	auto h = rect.height;
 	
-	auto size = sprite.getGlobalBounds();
-	auto pos = Vector2f(size.left, size.top);
+	auto size = sprite.getGlobalBounds;
+	auto pos = sprite.position;
 	if(direction != CenterDirection.Vertical)
 	{
 		pos.x = x0 + (w - size.width)/2.;

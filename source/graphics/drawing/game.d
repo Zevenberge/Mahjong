@@ -14,6 +14,7 @@ import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts.opts;
+import mahjong.graphics.rendersprite;
 
 alias drawGame = draw;
 void draw(Metagame game, RenderTarget target)
@@ -44,7 +45,11 @@ private void drawWal(Metagame game, RenderTarget target)
 
 private void drawGameInfo(Metagame game, RenderTarget target)
 {
-	
+	auto bounds = FloatRect(0, 900, 100, 900);
+	auto renderSprite = new RenderSprite(bounds);
+	auto gameInfo = getGameInfo;
+	gameInfo.draw(renderSprite, game);
+	target.draw(renderSprite);
 }
 
 private Sprite _playerSprite;
@@ -62,65 +67,65 @@ private RenderTexture getPlayerTexture()
 }
 
 private GameInfo _gameInfo;
-private GameInfo getGameInfo(Metagame game)
+private GameInfo getGameInfo()
 {
 	if(_gameInfo is null)
 	{
-		_gameInfo = new GameInfo(game);
+		_gameInfo = new GameInfo;
 	}
 	return _gameInfo;
 }
 
 private class GameInfo
 {
-	this(Metagame game)
+	this()
 	{
-		_game = game;
 		initialise;
 	}
 	
-	void draw(RenderTarget target)
+	void draw(RenderTarget target, Metagame game)
 	{
-		update;
+		update(game);
+		target.draw(_roundInfo);
+		target.draw(_turnInfo);
+		target.draw(_turnPlayerInfo);
 	}
 	
 	private:
-		Metagame _game;
 		Text _roundInfo;
 		Text _turnInfo;
 		Text _turnPlayerInfo;
 		
 		void initialise()
 		{
+			trace("Initialising GameInfo");
 			_roundInfo = new Text;
-			with(_roundInfo)
-			{
-				setFont(infoFont);
-				setCharacterSize(styleOpts.gameInfoFontSize);
-				setColor(styleOpts.gameInfoFontColor);
-			}
+			initText(_roundInfo, Vector2f(30, 10), infoFont);
 			_turnInfo = new Text;
-			with(_turnInfo)
-			{
-				setFont(infoFont);
-				setCharacterSize(styleOpts.gameInfoFontSize);
-				setColor(styleOpts.gameInfoFontColor);
-			}
+			initText(_turnInfo, Vector2f(600,10), fontReg);
 			_turnPlayerInfo = new Text;
-			with(_turnPlayerInfo)
+			initText(_turnPlayerInfo, Vector2f(600,50), fontReg);
+		}
+		
+		void initText(Text text, Vector2f pos, Font font)
+		{
+			with(text)
 			{
-				setFont(infoFont);
+				setFont(font);
 				setCharacterSize(styleOpts.gameInfoFontSize);
 				setColor(styleOpts.gameInfoFontColor);
+				position = pos;
 			}
 			
 		}
 		
-		void update()
+		void update(Metagame game)
 		{
-			_roundInfo.setString(_game.leadingWind.to!int.to!Kanji.to!string 
-				~ _game.round.toKanji);
-			
+			_roundInfo.setString(game.leadingWind.to!int.to!Kanji.to!string 
+				~ game.round.toKanji);
+			_roundInfo.center(CenterDirection.Vertical, FloatRect(0,0,900,100));
+			_turnPlayerInfo.setString(game.currentPlayer.name.to!string);
+			_turnInfo.setString(game.phase.to!string);
 		}
 }
 

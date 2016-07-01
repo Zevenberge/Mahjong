@@ -1,6 +1,7 @@
 module mahjong.graphics.rendersprite;
 
 import std.conv;
+import std.experimental.logger;
 import dsfml.system.vector2;
 import dsfml.graphics.color;
 import dsfml.graphics.drawable;
@@ -17,6 +18,8 @@ import mahjong.graphics.conv;
 import mahjong.graphics.coords;
 import mahjong.graphics.utils;
 
+import dsfml.graphics.text;
+
 class RenderSprite : Drawable, Transformable, RenderTarget
 {
 	private TransformingDrawable[] _drawables;
@@ -27,6 +30,8 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 	this(FloatRect initRect)
 	{
 		_size = initRect;
+		_transform.x = initRect.left;
+		_transform.y = initRect.top;
 	}
 	
 	void draw(RenderTarget target, RenderStates states)
@@ -35,6 +40,7 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 		{
 			drawable.transformCoords(_transform);
 			target.draw(drawable, states);
+			drawable.untransformCoord;
 		}
 	}
 	Vector2f position(Vector2f newPosition) @property
@@ -152,14 +158,12 @@ private struct TransformingDrawable
 		if(tf !is null)
 		{
 			origCoords = FloatCoords(tf.position, tf.rotation);
-			scale = tf.scale;
 		}
 	}
 	
 	Drawable obj;
 	RenderStates states;
-	FloatCoords origCoords;
-	Vector2f scale;
+	const(FloatCoords) origCoords;
 	
 	void transformCoords(FloatCoords transform)
 	{
@@ -167,6 +171,14 @@ private struct TransformingDrawable
 		if(tf is null) return;
 		tf.position = origCoords.position + transform.position;
 		tf.rotation = origCoords.rotation + transform.rotation;
+	}
+	
+	void untransformCoord()
+	{
+		auto tf = cast(Transformable)obj;
+		if(tf is null) return;
+		tf.position = origCoords.position;
+		tf.rotation = origCoords.rotation;
 	}
 	
 	alias obj this;
