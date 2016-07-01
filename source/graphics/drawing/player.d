@@ -99,7 +99,7 @@ private struct PlayerVisuals
 				trace("Setting the normal color");
 				_score.setColor(pointsColor);
 			}
-			_score.center(CenterDirection.Both, _scoreLabel.getGlobalBounds);
+			_score.center!(CenterDirection.Both)(_scoreLabel.getGlobalBounds);
 			trace("Updated the score");
 		}
 

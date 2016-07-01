@@ -123,7 +123,7 @@ private class GameInfo
 		{
 			_roundInfo.setString(game.leadingWind.to!int.to!Kanji.to!string 
 				~ game.round.toKanji);
-			_roundInfo.center(CenterDirection.Vertical, FloatRect(0,0,900,100));
+			_roundInfo.center!(CenterDirection.Vertical)(FloatRect(0,0,900,100));
 			_turnPlayerInfo.setString(game.currentPlayer.name.to!string);
 			_turnInfo.setString(game.phase.to!string);
 		}

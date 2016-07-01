@@ -86,7 +86,7 @@ void alignTopLeft(T) (T sprite, const FloatRect box)
   sprite.position = Vector2f(box.left, box.top);
 }
 
-void center(T)(T sprite, CenterDirection direction, const FloatRect rect)
+void center(CenterDirection direction, T)(T sprite, const FloatRect rect)
 {
 	auto x0 = rect.left;
 	auto h0 = rect.top;
@@ -95,11 +95,11 @@ void center(T)(T sprite, CenterDirection direction, const FloatRect rect)
 	
 	auto size = sprite.getGlobalBounds;
 	auto pos = sprite.position;
-	if(direction != CenterDirection.Vertical)
+	static if(direction != CenterDirection.Vertical)
 	{
 		pos.x = x0 + (w - size.width)/2.;
 	}
-	if(direction != CenterDirection.Horizontal)
+	static if(direction != CenterDirection.Horizontal)
 	{
 		pos.y = h0 + (h - size.height)/2.;
 	}
@@ -111,7 +111,7 @@ void alignBottom(Sprite sprite, FloatRect box)
   auto size = sprite.getGlobalBounds();
   sprite.position = Vector2f(box.left, (box.top + box.height - size.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
-  center(sprite, CenterDirection.Horizontal, 
+  center!(CenterDirection.Horizontal)(sprite, 
   	FloatRect(box.left, box.top, box.width, box.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
@@ -130,7 +130,7 @@ void setTitle(Text title, string text)
   	position = Vector2f(200,20);
   }
   auto size = styleOpts.gameScreenSize;
-  center(title, CenterDirection.Horizontal, FloatRect(0, 0, size.x, size.y));
+  title.center!(CenterDirection.Horizontal)(FloatRect(0, 0, size.x, size.y));
 }
 
 
@@ -289,8 +289,8 @@ void spaceMenuItems(T : MenuItem)(T[] menuItems)
 		auto ypos = styleOpts.menuTop + (size.height + styleOpts.menuSpacing) * i;
 		trace("Y position of ", item.description, " is ", ypos);
 		item.name.position = Vector2f(0, ypos);
-		center(item.name, CenterDirection.Horizontal, 
-			FloatRect(0, 0, screenSize.x, screenSize.y));
+		item.name.center!(CenterDirection.Horizontal)
+				(FloatRect(0, 0, screenSize.x, screenSize.y));
 		++i;
 	}
 	trace("Arranged the manu items");
