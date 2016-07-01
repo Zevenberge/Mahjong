@@ -11,7 +11,20 @@ struct Coords(T)
 	T y;
 	float rotation;
 	
-	Vector2!T vector() @property
+	void move(Vector2!T offSet)
+	{
+		x += offSet.x;
+		y += offSet.y;
+	}
+	
+	Vector2!T position(Vector2!T newVector) @property
+	{
+		x = newVector.x;
+		y = newVector.y;
+		return newVector;
+	}
+	
+	Vector2!T position() const @property
 	{
 		return Vector2!T(x, y);
 	}

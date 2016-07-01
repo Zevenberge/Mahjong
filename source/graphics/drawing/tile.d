@@ -78,7 +78,7 @@ private class TileVisuals
 	
 	FloatRect getGlobalBounds()
 	{
-		_sprite.position = _coords.vector;
+		_sprite.position = _coords.position;
 		_sprite.rotation = _coords.rotation;
 		return _sprite.getGlobalBounds;
 	}
@@ -94,7 +94,7 @@ private class TileVisuals
 		{
 			sprite = getClosedSprite;
 		}
-		sprite.position = _coords.vector;
+		sprite.position = _coords.position;
 		sprite.rotation = _coords.rotation;
 		view.draw(sprite);
 	}
