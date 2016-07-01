@@ -1,15 +1,16 @@
 module mahjong.graphics.coords;
 
+import std.traits;
 import dsfml.system.vector2;
 
 alias FloatCoords = Coords!float;
 alias IntCoords = Coords!int;
 
-struct Coords(T)
+struct Coords(T) if(isNumeric!T)
 {
-	T x;
-	T y;
-	float rotation;
+	T x = 0;
+	T y = 0;
+	float rotation = 0;
 	
 	void move(Vector2!T offSet)
 	{
