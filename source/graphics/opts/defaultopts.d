@@ -54,7 +54,6 @@ class DefaultStyleOpts : StyleOpts
 	{
 		return Vector2i(900,1000);
 	}
-	
 	Vector2i gameScreenSize()
 	{
 		return Vector2i(900,900);
@@ -62,6 +61,10 @@ class DefaultStyleOpts : StyleOpts
 	string screenHeader()
 	{
 		return "Mahjong";
+	}
+	int gameInfoMargin()
+	{
+		return 10;
 	}
 	int gameInfoFontSize()
 	{
