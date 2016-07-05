@@ -86,28 +86,24 @@ void alignTopLeft(T) (T sprite, const FloatRect box)
   sprite.position = Vector2f(box.left, box.top);
 }
 
-void center(T) (T sprite, CenterDirection direction, const FloatRect rect)
+void center(CenterDirection direction, T)(T sprite, const FloatRect rect)
 {
-	center!T(sprite, direction, rect.left, rect.top, rect.width, rect.height);
-}
-void center(T) (T sprite, CenterDirection direction, const float x0 = 0, const float h0 = 0, const float w = width, const float h = height)
-{
-  FloatRect size = sprite.getGlobalBounds();
-  if(direction != CenterDirection.Vertical)
-  {
-    float xpos = x0 + (w - size.width)/2.;
-    sprite.position = Vector2f(xpos,size.top);
-  }
-
-  if(direction != CenterDirection.Horizontal)
-  {
-    float ypos = h0 + (h - size.height)/2.;
-    if(direction == CenterDirection.Both)
-    {
-      size = sprite.getGlobalBounds(); // Correct for the change that is already made.
-    }
-    sprite.position = Vector2f(size.left,ypos);
-  }
+	auto x0 = rect.left;
+	auto h0 = rect.top;
+	auto w = rect.width;
+	auto h = rect.height;
+	
+	auto size = sprite.getGlobalBounds;
+	auto pos = sprite.position;
+	static if(direction != CenterDirection.Vertical)
+	{
+		pos.x = x0 + (w - size.width)/2.;
+	}
+	static if(direction != CenterDirection.Horizontal)
+	{
+		pos.y = h0 + (h - size.height)/2.;
+	}
+	sprite.position = pos;
 }
 
 void alignBottom(Sprite sprite, FloatRect box)
@@ -115,7 +111,8 @@ void alignBottom(Sprite sprite, FloatRect box)
   auto size = sprite.getGlobalBounds();
   sprite.position = Vector2f(box.left, (box.top + box.height - size.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
-  center(sprite, CenterDirection.Horizontal, box.left, box.top, box.width, box.height);
+  center!(CenterDirection.Horizontal)(sprite, 
+  	FloatRect(box.left, box.top, box.width, box.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
 
@@ -124,12 +121,16 @@ void setTitle(Text title, string text)
   /*
     Have a function that takes care of a uniform style for all title fields.
   */
-  title.setFont(titleFont);
-  title.setString(text);
-  title.setCharacterSize(48);
-  title.setColor(Color.Black);
-  title.position = Vector2f(200,20);
-  center(title, CenterDirection.Horizontal,0);
+  with(title)
+  {
+  	setFont(titleFont);
+  	setString(text);
+  	setCharacterSize(48);
+  	setColor(Color.Black);
+  	position = Vector2f(200,20);
+  }
+  auto size = styleOpts.gameScreenSize;
+  title.center!(CenterDirection.Horizontal)(FloatRect(0, 0, size.x, size.y));
 }
 
 
@@ -149,29 +150,6 @@ void changeOpacity(ref ubyte[] opacities, const int position)
 			opacities[opt] = max(opacities[opt]-10, 0).to!ubyte;
 		}
 	}
-}
-
-
-void correctOutOfBounds(ref int position, ulong bounds)
-in
-{
-   assert(bounds < int.max);
-}
-out
-{
-  assert(position >= 0);
-  assert(position < bounds);
-}
-body
-{
-  if(position < 0)
-  {
-    position = 0;
-  }
-  else if(position >= bounds)
-  {
-    position = cast(int)bounds - 1;
-  }
 }
 
 void moveToPlayer(ref Vector2f location, const Vector2f movement, const int playLoc)
@@ -305,12 +283,14 @@ void spaceMenuItems(T : MenuItem)(T[] menuItems)
 	trace("Arranging the menu items");
 	if(menuItems.empty) return;
 	auto size = menuItems.front.name.getGlobalBounds;
+	auto screenSize = styleOpts.screenSize;
 	foreach(i, item; menuItems)
 	{
 		auto ypos = styleOpts.menuTop + (size.height + styleOpts.menuSpacing) * i;
 		trace("Y position of ", item.description, " is ", ypos);
 		item.name.position = Vector2f(0, ypos);
-		center(item.name, CenterDirection.Horizontal);
+		item.name.center!(CenterDirection.Horizontal)
+				(FloatRect(0, 0, screenSize.x, screenSize.y));
 		++i;
 	}
 	trace("Arranged the manu items");

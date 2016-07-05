@@ -47,7 +47,7 @@ void initialiseTiles(Wall wall)
 	trace("Setting up wall tiles.");
 	for(int i = 0; i < (wall.tiles.length/2); ++i)
 	{
-		auto position = CENTER;
+		auto position = styleOpts.center;
 		auto movement = calculatePositionInSquare(widthOfWall, undershoot, 
 			Vector2i(i % widthOfWall,0), FloatRect(0, 0, size.x, size.y));
 		int wallSide = getWallSide(i, widthOfWall);
@@ -103,7 +103,7 @@ private void modifyTilePosition(const Tile tile, const Vector2f position, const 
 }
 private Vector2f getOutermostBambooPosition()
 { // There are only 10 tiles left. Stack them two high. Return the position of the last tile.
-	auto position = CENTER;
+	auto position = styleOpts.center;
 	position.x += 1.5 * TileSize.x; // Move the tile 1.5 tiles to the right.
 	position.y -= 0.5 * TileSize.y;// Move the tile 0.5 tiles to the top.
 	return position;

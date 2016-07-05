@@ -99,7 +99,7 @@ private struct PlayerVisuals
 				trace("Setting the normal color");
 				_score.setColor(pointsColor);
 			}
-			_score.center(CenterDirection.Both, _scoreLabel.getGlobalBounds);
+			_score.center!(CenterDirection.Both)(_scoreLabel.getGlobalBounds);
 			trace("Updated the score");
 		}
 
@@ -119,7 +119,7 @@ private struct PlayerVisuals
 			info("Initialising player sprite");
 			redrawTexture;
 			_sprite = new Sprite(_renderTexture.getTexture);
-			_sprite.pix2scale(width);
+			_sprite.pix2scale(styleOpts.gameScreenSize.x);
 			placeSprite(rotation);
 			info("Initialized player sprite");
 		}
@@ -127,10 +127,11 @@ private struct PlayerVisuals
 		void placeSprite(float rotation)
 		{
 			trace("Placing sprite");
+			auto screen = styleOpts.gameScreenSize;
 			_sprite.pix2scale(drawingOpts.iconSize);
 			_sprite.position = Vector2f(
-				width - (drawingOpts.iconSize + drawingOpts.iconSpacing),
-				height - drawingOpts.iconSize
+				screen.x - (drawingOpts.iconSize + drawingOpts.iconSpacing),
+				screen.y - drawingOpts.iconSize
 			);
 			_sprite.setRotationAroundCenter(-rotation);
 			trace("Placed the sprite");
@@ -182,12 +183,15 @@ private struct PlayerVisuals
 		void redrawTexture()
 		{
 			info("Redrawing the player render texture");
-			_renderTexture.clear(Color.Transparent);
-			_renderTexture.draw(_icon);
-			_renderTexture.draw(_scoreLabel);
-			_renderTexture.draw(_score);
-			_renderTexture.draw(_wind);
-			_renderTexture.display;
+			with(_renderTexture)
+			{
+				clear(Color.Transparent);
+				draw(_icon);
+				draw(_scoreLabel);
+				draw(_score);
+				draw(_wind);
+				display;
+			}
 			info("Redrawn the player texture");
 		}
 } 

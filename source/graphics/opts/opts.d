@@ -2,6 +2,7 @@ module mahjong.graphics.opts.opts;
 
 import dsfml.graphics;
 import mahjong.domain.wall;
+import mahjong.graphics.conv;
 import mahjong.graphics.enums.geometry;
 
 Opts drawingOpts;
@@ -28,7 +29,17 @@ StyleOpts styleOpts;
 interface StyleOpts
 {
 	Vector2i screenSize();
+	Vector2i gameScreenSize();
+	final Vector2f center()
+	{
+		return gameScreenSize.toVector2f/2;
+	}
 	string screenHeader();
+	int gameInfoMargin();
+	int gameInfoFontSize();
+	Color gameInfoFontColor();
+	int memoFontSize();
+	Color memoFontColor();
 	int menuFontSize();
 	Color menuFontColor();
 	int menuTop();

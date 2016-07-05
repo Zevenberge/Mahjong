@@ -5,6 +5,7 @@ import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.selections.selection;
+import mahjong.graphics.utils;
 
 class Selectable(T)
 {

@@ -52,11 +52,35 @@ class DefaultStyleOpts : StyleOpts
 {
 	Vector2i screenSize()
 	{
+		return Vector2i(900,1000);
+	}
+	Vector2i gameScreenSize()
+	{
 		return Vector2i(900,900);
 	}
 	string screenHeader()
 	{
 		return "Mahjong";
+	}
+	int gameInfoMargin()
+	{
+		return 10;
+	}
+	int gameInfoFontSize()
+	{
+		return 48;
+	}
+	Color gameInfoFontColor()
+	{
+		return Color(0, 0, 0, 200);
+	}
+	int memoFontSize()
+	{
+		return 20;
+	}
+	Color memoFontColor()
+	{
+		return Color.Black;
 	}
 	int menuFontSize()
 	{

@@ -43,7 +43,8 @@ class MenuItem
 			setColor(styleOpts.menuFontColor);
 			position = Vector2f(200,0);
 		}   
-		center(text, CenterDirection.Horizontal);
+		text.center!(CenterDirection.Horizontal)
+			(FloatRect(0,0, styleOpts.screenSize.x, styleOpts.screenSize.y));
 		name = text;
 	}
 }
