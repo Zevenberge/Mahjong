@@ -2,6 +2,7 @@ module mahjong.graphics.coords;
 
 import std.traits;
 import dsfml.system.vector2;
+import dsfml.graphics.transformable;
 
 alias FloatCoords = Coords!float;
 alias IntCoords = Coords!int;
@@ -41,4 +42,21 @@ struct Coords(T) if(isNumeric!T)
 		this.y = y;
 		this.rotation = rotation;
 	}
+	
+	bool opEquals()(auto ref Coords!T other) const
+	{
+		return x == other.x && y == other.y &&
+			rotation == other.rotation;
+	}
+}
+
+FloatCoords getFloatCoords(Transformable t)
+{
+	return FloatCoords(t.position, t.rotation);
+}
+
+void setFloatCoords(Transformable t, FloatCoords c)
+{
+	t.rotation = c.rotation;
+	t.position = c.position;
 }

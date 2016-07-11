@@ -35,6 +35,11 @@ FloatCoords getCoords(const Tile tile)
 	return getTileVisuals(tile).getCoords;
 }
 
+Sprite getFrontSprite(Tile tile)
+{
+	return getTileVisuals(tile)._sprite;
+}
+
 deprecated FloatRect getGlobalBounds(const Tile tile) 
 {
 	return  getTileVisuals(tile).getGlobalBounds;
@@ -53,6 +58,7 @@ deprecated void setPosition(Tile tile, Vector2f pos)
 private class TileVisuals
 {
 	private Sprite _sprite;
+	private Sprite _backSprite;
 	private FloatCoords _coords;
 	
 	void initialise(const Tile stone)
@@ -62,11 +68,14 @@ private class TileVisuals
 		_sprite = new Sprite(tilesTexture);
 		_sprite.textureRect = getTextureRect(stone);
 		_sprite.pix2scale(tile.displayWidth);
+		_backSprite = initialiseNewBackSprite;
 		trace("Initialised tile visual for tile ", stone.id);
 	}
 	
 	void setCoords(FloatCoords coords)
 	{
+		_sprite.setFloatCoords(coords);
+		_backSprite.setFloatCoords(coords);
 		_coords = coords;
 	}
 	
@@ -78,25 +87,40 @@ private class TileVisuals
 	
 	FloatRect getGlobalBounds()
 	{
-		_sprite.position = _coords.position;
-		_sprite.rotation = _coords.rotation;
 		return _sprite.getGlobalBounds;
 	}
 	
 	void draw(const Tile tile, RenderTarget view)
 	{
-		Sprite sprite;
+		updateCoords;
 		if(tile.isOpen)
 		{
-			sprite = _sprite; 
+			view.draw(_sprite); 
 		}
 		else
 		{
-			sprite = getClosedSprite;
+			view.draw(_backSprite);
 		}
-		sprite.position = _coords.position;
-		sprite.rotation = _coords.rotation;
-		view.draw(sprite);
+	}
+	
+	private void updateCoords()
+	{
+		auto spriteCoords = _sprite.getFloatCoords;
+		if(_coords != spriteCoords)
+		{
+			trace("Front sprite updated.");
+			_coords = spriteCoords;
+			_backSprite.setFloatCoords(_coords);
+			return;
+		}
+		auto backSpriteCoords = _backSprite.getFloatCoords;
+		if(_coords != backSpriteCoords)
+		{
+			trace("Back sprite updated");
+			_coords = backSpriteCoords;
+			_sprite.setFloatCoords(_coords);
+			return;
+		}
 	}
 }
 
@@ -111,15 +135,6 @@ private TileVisuals getTileVisuals(const Tile tile)
 		return tileVisuals;
 	}
 	return _tiles[tile.id];
-}
-
-private Sprite getClosedSprite()
-{
-	if(_backSprite is null)
-	{
-		return initialiseNewBackSprite;
-	}
-	return _backSprite;
 }
 
 private IntRect getTextureRect(const Tile stone)
@@ -154,11 +169,11 @@ private IntRect getTextureRect(const Tile stone)
 private Sprite initialiseNewBackSprite()
 {
 	loadTilesTexture;
-	_backSprite = new Sprite(tilesTexture);
-	_backSprite.textureRect = getBackSpriteBounds;
-	_backSprite.color = Color.Red;
-	_backSprite.pix2scale(tile.displayWidth);
-	return _backSprite;
+	auto backSprite = new Sprite(tilesTexture);
+	backSprite.textureRect = getBackSpriteBounds;
+	backSprite.color = Color.Red;
+	backSprite.pix2scale(tile.displayWidth);
+	return backSprite;
 }
 private IntRect getBackSpriteBounds()
 {
@@ -177,7 +192,6 @@ private void loadTilesTexture()
 }
 
 private TileVisuals[UUID] _tiles;
-private Sprite _backSprite;
 
 
 

@@ -1,6 +1,7 @@
 module mahjong.graphics.controllers.controller;
 
 import dsfml.graphics;
+import mahjong.graphics.anime.animation;
 
 class Controller
 {
@@ -36,6 +37,14 @@ class Controller
 	abstract void roundUp();
 	
 	abstract void yield();
+	
+	void animate()
+	{
+		foreach(animation; animations)
+		{
+			animation.animate;
+		}
+	}
 }
 
 Controller controller;

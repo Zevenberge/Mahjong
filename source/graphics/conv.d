@@ -62,3 +62,10 @@ string toKanji(uint number)
 	while(number > 0);
 	return builder.to!string;
 }
+
+FloatRect toRect(Vector2f v)
+{
+	return FloatRect(0, 0, v.x, v.y);
+}
+
+

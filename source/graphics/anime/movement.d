@@ -1,5 +1,6 @@
 module mahjong.graphics.anime.movement;
 
+import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.coords;
@@ -26,7 +27,8 @@ class MovementAnimation : Animation
 	
 	protected override void nextFrame()
 	{
-		_transformable.position += _deltaCoords.position;
+		trace("Moving ", _deltaCoords.position);
+		_transformable.position = _transformable.position + _deltaCoords.position;
 		_transformable.rotation = _transformable.rotation + _deltaCoords.rotation;
 		_amountOfFrames--;
 		if(_amountOfFrames == 0)

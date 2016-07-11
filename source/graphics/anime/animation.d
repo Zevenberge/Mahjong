@@ -7,6 +7,12 @@ import mahjong.share.range;
 
 Animation[] animations;
 
+void addUniqueAnimation(Animation anime)
+{
+	animations.remove!((a,b) => a.objectId == b.objectId)(anime);
+	animations ~= anime;
+}
+
 class Animation
 {
 	UUID objectId;

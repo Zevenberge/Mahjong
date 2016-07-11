@@ -14,6 +14,7 @@ import mahjong.engine.mahjong;
 
 class Ingame
 { 
+	UUID id;
 	// Ingame variables.
 	int wind = -1; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
@@ -33,6 +34,7 @@ class Ingame
 		this.wind = wind;
 		closedHand = new ClosedHand;
 		openHand = new OpenHand;
+		id = randomUUID;
 	}
 
 	int getWind()

@@ -4,8 +4,12 @@ import std.algorithm.iteration;
 import std.conv;
 import std.experimental.logger;
 import std.range;
+import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.ingame;
+import mahjong.graphics.anime.animation;
+import mahjong.graphics.anime.movement;
+import mahjong.graphics.conv;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.openhand;
@@ -17,15 +21,80 @@ import mahjong.graphics.opts.opts;
 alias drawIngame = draw;
 void draw(Ingame ingame, RenderTarget view)
 {
-	ingame.closedHand.drawClosedHand(view);
-	ingame.openHand.drawOpenHand(view);
-	drawDiscards(ingame, view);
+	auto drawable = getDrawable(ingame);
+	drawable.draw(view);
 }
 
-private void drawDiscards(Ingame ingame, RenderTarget view)
+void clearDiscards()
 {
-	placeDiscards(ingame);
-	ingame.discards.each!(t => t.drawTile(view));
+	_ingameDrawables.clear;
+}
+
+private IngameDrawable[UUID] _ingameDrawables;
+private IngameDrawable getDrawable(Ingame ingame)
+{
+	if(ingame.id !in _ingameDrawables)
+	{
+		trace("Initialising new ingame drawable");
+		auto drawable = new IngameDrawable(ingame);
+		_ingameDrawables[ingame.id] = drawable;
+		return drawable;
+	}
+	return _ingameDrawables[ingame.id];
+}
+
+private class IngameDrawable
+{
+	size_t previousAmountOfDiscards;
+	
+	this(Ingame game)
+	{
+		_game = game;
+	}
+	
+	private Ingame _game;
+	
+	void draw(RenderTarget target)
+	{
+		_game.closedHand.drawClosedHand(target);
+		_game.openHand.drawOpenHand(target);
+		drawDiscards(_game, target);
+	}
+
+	private void drawDiscards(Ingame ingame, RenderTarget view)
+	{
+		auto amountOfDiscards = ingame.discards.length;
+		if(amountOfDiscards == previousAmountOfDiscards + 1)
+		{
+			// One additional tile was discarded.
+			animateLastDiscard;
+			previousAmountOfDiscards = amountOfDiscards;
+		}
+		ingame.discards.each!(t => t.drawTile(view));
+	}
+
+	private void animateLastDiscard()
+	{
+		trace("Starting the animation of the last discard");
+		auto tile = _game.discards[$-1];
+		auto coords = getNewCoords;
+		auto sprite = getFrontSprite(tile);
+		auto animation = new MovementAnimation(sprite, coords, 15);
+		animation.objectId = tile.id;
+		addUniqueAnimation(animation);
+	}
+	
+	private FloatCoords getNewCoords()
+	{
+		auto tileSize = drawingOpts.tileSize;
+		auto tileIndex = getDiscardIndex(_game.discards.length.to!int - 1);
+		auto movement = calculatePositionInSquare(
+						drawingOpts.amountOfDiscardsPerLine, 
+						discardUndershoot,
+						tileIndex, tileSize.toRect);
+		auto position = styleOpts.center;
+		return FloatCoords(position+movement, 0);
+	}
 }
 
 private void placeDiscards(Ingame ingame)

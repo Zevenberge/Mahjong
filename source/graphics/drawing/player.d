@@ -40,6 +40,7 @@ void draw(Player player, RenderTarget view, float rotation)
 void clearPlayerCache()
 {
 	_players.clear;
+	clearDiscards;
 	trace("Cleared player cache");
 }
 

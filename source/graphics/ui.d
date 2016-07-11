@@ -35,6 +35,7 @@ void run()
 			}
 			controller.draw;
 			window.display;
+			controller.animate;
 			controller.yield;
 		}
 	}
