@@ -2,6 +2,7 @@ module mahjong.graphics.selections.selection;
 
 import dsfml.graphics.rectangleshape;
 import dsfml.graphics.rendertarget;
+import mahjong.graphics.coords;
 
 struct Selection
 {
@@ -11,5 +12,11 @@ struct Selection
 	void draw(RenderTarget target)
 	{
 		target.draw(visual);
+	}
+	
+	void setCoords(FloatCoords coords)
+	{
+		visual.position = coords.position;
+		visual.rotation = coords.rotation;
 	}
 }

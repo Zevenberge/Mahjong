@@ -39,9 +39,13 @@ Sprite getFrontSprite(Tile tile)
 	return getTileVisuals(tile)._sprite;
 }
 
-deprecated FloatRect getGlobalBounds(const Tile tile) 
+FloatRect getGlobalBounds(const Tile tile) 
 {
 	return  getTileVisuals(tile).getGlobalBounds;
+}
+FloatRect getLocalBounds(const Tile tile)
+{
+	return getTileVisuals(tile).getLocalBounds;
 }
 deprecated void setPosition(Tile tile, Vector2f pos)
 {
@@ -86,6 +90,11 @@ private class TileVisuals
 	FloatRect getGlobalBounds()
 	{
 		return _sprite.getGlobalBounds;
+	}
+	
+	FloatRect getLocalBounds()
+	{
+		return _sprite.getLocalBounds;
 	}
 	
 	void draw(const Tile tile, RenderTarget view)

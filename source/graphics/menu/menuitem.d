@@ -28,6 +28,10 @@ class MenuItem
 	{
 		return name.getGlobalBounds;
 	}
+	FloatRect getLocalBounds()
+	{
+		return name.getLocalBounds;
+	}
 		
 	string description;
 	Text name;

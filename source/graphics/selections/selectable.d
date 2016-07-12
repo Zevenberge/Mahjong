@@ -2,7 +2,7 @@ module mahjong.graphics.selections.selectable;
 
 import dsfml.graphics;
 import mahjong.graphics.drawing.tile;
-import mahjong.graphics.enums.geometry;;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.selections.selection;
 import mahjong.graphics.utils;
@@ -36,7 +36,7 @@ class Selectable(T)
 	}
 
 
-  private void selectOpt()
+  protected void selectOpt()
   {
     // Firstly check whether the selection does not fall out of bounds.
     correctOutOfBounds(selection.position, opts.length);

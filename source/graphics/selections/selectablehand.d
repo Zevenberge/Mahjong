@@ -8,6 +8,8 @@ import mahjong.domain.closedhand;
 import mahjong.domain.tile;
 import mahjong.engine.mahjong;
 import mahjong.graphics.drawing.closedhand;
+import mahjong.graphics.drawing.tile;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.selections.selectable;
 
 class SelectableHand : Selectable!Tile
@@ -39,6 +41,8 @@ class SelectableHand : Selectable!Tile
 	void draw(RenderTarget target)
 	{
 		if(opts.empty) return;
+		opts = _hand.tiles;
+		selectOpt;
 		selection.draw(target);
 	}
 }
