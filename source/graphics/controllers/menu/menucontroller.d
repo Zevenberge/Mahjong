@@ -28,6 +28,7 @@ class MenuController : MenuControllerBase!Menu
 	
 	protected override bool menuClosed()
 	{
+		closeMenu;
 		return false;
 	}
 	

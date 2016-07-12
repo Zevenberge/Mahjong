@@ -31,7 +31,7 @@ abstract class MenuControllerBase(TMenu) : Controller
 				optionSelected;
 				break;
 			case Escape:
-				return true;
+				return menuClosed;
 			default:
 		}
 		return false;
