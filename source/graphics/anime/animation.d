@@ -1,5 +1,6 @@
 module mahjong.graphics.anime.animation;
 
+import std.algorithm.iteration;
 import std.experimental.logger;
 import std.range;
 import std.uuid;
@@ -11,6 +12,15 @@ void addUniqueAnimation(Animation anime)
 {
 	animations.remove!((a,b) => a.objectId == b.objectId)(anime);
 	animations ~= anime;
+}
+
+void addIfNonExistent(Animation anime)
+{
+	if(animations.filter!(a => a.objectId == anime.objectId).empty)
+	{
+		trace("Added animation (", anime.objectId, ") to the list");
+		animations ~= anime;
+	}
 }
 
 class Animation

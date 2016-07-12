@@ -31,7 +31,6 @@ void setCoords(const Tile tile, FloatCoords coords)
 
 FloatCoords getCoords(const Tile tile)
 {
-	trace("Getting coords for tile");
 	return getTileVisuals(tile).getCoords;
 }
 
@@ -81,7 +80,6 @@ private class TileVisuals
 	
 	FloatCoords getCoords()
 	{
-		trace("Coords getter called");
 		return _coords;
 	}
 	

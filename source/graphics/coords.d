@@ -1,5 +1,6 @@
 module mahjong.graphics.coords;
 
+import std.math;
 import std.traits;
 import dsfml.system.vector2;
 import dsfml.graphics.transformable;
@@ -45,8 +46,14 @@ struct Coords(T) if(isNumeric!T)
 	
 	bool opEquals()(auto ref Coords!T other) const
 	{
-		return x == other.x && y == other.y &&
-			rotation == other.rotation;
+		return (x - other.x).abs < 0.001 && (y - other.y).abs < 0.001 &&
+			(rotation - other.rotation).abs < 0.001;
+	}
+
+	string toString() const
+	{
+		import std.conv;
+		return "X: " ~ x.text ~ " Y: " ~ y.text ~ " R: " ~ rotation.text;
 	}
 }
 
