@@ -11,6 +11,7 @@ import mahjong.graphics.coords;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.manipulation;
+import mahjong.graphics.meta;
 
 alias drawTile = draw;
 void draw(const Tile tile, RenderTarget view)
@@ -62,7 +63,6 @@ private class TileVisuals
 {
 	private Sprite _sprite;
 	private Sprite _backSprite;
-	private FloatCoords _coords;
 	
 	void initialise(const Tile stone)
 	{
@@ -75,17 +75,7 @@ private class TileVisuals
 		trace("Initialised tile visual for tile ", stone.id);
 	}
 	
-	void setCoords(FloatCoords coords)
-	{
-		_sprite.setFloatCoords(coords);
-		_backSprite.setFloatCoords(coords);
-		_coords = coords;
-	}
-	
-	FloatCoords getCoords()
-	{
-		return _coords;
-	}
+	mixin delegateCoords!([_sprite.stringof, _backSprite.stringof]);
 	
 	FloatRect getGlobalBounds()
 	{
