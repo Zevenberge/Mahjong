@@ -1,6 +1,7 @@
 module mahjong.graphics.cache.texture;
 
-import dsfml.graphics;
+import dsfml.graphics.texture;
 
 Texture tilesTexture;
 Texture infoTexture;
+Texture splashTexture;

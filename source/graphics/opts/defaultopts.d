@@ -98,6 +98,10 @@ class DefaultStyleOpts : StyleOpts
 	{
 		return 20;
 	}
+	int popupFontSize()
+	{
+		return 48;
+	}
 }
 
 
