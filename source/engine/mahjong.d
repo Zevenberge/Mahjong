@@ -469,6 +469,9 @@ private bool scanChis(ref Tile[] hand, ref Tile[] final_hand, ref int chis)
   
   return false; // Do not return the modifications to the hand.
 }
+/++
+
++/
 void takeOutTile(ref Tile[] hand, ref Tile[] output, Tile takenOut)
 {
    int i = 0;
@@ -484,46 +487,47 @@ void takeOutTile(ref Tile[] hand, ref Tile[] output, Tile takenOut)
    throw new Exception("Tile not found");
 }
 /// Ditto
-void takeOutTile(ref Tile[] hand, ref Tile[] output, const size_t i, size_t j = 0)
+void takeOutTile(ref Tile[] hand, ref Tile[] output, const size_t index, size_t count = 1)
 {
-      if (i >= j)
-      {
-          j = i + 1;
-      }
-      Tile[] temphand;
-      output ~= hand[i .. j];
-      temphand ~= hand[j .. $];
-      hand = hand[0 .. i];
-      hand ~= temphand;
+	auto end = count + index; 
+    Tile[] temphand;
+    output ~= hand[index .. end];
+    temphand ~= hand[end .. $];
+    hand = hand[0 .. index];
+    hand ~= temphand;
 }
 ///
 unittest 
 {
 	import std.stdio;
+	import std.algorithm.searching;
 	writeln("Checking the takeOutTile function...");
-	Tile[] wall, output;
-	initialiseWall(wall); // Set up the "wall", which will act as our hand.
-	Tile[] walldup = wall.dup;
-	int i = uniform(0,to!int(wall.length));
-	takeOutTile(wall, output, i);
-	assert(output[0].type == walldup[i].type); // Check whether the tile that is taken out of the
-	assert(output[0].value == walldup[i].value); // wall is actually the one that was intended.
-	assert(wall.length == walldup.length-1);  // Also check if there is indeed a tile taken from the wall.
-	wall ~= output;
-	sortHand(wall);
-	assert(wall == walldup); // After adding the tile back to the wall, it should be complete again.
-
-	// Add a second test for the overload.
-	int j = uniform(i,to!int(wall.length));
-	takeOutTile(wall, output, i, j);
-	int k;
-	for(; i < j; ++i)
-	{
-		 assert(isEqual(output[k],walldup[i]));
-		 ++k;
-	}
-
-	writeln(" The takeOutTile function is correct.");
+	auto tile = new Tile;
+	Tile a = new Tile, b = new Tile;
+	Tile[] hand;
+	hand = hand ~ a ~ tile ~ b;
+	Tile[] takenOut;	
+	takeOutTile(hand, takenOut, 1);
+	assert(takenOut.length == 1, "Only one tile should be taken out");
+	assert(takenOut[0].id == tile.id, "The tile that was taken out should be the one that was determined");
+	assert(hand.length == 2, "Tile should be taken out");
+	assert(hand.all!(t => t.id != tile.id), "The tile should not be in the wall any more.");
+}
+unittest // Range overload
+{
+	import std.stdio;
+	import std.algorithm.searching;
+	writeln("Checking the takeOutTile function...");
+	auto tile = new Tile;
+	auto a = new Tile, b = new Tile;
+	Tile[] hand;
+	hand = hand ~ a ~ tile ~ b;
+	Tile[] takenOut;	
+	takeOutTile(hand, takenOut, 1, 2);
+	assert(takenOut.length == 2, "Two tiles should be taken out");
+	assert(takenOut[0].id == tile.id, "The first tile that was taken out should be the one that was determined");
+	assert(hand.length == 1, "Only one sould remain.");
+	assert(hand.all!(t => t.id == a.id), "The tile should not be in the wall any more.");
 }
 
 private bool scanEquals(ref Tile[] hand, ref Tile[] final_hand,  ref int pairs, const int distance)
@@ -544,9 +548,11 @@ if(hand.length > distance)
 unittest // Check whether the example hands are seen as mahjong hands.
 {
 	import std.stdio;
+	import std.path;
 
 	void testHands(string filename, const bool isHand)
 	{
+		writeln("Looking for ", filename.asAbsolutePath);
 		for( int line_number = 1; ; ++line_number)
 		{   
 			Tile[] hand;
@@ -567,9 +573,9 @@ unittest // Check whether the example hands are seen as mahjong hands.
 	}
 
 	writeln("Checking the example hands...");
-	testHands("nine_gates", true);
-	testHands("example_hands", true);
-	testHands("unlegit_hands", false);
+	testHands("test/nine_gates", true);
+	testHands("test/example_hands", true);
+	testHands("test/unlegit_hands", false);
 	writeln(" The function reads the example hands correctly.");
 
 	
