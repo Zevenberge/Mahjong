@@ -52,7 +52,7 @@ class Wall
 
 	protected void initialise()
 	{
-		set_up_wall(tiles);
+		setUpWall(tiles);
 	}
 
    

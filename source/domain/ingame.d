@@ -20,7 +20,7 @@ class Ingame
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
 	OpenHand openHand; // The open pons/chis/kans 
 	Tile[]  discards; // All of the personal discards.
-	private Tile last_tile;  // The last tile, to determine whether or not this is a tsumo or a ron.
+	private Tile lastTile;  // The last tile, to determine whether or not this is a tsumo or a ron.
 	bool isNagashiMangan = true;
 	bool isRiichi = false;
 	bool isDoubleRiichi = false;
@@ -52,11 +52,11 @@ class Ingame
     int i=0;
     foreach(tile; closedHand.tiles)
     {
-      if(is_equal(tile, discard))
+      if(isEqual(tile, discard))
       {
         if((i+1) < closedHand.tiles.length)
         {
-          if(is_equal(closedHand.tiles[i+1], discard))
+          if(isEqual(closedHand.tiles[i+1], discard))
           {
             return true;
           }
@@ -88,7 +88,7 @@ class Ingame
       {
         tile.value = i;
         Tile[] temphand = closedHand.tiles ~ tile;
-        if(scan_hand(temphand, chis, pons))
+        if(.scanHand(temphand, chis, pons))
         {
           isTenpai = true;
         }
@@ -103,7 +103,7 @@ class Ingame
   {
      foreach(tile; discards)
      {
-       if(scan_hand(closedHand.tiles ~ tile, pons, chis))
+       if(.scanHand(closedHand.tiles ~ tile, pons, chis))
        {
           return true;
        }
@@ -123,7 +123,7 @@ class Ingame
 
   private bool scanHand(Tile[] set)
   {
-     return .scan_hand(set, pons, chis);
+     return .scanHand(set, pons, chis);
      //FIXME: take into account yaku requirement.
   }
 
@@ -146,7 +146,7 @@ class Ingame
 
 	void discard(ulong discardedNr)
 	{    
-		take_out_tile(closedHand.tiles, discards, discardedNr);
+		takeOutTile(closedHand.tiles, discards, discardedNr);
 		discards[$-1].origin = wind; // Sets the tile to be from the player who discarded it.
 		discards[$-1].open;
 		if( (!isHonour(discards[$-1])) && (!isTerminal(discards[$-1])) )
@@ -164,7 +164,7 @@ class Ingame
 		bool found = false;
 		foreach(tile; closedHand.tiles)
 		{
-			if(is_identical(tile,discardedTile))
+			if(isIdentical(tile,discardedTile))
 			{
 				found = true;
 				discard(i);
@@ -183,7 +183,7 @@ class Ingame
   }
   public ref Tile getLastTile()
   {
-     return last_tile;
+     return lastTile;
   }
 
 	void closeHand()
@@ -199,7 +199,7 @@ class Ingame
 	void drawTile(ref Wall wall)
 	{
 		closedHand.drawTile(wall);
-		last_tile = closedHand.getLastTile;
+		lastTile = closedHand.getLastTile;
 	}
 
 }
