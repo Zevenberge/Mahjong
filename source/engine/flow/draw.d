@@ -46,6 +46,7 @@ unittest
 	// The flow of the game determines that it is time to draw.
 	auto drawFlow = new DrawFlow(player, wall);
 	switchFlow(drawFlow);
+	flow.checkProgress;
 	assert(wallLength - 1 == wall.length, "A tile should be taken from the wall.");
 	assert(player.game.closedHand.length == 1, "The player should be given a tile.");
 	assert(typeid(flow) == typeid(TurnFlow));
