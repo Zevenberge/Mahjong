@@ -10,6 +10,11 @@ import mahjong.share.range;
 class ClosedHand
 {
 	Tile[] tiles;
+
+	size_t length() @property
+	{
+		return tiles.length;
+	}
 	
 	void addTile(Tile tile)
 	{
