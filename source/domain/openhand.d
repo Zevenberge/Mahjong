@@ -55,7 +55,7 @@ class OpenHand
     int i = 0;
     foreach(tile; hand)
     {
-      if(is_equal(tile, dibsable))
+      if(isEqual(tile, dibsable))
       {
         selectTile(tile, i); 
         ++i;
