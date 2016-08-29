@@ -11,7 +11,7 @@ import mahjong.domain.enums.tile;
 import mahjong.domain.enums.wall;
 import mahjong.domain.tile;
 import mahjong.engine.mahjong;
-import mahjong.engine.opts.opts;
+import mahjong.engine.opts;
 
 
 class Wall

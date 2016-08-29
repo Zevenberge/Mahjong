@@ -9,10 +9,7 @@ import mahjong.domain.enums.game;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.engine.enums.game;
-import mahjong.engine.opts.bambooopts;
-import mahjong.engine.opts.defaultopts;
-import mahjong.engine.opts.eightplayeropts;
-import mahjong.engine.opts.opts;
+import mahjong.engine.opts;
 
 /++
 	GameFront is the front-end of the game engine. The 

@@ -31,8 +31,7 @@ unittest
 {
 	import std.stdio;
 	import mahjong.domain.enums.tile;
-	import mahjong.engine.opts.opts;
-	import mahjong.engine.opts.defaultopts;
+	import mahjong.engine.opts;
 	
 	writeln("Testing draw flow.");
 	gameOpts = new DefaultGameOpts ;

@@ -11,7 +11,7 @@ import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.meta;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 class Popup
 {

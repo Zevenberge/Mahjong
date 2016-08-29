@@ -10,7 +10,7 @@ import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.player;
 import mahjong.graphics.drawing.tile;
-import mahjong.graphics.menu.menu;
+import mahjong.graphics.menu;
 import mahjong.graphics.selections.selectablehand;
 
 abstract class GameController : Controller

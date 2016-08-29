@@ -2,8 +2,7 @@ module mahjong.graphics.opts.bambooopts;
 
 import mahjong.domain.wall;
 import mahjong.graphics.drawing.wall;
-import mahjong.graphics.opts.defaultopts;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 class BambooDrawingOpts : DefaultDrawingOpts
 {

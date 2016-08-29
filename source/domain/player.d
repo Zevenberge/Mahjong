@@ -7,7 +7,7 @@ import mahjong.domain.enums.game;
 import mahjong.domain.ingame;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
-import mahjong.engine.opts.opts;
+import mahjong.engine.opts;
 
 
 

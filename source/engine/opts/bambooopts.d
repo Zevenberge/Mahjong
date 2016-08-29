@@ -1,7 +1,7 @@
 module mahjong.engine.opts.bambooopts;
 
 import mahjong.domain.enums.game;
-import mahjong.engine.opts.defaultopts;
+import mahjong.engine.opts;
 
 class BambooOpts : DefaultGameOpts
 {

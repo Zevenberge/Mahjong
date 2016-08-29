@@ -6,7 +6,7 @@ import mahjong.graphics.cache.font;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 class MenuItem
 {

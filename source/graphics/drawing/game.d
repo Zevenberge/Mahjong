@@ -13,7 +13,7 @@ import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.manipulation;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 import mahjong.graphics.rendersprite;
 
 alias drawGame = draw;

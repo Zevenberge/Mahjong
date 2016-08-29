@@ -16,7 +16,7 @@ import mahjong.graphics.drawing.openhand;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.manipulation;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 alias drawIngame = draw;
 void draw(Ingame ingame, RenderTarget view)

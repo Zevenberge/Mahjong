@@ -11,7 +11,7 @@ import mahjong.graphics.anime.movement;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 alias drawClosedHand = draw;
 void draw(ClosedHand hand, RenderTarget view)

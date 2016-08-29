@@ -4,8 +4,7 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
-import mahjong.graphics.opts.defaultopts;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 void run()
 {

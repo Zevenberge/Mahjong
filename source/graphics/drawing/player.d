@@ -16,7 +16,7 @@ import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 alias drawPlayer = draw;
 void draw(Player player, RenderTarget view, float rotation)

@@ -14,7 +14,7 @@ import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
-import mahjong.engine.opts.opts;
+import mahjong.engine.opts;
 import mahjong.graphics.enums.game;
 import mahjong.graphics.enums.kanji;
 

@@ -11,9 +11,7 @@ import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;;
 import mahjong.graphics.menu.mainmenu;
 import mahjong.graphics.menu.menuitem;
-import mahjong.graphics.opts.bambooopts;
-import mahjong.graphics.opts.defaultopts;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 private MainMenu _mainMenu;
 MainMenu composeMainMenu()
