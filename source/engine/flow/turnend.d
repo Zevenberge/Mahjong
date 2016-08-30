@@ -8,19 +8,19 @@ class TurnEndFlow : Flow
 {
 	this(Metagame meta)
 	{
-		_meta = meta;
+		_game = meta;
 	}
 	
-	private Metagame _meta;
+	private Metagame _game;
 	
 	override void advanceIfDone()
 	{
-		if(_meta.isExhaustiveDraw)
+		if(_game.isExhaustiveDraw)
 		{
 			info("Exhaustive draw reached.");
 			switchFlow(new ExhaustiveDrawFlow);
 		}
-		else if(_meta.isAbortiveDraw)
+		else if(_game.isAbortiveDraw)
 		{
 			info("Abortive draw reached.");
 			switchFlow(new AbortiveDrawFlow);
@@ -28,8 +28,8 @@ class TurnEndFlow : Flow
 		else
 		{
 			trace("Advancing to the next turn.");
-			_meta.advanceTurn;
-			switchFlow(new DrawFlow(_meta.currentPlayer, _meta.wall));
+			_game.advanceTurn;
+			switchFlow(new DrawFlow(_game.currentPlayer, _game.wall));
 		}
 	}
 }

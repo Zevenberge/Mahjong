@@ -39,13 +39,13 @@ class TurnFlow : Flow
 		{
 			_player.discard(tile);
 			_flow = new RonFlow();
-
 		}
 
 		void claimTsumo()
 		{
 			info("Tsumo claimed by ", _player.name);
 			_meta.tsumo(_player);
+			_flow = new MahjongFlow;
 		}
 }
 
