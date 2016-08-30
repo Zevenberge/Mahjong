@@ -14,12 +14,14 @@ class TurnFlow : Flow
 		_player = player;
 		_meta = meta;
 		_event = new TurnEvent(this, player);
+		_player.delegator.handle(_event);
 	}
 	
 	override void advanceIfDone()
 	{
 		if(_event.isHandled)
 		{
+			assert(_flow !is null, "When the event is handled, the flow should not be null");
 			advance();
 		}
 	}
@@ -38,7 +40,7 @@ class TurnFlow : Flow
 		void discard(Tile tile)
 		{
 			_player.discard(tile);
-			_flow = new RonFlow();
+			_flow = new RonFlow;
 		}
 
 		void claimTsumo()
@@ -65,7 +67,7 @@ class TurnEvent
 	void discard(Tile tile)
 	in
 	{
-		assert(!isHandled);
+		assert(!isHandled, "The event should not be handled twice.");
 	}
 	body
 	{
@@ -76,7 +78,7 @@ class TurnEvent
 	void claimTsumo()
 	in
 	{
-		assert(!isHandled);
+		assert(!isHandled, "The event should not be handled twice.");
 	}
 	body
 	{
