@@ -1,5 +1,8 @@
 module mahjong.engine.ai;
 
+public import mahjong.engine.ai.delegation;
+public import mahjong.engine.ai.turn;
+
 import std.experimental.logger;
 import std.random;
 import std.uuid;

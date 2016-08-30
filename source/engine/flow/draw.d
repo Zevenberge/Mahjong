@@ -1,7 +1,6 @@
 module mahjong.engine.flow.draw;
 
-import mahjong.domain.player;
-import mahjong.domain.wall;
+import mahjong.domain;
 import mahjong.engine.flow;
 
 class DrawFlow : Flow
@@ -15,14 +14,9 @@ class DrawFlow : Flow
 	private Player _player;
 	private Wall _wall;
 	
-	override void checkProgress()
+	override void advanceIfDone()
 	{
 		_player.drawTile(_wall);
-		advance;
-	}
-	
-	private void advance()
-	{
 		switchFlow(new TurnFlow(_player));
 	}
 }
@@ -45,7 +39,7 @@ unittest
 	// The flow of the game determines that it is time to draw.
 	auto drawFlow = new DrawFlow(player, wall);
 	switchFlow(drawFlow);
-	flow.checkProgress;
+	flow.advanceIfDone;
 	assert(wallLength - 1 == wall.length, "A tile should be taken from the wall.");
 	assert(player.game.closedHand.length == 1, "The player should be given a tile.");
 	assert(typeid(flow) == typeid(TurnFlow));

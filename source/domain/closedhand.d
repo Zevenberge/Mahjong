@@ -2,8 +2,7 @@ module mahjong.domain.closedhand;
 
 import std.algorithm.iteration;
 import std.signals;
-import mahjong.domain.tile;
-import mahjong.domain.wall;
+import mahjong.domain;
 import mahjong.engine.mahjong;
 import mahjong.share.range;
 

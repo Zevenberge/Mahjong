@@ -1,11 +1,13 @@
 module mahjong.engine.flow;
 
+public import mahjong.engine.flow.delegation;
 public import mahjong.engine.flow.draw;
+public import mahjong.engine.flow.ron;
 public import mahjong.engine.flow.turn;
 
 class Flow
 {
-	abstract void checkProgress();
+	abstract void advanceIfDone();
 }
 
 

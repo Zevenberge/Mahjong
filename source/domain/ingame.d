@@ -4,11 +4,8 @@ import std.algorithm.iteration;
 import std.array;
 import std.experimental.logger;
 import std.uuid;
-import mahjong.domain.closedhand;
+import mahjong.domain;
 import mahjong.domain.enums.tile;
-import mahjong.domain.openhand;
-import mahjong.domain.tile;
-import mahjong.domain.wall;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 

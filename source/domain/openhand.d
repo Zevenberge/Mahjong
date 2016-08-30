@@ -3,8 +3,7 @@ module mahjong.domain.openhand;
 import dsfml.graphics;
 
 import mahjong.domain.enums.game;
-import mahjong.domain.metagame;
-import mahjong.domain.tile;
+import mahjong.domain;
 import mahjong.engine.mahjong;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;

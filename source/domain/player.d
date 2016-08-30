@@ -4,9 +4,8 @@ import std.string;
 import std.uuid;
 
 import mahjong.domain.enums.game;
-import mahjong.domain.ingame;
-import mahjong.domain.tile;
-import mahjong.domain.wall;
+import mahjong.domain;
+import mahjong.engine.flow;
 import mahjong.engine.opts;
 
 
@@ -20,17 +19,17 @@ class Player
 	int score; 
 
 	Ingame game; // Resets after every round.
+	Delegator delegator; // Allows for distribution of the flow logic
 
-
-	this()
+	this(Delegator delegator)
 	{
 		id = randomUUID;
-
+		this.delegator = delegator;
 	}
-	this(dchar[] name)
+	this(Delegator delegator, dchar[] name)
 	{
 		this.name = name;
-		this();
+		this(delegator);
 	}
 
 	void nextRound(bool passWinds)
@@ -78,16 +77,6 @@ class Player
      game.discard(disc);
   }
 
-  void placeRiichi()
-  {
-
-  }
-
-   Player dup()
-   {
-     return new Player(name);
-   }
-
    override string toString() const
    {
      return(format("%s-san",name));
@@ -128,6 +117,11 @@ class Player
 	void closeHand()
 	{
 		game.closeHand();
+	}
+
+	override bool opEquals(Player p)
+	{
+		return p.id == id;
 	}
 }
 

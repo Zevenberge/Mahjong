@@ -9,9 +9,7 @@ import std.uuid;
 import mahjong.domain.enums.game;
 import mahjong.domain.enums.tile;
 import mahjong.domain.enums.wall;
-import mahjong.domain.player;
-import mahjong.domain.tile;
-import mahjong.domain.wall;
+import mahjong.domain;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
@@ -149,16 +147,15 @@ class Metagame
 		}
 	}
 
-	void drawTile()
-	{ 
-		currentPlayer.drawTile(wall);
-		_phase = Phase.Discard;
+	void tsumo(Player player)
+	in
+	{
+		assert(player == currentPlayer);
 	}
-	
-	void tsumo()
+	body
 	{
 		flipOverWinningTiles();
-		if(hasMahjong)
+		if(player.isMahjong)
 		{
 			info("Player ", cast(Kanji)currentPlayer.getWind, " won");
 			_status = Status.Mahjong;
@@ -170,13 +167,7 @@ class Metagame
 		}
 	}
 
-	void discardTile(UUID discard)
-	{
-		currentPlayer.discard(discard);
-		nextTurn;
-	}
-	
-	private void nextTurn()
+	void advanceTurn()
 	{
 		if(isExhaustiveDraw)
 		{
@@ -191,7 +182,12 @@ class Metagame
 		}
 	}
 
-	private bool isExhaustiveDraw()
+	bool isAbortiveDraw()
+	{
+		return false;
+	}
+
+	bool isExhaustiveDraw()
 	{
 		return wall.length <= gameOpts.deadWallLength;
 	}
@@ -249,10 +245,6 @@ class Metagame
      Random useful functions.
    */
 
-   private bool hasMahjong()
-   {
-     return currentPlayer.isMahjong;
-   }
 
    private void flipOverWinningTiles()
    {
@@ -264,66 +256,6 @@ class Metagame
           player.closeHand; 
      }
    }
-
-   /*
-      Dump everything related to claiming tiles here.
-   */ 
-
-   private bool _ponnable = false;
-   private bool _chiable = false;
-   private bool _kannable = false;
-   private bool _ronnable = false;
-
-   bool ponnable() { return _ponnable; }
-   bool chiable() { return _chiable; }
-   bool kannable() { return _kannable; }
-   bool ronnable() { return _ronnable; }
-
-   private int[] canClaimTile = [-1]; // The playerLocations that can claim a tile.
-
-   private bool claimable()
-   {
-     return ponnable || chiable || kannable || ronnable;
-   }
-   private int[] isPonnable(const Tile discard)
-   { /*
-        Checks whether a discard can be ponned and returns the player location (.bottom, .right, .etc). If the tile cannot be ponned, it returns a -1.
-     */
-     // Start checking for pons at next player.
-     for(int i = _turn+1; i < _turn + gameOpts.amountOfPlayers; ++i)
-     {
-        if(players[i % gameOpts.amountOfPlayers].isPonnable(discard))
-        {
-          trace(cast(playerLocation)(i % gameOpts.amountOfPlayers), " could have ponned that one.");
-          break;
-        }
-     }
-     canClaimTile = [-1];
-     return canClaimTile;
-   } 
-
-   private int[] isRonnable(Tile discard)
-   { /*
-       Checks whether the discard can be ronned by any player.
-     */
-     // Start checking for rons at the next player.
-     _ronnable = false;
-     canClaimTile = [];
-     for(int i = _turn + 1; i < _turn + gameOpts.amountOfPlayers; ++i)
-     {
-        int pl = i % gameOpts.amountOfPlayers;
-        if(players[pl].isRonnable(discard))
-        {
-           _ronnable = true;
-           canClaimTile ~= pl;
-           trace(cast(playerLocation) pl , "can ron it!"); 
-        }
-     }
-
-     if(!_ronnable)
-        canClaimTile = [-1];
-     return canClaimTile;
-   } 
 }
 
 class BambooMetagame : Metagame
