@@ -8,17 +8,16 @@ class ChiFlow : Flow
 	this(Tile tile, Metagame game)
 	{
 		_tile = tile;
-		_game = game;
+		metagame = game;
 	}
 
 	override void advanceIfDone()
 	{
-		switchFlow(new TurnEndFlow(_game));
+		switchFlow(new TurnEndFlow(metagame));
 	}
 
 	private:
 		Tile _tile;
-		Metagame _game;
 }
 
 class ChiEvent

@@ -55,9 +55,9 @@ private void startBambooBattle()
 
 private void startGame(GameMode gameMode)
 {
-	auto console = ConsoleFront.boot;
-	auto gameFronts = console.setUp(gameMode);
-	controller = new SinglePlayerController(controller.getWindow, gameFronts);
+	//auto console = ConsoleFront.boot;
+	//auto gameFronts = console.setUp(gameMode);
+	//controller = new SinglePlayerController(controller.getWindow, gameFronts);
 	trace("Swapped controller");
 }
 

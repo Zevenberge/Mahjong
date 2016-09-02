@@ -18,3 +18,10 @@
 .dub
 docs.json
 __dummy.html
+
+# Coverage
+..-..-..*
+source-*
+
+# Mono
+Mahjong.*

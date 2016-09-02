@@ -1,6 +1,7 @@
 module mahjong.engine.ai.turn;
 
 import std.experimental.logger;
+import std.random;
 import mahjong.engine.ai;
 import mahjong.engine.flow;
 

@@ -40,7 +40,7 @@ class TurnFlow : Flow
 		void discard(Tile tile)
 		{
 			_player.discard(tile);
-			_flow = new RonFlow;
+			_flow = new RonFlow(tile, _meta);
 		}
 
 		void claimTsumo()

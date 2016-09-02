@@ -9,7 +9,8 @@ import mahjong.engine.ai;
 import mahjong.engine.gamefront;
 import mahjong.graphics.controllers.game.gamecontroller;
 
-class SinglePlayerController : GameController
+/+class SinglePlayerController : GameController
+
 {
 	this(RenderWindow window, GameFront[] gameFronts)
 	{
@@ -35,4 +36,4 @@ class SinglePlayerController : GameController
 		trace("Initialised AI");
 	}
 	private AI[] _ais;
-}
+}+/

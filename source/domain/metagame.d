@@ -22,11 +22,16 @@ class Metagame
      Preparation of the game.
    */
 
-	Player currentPlayer() { return players[_turn]; }
+	Player currentPlayer() @property { return players[_turn]; }
 	Player[] players; 
 	Wall wall;
 	PlayerWinds leadingWind;
 	uint round;
+
+	this(Player[] players)
+	{
+		this.players = players;
+	}
 
 	bool hasStarted()
 	{
@@ -35,7 +40,7 @@ class Metagame
 	void initialise()
 	{
 		info("Initialising metagame");
-		constructPlayers;
+		placePlayers;
 		trace("Constructed players");
 		setPlayers(uniform(0, gameOpts.amountOfPlayers));
 		info("Initialised metagame");
@@ -89,17 +94,14 @@ class Metagame
 		return new Wall;
 	}
 
-   private void constructPlayers()
-   { // FIXME: Encapsulate this in the player class.
-     for(int i=0; i < gameOpts.amountOfPlayers;++i)
-      {
-      // TODO: Idea: Make a number of preset profiles that can be loaded. E.g. player1avatar = Sakura.avatar;
-        trace("Constructing player ", i);
-        auto player = new Player;
-        player.playLoc = i;
-        trace(player.name);
-        players ~= player;
-      }
+   private void placePlayers()
+   { 
+		foreach(i, player; players)
+		{
+        	trace("Placing player \"", player.name, "\" (", i, ")");
+        	player.playLoc = i.to!int;
+
+		}
    }
 
    private void distributeTiles()
@@ -260,6 +262,11 @@ class Metagame
 
 class BambooMetagame : Metagame
 {
+	this(Player[] players)
+	{
+		super(players);
+	}
+
 	override Wall getWall()
 	{
 		return new BambooWall;
@@ -268,6 +275,11 @@ class BambooMetagame : Metagame
 
 class EightPlayerMetagame : Metagame
 {
+	this(Player[] players)
+	{
+		super(players);
+	}
+
 	override Wall getWall()
 	{
 		return new EightPlayerWall;

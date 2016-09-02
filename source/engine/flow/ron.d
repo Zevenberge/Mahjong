@@ -8,17 +8,16 @@ class RonFlow : Flow
 	this(Tile tile, Metagame game)
 	{
 		_tile = tile;
-		_game = game;
+		metagame = game;
 	}
 
 	override void advanceIfDone()
 	{
-		switchFlow(new PonFlow(_tile, _game));
+		switchFlow(new PonFlow(_tile, metagame));
 	}
 		
 	private:
 		Tile _tile;
-		Metagame _game;
 }
 
 class RonEvent

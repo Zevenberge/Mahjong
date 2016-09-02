@@ -11,7 +11,7 @@ import mahjong.engine.enums.game;
 import mahjong.engine.gamefront;
 import mahjong.engine.mahjong;
 
-class AI
+/+class AI
 {
 	void interact()
 	{
@@ -68,4 +68,4 @@ class RandomAI : AI
 		}
 	}
 }
-
++/

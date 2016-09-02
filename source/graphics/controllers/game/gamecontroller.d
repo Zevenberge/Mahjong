@@ -13,7 +13,7 @@ import mahjong.graphics.drawing.tile;
 import mahjong.graphics.menu;
 import mahjong.graphics.selections.selectablehand;
 
-abstract class GameController : Controller
+/+abstract class GameController : Controller
 {
 	protected this(RenderWindow window, GameFront[] gameFronts)
 	{
@@ -127,7 +127,7 @@ abstract class GameController : Controller
 	}
 	
 	private SelectableHand _hand;
-}
+}+/
 
 
 

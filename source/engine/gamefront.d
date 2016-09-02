@@ -11,13 +11,14 @@ import mahjong.domain.player;
 import mahjong.engine.enums.game;
 import mahjong.engine.opts;
 
+// TODO refactor
 /++
 	GameFront is the front-end of the game engine. The 
 	controllers and AI talk to this when they want to
 	play the game. Game logic then takes care of the rest.
 +/
 
-class GameFront
+/+class GameFront
 {
 	private this(Metagame metagame, UUID playerId)
 	{
@@ -41,7 +42,7 @@ class GameFront
 	{
 		if(!isAllowed(Interaction.Draw)) return;
 		trace("Drawing tile");
-		metagame.drawTile;
+		//metagame.drawTile;
 	}
 	
 	void claimChi()
@@ -68,14 +69,14 @@ class GameFront
 	{
 		if(!isAllowed(Interaction.Discard)) return;
 		trace("Tsumo");
-		metagame.tsumo;
+		//metagame.tsumo;
 	}
 	
 	void discard(UUID tile)
 	{
 		if(!isAllowed(Interaction.Discard)) return;
 		trace("Discarding tile ", tile);
-		metagame.discardTile(tile);
+		//metagame.discardTile(tile);
 	}
 	
 	bool isTurn()
@@ -172,7 +173,7 @@ class ConsoleFront
 		{
 			case Riichi:
 				gameOpts = new DefaultGameOpts;
-				return new Metagame;
+				return gameOpts.createMetagame();
 			case Bamboo:
 				gameOpts = new BambooOpts;
 				return new BambooMetagame;
@@ -181,4 +182,6 @@ class ConsoleFront
 				return new EightPlayerMetagame;
 		}
 	}
-}
+}+/
+
+

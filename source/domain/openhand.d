@@ -73,39 +73,6 @@ class OpenHand
     selections[i].size = Vector2f(position.width + 2*selectionMargin, position.height + 2*selectionMargin);
   }
 
-  // FIXME: what is this function doing here?
-  bool navigate(int key, ref Metagame meta)
-  {
-     bool isClaimed = false;
-     enum chi {next = 1, prev = -1}
-     switch(key)
-     {
-       case Keyboard.Key.Left:
-         if(meta.chiable)
-         {
-           navigateChi(chi.prev, meta);
-         }
-         break;
-       case Keyboard.Key.Right, Keyboard.Key.Space:
-         if(meta.chiable)
-         {
-           navigateChi(chi.next, meta);
-         }
-         break;
-       case Keyboard.Key.Return:
-         isClaimed = true;
-         return isClaimed;
-       default:
-         break;
-     }
-     return isClaimed;
-  }
-
-  void navigateChi(int direction, ref Metagame meta)
-  {
-//TODO FIXME
-  }
- 
   public void drawSelections(ref RenderWindow window)
   {
      foreach(rectangle; selections)

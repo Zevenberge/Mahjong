@@ -1,6 +1,8 @@
 module mahjong.engine.opts.bambooopts;
 
+import mahjong.domain;
 import mahjong.domain.enums.game;
+import mahjong.engine.flow;
 import mahjong.engine.opts;
 
 class BambooOpts : DefaultGameOpts
@@ -17,4 +19,9 @@ class BambooOpts : DefaultGameOpts
 	{
 		return GameMode.Bamboo;
 	}
+	override Metagame createMetagame(Delegator[] delegators) 
+	{
+		return new BambooMetagame(createPlayers(delegators));
+	}
+
 }

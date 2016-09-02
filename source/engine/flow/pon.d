@@ -8,17 +8,16 @@ class PonFlow : Flow
 	this(Tile tile, Metagame game)
 	{
 		_tile = tile;
-		_game = game;
+		metagame = game;
 	}
 
 	override void advanceIfDone()
 	{
-		switchFlow(new ChiFlow(_tile, _game));
+		switchFlow(new ChiFlow(_tile, metagame));
 	}
 	
 	private:
 		Tile _tile;
-		Metagame _game;
 }
 
 class PonEvent
