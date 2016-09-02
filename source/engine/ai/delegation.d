@@ -5,7 +5,7 @@ import mahjong.engine.flow;
 
 class AiDelegator : Delegator
 {
-	override handle(TurnEvent event)
+	override void handle(TurnEvent event)
 	{
 		playTurn(event);
 	}

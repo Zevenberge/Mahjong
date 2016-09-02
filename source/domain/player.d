@@ -119,8 +119,10 @@ class Player
 		game.closeHand();
 	}
 
-	override bool opEquals(Player p)
+	override bool opEquals(Object o)
 	{
+		auto p = cast(Player)o;
+		if(p is null) return false;
 		return p.id == id;
 	}
 }
