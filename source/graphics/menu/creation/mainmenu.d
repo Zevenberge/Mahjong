@@ -6,7 +6,7 @@ import mahjong.domain.enums.game;
 import mahjong.engine.gamefront;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.placeholdercontroller;
-import mahjong.graphics.controllers.game.singleplayercontroller;
+import mahjong.graphics.controllers.game;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;;
 import mahjong.graphics.menu.mainmenu;

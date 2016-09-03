@@ -1,33 +1,33 @@
 module mahjong.graphics.controllers.game;
 
-public import mahjong.graphics.controllers.game.gamecontroller;
-public import mahjong.graphics.controllers.game.singleplayercontroller;
+public import mahjong.graphics.controllers.game.idle;
+public import mahjong.graphics.controllers.game.turn;
 
 import dsfml.graphics;
-import mahjong.engine.flow;
+import mahjong.domain;
 import mahjong.graphics.controllers.controller;
+import mahjong.graphics.controllers.menu;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.player;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.menu;
 
-class GameController(T : Flow) : Controller
+class GameController : Controller
 {
-	protected this(RenderWindow window, T flow)
+	protected this(RenderWindow window, Metagame metagame)
 	{
 		super(window);
-		this.flow = flow;
+		_metagame = metagame;
 	}
 
-	protected T flow;
+	protected Metagame _metagame;
 
 	override void draw()
 	{
 		_window.clear;
 		drawGameBg(_window);
-		if(_hand !is null) _hand.draw(_window);
-		_ownGameFront.metagame.draw(_window);
+		_metagame.draw(_window);
 	}
 
 	final override bool handleKeyEvent(Event.KeyEvent key)
@@ -38,7 +38,7 @@ class GameController(T : Flow) : Controller
 				pauseGame;
 				break;
 			default:
-				handleGameKey;
+				handleGameKey(key);
 				break;
 		}
 		return false;
