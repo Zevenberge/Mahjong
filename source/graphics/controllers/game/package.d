@@ -5,6 +5,7 @@ public import mahjong.graphics.controllers.game.turn;
 
 import dsfml.graphics;
 import mahjong.domain;
+import mahjong.engine.flow;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu;
 import mahjong.graphics.drawing.background;
@@ -52,4 +53,14 @@ class GameController : Controller
 	}
 
 	protected abstract void handleGameKey(Event.KeyEvent key);
+
+	override void roundUp() 
+	{
+		// Do nothing
+	}
+
+	override void yield() 
+	{
+		flow.advanceIfDone;
+	}
 }

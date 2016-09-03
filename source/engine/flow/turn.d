@@ -13,7 +13,7 @@ class TurnFlow : Flow
 	{
 		_player = player;
 		_meta = meta;
-		_event = new TurnEvent(this, player);
+		_event = new TurnEvent(this, meta, player);
 		_player.delegator.handle(_event);
 	}
 	
@@ -53,16 +53,18 @@ class TurnFlow : Flow
 
 class TurnEvent
 {
-	this(TurnFlow flow, Player player)
+	this(TurnFlow flow, Metagame metagame, Player player)
 	{
 		_flow = flow;
 		this.player = player;
+		this.metagame = metagame;
 	}	
 	private TurnFlow _flow;
 	
 	private bool isHandled = false;
 	
 	Player player;
+	Metagame metagame;
 	
 	void discard(Tile tile)
 	in
