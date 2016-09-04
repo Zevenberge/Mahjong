@@ -14,7 +14,7 @@ class TurnFlow : Flow
 		_player = player;
 		_meta = meta;
 		_event = new TurnEvent(this, meta, player);
-		_player.delegator.handle(_event);
+		_player.eventHandler.handle(_event);
 	}
 	
 	override void advanceIfDone()

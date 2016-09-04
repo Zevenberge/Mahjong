@@ -19,7 +19,7 @@ class BambooOpts : DefaultGameOpts
 	{
 		return GameMode.Bamboo;
 	}
-	override Metagame createMetagame(Delegator[] delegators) 
+	override Metagame createMetagame(GameEventHandler[] delegators) 
 	{
 		return new BambooMetagame(createPlayers(delegators));
 	}

@@ -1,6 +1,6 @@
 module mahjong.engine.ai;
 
-public import mahjong.engine.ai.delegation;
+public import mahjong.engine.ai.eventhandler;
 public import mahjong.engine.ai.turn;
 
 import std.experimental.logger;

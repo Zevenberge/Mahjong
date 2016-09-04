@@ -26,6 +26,7 @@ class Metagame
 	Player[] players; 
 	Wall wall;
 	PlayerWinds leadingWind;
+	private int _initialWind;
 	uint round;
 
 	this(Player[] players)
@@ -41,32 +42,32 @@ class Metagame
 	{
 		info("Initialising metagame");
 		placePlayers;
+		_initialWind = uniform(0, gameOpts.amountOfPlayers); 
 		trace("Constructed players");
-		setPlayers(uniform(0, gameOpts.amountOfPlayers));
 		info("Initialised metagame");
 	}
 	void nextRound()
 	{
 		info("Moving to the next round");
-		setPlayers(players[playerLocation.bottom].getWind);
+		setPlayers;
 		emit;
 	}
 	
 	mixin Signal!();
 	
-	private void setPlayers(int initialWind)
+	private void setPlayers()
 	{
 		_status = Status.NewGame;
 		leadingWind = PlayerWinds.east;
 		round = 1;
 		info("Setting up the game");
-		setPlayersGame(initialWind);
+		setPlayersGame;
 		trace("Setting up the wall.");
 		wall = getWall;
 		wall.setUp;
 		info("Preparations are finished.");
 	}
-	void beginGame()
+	void beginRound()
 	{
 		wall.dice;
 		distributeTiles;
@@ -74,20 +75,13 @@ class Metagame
 		_status = Status.Running;
 
 	}
-   private void setPlayersGame(int initialWind)
-   {
-     foreach(player; players) // Re-initialise the players' game.
-     { 
-       player.firstGame(initialWind % gameOpts.amountOfPlayers);
-       ++initialWind;
-     }
-   }
-
-   void reset()
-   { 
-     int initialWind = uniform(0, gameOpts.amountOfPlayers); 
-     setPlayers(initialWind);
-   }
+	private void setPlayersGame()
+	{
+		foreach(int i, player; players) // Re-initialise the players' game.
+		{ 
+			player.startGame((_initialWind + i) % gameOpts.amountOfPlayers);
+		}
+	}
    
 	protected Wall getWall()
 	{

@@ -19,17 +19,18 @@ class Player
 	int score; 
 
 	Ingame game; // Resets after every round.
-	Delegator delegator; // Allows for distribution of the flow logic
+	GameEventHandler eventHandler; // Allows for distribution of the flow logic
 
-	this(Delegator delegator)
+	this(GameEventHandler eventHandler)
 	{
 		id = randomUUID;
-		this.delegator = delegator;
+		score = gameOpts.initialScore;
+		this.eventHandler = eventHandler;
 	}
-	this(Delegator delegator, dchar[] name)
+	this(GameEventHandler eventHandler, dchar[] name)
 	{
 		this.name = name;
-		this(delegator);
+		this(eventHandler);
 	}
 
 	void nextRound(bool passWinds)
@@ -38,15 +39,9 @@ class Player
 		startGame(wind);
 	}
 
-	private void startGame(int wind)
+	void startGame(int wind)
 	{
 		game = new Ingame(wind);
-	}
-
-	void firstGame(int initialWind)
-	{
-		score = gameOpts.initialScore;
-		startGame(initialWind);
 	}
 
   int getWind()
