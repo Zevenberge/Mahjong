@@ -33,9 +33,7 @@ unittest
 	
 	auto player = new Player(new TestEventHandler);
 	player.startGame(Winds.east);
-	Player[] players;
-	players ~= player;
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame([player]);
 	auto wall = new Wall;
 	wall.setUp;
 	writeln("Setup finished.");
