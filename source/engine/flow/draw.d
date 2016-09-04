@@ -31,8 +31,8 @@ unittest
 	writeln("Testing draw flow.");
 	gameOpts = new DefaultGameOpts ;
 	
-	auto player = new Player(new TestDelegator);
-	player.firstGame(Winds.east);
+	auto player = new Player(new TestEventHandler);
+	player.startGame(Winds.east);
 	Player[] players;
 	players ~= player;
 	auto metagame = new Metagame(players);
