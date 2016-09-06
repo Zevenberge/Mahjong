@@ -18,11 +18,12 @@ import mahjong.graphics.enums.kanji;
 
 class Metagame
 {
-   /*
-     Preparation of the game.
-   */
 
-	Player currentPlayer() @property { return players[_turn]; }
+	Player currentPlayer() @property 
+	{ 
+		return _turn == -1 ? null : players[_turn]; 
+	}
+
 	Player[] players; 
 	Wall wall;
 	PlayerWinds leadingWind;
@@ -32,6 +33,7 @@ class Metagame
 	this(Player[] players)
 	{
 		this.players = players;
+		initialise;
 	}
 
 	bool hasStarted()
@@ -42,14 +44,19 @@ class Metagame
 	{
 		info("Initialising metagame");
 		placePlayers;
-		_initialWind = uniform(0, gameOpts.amountOfPlayers); 
+		_initialWind = uniform(0, players.length).to!int; 
 		trace("Constructed players");
 		info("Initialised metagame");
 	}
+
+	/++
+	 + Sets up the round such that it can be started.
+	 +/
 	void nextRound()
 	{
 		info("Moving to the next round");
 		setPlayers;
+		removeTurnPlayer;
 		emit;
 	}
 	
@@ -67,11 +74,14 @@ class Metagame
 		wall.setUp;
 		info("Preparations are finished.");
 	}
+	/++
+	 + Begins the round, assuming that it is initialised.
+	 +/
 	void beginRound()
 	{
 		wall.dice;
 		distributeTiles;
-		setFirstTurn;
+		setTurnPlayerToEast;
 		_status = Status.Running;
 
 	}
@@ -130,7 +140,7 @@ class Metagame
 
 	private Phase _phase = Phase.Draw;
 
-	private void setFirstTurn() 
+	private void setTurnPlayerToEast() 
 	{
 		foreach(i, player; players)
 		{
@@ -141,6 +151,11 @@ class Metagame
 				break;
 			}
 		}
+	}
+
+	private void removeTurnPlayer()
+	{
+		_turn = -1;
 	}
 
 	void tsumo(Player player)
@@ -223,7 +238,7 @@ class Metagame
      }
    }
 
-	Phase phase()
+	Phase phase() @property
 	{
 		return _phase;
 	}
