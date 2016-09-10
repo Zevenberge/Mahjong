@@ -54,6 +54,7 @@ unittest
 {
 	import std.stdio;
 	import mahjong.engine.opts;
+	import mahjong.test.utils;
 
 	writeln("Testing round start flow");
 	gameOpts = new DefaultGameOpts;
@@ -63,15 +64,15 @@ unittest
 	auto metagame = new Metagame([player]);
 	auto flow = new RoundStartFlow(metagame);
 	switchFlow(flow);
-	assert(typeid(.flow) == typeid(RoundStartFlow), "RoundStartFlow should be set as flow");
+	assert(.flow.isOfType!RoundStartFlow, "RoundStartFlow should be set as flow");
 	assert(metagame.currentPlayer is null, "As the game is not started, there should be no turn player");
 	writeln("Testing whether the flow advances when it should not");
 	flow.advanceIfDone;
-	assert(typeid(.flow) == typeid(RoundStartFlow), "As the players are not ready, the flow should not have advanced");
+	assert(.flow.isOfType!RoundStartFlow, "As the players are not ready, the flow should not have advanced");
 	eventHandler.roundStartEvent.isReady = true;
 	writeln("Testing whether the flow advances when it should");
 	flow.advanceIfDone;
-	assert(typeid(.flow) == typeid(DrawFlow), "As the players are ready, the flow should have advanced to the start of the turn (draw flow)");
+	assert(.flow.isOfType!DrawFlow, "As the players are ready, the flow should have advanced to the start of the turn (draw flow)");
 	assert(metagame.currentPlayer == player, "The only player should be in turn now");
 	writeln("Round start flow test succeeded.");
 }

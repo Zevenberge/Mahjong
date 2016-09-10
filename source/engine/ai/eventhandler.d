@@ -13,4 +13,8 @@ class AiEventHandler : GameEventHandler
 	{
 		event.isReady = true;
 	}
+	override void handle(RoundStartEvent event)
+	{
+		event.isReady = true;
+	}
 }

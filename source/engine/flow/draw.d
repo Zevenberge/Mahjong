@@ -18,7 +18,7 @@ class DrawFlow : Flow
 	override void advanceIfDone()
 	{
 		_player.drawTile(_wall);
-		switchFlow(new TurnFlow(_player, metagame));
+		switchFlow(new TurnFlow(_player, metagame, _player.getLastTile));
 	}
 }
 ///
@@ -27,6 +27,7 @@ unittest
 	import std.stdio;
 	import mahjong.domain.enums.tile;
 	import mahjong.engine.opts;
+	import mahjong.test.utils;
 	
 	writeln("Testing draw flow.");
 	gameOpts = new DefaultGameOpts ;
@@ -44,6 +45,7 @@ unittest
 	flow.advanceIfDone;
 	assert(wallLength - 1 == wall.length, "A tile should be taken from the wall.");
 	assert(player.game.closedHand.length == 1, "The player should be given a tile.");
-	assert(typeid(flow) == typeid(TurnFlow));
+	assert(flow.isOfType!TurnFlow, 
+		"After drawing, the flow should have switched to the turn");
 	writeln("Draw flow test succeeded.");
 }

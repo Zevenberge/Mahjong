@@ -5,6 +5,7 @@ import std.experimental.logger;
 import std.array;
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.opts;
 
 class GameStartFlow : Flow
 {
@@ -16,8 +17,7 @@ class GameStartFlow : Flow
 	body
 	{
 		info("Starting game.");
-		auto players = eventHandlers.map!(d => new Player(d)).array;
-		metagame = new Metagame(players);
+		metagame = gameOpts.createMetagame(eventHandlers);
 		_events = eventHandlers.map!((handler) 
 			{
 				auto event = new GameStartEvent(metagame);
@@ -59,6 +59,7 @@ unittest
 {
 	import std.stdio;
 	import mahjong.engine.opts;
+	import mahjong.test.utils;
 
 	writeln("Testing game start flow");
 	gameOpts = new DefaultGameOpts ;
@@ -68,13 +69,13 @@ unittest
 	auto flow = new GameStartFlow([eventHandler]);
 	assert(flow.metagame.players.length == 1, "One player should have been created");
 	switchFlow(flow);
-	assert(typeid(.flow) == typeid(GameStartFlow), "GameStartFlow should be set as flow");
+	assert(.flow.isOfType!GameStartFlow, "GameStartFlow should be set as flow");
 	writeln("Testing whether the flow advances when it should not");
 	flow.advanceIfDone;
-	assert(typeid(.flow) == typeid(GameStartFlow), "As the players are not ready, the flow should not have advanced");
+	assert(.flow.isOfType!GameStartFlow, "As the players are not ready, the flow should not have advanced");
 	eventHandler.gameStartEvent.isReady = true;
 	writeln("Testing whether the flow advances when it should");
 	flow.advanceIfDone;
-	assert(typeid(.flow) == typeid(RoundStartFlow), "As the players are ready, the flow should have advanced to the start of the round");
+	assert(.flow.isOfType!RoundStartFlow, "As the players are ready, the flow should have advanced to the start of the round");
 	writeln("Game start flow test succeeded.");
 }

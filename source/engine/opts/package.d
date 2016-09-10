@@ -18,5 +18,5 @@ interface Opts
 	int amountOfPlayers();
 	int initialScore();
 	GameMode gameMode();
-	Metagame createMetagame(GameEventHandler[] delegators);
+	Metagame createMetagame(GameEventHandler[] eventHandlers);
 }

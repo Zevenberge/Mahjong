@@ -8,8 +8,19 @@ class UiEventHandler : GameEventHandler
 {
 	override void handle(TurnEvent event) 
 	{
-		trace("UI: Handling turn event by switching controller");
+		info("UI: Handling turn event by switching controller");
 		controller = new TurnController(controller.getWindow, event.metagame, event);
 	}
+	
+	override void handle(GameStartEvent event)
+	{
+		info("UI: Handling game start event by creating an idle controller");
+		controller = new IdleController(controller.getWindow, event.metagame);
+		event.isReady = true;
+	}
 
+	override void handle(RoundStartEvent event)
+	{
+		event.isReady = true;
+	}
 }

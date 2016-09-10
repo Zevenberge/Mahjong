@@ -26,7 +26,7 @@ class Flow
 
 Flow flow;
 
-package void switchFlow(Flow newFlow)
+void switchFlow(Flow newFlow)
 {
 	flow = newFlow;
 }

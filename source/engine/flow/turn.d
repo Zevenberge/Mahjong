@@ -9,11 +9,11 @@ import mahjong.engine.flow;
 
 class TurnFlow : Flow
 {
-	this(Player player, Metagame meta)
+	this(Player player, Metagame meta, Tile drawnTile)
 	{
 		_player = player;
 		_meta = meta;
-		_event = new TurnEvent(this, meta, player);
+		_event = new TurnEvent(this, meta, player, player.getLastTile);
 		_player.eventHandler.handle(_event);
 	}
 	
@@ -31,7 +31,7 @@ class TurnFlow : Flow
 		Player _player;
 		Metagame _meta;
 		Flow _flow;
-	
+
 		void advance()
 		{
 			switchFlow(_flow);
@@ -53,11 +53,12 @@ class TurnFlow : Flow
 
 class TurnEvent
 {
-	this(TurnFlow flow, Metagame metagame, Player player)
+	this(TurnFlow flow, Metagame metagame, Player player, Tile drawnTile)
 	{
 		_flow = flow;
 		this.player = player;
 		this.metagame = metagame;
+		this.drawnTile = drawnTile;
 	}	
 	private TurnFlow _flow;
 	
@@ -65,6 +66,7 @@ class TurnEvent
 	
 	Player player;
 	Metagame metagame;
+	Tile drawnTile;
 	
 	void discard(Tile tile)
 	in

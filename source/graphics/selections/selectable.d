@@ -1,18 +1,37 @@
 module mahjong.graphics.selections.selectable;
 
 import dsfml.graphics;
-import mahjong.graphics.drawing.tile;
-import mahjong.graphics.enums.geometry;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.selections.selection;
-import mahjong.graphics.utils;
 
 class Selectable(T)
 {
+	mixin Select!T;
+
+	this()
+	{
+		initSelection;
+	}
+
+  FloatRect getGlobalBounds()
+  {
+    return calcGlobalBounds(opts);
+  }
+
+}
+
+mixin template Select(T)
+{
+	// HACK: Tile should not be imported here?
+	import mahjong.graphics.drawing.tile;
+	import mahjong.graphics.enums.geometry;
+	import mahjong.graphics.manipulation;
+	import mahjong.graphics.utils;
+
 	T[] opts;
 	Selection selection;
    
-	this()
+	void initSelection()
 	{
 		selection = Selection(new RectangleShape, 0);
 		selection.visual.fillColor = Color.Red;
@@ -52,10 +71,4 @@ class Selectable(T)
 		selection.position = i;
 		selectOpt;
 	}
-
-  FloatRect getGlobalBounds()
-  {
-    return calcGlobalBounds(opts);
-  }
-
 }

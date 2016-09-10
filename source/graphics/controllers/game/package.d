@@ -56,7 +56,7 @@ class GameController : Controller
 
 	override void roundUp() 
 	{
-		// Do nothing
+		.flow = null;
 	}
 
 	override void yield() 
