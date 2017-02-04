@@ -6,6 +6,7 @@ import std.experimental.logger;
 import std.uuid;
 import mahjong.domain;
 import mahjong.domain.enums.tile;
+import mahjong.domain.exceptions;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 
@@ -154,7 +155,7 @@ class Ingame
 		bool found = false;
 		foreach(tile; closedHand.tiles)
 		{
-			if(isIdentical(tile,discardedTile))
+			if(tile.isIdentical(discardedTile))
 			{
 				found = true;
 				discard(i);
@@ -164,7 +165,7 @@ class Ingame
 		}
 		if(!found)
 		{
-			throw new Exception("Identical tiles not found!");
+			throw new TileNotFoundException(discardedTile);
 		}
 	}
 	ref Tile getLastDiscard()

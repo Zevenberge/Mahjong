@@ -156,32 +156,6 @@ body
 	}
 }
 
-deprecated bool isEqual(const Tile tileA, const Tile tileB)
-{
-	return (tileA.type == tileB.type) && (tileA.value == tileB.value);
-}
-unittest
-{
-	import std.stdio;
-	writeln("Checking the isEqual function for tiles...");
-	Tile[] wall;
-	setUpWall(wall);
-	int i = uniform(0, to!int(wall.length));
-	assert(isEqual(wall[i], wall[i]));
-	writeln(" The isEqual function is correct.");
-}
-
-deprecated bool isIdentical(const ref Tile tileA, const ref Tile tileB)
-{
-	if((tileA.id == tileB.id) && isEqual(tileA,tileB))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
 /**
  Checks whether tileB follows on tileA
  */
@@ -265,12 +239,12 @@ private bool isSevenPairs(const Tile[] hand)
 	{
 		if(hand.length > 2*i+2) 
 		{ // Check if no two pairs are the same, only if the hand size allows it.
-			if(isEqual(hand[2*i],hand[2*i+2]))
+			if(hand[2*i].hasEqualValue(hand[2*i+2]))
 			{ 
 				return false;
 			} // Return if we have three identical tiles.
 		}
-		if(!isEqual(hand[2*i],hand[2*i+1]))
+		if(!hand[2*i].hasEqualValue(hand[2*i+1]))
 		{ // Check whether is is a pair.
 			return false;
 		}  // If it is no pair, it is no seven pairs hand.
@@ -310,13 +284,13 @@ private bool isThirteenOrphans(const Tile[] hand)
 			default:
 				assert(false);
 		}
-		if(!isEqual(hand[i+pairs], honour)) //If the tile is not the honour we are looking for
+		if(!hand[i+pairs].hasEqualValue(honour)) //If the tile is not the honour we are looking for
 		{ 
 			return false;  
 		}
 		if((i + pairs + 1) < hand.length) 
 		{
-			if(isEqual(hand[i+pairs], hand[i+pairs+1])) // If we have a pair
+			if(hand[i+pairs].hasEqualValue(hand[i+pairs+1])) // If we have a pair
 			{
 				++pairs;
 				if(pairs > 1)
@@ -513,14 +487,17 @@ private bool scanEquals(ref Tile[] hand, ref Tile[] final_hand,  ref int pairs, 
 	   */
 	if(hand.length > distance)
 	{ 
-		if(!isEqual(hand[0],hand[distance])) 
-		{return false;}
+		if(!hand[0].hasEqualValue(hand[distance])) 
+		{
+			return false;
+		}
 		
 		final_hand ~= hand[0 .. distance+1];
 		hand = hand[distance+1 .. $];
 		++pairs;
 		return true;
-	} else { return false;}
+	}
+	return false;
 }
 unittest // Check whether the example hands are seen as mahjong hands.
 {
@@ -580,19 +557,6 @@ void sortHand(ref Tile[] hand)
 			break;
 		}
 	}
-}
-
-void toggle(ref bool foo)
-{
-	foo = !foo;
-}
-unittest
-{
-	bool foo = true;
-	toggle(foo); // foo is now false.
-	assert(!foo);
-	toggle(foo); // foo is again true.
-	assert(foo);
 }
 
 void swapTiles(ref Tile tileA, ref Tile tileB)
@@ -685,7 +649,7 @@ unittest{
 bool isIn(const Tile wanted, const Tile[] deck)
 {
 	foreach(tile; deck)
-		if(isEqual(tile, wanted))
+		if(tile.hasEqualValue(wanted))
 			return true;
 	return false;
 }
@@ -703,7 +667,7 @@ bool isIn(const ref Tile[] deck, const ref Tile wanted)
 {
 	foreach(tile; deck)
 	{
-		if(isEqual(tile, wanted))
+		if(tile.hasEqualValue(wanted))
 		{
 			return true;
 		}
@@ -714,7 +678,7 @@ bool isAnotherIn(const ref Tile[] deck, const ref Tile wanted)
 {
 	foreach(tile; deck)
 	{
-		if(isEqual(tile, wanted) && !isIdentical(tile, wanted))
+		if(tile.hasEqualValue(wanted) && !tile.isIdentical(wanted))
 		{
 			return true;
 		}

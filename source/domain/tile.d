@@ -59,12 +59,12 @@ class Tile
      	return(to!string(face));
     }
    
-	bool isIdentical(const Tile other) pure
+	bool isIdentical(const Tile other) pure const
 	{
 		return id == other.id;
 	}
 
-	bool hasEqualValue(const Tile other) pure
+	bool hasEqualValue(const Tile other) pure const
 	{
 		return type == other.type && value == other.value;
 	}
@@ -80,7 +80,6 @@ unittest
 
 unittest
 {
-	import mahjong.domain.enums.tile;
 	auto tile = new Tile;
 	tile.type = Types.wind;
 	assert(tile.isHonour, "Tile should have been an honour");
@@ -96,7 +95,6 @@ unittest
 
 unittest
 {
-	import mahjong.domain.enums.tile;
 	auto tile = new Tile;
 	tile.type = Types.character;
 	tile.value = Numbers.one;
@@ -123,4 +121,17 @@ unittest
 	tile.type = Types.dragon;
 	tile.value = Dragons.green;
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
+}
+
+unittest
+{
+	auto tileA = new Tile(Types.dragon, Dragons.green);
+	auto tileB = new Tile(Types.dragon, Dragons.green);
+	assert(tileA.hasEqualValue(tileB), "Equal tiles were not seen as equal");
+	tileB.value = Dragons.red;
+	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
+	tileB.type = Types.wind;
+	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
+	tileB.value = Dragons.green;
+	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
 }
