@@ -25,8 +25,7 @@ void draw(Player player, RenderTarget view, float rotation)
 	if(player.id !in _players)
 	{
 		trace("Adding new player.");
-		visual.initialise(defaultTexture, player.score, 
-			player.getWind.to!Kanji.to!string, rotation);
+		visual.initialise(defaultTexture, player, rotation);
 		_players[player.id] = visual;
 	}
 	else
@@ -34,7 +33,15 @@ void draw(Player player, RenderTarget view, float rotation)
 		visual = _players[player.id];
 	}
 	visual.draw(view);
-	player.game.drawIngame(view);
+	if(player.game !is null) player.game.drawIngame(view);
+}
+
+void updateWindsOfExistingPlayers()
+{
+	foreach(player; _players)
+	{
+		player.updateWind;
+	}
 }
 
 void clearPlayerCache()
@@ -57,6 +64,7 @@ private struct PlayerVisuals
 		Text _score;
 		int _numberedScore;
 		Text _wind;
+		Player _player;
 		
 		void initialiseNewTexture()
 		{
@@ -104,14 +112,13 @@ private struct PlayerVisuals
 			trace("Updated the score");
 		}
 
-		void initialiseWind(string wind)
+		void initialiseWind()
 		{
 			info("Initialising wind");
 			_wind = new Text;
 			_wind.setFont(kanjiFont);
 			_wind.setCharacterSize(windSize);
 			_wind.setColor(windColor);
-			updateWind(wind);
 			info("Initialised wind");
 		}
 		
@@ -145,14 +152,14 @@ private struct PlayerVisuals
 			view.draw(_sprite);
 		}
 		
-		void initialise(string iconFile, int score, string wind, float rotation)
+		void initialise(string iconFile, Player player, float rotation)
 		{
 			info("Initialising player visuals");
+			_player = player;
 			initialiseNewTexture;
 			initialiseIcon(iconFile);
 			initialiseScoreLabel;
-			initialiseScore(score);
-			initialiseWind(wind);
+			initialiseScore(player.score);
 			initialiseSprite(rotation);
 			info("Initialised player visuals");
 		}
@@ -165,20 +172,14 @@ private struct PlayerVisuals
 			trace("Updated score");
 		}
 		
-		void updateWind(string wind)
+		void updateWind()
 		{
+			auto wind = _player.getWind.to!Kanji.to!string;
+			if(_wind is null) initialiseWind;
 			trace("Updating wind");
 			_wind.setString(wind);
 			_wind.alignTopLeft(iconBounds);
 			trace("Updated wind");
-		}
-		
-		void update(Player player)
-		{
-			info("Updating player");
-			updateScore(player.score);
-			updateWind(player.getWind.to!Kanji.to!string);
-			info("Updated player");
 		}
 		
 		void redrawTexture()
@@ -190,7 +191,7 @@ private struct PlayerVisuals
 				draw(_icon);
 				draw(_scoreLabel);
 				draw(_score);
-				draw(_wind);
+				if(_wind !is null) draw(_wind);
 				display;
 			}
 			info("Redrawn the player texture");

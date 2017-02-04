@@ -46,66 +46,67 @@ class Player
 		game = new Ingame(wind);
 	}
 
-  int getWind()
-  {
-    return game.getWind();
-  }
+	int getWind()
+	{
+		if(game is null) return -1;
+		return game.getWind();
+	}
 
-  void drawTile(ref Wall wall)
-  {
-     this.game.drawTile(wall);
-  }
+	void drawTile(ref Wall wall)
+	{
+		this.game.drawTile(wall);
+	}
 
-  Tile getLastDiscard()
-  {
-     return game.getLastDiscard;
-  }
-  Tile getLastTile()
-  {
-     return game.getLastTile;
-  }
+	Tile getLastDiscard()
+	{
+		return game.getLastDiscard;
+	}
+	Tile getLastTile()
+	{
+		return game.getLastTile;
+	}
 
-  /*
-     Functions with regard to placing tiles and displays.
-  */
+	/*
+	 Functions with regard to placing tiles and displays.
+	 */
 
-  public void discard(T) (T disc)
-  {
-     game.discard(disc);
-  }
+	public void discard(T) (T disc)
+	{
+		game.discard(disc);
+	}
 
-   override string toString() const
-   {
-     return(format("%s-san",name));
-   }
+	override string toString() const
+	{
+		return(format("%s-san",name));
+	}
 
-   bool isMahjong()
-   {
-      return game.isMahjong();
-   }
+	bool isMahjong()
+	{
+		return game.isMahjong();
+	}
 
-   bool isTenpai()
-   {
-      return game.checkTenpai;
-   }
+	bool isTenpai()
+	{
+		return game.checkTenpai;
+	}
 
-   bool isNagashiMangan()
-   {
-      return game.isNagashiMangan;
-   }
+	bool isNagashiMangan()
+	{
+		return game.isNagashiMangan;
+	}
 
-/*
-   Functions with regard to claiming tiles.
-*/
+	/*
+	 Functions with regard to claiming tiles.
+	 */
 
-  bool isPonnable(const ref Tile discard)
-  {
-     return game.isPonnable(discard);
-  }
-  bool isRonnable(ref Tile discard)
-  { // FIXME: Try to make the chain of inputs const.
-     return game.isRonnable(discard);
-  }
+	bool isPonnable(const ref Tile discard)
+	{
+		return game.isPonnable(discard);
+	}
+	bool isRonnable(ref Tile discard)
+	{ // FIXME: Try to make the chain of inputs const.
+		return game.isRonnable(discard);
+	}
 
 	void showHand()
 	{

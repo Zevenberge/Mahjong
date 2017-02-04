@@ -28,6 +28,8 @@ class RoundStartFlow : Flow
 		{
 			info("All players are ready. Initialising game");
 			metagame.beginRound;
+			info("Poking hooks");
+			hooks.onRoundStarted;
 			info("Started round. Switching to draw flow");
 			switchFlow(new DrawFlow(metagame.currentPlayer, metagame, metagame.wall));
 		}
@@ -74,5 +76,6 @@ unittest
 	flow.advanceIfDone;
 	assert(.flow.isOfType!DrawFlow, "As the players are ready, the flow should have advanced to the start of the turn (draw flow)");
 	assert(metagame.currentPlayer == player, "The only player should be in turn now");
+	assert(metagame.round == 1, "The game should have started in the first round");
 	writeln("Round start flow test succeeded.");
 }

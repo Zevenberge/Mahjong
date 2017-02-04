@@ -242,10 +242,6 @@ class Metagame
 	{
 		return _phase;
 	}
-	bool isPhase(Phase phase)
-	{
-		return _phase == phase;
-	}
 
 	bool isTurn(UUID playerId)
 	{

@@ -4,6 +4,7 @@ import std.conv;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain.metagame;
+import mahjong.engine.enums.game;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
 import mahjong.graphics.conv;
@@ -20,6 +21,7 @@ alias drawGame = draw;
 void draw(Metagame game, RenderTarget target)
 {
 	drawPlayers(game, target);
+	if(game.status < Status.Running) return;
 	drawWal(game, target);
 	drawGameInfo(game, target);
 }
