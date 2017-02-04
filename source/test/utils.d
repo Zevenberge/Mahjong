@@ -2,8 +2,12 @@
 
 version(unittest)
 {
+	import std.experimental.logger;
+
 	bool isOfType(T, S)(S obj)
 	{
-		return cast(T)obj !is null;
+		auto result = cast(T)obj !is null;
+		if(!result) error("Expected ", T.stringof, " but was ", typeid(obj));
+		return result;
 	}
 }

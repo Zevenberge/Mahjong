@@ -1,5 +1,6 @@
 module mahjong.domain.player;
 
+import std.experimental.logger;
 import std.string;
 import std.uuid;
 
@@ -41,6 +42,7 @@ class Player
 
 	void startGame(int wind)
 	{
+		trace("Starting game for ", wind);
 		game = new Ingame(wind);
 	}
 

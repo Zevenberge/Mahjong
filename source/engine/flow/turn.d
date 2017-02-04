@@ -91,5 +91,72 @@ class TurnEvent
 	}
 }
 
+unittest
+{
+	import std.stdio;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
 
+	writeln("Testing flow of turn when nothing happened.");
+	auto eventHandler = new TestEventHandler;
+	auto player = new Player(eventHandler);
+	player.startGame(0);
+	auto metagame = new Metagame([player]);
+	auto tile = new Tile;
+	auto flow = new TurnFlow(player, metagame, tile);
+	switchFlow(flow);
+	assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
+	writeln("Testing whether the flow advances when it should not");
+	flow.advanceIfDone;
+	assert(.flow.isOfType!TurnFlow, "As the player is not ready, the flow should not have advanced");
+	writeln("Idle turn flow test succeeded");
+}
 
+unittest
+{
+	import std.stdio;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
+	import mahjong.domain.wall;
+
+	writeln("Testing flow of turn when discarding.");
+	gameOpts = new DefaultGameOpts;
+
+	auto eventHandler = new TestEventHandler;
+	auto player = new Player(eventHandler);
+	player.startGame(0);
+	auto metagame = new Metagame([player]);
+	auto tile = new Tile;
+	auto wall = new Wall;
+	wall.tiles ~= tile;
+	player.drawTile(wall);
+	auto flow = new TurnFlow(player, metagame, tile);
+	switchFlow(flow);
+	flow._event.discard(tile);
+	writeln("Testing whether the flow advances when it should");
+	flow.advanceIfDone;
+	assert(.flow.isOfType!RonFlow, "A tile is discarded, therefore the flow should move over to a ron.");
+	writeln("Turn to Ron flow test succeeded.");
+}
+
+unittest
+{
+	import std.stdio;
+	import mahjong.engine.mahjong;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
+	writeln("Testing flow of turn when claiming tsumo.");
+
+	auto eventHandler = new TestEventHandler;
+	auto player = new Player(eventHandler);
+	player.startGame(0);
+	auto metagame = new Metagame([player]);
+	auto tile = new Tile;
+	auto flow = new TurnFlow(player, metagame, tile);
+	switchFlow(flow);
+	player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
+	flow._event.claimTsumo;
+	flow.advanceIfDone;
+	assert(.flow.isOfType!MahjongFlow, "A tsumo is claimed, therefore the flow should move over to the defeault mahjong flow.");
+	writeln("Turn to Mahjong flow test succeeded.");
+}

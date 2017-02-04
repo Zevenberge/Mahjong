@@ -39,94 +39,87 @@ class Ingame
 		return wind;
 	}
 
+	
+	/*
+	 Normal dibsing functions.
+	 */
 
-/*
-   Normal dibsing functions.
-*/
+	bool isPonnable(const ref Tile discard)
+	{
+		int i=0;
+		foreach(tile; closedHand.tiles)
+		{
+			if(tile.hasEqualValue(discard))
+			{
+				if((i+1) < closedHand.tiles.length)
+				{
+					return closedHand.tiles[i+1].hasEqualValue(discard);
+				}
+			}
+			++i;  
+		}
+		return false;
+	}
 
-  bool isPonnable(const ref Tile discard)
-  {
-    int i=0;
-    foreach(tile; closedHand.tiles)
-    {
-      if(isEqual(tile, discard))
-      {
-        if((i+1) < closedHand.tiles.length)
-        {
-          if(isEqual(closedHand.tiles[i+1], discard))
-          {
-            return true;
-          }
-          else
-          {
-            return false;
-          }
-        }
-      }
-      ++i;  
-    }
-    return false;
-  }
+	/*
+	 Functions related to the mahjong call.
+	 */
 
-/*
-   Functions related to the mahjong call.
-*/
+	bool checkTenpai()
+	{ /*
+		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
+		   */
+		bool isTenpai = false;
+		auto tile = new Tile;
+		for(int t = Types.min; t <= Types.max; ++t)
+		{
+			tile.type = t;
+			for(int i = Numbers.min; i <= Numbers.max; ++i)
+			{
+				tile.value = i;
+				Tile[] temphand = closedHand.tiles ~ tile;
+				if(.scanHand(temphand, chis, pons))
+				{
+					isTenpai = true;
+				}
 
-  bool checkTenpai()
-  { /*
-      Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
-    */
-    bool isTenpai = false;
-    auto tile = new Tile;
-    for(int t = Types.min; t <= Types.max; ++t)
-    {
-      tile.type = t;
-      for(int i = Numbers.min; i <= Numbers.max; ++i)
-      {
-        tile.value = i;
-        Tile[] temphand = closedHand.tiles ~ tile;
-        if(.scanHand(temphand, chis, pons))
-        {
-          isTenpai = true;
-        }
+			}
+		}
+		this.isTenpai = isTenpai;
+		return isTenpai;
+	}
 
-      }
-    }
-    this.isTenpai = isTenpai;
-    return isTenpai;
-  }
+	bool isFuriten()
+	{
+		foreach(tile; discards)
+		{
+			if(.scanHand(closedHand.tiles ~ tile, pons, chis))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
-  public bool isFuriten()
-  {
-     foreach(tile; discards)
-     {
-       if(.scanHand(closedHand.tiles ~ tile, pons, chis))
-       {
-          return true;
-       }
-     }
-     return false;
-  }
+	bool isRonnable(ref Tile discard)
+	{
+		return scanHand(closedHand.tiles ~ discard) && !isFuriten ;
+	}
 
-  public bool isRonnable(ref Tile discard)
-  {
-    return scanHand(closedHand.tiles ~ discard) && !isFuriten ;
-  }
+	bool isMahjong()
+	{
+		return scanHand(closedHand.tiles);
+	}
 
-  public bool isMahjong()
-  {
-     return scanHand(closedHand.tiles);
-  }
+	private bool scanHand(Tile[] set)
+	{
+		return .scanHand(set, pons, chis);
+		//FIXME: take into account yaku requirement.
+	}
 
-  private bool scanHand(Tile[] set)
-  {
-     return .scanHand(set, pons, chis);
-     //FIXME: take into account yaku requirement.
-  }
-
-/*
-   Discard things you no longer need.
-*/
+	/*
+	 Discard things you no longer need.
+	 */
 	void discard(UUID discardId)
 	{
 		size_t index;
@@ -146,7 +139,7 @@ class Ingame
 		takeOutTile(closedHand.tiles, discards, discardedNr);
 		discards[$-1].origin = wind; // Sets the tile to be from the player who discarded it.
 		discards[$-1].open;
-		if( (!isHonour(discards[$-1])) && (!isTerminal(discards[$-1])) )
+		if( (!discards[$-1].isHonour) && (!discards[$-1].isTerminal) )
 		{
 			if(isNagashiMangan)
 			{
@@ -174,14 +167,14 @@ class Ingame
 			throw new Exception("Identical tiles not found!");
 		}
 	}
-  public ref Tile getLastDiscard()
-  {
-     return discards[$-1];
-  }
-  public ref Tile getLastTile()
-  {
-     return lastTile;
-  }
+	ref Tile getLastDiscard()
+	{
+		return discards[$-1];
+	}
+	ref Tile getLastTile()
+	{
+		return lastTile;
+	}
 
 	void closeHand()
 	{
