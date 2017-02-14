@@ -5,6 +5,7 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.mahjong;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
@@ -27,6 +28,7 @@ class TurnController : GameController
 	{
 		_window.clear;
 		drawGameBg(_window);
+		selectOpt;
 		selection.draw(_window);
 		_metagame.draw(_window);
 	}
@@ -37,9 +39,11 @@ class TurnController : GameController
 		{
 			case Left:
 				// TODO Move the selection left
+				selectPrevious;
 				break;
 			case Right:
 				// TODO Move the selection right
+				selectNext;
 				break;
 			case Return:
 				discardSelectedTile;
@@ -70,6 +74,8 @@ class TurnController : GameController
 	private void initialise()
 	{
 		trace("Initialising selection of turn controller");
+		_event.player.game.closedHand.open;
+		_event.player.game.closedHand.tiles.sortHand;
 		opts = _event.player.game.closedHand.tiles;
 		initSelection;
 		auto index = getIndexOfDrawnTile;
@@ -78,6 +84,7 @@ class TurnController : GameController
 
 	private int getIndexOfDrawnTile()
 	{
+		// TODO use std.algorithm.searching
 		int index;
 		foreach(i, tile; opts)
 		{

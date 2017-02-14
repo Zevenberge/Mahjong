@@ -37,8 +37,8 @@ class DefaultGameOpts : Opts
 	{
 		return new Metagame(createPlayers(delegators));
 	}
-	protected Player[] createPlayers(GameEventHandler[] delegators)
+	protected Player[] createPlayers(GameEventHandler[] eventHandlers)
 	{
-		return delegators.map!(d => new Player(d)).array;
+		return eventHandlers.map!(d => d.createPlayer).array;
 	}
 }

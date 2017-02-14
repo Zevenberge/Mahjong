@@ -1,5 +1,6 @@
 module mahjong.engine.flow.eventhandler;
 
+import mahjong.domain.player;
 import mahjong.engine.flow;
 
 class GameEventHandler
@@ -7,6 +8,10 @@ class GameEventHandler
 	abstract void handle(TurnEvent event);
 	abstract void handle(GameStartEvent event);
 	abstract void handle(RoundStartEvent event);
+	Player createPlayer()
+	{
+		return new Player(this);
+	}
 }
 
 version(unittest)
