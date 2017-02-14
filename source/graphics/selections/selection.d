@@ -7,7 +7,7 @@ import mahjong.graphics.coords;
 struct Selection
 {
 	RectangleShape visual;
-	int position;
+	size_t position;
 	
 	void draw(RenderTarget target)
 	{

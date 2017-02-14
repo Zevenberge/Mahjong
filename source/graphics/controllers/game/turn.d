@@ -82,19 +82,17 @@ class TurnController : GameController
 		changeOpt(index);
 	}
 
-	private int getIndexOfDrawnTile()
+	private size_t getIndexOfDrawnTile()
 	{
 		// TODO use std.algorithm.searching
-		int index;
 		foreach(i, tile; opts)
 		{
 			if(tile.id == _event.drawnTile.id)
 			{
-				index = i.to!int;
-				break;
+				return i;
 			}
 		}
-		return index;
+		return 0;
 	}
 
 	mixin Select!Tile;

@@ -13,10 +13,10 @@ class Selectable(T)
 		initSelection;
 	}
 
-  FloatRect getGlobalBounds()
-  {
-    return calcGlobalBounds(opts);
-  }
+	FloatRect getGlobalBounds()
+	{
+		return calcGlobalBounds(opts);
+	}
 
 }
 
@@ -30,7 +30,7 @@ mixin template Select(T)
 
 	T[] opts;
 	Selection selection;
-   
+	
 	void initSelection()
 	{
 		selection = Selection(new RectangleShape, 0);
@@ -39,14 +39,13 @@ mixin template Select(T)
 
 	void selectPrevious()
 	{
-		--selection.position;
-		selectOpt;
+		if(selection.position == 0) return;
+		changeOpt(selection.position - 1);
 	}
 	
 	void selectNext()
 	{
-		++selection.position;
-		selectOpt;
+		changeOpt(selection.position + 1);
 	}
 	
 	T selectedItem()
@@ -54,19 +53,19 @@ mixin template Select(T)
 		return opts[selection.position];
 	}
 
-
-  protected void selectOpt()
-  {
-    // Firstly check whether the selection does not fall out of bounds.
-    correctOutOfBounds(selection.position, opts.length);
-    // Construct the selection rectangle.
-    FloatRect optPos = opts[selection.position].getGlobalBounds();
-    selection.visual.position = Vector2f(optPos.left - selectionMargin, optPos.top - selectionMargin);
-    selection.visual.size = Vector2f(optPos.width + 2 * selectionMargin, optPos.height + 2 * selectionMargin);
-  }
+	
+	protected void selectOpt()
+	{
+		// Firstly check whether the selection does not fall out of bounds.
+		correctOutOfBounds(selection.position, opts.length);
+		// Construct the selection rectangle.
+		FloatRect optPos = opts[selection.position].getGlobalBounds();
+		selection.visual.position = Vector2f(optPos.left - selectionMargin, optPos.top - selectionMargin);
+		selection.visual.size = Vector2f(optPos.width + 2 * selectionMargin, optPos.height + 2 * selectionMargin);
+	}
 
 	/// Change the option to a given value i.
-	protected void changeOpt(const int i)
+	protected void changeOpt(const size_t i)
 	{
 		selection.position = i;
 		selectOpt;

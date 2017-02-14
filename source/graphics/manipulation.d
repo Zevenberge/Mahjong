@@ -130,7 +130,7 @@ void setTitle(Text title, string text)
 }
 
 
-void changeOpacity(ref ubyte[] opacities, const int position)
+void changeOpacity(ref ubyte[] opacities, const size_t position)
 {
     /*
       Change the opacity of background images for a more or less fluid transition.

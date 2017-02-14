@@ -34,8 +34,14 @@ class TurnEndFlow : Flow
 
 unittest
 {
+	import mahjong.test.utils;
 	class TestMetagame : Metagame
 	{
+		this()
+		{
+			super(null);
+		}
+
 		private bool _isExhaustiveDraw;
 		private bool _isAbortiveDraw;
 
