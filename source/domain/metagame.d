@@ -3,7 +3,6 @@ module mahjong.domain.metagame;
 import std.experimental.logger;
 import std.random;
 import std.conv;
-import std.signals;
 import std.uuid;
 
 import mahjong.domain.enums.game;
@@ -45,7 +44,6 @@ class Metagame
 		info("Initialising metagame");
 		placePlayers;
 		_initialWind = uniform(0, players.length).to!int; 
-		trace("Constructed players");
 		info("Initialised metagame");
 	}
 
@@ -57,11 +55,9 @@ class Metagame
 		info("Moving to the next round");
 		setPlayers;
 		removeTurnPlayer;
-		emit;
 	}
 	
-	mixin Signal!();
-	
+
 	private void setPlayers()
 	{
 		_status = Status.NewGame;
