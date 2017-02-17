@@ -13,15 +13,15 @@ class TurnEndFlow : Flow
 	
 	override void advanceIfDone()
 	{
-		if(metagame.isExhaustiveDraw)
-		{
-			info("Exhaustive draw reached.");
-			switchFlow(new ExhaustiveDrawFlow);
-		}
-		else if(metagame.isAbortiveDraw)
+		if(metagame.isAbortiveDraw)
 		{
 			info("Abortive draw reached.");
 			switchFlow(new AbortiveDrawFlow);
+		}
+		else if(metagame.isExhaustiveDraw)
+		{
+			info("Exhaustive draw reached.");
+			switchFlow(new ExhaustiveDrawFlow);
 		}
 		else
 		{
@@ -39,7 +39,8 @@ unittest
 	{
 		this()
 		{
-			super(null);
+			auto eventhandler = new TestEventHandler();
+			super([new Player(eventhandler), new Player(eventhandler)]);
 		}
 
 		private bool _isExhaustiveDraw;

@@ -56,7 +56,6 @@ class Metagame
 		setPlayers;
 		removeTurnPlayer;
 	}
-	
 
 	private void setPlayers()
 	{
@@ -70,6 +69,7 @@ class Metagame
 		wall.setUp;
 		info("Preparations are finished.");
 	}
+
 	/++
 	 + Begins the round, assuming that it is initialised.
 	 +/

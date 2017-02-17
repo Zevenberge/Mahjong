@@ -40,7 +40,7 @@ class TurnFlow : Flow
 		void discard(Tile tile)
 		{
 			_player.discard(tile);
-			_flow = new RonFlow(tile, _meta);
+			_flow = new ClaimFlow(tile, _meta);
 		}
 
 		void claimTsumo()
@@ -135,7 +135,7 @@ unittest
 	flow._event.discard(tile);
 	writeln("Testing whether the flow advances when it should");
 	flow.advanceIfDone;
-	assert(.flow.isOfType!RonFlow, "A tile is discarded, therefore the flow should move over to a ron.");
+	assert(.flow.isOfType!ClaimFlow, "A tile is discarded, therefore the flow should move over to a ron.");
 	writeln("Turn to Ron flow test succeeded.");
 }
 

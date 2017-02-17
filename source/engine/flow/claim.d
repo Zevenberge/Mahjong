@@ -1,9 +1,9 @@
-module mahjong.engine.flow.pon;
+module mahjong.engine.flow.claim;
 
 import mahjong.domain;
 import mahjong.engine.flow;
 
-class PonFlow : Flow
+class ClaimFlow : Flow
 {
 	this(Tile tile, Metagame game)
 	{
@@ -13,14 +13,14 @@ class PonFlow : Flow
 
 	override void advanceIfDone()
 	{
-		switchFlow(new ChiFlow(_tile, metagame));
+		switchFlow(new TurnEndFlow(metagame));
 	}
-	
+		
 	private:
 		Tile _tile;
 }
 
-class PonEvent
+class ClaimEvent
 {
 	this(Tile tile, Player player)
 	{
