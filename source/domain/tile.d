@@ -9,25 +9,20 @@ import mahjong.engine.enums.game;
 class Tile
 { // FIXME: Increase encapsulation.
 	dchar face; // The unicode face of the tile. TODO: remove dependacy on unicode face.
-	int type;  // Winds, dragons, etc
-	int value; // East - North, Green - White, one  - nine.
-	UUID id;
+	const int type;  // Winds, dragons, etc
+	const int value; // East - North, Green - White, one  - nine.
+	const UUID id;
 
 	int dora = 0;
 	int origin = Origin.wall; // Origin of the tile in in-game winds.
 	private bool _isOpen = false;
-
-    this()
-    {
-		id = randomUUID;
-    }
    
     this(int type, int value)
     {
-   		this();
+		id = randomUUID;
     	this.type = type;
     	this.value = value;
-    } 
+    }
    
 	bool isHonour() @property pure const
     {
@@ -72,54 +67,49 @@ class Tile
 
 unittest
 {
-	auto tile = new Tile;
+	auto tile = new Tile(1, 4);
 	assert(tile.isIdentical(tile), "Tile was not identical with itself");
-	auto anotherTile = new Tile;
+	auto anotherTile = new Tile(1, 4);
 	assert(!tile.isIdentical(anotherTile), "Tile was a different tile");
 }
 
 unittest
 {
-	auto tile = new Tile;
-	tile.type = Types.wind;
+	auto tile = new Tile(Types.wind, 1);
 	assert(tile.isHonour, "Tile should have been an honour");
-	tile.type = Types.dragon;
+	tile = new Tile(Types.dragon, 1);
 	assert(tile.isHonour, "Tile should have been an honour");
-	tile.type = Types.character;
+	tile = new Tile(Types.character, 1);
 	assert(!tile.isHonour, "Tile should not have been an honour");
-	tile.type = Types.bamboo;
+	tile = new Tile(Types.bamboo, 1);
 	assert(!tile.isHonour, "Tile should not have been an honour");
-	tile.type = Types.ball;
+	tile = new Tile(Types.ball, 1);
 	assert(!tile.isHonour, "Tile should not have been an honour");
 }
 
 unittest
 {
-	auto tile = new Tile;
-	tile.type = Types.character;
-	tile.value = Numbers.one;
+	auto tile = new Tile(Types.character, Numbers.one);
 	assert(tile.isTerminal, "Tile should have been a terminal");
-	tile.value = Numbers.two;
+	tile = new Tile(Types.character, Numbers.two);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.value = Numbers.three;
+	tile = new Tile(Types.character, Numbers.three);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.value = Numbers.four;
+	tile = new Tile(Types.character, Numbers.four);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.value = Numbers.five;
+	tile = new Tile(Types.character, Numbers.five);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.value = Numbers.six;
+	tile = new Tile(Types.character, Numbers.six);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.value = Numbers.seven;
+	tile = new Tile(Types.character, Numbers.seven);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.value = Numbers.eight;
+	tile = new Tile(Types.character, Numbers.eight);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.value = Numbers.nine;
+	tile = new Tile(Types.character, Numbers.nine);
 	assert(tile.isTerminal, "Tile should have been a terminal");
-	tile.type = Types.wind;
-	tile.value = Winds.east;
+	tile = new Tile(Types.wind, Winds.east);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
-	tile.type = Types.dragon;
-	tile.value = Dragons.green;
+	tile = new Tile(Types.dragon, Dragons.green);
 	assert(!tile.isTerminal, "Tile should not have been a terminal");
 }
 
@@ -128,10 +118,10 @@ unittest
 	auto tileA = new Tile(Types.dragon, Dragons.green);
 	auto tileB = new Tile(Types.dragon, Dragons.green);
 	assert(tileA.hasEqualValue(tileB), "Equal tiles were not seen as equal");
-	tileB.value = Dragons.red;
+	tileB = new Tile(Types.dragon, Dragons.red);
 	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
-	tileB.type = Types.wind;
+	tileB = new Tile(Types.wind, Dragons.red);
 	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
-	tileB.value = Dragons.green;
+	tileB = new Tile(Types.wind, Dragons.green);
 	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
 }

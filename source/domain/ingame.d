@@ -71,13 +71,11 @@ class Ingame
 		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
 		   */
 		bool isTenpai = false;
-		auto tile = new Tile;
-		for(int t = Types.min; t <= Types.max; ++t)
+		for(int type = Types.min; type <= Types.max; ++type)
 		{
-			tile.type = t;
-			for(int i = Numbers.min; i <= Numbers.max; ++i)
+			for(int value = Numbers.min; value <= Numbers.max; ++value)
 			{
-				tile.value = i;
+				auto tile = new Tile(type, value);
 				Tile[] temphand = closedHand.tiles ~ tile;
 				if(.scanHand(temphand, chis, pons))
 				{

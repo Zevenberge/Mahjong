@@ -1,5 +1,6 @@
 module mahjong.engine.flow.claim;
 
+import std.experimental.logger;
 import mahjong.domain;
 import mahjong.engine.flow;
 
@@ -7,6 +8,7 @@ class ClaimFlow : Flow
 {
 	this(Tile tile, Metagame game)
 	{
+		trace("Constructing claim flow");
 		_tile = tile;
 		metagame = game;
 	}
@@ -17,7 +19,7 @@ class ClaimFlow : Flow
 	}
 		
 	private:
-		Tile _tile;
+		const Tile _tile;
 }
 
 class ClaimEvent
@@ -27,5 +29,5 @@ class ClaimEvent
 		this.tile = tile;
 	}
 	
-	Tile tile;
+	const Tile tile;
 }

@@ -111,10 +111,8 @@ private Tile getTile(dchar face)
 		}
 		++tileNumber;
 	}
-	auto tile = new Tile;
+	auto tile = new Tile(typeOfTile, value);
 	tile.face = face;
-	tile.type = typeOfTile;
-	tile.value = value;
 	return tile;
 }
 unittest{
@@ -169,36 +167,14 @@ unittest
 {
 	import std.stdio;
 	writeln("Checking the isConstructive function...");
-	auto one = new Tile;
-	with(one)
-	{
-		value = 1;
-		type = Types.bamboo;
-	}
-	
-	auto two = new Tile;
-	with(two)
-	{
-		value = 2;
-		type = Types.bamboo;
-	}
+	auto one = new Tile(Types.bamboo, 1);
+	auto two = new Tile(Types.bamboo, 2);
 	assert(isConstructive(one, two));
 	assert(!isConstructive(two, one));
-	auto three = new Tile;
-	with(three)
-	{
-		value = 3;
-		type = Types.bamboo;
-	}	
+	auto three = new Tile(Types.bamboo, 3);
 	assert(!isConstructive(one, three));
-	auto otherTwo = new Tile;
-	with(otherTwo)
-	{
-		value = 2;
-		type = Types.ball;
-	}
+	auto otherTwo = new Tile(Types.ball, 2);
 	assert(!.isConstructive(one, otherTwo));
-	
 	writeln(" The isConstructive function is correct.");
 }
 
@@ -207,8 +183,8 @@ in {assert(hand.length > 0);}
 out {assert(hand.length > 0);}
 body
 { /*
-	       See if the current hand is a legit mahjong hand.
-	       */
+	   See if the current hand is a legit mahjong hand.
+	   */
 	sortHand(hand);
 	bool isMahjong=false;
 	// Run a dedicated scan for the weird hands, like Thirteen Orphans and Seven pairs, but only if the hand has exactly 14 tiles.
@@ -258,28 +234,23 @@ private bool isThirteenOrphans(const Tile[] hand)
 	
 	for(int i = 0; i < 13; ++i)
 	{ 
-		auto honour = new Tile;
-		
+		Tile honour;
+
 		switch(i){
 			case 0: .. case 3: // Winds
-				honour.type = Types.wind;
-				honour.value = i;
+				honour = new Tile(Types.wind, i);
 				break;
 			case 4: .. case 6: // Dragons
-				honour.type = Types.dragon;
-				honour.value = i % (Winds.max + 1);
+				honour = new Tile(Types.dragon, i % (Winds.max + 1));
 				break;
 			case 7, 8:         // Characters
-				honour.type = Types.character;
-				honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
+				honour = new Tile(Types.character, i.isOdd ? Numbers.one : Numbers.nine);
 				break;
 			case 9, 10:        // Bamboos
-				honour.type = Types.bamboo;
-				honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
+				honour = new Tile(Types.bamboo, i.isOdd ? Numbers.one : Numbers.nine);
 				break;
 			case 11, 12:       // Balls
-				honour.type = Types.ball;
-				honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
+				honour = new Tile(Types.ball, i.isOdd ? Numbers.one : Numbers.nine);
 				break;
 			default:
 				assert(false);
@@ -453,8 +424,8 @@ unittest
 	import std.stdio;
 	import std.algorithm.searching;
 	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile;
-	Tile a = new Tile, b = new Tile;
+	auto tile = new Tile(0, 0);
+	Tile a = new Tile(0,0), b = new Tile(0,0);
 	Tile[] hand;
 	hand = hand ~ a ~ tile ~ b;
 	Tile[] takenOut;	
@@ -469,8 +440,8 @@ unittest // Range overload
 	import std.stdio;
 	import std.algorithm.searching;
 	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile;
-	auto a = new Tile, b = new Tile;
+	auto tile = new Tile(0,0);
+	auto a = new Tile(0,0), b = new Tile(0,0);
 	Tile[] hand;
 	hand = hand ~ a ~ tile ~ b;
 	Tile[] takenOut;	
@@ -567,20 +538,8 @@ void swapTiles(ref Tile tileA, ref Tile tileB)
 }
 unittest
 {
-	auto tileA = new Tile();
-	with(tileA)
-	{
-		face = 'p';
-		value = 1;
-		type = Types.wind;
-	}
-	auto tileB = new Tile();
-	with(tileB)
-	{
-		face = 'c';
-		value = 2;
-		type = Types.character;
-	}
+	auto tileA = new Tile(Types.wind, 1);
+	auto tileB = new Tile(Types.character, 2);
 	swapTiles(tileA,tileB);
 	assert(tileA.value == 2 && tileA.type == Types.character, "A not swapped");
 	assert(tileB.value == 1 && tileB.type == Types.wind, "B not swapped");
@@ -633,7 +592,7 @@ void printTiles(Tile[] wall)
 }
 
 bool isOdd(const int i)
-in
+	in
 { 
 	assert(i >= 0); 
 }
@@ -644,71 +603,4 @@ body
 unittest{
 	assert(isOdd(9));
 	assert(!isOdd(8));
-}
-
-bool isIn(const Tile wanted, const Tile[] deck)
-{
-	foreach(tile; deck)
-		if(tile.hasEqualValue(wanted))
-			return true;
-	return false;
-}
-
-bool isIn(const int wanted, const int[] list)
-{
-	foreach(number; list)
-		if(number == wanted)
-			return true;
-	return false;
-}
-
-// FIXME: Depreciated: use UFCS.
-bool isIn(const ref Tile[] deck, const ref Tile wanted)
-{
-	foreach(tile; deck)
-	{
-		if(tile.hasEqualValue(wanted))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-bool isAnotherIn(const ref Tile[] deck, const ref Tile wanted)
-{
-	foreach(tile; deck)
-	{
-		if(tile.hasEqualValue(wanted) && !tile.isIdentical(wanted))
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-bool isConnected(const ref Tile[] hand, const ref Tile tile)
-{
-	auto connection = new Tile;
-	connection.type = tile.type;
-
-	if(!tile.isHonour)
-	{ // See whether a tile within range 2 of the same suit is in the hand.
-		for(connection.value = tile.value-2; connection.value <= tile.value+2; ++connection.value)
-		{
-			if(connection.value == tile.value)
-			{ // Skip the original value, as it requires an extra step.
-				++connection.value;
-			}
-			if(isIn(hand, connection))
-			{
-				return true;
-			}
-		} 
-	}
-	return isAnotherIn(hand, tile);
-}
-
-void message(const dchar[] mail)
-{ // Write a message to the desired output.
-	info(mail);
 }
