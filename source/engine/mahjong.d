@@ -574,23 +574,6 @@ version(unittest)
 	}
 }
 
-void printTiles(Tile[] wall)
-{
-	for(int i=0; i<5; ++i)
-	{
-		switch (cast(Types)wall[i].type){
-			case Types.dragon:
-				trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", cast(Dragons)wall[i].value, ".");
-				break;
-			case Types.wind:
-				trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", cast(Winds)wall[i].value, ".");
-				break;
-			default:
-				trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", wall[i].value+1, ".");
-		}
-	}
-}
-
 bool isOdd(const int i)
 	in
 { 
