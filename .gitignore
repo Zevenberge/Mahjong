@@ -13,6 +13,8 @@
 
 # Executables
 *.exe
+mahjong*
+__test__library__
 
 # DUB
 .dub
