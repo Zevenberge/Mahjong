@@ -42,24 +42,29 @@ class Ingame
 
 	
 	/*
-	 Normal dibsing functions.
+	 Normal functions related to claiming tiles.
 	 */
-
-	bool isPonnable(const ref Tile discard)
+	private bool isOwn(const Tile tile)
 	{
-		int i=0;
-		foreach(tile; closedHand.tiles)
-		{
-			if(tile.hasEqualValue(discard))
-			{
-				if((i+1) < closedHand.tiles.length)
-				{
-					return closedHand.tiles[i+1].hasEqualValue(discard);
-				}
-			}
-			++i;  
-		}
-		return false;
+		return tile.origin == wind;
+	}
+
+	bool isPonnable(const Tile discard)
+	{
+		if(isOwn(discard)) return false;
+		return closedHand.isPonnable(discard);
+	}
+
+	bool isKannable(const Tile discard)
+	{
+		if(isOwn(discard)) return false;
+		return closedHand.isKannable(discard);
+	}
+
+	bool isRonnable(ref Tile discard)
+	{
+		if(isOwn(discard)) return false;
+		return scanHand(closedHand.tiles ~ discard) && !isFuriten ;
 	}
 
 	/*
@@ -98,11 +103,6 @@ class Ingame
 			}
 		}
 		return false;
-	}
-
-	bool isRonnable(ref Tile discard)
-	{
-		return scanHand(closedHand.tiles ~ discard) && !isFuriten ;
 	}
 
 	bool isMahjong()

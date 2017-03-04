@@ -80,7 +80,7 @@ enum Request {None, Chi, Pon, Kan, Ron}
 interface ClaimRequest
 {
 	void apply(Metagame metagame);
-	void assertValidity(Metagame metagame);
+	bool isAllowed(Metagame metagame);
 	@property Request request() pure const;
 }
 
@@ -91,9 +91,9 @@ class NoRequest : ClaimRequest
 		// Do nothing.
 	}
 
-	void assertValidity(Metagame metagame)
+	bool isAllowed(Metagame metagame)
 	{
-		// Doing notihing is always allowed.
+		return true;
 	}
 
 	Request request() @property pure const
@@ -109,9 +109,9 @@ class PonRequest : ClaimRequest
 		// Do nothing.
 	}
 
-	void assertValidity(Metagame metagame)
+	bool isAllowed(Metagame metagame)
 	{
-		// Doing notihing is always allowed.
+		return false;
 	}
 
 	Request request() @property pure const
@@ -127,9 +127,9 @@ class KanRequest : ClaimRequest
 		// Do nothing.
 	}
 
-	void assertValidity(Metagame metagame)
+	bool isAllowed(Metagame metagame)
 	{
-		// Doing notihing is always allowed.
+		return false;
 	}
 
 	Request request() @property pure const
@@ -145,9 +145,9 @@ class ChiRequest : ClaimRequest
 		// Do nothing.
 	}
 
-	void assertValidity(Metagame metagame)
+	bool isAllowed(Metagame metagame)
 	{
-		// Doing notihing is always allowed.
+		return false;
 	}
 
 	Request request() @property pure const
@@ -163,9 +163,9 @@ class RonRequest : ClaimRequest
 		// Do nothing.
 	}
 
-	void assertValidity(Metagame metagame)
+	bool isAllowed(Metagame metagame)
 	{
-		// Doing notihing is always allowed.
+		return false;
 	}
 
 	Request request() @property pure const

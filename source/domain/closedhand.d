@@ -1,6 +1,7 @@
 module mahjong.domain.closedhand;
 
 import std.algorithm.iteration;
+import std.array;
 import std.signals;
 import mahjong.domain;
 import mahjong.engine.mahjong;
@@ -46,7 +47,6 @@ class ClosedHand
 	void drawTile(ref Wall wall)
 	{
 		addTile(wall.drawTile);
-		
 	}
 	
 	Tile getLastTile()
@@ -54,18 +54,13 @@ class ClosedHand
 		return tiles[$-1];
 	}
 
-	void open()
+	bool isPonnable(const Tile discard)
 	{
-		foreach(tile; tiles)
-		{
-			tile.open;
-		}
+		return tiles.filter!(tile => tile.hasEqualValue(discard)).array.length >= 2;
 	}
-	void close()
+
+	bool isKannable(const Tile discard)
 	{
-		foreach(tile; tiles)
-		{
-			tile.close;
-		}
+		return tiles.filter!(tile => tile.hasEqualValue(discard)).array.length >= 3;
 	}
 }

@@ -97,7 +97,7 @@ class Player
 	 Functions with regard to claiming tiles.
 	 */
 
-	bool isPonnable(const ref Tile discard)
+	bool isPonnable(const Tile discard)
 	{
 		return game.isPonnable(discard);
 	}
