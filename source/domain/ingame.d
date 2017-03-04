@@ -9,6 +9,7 @@ import mahjong.domain.enums.tile;
 import mahjong.domain.exceptions;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
+import mahjong.engine.sort;
 
 class Ingame
 { 
@@ -82,7 +83,7 @@ class Ingame
 			{
 				auto tile = new Tile(type, value);
 				Tile[] temphand = closedHand.tiles ~ tile;
-				if(.scanHand(temphand, chis, pons))
+				if(.scanHandForMahjong(temphand, chis, pons))
 				{
 					isTenpai = true;
 				}
@@ -97,7 +98,7 @@ class Ingame
 	{
 		foreach(tile; discards)
 		{
-			if(.scanHand(closedHand.tiles ~ tile, pons, chis))
+			if(.scanHandForMahjong(closedHand.tiles ~ tile, pons, chis))
 			{
 				return true;
 			}
@@ -112,7 +113,7 @@ class Ingame
 
 	private bool scanHand(Tile[] set)
 	{
-		return .scanHand(set, pons, chis);
+		return .scanHandForMahjong(set, pons, chis);
 		//FIXME: take into account yaku requirement.
 	}
 

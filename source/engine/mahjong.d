@@ -1,184 +1,28 @@
 module mahjong.engine.mahjong;
 
 import std.experimental.logger;
-import std.string;
-import std.range;
-import std.uni;
 import std.algorithm;
 import std.random;
 import std.process;
 import std.conv; 
 import std.file;
+import std.string;
 
+import mahjong.domain.closedhand;
 import mahjong.domain.enums.tile;
+import mahjong.domain.openhand;
 import mahjong.domain.tile;
 import mahjong.engine.enums.game;
+import mahjong.engine.sort;
 import mahjong.engine.yaku; 
+import mahjong.share.numbers;
 
-void setUpWall(ref Tile[] wall, int dups = 4)
+bool scanHandForMahjong(ClosedHand closedHand, OpenHand openHand)
 {
-	for(int i = 0; i < dups; ++i)
-	{
-		wall ~= createSetOfTiles();
-	}
-	defineDoras(wall);
+	return scanHandForMahjong(closedHand.tiles, 0, 0, 0);
 }
 
-Tile[] createSetOfTiles() 
-{
-	dchar[] tiles = defineTiles(); // First load all mahjong tiles.
-	return convertToTiles(tiles);
-}
-
-Tile[] convertToTiles(const(dchar)[] faces)
-{
-	Tile[] tiles;
-	foreach(face; stride(faces,1))
-	{
-		tiles ~= getTile(face);
-	}
-	return tiles;
-}
-
-void defineDoras(ref Tile[] wall)
-in
-{
-	assert(wall.length == 136, "Wall length was %s".format(wall.length));
-}
-/*
- Define the doras that are in the wall. The way this is programmed, this has to be initialised before the shuffle. It is put in a seperate subroutine to allow for multiple dora definitions.
- */
-body
-{
-	++wall[44].dora;
-	++wall[80].dora;
-	++wall[116].dora;
-}
-
-
-dchar[] defineTiles()
-{
-	/*
-	 Define the tiles in the wall. For now, use the mahjong tiles provided by the unicode set.
-	 */
-	dchar[] tiles;
-	tiles ~= "🀀🀁🀂🀃🀅🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑🀒🀓🀔🀕🀖🀗🀘🀙🀚🀛🀜🀝🀞🀟🀠🀡"d;
-	return tiles;
-	/* Set of Mahjong tiles in Unicode format
-	 🀀 	🀁 	🀂 	🀃 	🀄 	🀅 	🀆 	🀇 	🀈 	🀉 	🀊 	🀋 	🀌 	🀍 	🀎 	🀏
-	 🀐 	🀑 	🀒 	🀓 	🀔 	🀕 	🀖 	🀗 	🀘 	🀙 	🀚 	🀛 	🀜 	🀝 	🀞 	🀟
-	 🀠 	🀡 	🀢 	🀣 	🀤 	🀥 	🀦 	🀧 	🀨 	🀩 	🀪 	🀫
-	 */
-}
-
-
-private Tile getTile(dchar face)
-{
-	dchar[] tiles = defineTiles(); // Always load the default tile set such that the correct Numbers are compared!!
-	Types typeOfTile;
-	int value;
-	int tileNumber;
-	foreach(stone; stride(tiles,1))
-	{
-		if(stone == face)
-		{
-			switch (tileNumber) 
-			{
-				case 0: .. case 3:
-					typeOfTile = Types.wind;
-					value = tileNumber;
-					break;
-				case 4: .. case 6:
-					typeOfTile = Types.dragon;
-					value = tileNumber - 4;
-					break;
-				case 7: .. case 15:
-					typeOfTile = Types.character;
-					value = tileNumber - 7;
-					break;
-				case 16: .. case 24:
-					typeOfTile = Types.bamboo;
-					value = tileNumber - 16;
-					break;
-				case 25: .. case 33:
-					typeOfTile = Types.ball;
-					value = tileNumber - 25;
-					break;
-				default:
-					fatal("Could not identify tile by the face. Terminating program.");
-			}
-			break;
-		}
-		++tileNumber;
-	}
-	auto tile = new Tile(typeOfTile, value);
-	tile.face = face;
-	return tile;
-}
-unittest{
-	import std.stdio;
-	writeln("Checking the labelling of the wall...");
-	Tile[] wall;
-	setUpWall(wall);
-	foreach(stone; wall)
-	{
-		if (stone.face == '🀀')
-		{
-			assert(stone.type == Types.wind);
-			assert(stone.value == Winds.east);
-		} 
-		else if (stone.face == '🀏')
-		{  
-			assert(stone.type == Types.character);
-			assert(stone.value == Numbers.nine);
-		}
-	}
-	writeln(" The tiles are correctly labelled.");
-}
-
-/*
- Shuffle the tiles in the wall. Take a slice off the middle of the wall and place it at the end.
- */
-void shuffleWall(ref Tile[] wall)
-in
-{
-	assert(wall.length > 0);
-}
-body
-{
-	for(int i=0; i<500; ++i)
-	{
-		ulong t1 = uniform(0, wall.length);
-		ulong t2 = uniform(0, wall.length);
-		swapTiles(wall[t1],wall[t2]);
-	}
-}
-
-/**
- Checks whether tileB follows on tileA
- */
-bool isConstructive(const Tile tileA, const Tile tileB)
-{
-	return (tileA.type == tileB.type) 
-		&& (tileA.value == tileB.value - 1);
-}
-///
-unittest
-{
-	import std.stdio;
-	writeln("Checking the isConstructive function...");
-	auto one = new Tile(Types.bamboo, 1);
-	auto two = new Tile(Types.bamboo, 2);
-	assert(isConstructive(one, two));
-	assert(!isConstructive(two, one));
-	auto three = new Tile(Types.bamboo, 3);
-	assert(!isConstructive(one, three));
-	auto otherTwo = new Tile(Types.ball, 2);
-	assert(!.isConstructive(one, otherTwo));
-	writeln(" The isConstructive function is correct.");
-}
-
-bool scanHand(Tile[] hand, int chis = 0, int pons = 0, int pairs = 0)
+bool scanHandForMahjong(Tile[] hand, int chis = 0, int pons = 0, int pairs = 0)
 in {assert(hand.length > 0);}
 out {assert(hand.length > 0);}
 body
@@ -274,9 +118,8 @@ private bool isThirteenOrphans(const Tile[] hand)
 	/*
 	 When the code arrives at this point, we have confirmed that the hand has each of the thirteen orphans in it. The final check is whether the hand also has the pair.
 	 */
-	if(pairs == 1) { return true; }
-	
-	return false;
+
+	return pairs == 1;
 }
 private bool scanMahjong(ref Tile[] hand, ref Tile[] mahjongHand, ref int chis, ref int pairs, ref int pons)
 { /*
@@ -367,12 +210,12 @@ private bool scanChis(ref Tile[] hand, ref Tile[] final_hand, ref int chis)
 
 	for(int i=0;(i < 5) && (i < mutehand.length);++i)
 	{ 
-		if(isConstructive(mutefinal[$-1], mutehand[i]))
+		if(mutefinal[$-1].isConstructive(mutehand[i]))
 		{
 			takeOutTile(mutehand, mutefinal, i); // The second tile in a row
 			for( ; (i < 10) && (i < mutehand.length); ++i)
 			{
-				if(isConstructive(mutefinal[$-1], mutehand[i]))
+				if(mutefinal[$-1].isConstructive(mutehand[i]))
 				{
 					takeOutTile(mutehand, mutefinal, i); // The chi is completed.
 					assert(mutefinal.length == 3);
@@ -390,66 +233,6 @@ private bool scanChis(ref Tile[] hand, ref Tile[] final_hand, ref int chis)
 	}
 	
 	return false; // Do not return the modifications to the hand.
-}
-/++
-
- +/
-void takeOutTile(ref Tile[] hand, ref Tile[] output, Tile takenOut)
-{
-	int i = 0;
-	foreach(tile; hand)
-	{
-		if(tile.isIdentical(takenOut))
-		{
-			takeOutTile(hand, output, i);
-			return;
-		}
-		++i;
-	}
-	throw new Exception("Tile not found");
-}
-/// Ditto
-void takeOutTile(ref Tile[] hand, ref Tile[] output, const size_t index, size_t count = 1)
-{
-	auto end = count + index; 
-	Tile[] temphand;
-	output ~= hand[index .. end];
-	temphand ~= hand[end .. $];
-	hand = hand[0 .. index];
-	hand ~= temphand;
-}
-///
-unittest 
-{
-	import std.stdio;
-	import std.algorithm.searching;
-	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile(0, 0);
-	Tile a = new Tile(0,0), b = new Tile(0,0);
-	Tile[] hand;
-	hand = hand ~ a ~ tile ~ b;
-	Tile[] takenOut;	
-	takeOutTile(hand, takenOut, 1);
-	assert(takenOut.length == 1, "Only one tile should be taken out");
-	assert(takenOut[0].id == tile.id, "The tile that was taken out should be the one that was determined");
-	assert(hand.length == 2, "Tile should be taken out");
-	assert(hand.all!(t => t.id != tile.id), "The tile should not be in the wall any more.");
-}
-unittest // Range overload
-{
-	import std.stdio;
-	import std.algorithm.searching;
-	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile(0,0);
-	auto a = new Tile(0,0), b = new Tile(0,0);
-	Tile[] hand;
-	hand = hand ~ a ~ tile ~ b;
-	Tile[] takenOut;	
-	takeOutTile(hand, takenOut, 1, 2);
-	assert(takenOut.length == 2, "Two tiles should be taken out");
-	assert(takenOut[0].id == tile.id, "The first tile that was taken out should be the one that was determined");
-	assert(hand.length == 1, "Only one sould remain.");
-	assert(hand.all!(t => t.id == a.id), "The tile should not be in the wall any more.");
 }
 
 private bool scanEquals(ref Tile[] hand, ref Tile[] final_hand,  ref int pairs, const int distance)
@@ -485,7 +268,7 @@ unittest // Check whether the example hands are seen as mahjong hands.
 			auto hand = convertToTiles(line);
 			sortHand(hand);
 			bool isMahjong;
-			isMahjong = scanHand(hand);
+			isMahjong = scanHandForMahjong(hand);
 			assert(isHand == isMahjong);
 			write("The mahjong is ", isMahjong, ".  ");
 			foreach(stone; hand) {write(stone);}
@@ -502,52 +285,12 @@ unittest // Check whether the example hands are seen as mahjong hands.
 	writeln(" The function reads the example hands correctly.");
 }
 
-void sortHand(ref Tile[] hand)
-{  /*
-	    Sort the tiles in the hand. Arrange them by their type and their value.
-	    */
-	for( ; ; )
-	{
-		Tile[] hand_prev = hand.dup;
-		for(int i = 1; i < hand.length; ++i)
-		{  // Sort by type first (dragon, wind, character, bamboo, ball)
-			if(hand[i].type < hand[i-1].type) {
-				swapTiles(hand[i], hand[i-1]);
-			} else if(hand[i].type == hand[i-1].type) {
-				// Then sort them by value.
-				if(hand[i].value < hand[i-1].value)
-				{ swapTiles(hand[i], hand[i-1]);
-				} else if(hand[i].value == hand[i-1].value)
-				{ if(hand[i].dora > hand[i-1].dora)
-					{ swapTiles(hand[i], hand[i-1]);}
-				}
-			}
-		}
-		if(hand_prev == hand)
-		{
-			break;
-		}
-	}
-}
 
-void swapTiles(ref Tile tileA, ref Tile tileB)
-{
-	Tile tileC = tileA;
-	tileA = tileB;
-	tileB = tileC;
-}
-unittest
-{
-	auto tileA = new Tile(Types.wind, 1);
-	auto tileB = new Tile(Types.character, 2);
-	swapTiles(tileA,tileB);
-	assert(tileA.value == 2 && tileA.type == Types.character, "A not swapped");
-	assert(tileB.value == 1 && tileB.type == Types.wind, "B not swapped");
-
-}
 version(unittest)
 {
+	import std.range;
 	import std.stdio;
+	import mahjong.engine.creation;
 	/// Read the given file into dstring lines
 	dstring[] readLines(string filename)
 	{ 
@@ -574,16 +317,3 @@ version(unittest)
 	}
 }
 
-bool isOdd(const int i)
-	in
-{ 
-	assert(i >= 0); 
-}
-body
-{ 
-	return i % 2 == 1;
-}
-unittest{
-	assert(isOdd(9));
-	assert(!isOdd(8));
-}

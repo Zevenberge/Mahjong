@@ -5,7 +5,7 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain;
 import mahjong.engine.flow;
-import mahjong.engine.mahjong;
+import mahjong.engine.sort;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;

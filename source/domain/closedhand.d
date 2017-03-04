@@ -4,7 +4,7 @@ import std.algorithm.iteration;
 import std.array;
 import std.signals;
 import mahjong.domain;
-import mahjong.engine.mahjong;
+import mahjong.engine.sort;
 import mahjong.share.range;
 
 class ClosedHand

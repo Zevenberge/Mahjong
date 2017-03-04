@@ -1,6 +1,7 @@
 module mahjong.domain.tile;
 
 import std.conv;
+import std.math;
 import std.uuid;
 
 import mahjong.domain.enums.tile;
@@ -32,6 +33,12 @@ class Tile
 	bool isTerminal() @property pure const
 	{
 		return !isHonour && (value == Numbers.one || value == Numbers.nine);
+	}
+
+	bool isConstructive(const Tile other) pure const
+	{
+		return !isHonour && type == other.type &&
+			abs(value - other.value) == 1;
 	}
 
     void close() 
@@ -124,4 +131,19 @@ unittest
 	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
 	tileB = new Tile(Types.wind, Dragons.green);
 	assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
+}
+
+unittest
+{
+	import std.stdio;
+	writeln("Checking the isConstructive function...");
+	auto one = new Tile(Types.bamboo, 1);
+	auto two = new Tile(Types.bamboo, 2);
+	assert(one.isConstructive(two));
+	assert(two.isConstructive(one));
+	auto three = new Tile(Types.bamboo, 3);
+	assert(!one.isConstructive(three));
+	auto otherTwo = new Tile(Types.ball, 2);
+	assert(!one.isConstructive(otherTwo));
+	writeln(" The isConstructive function is correct.");
 }

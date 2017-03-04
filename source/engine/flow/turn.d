@@ -141,6 +141,7 @@ unittest
 unittest
 {
 	import std.stdio;
+	import mahjong.engine.creation;
 	import mahjong.engine.mahjong;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
