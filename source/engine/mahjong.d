@@ -19,7 +19,7 @@ import mahjong.share.numbers;
 
 bool scanHandForMahjong(ClosedHand closedHand, OpenHand openHand)
 {
-	return scanHandForMahjong(closedHand.tiles, 0, 0, 0);
+	return scanHandForMahjong(closedHand.tiles, 0, openHand.amountOfPons, 0);
 }
 
 bool scanHandForMahjong(Tile[] hand, int chis = 0, int pons = 0, int pairs = 0)

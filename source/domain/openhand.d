@@ -1,95 +1,98 @@
 module mahjong.domain.openhand;
 
-import dsfml.graphics;
+import std.algorithm.iteration;
+import std.array;
 
-import mahjong.domain.enums.game;
 import mahjong.domain;
+import mahjong.domain.enums.game;
+import mahjong.domain.exceptions;
 import mahjong.engine.mahjong;
-import mahjong.graphics.drawing.tile;
-import mahjong.graphics.enums.geometry;
-import mahjong.graphics.manipulation;
 
 class OpenHand
 {
-	Tile[][amountOfSets] tiles;
-	RectangleShape[3] selections;
-
-	void initialiseSelections()
+	private Tile[][] _sets;
+	const(Tile[][]) sets() @property
 	{
-		foreach(rectangle; selections)
-		{
-			rectangle = new RectangleShape;
-			rectangle.fillColor = Color.Yellow;
-			rectangle.size = tileSelectionSize;
-		}
+		return _sets;
 	}
 
-	void resetSelections()
+	private ubyte _amountOfPons;
+	ubyte amountOfPons() @property
 	{
-		foreach(rectangle; selections)
-		{
-			rectangle.position = Vector2f(0,0);
-			rectangle.size = Vector2f(0,0);
-		}
+		return _amountOfPons;
 	}
 
-	void placeKanSelections(Tile[] hand, Tile dibsable)
+	private ubyte _amountOfKans;
+	ubyte amountOfKans() @property
 	{
-		placeIdenticals(hand, dibsable, 4);
+		return _amountOfKans;
 	}
 
-	void placePonSelections(Tile[] hand, Tile dibsable)
-	{
-		placeIdenticals(hand, dibsable, 3);
-	}
-
-	void placePairSelections(Tile[] hand, Tile dibsable)
-	{
-		placeIdenticals(hand, dibsable, 2);
-	}
-
-	void placeIdenticals(Tile[] hand, Tile dibsable, int amountOfIdenticals)
-	{
-		resetSelections;
-		int i = 0;
-		foreach(tile; hand)
-		{
-			if(tile.hasEqualValue(dibsable))
-			{
-				selectTile(tile, i); 
-				++i;
-				if(!(i < amountOfIdenticals-1))
-				{
-					break;
-				}
-			}
-		}
-	}
-
-	void selectTile(Tile tile, const ref int i)
-	{
-		FloatRect position = tile.getGlobalBounds;
-		selections[i].position = Vector2f(position.left - selectionMargin, position.top - selectionMargin);
-		selections[i].size = Vector2f(position.width + 2*selectionMargin, position.height + 2*selectionMargin);
-	}
-
-	 void drawSelections(ref RenderWindow window)
-	{
-		foreach(rectangle; selections)
-		{
-			window.draw(rectangle);
-		}
-	} 
-
-	FloatRect getGlobalBounds(int i)
+	void addPon(Tile[] tiles)
 	in
-	{ // Assert i is in the range.
-		assert(i < amountOfSets);
-		assert(i >= 0);
+	{
+		assert(tiles.length == 3, "A pon should consist of three tiles.");
 	}
 	body
 	{
-		//TODO: refactor this when ponning is implemented.
-		return FloatRect();//return calcGlobalBounds(tiles[][i]);
+		_sets ~= tiles;
+		++_amountOfPons;
 	}
+
+	void addKan(Tile[] tiles)
+	in
+	{
+		assert(tiles.length == 4, "A kan should consist of four tiles.");
+	}
+	body
+	{
+		_sets ~= tiles;
+		++_amountOfPons;
+		++_amountOfKans;
+	}
+
+	void promotePonToKan(Tile kanTile)
+	{
+		foreach(set; _sets)
+		{
+			if(set.length != 3) continue;
+			if(!kanTile.hasEqualValue(set[0])) continue;
+			set ~= kanTile;
+			++_amountOfKans;
+			return;
+		}
+		throw new SetNotFoundException(kanTile);
+	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto openHand = new OpenHand;
+	auto pon = "🀀🀀🀀"d.convertToTiles;
+	openHand.addPon(pon);
+	assert(openHand.amountOfPons == 1, "Hand should have one pon");
+	assert(openHand.amountOfKans == 0, "Hand should have no kans");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto openHand = new OpenHand;
+	auto kan = "🀀🀀🀀🀀"d.convertToTiles;
+	openHand.addKan(kan);
+	assert(openHand.amountOfPons == 1, "Hand should have one pon");
+	assert(openHand.amountOfKans == 1, "Hand should have one kan");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto openHand = new OpenHand;
+	auto pon = "🀀🀀🀀"d.convertToTiles;
+	auto kanTile = "🀀"d.convertToTiles[0];
+	openHand.addPon(pon);
+	openHand.promotePonToKan(kanTile);
+	assert(openHand.amountOfPons == 1, "Hand should have one pon");
+	assert(openHand.amountOfKans == 1, "Hand should have one kan");
 }
