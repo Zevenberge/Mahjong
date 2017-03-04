@@ -19,6 +19,11 @@ import mahjong.domain.metagame;
 
 class Flow
 {
+	this(Metagame game)
+	{
+		metagame = game;
+	}
+
 	Metagame metagame;
 	abstract void advanceIfDone();
 }

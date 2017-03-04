@@ -1,5 +1,6 @@
 module mahjong.domain.metagame;
 
+import std.algorithm;
 import std.experimental.logger;
 import std.random;
 import std.conv;
@@ -17,13 +18,19 @@ import mahjong.graphics.enums.kanji;
 
 class Metagame
 {
+	Player[] players; 
 
 	Player currentPlayer() @property 
 	{ 
 		return _turn == -1 ? null : players[_turn]; 
 	}
 
-	Player[] players; 
+	auto otherPlayers() @property
+	{
+		auto currentPlayer = this.currentPlayer;
+		return players.filter!(p => &p != &currentPlayer);
+	}
+
 	Wall wall;
 	PlayerWinds leadingWind;
 	private int _initialWind;
@@ -189,12 +196,12 @@ class Metagame
 		}
 	}
 
-	bool isAbortiveDraw()
+	bool isAbortiveDraw() @property
 	{
 		return false;
 	}
 
-	bool isExhaustiveDraw()
+	bool isExhaustiveDraw() @property
 	{
 		return wall.length <= gameOpts.deadWallLength;
 	}

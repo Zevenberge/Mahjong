@@ -12,7 +12,7 @@ class TurnFlow : Flow
 	this(Player player, Metagame meta, Tile drawnTile)
 	{
 		_player = player;
-		_meta = meta;
+		super(meta);
 		_event = new TurnEvent(this, meta, player, player.getLastTile);
 		_player.eventHandler.handle(_event);
 	}
@@ -29,7 +29,6 @@ class TurnFlow : Flow
 	private: 
 		TurnEvent _event;
 		Player _player;
-		Metagame _meta;
 		Flow _flow;
 
 		void advance()
@@ -40,14 +39,14 @@ class TurnFlow : Flow
 		void discard(Tile tile)
 		{
 			_player.discard(tile);
-			_flow = new ClaimFlow(tile, _meta);
+			_flow = new ClaimFlow(tile, metagame);
 		}
 
 		void claimTsumo()
 		{
 			info("Tsumo claimed by ", _player.name);
-			_meta.tsumo(_player);
-			_flow = new MahjongFlow;
+			metagame.tsumo(_player);
+			_flow = new MahjongFlow(metagame);
 		}
 }
 

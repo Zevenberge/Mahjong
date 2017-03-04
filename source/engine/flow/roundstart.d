@@ -10,7 +10,7 @@ class RoundStartFlow : Flow
 	this(Metagame metagame)
 	{
 		info("Starting round.");
-		this.metagame = metagame;
+		super(metagame);
 		metagame.nextRound;
 		foreach(player; metagame.players)
 		{

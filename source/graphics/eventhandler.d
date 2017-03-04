@@ -23,4 +23,10 @@ class UiEventHandler : GameEventHandler
 	{
 		event.isReady = true;
 	}
+
+	override void handle(ClaimEvent event) 
+	{
+		// TODO
+	}
+
 }

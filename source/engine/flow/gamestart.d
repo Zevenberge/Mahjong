@@ -17,7 +17,8 @@ class GameStartFlow : Flow
 	body
 	{
 		info("Starting game.");
-		metagame = gameOpts.createMetagame(eventHandlers);
+		auto game = gameOpts.createMetagame(eventHandlers);
+		super(game);
 		_events = eventHandlers.map!((handler) 
 			{
 				auto event = new GameStartEvent(metagame);

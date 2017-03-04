@@ -9,8 +9,6 @@ import mahjong.domain;
 import mahjong.engine.flow;
 import mahjong.engine.opts;
 
-
-
 class Player
 { // General variables.
 	UUID id;

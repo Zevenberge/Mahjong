@@ -5,9 +5,16 @@ import mahjong.engine.flow;
 
 class AiEventHandler : GameEventHandler
 {
+	this(AI ai)
+	{
+		_ai = ai;
+	}
+
+	private AI _ai;
+
 	override void handle(TurnEvent event)
 	{
-		playTurn(event);
+		_ai.playTurn(event);
 	}
 	override void handle(GameStartEvent event)
 	{
@@ -17,4 +24,9 @@ class AiEventHandler : GameEventHandler
 	{
 		event.isReady = true;
 	}
+	override void handle(ClaimEvent event) 
+	{
+		_ai.claim(event);
+	}
+
 }

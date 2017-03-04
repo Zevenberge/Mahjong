@@ -8,6 +8,7 @@ class GameEventHandler
 	abstract void handle(TurnEvent event);
 	abstract void handle(GameStartEvent event);
 	abstract void handle(RoundStartEvent event);
+	abstract void handle(ClaimEvent event);
 	Player createPlayer()
 	{
 		return new Player(this);
@@ -41,5 +42,11 @@ version(unittest)
 			roundStartEvent = event;
 		}
 
+		ClaimEvent claimEvent;
+		override void handle(ClaimEvent event)
+		{
+			trace("Handling claim event");
+			claimEvent = event;
+		}
 	}
 }

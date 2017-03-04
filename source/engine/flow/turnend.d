@@ -6,9 +6,9 @@ import mahjong.engine.flow;
 
 class TurnEndFlow : Flow
 {
-	this(Metagame meta)
+	this(Metagame game)
 	{
-		metagame = meta;
+		super(game);
 	}
 	
 	override void advanceIfDone()
@@ -16,12 +16,12 @@ class TurnEndFlow : Flow
 		if(metagame.isAbortiveDraw)
 		{
 			info("Abortive draw reached.");
-			switchFlow(new AbortiveDrawFlow);
+			switchFlow(new AbortiveDrawFlow(metagame));
 		}
 		else if(metagame.isExhaustiveDraw)
 		{
 			info("Exhaustive draw reached.");
-			switchFlow(new ExhaustiveDrawFlow);
+			switchFlow(new ExhaustiveDrawFlow(metagame));
 		}
 		else
 		{

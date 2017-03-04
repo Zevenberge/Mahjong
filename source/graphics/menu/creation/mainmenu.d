@@ -46,9 +46,12 @@ private void startRiichiMahjong()
 	drawingOpts = new DefaultDrawingOpts;
 	gameOpts = new DefaultGameOpts;
 	startGame(
-		new UiEventHandler, new AiEventHandler, new AiEventHandler, new AiEventHandler);
+		new UiEventHandler, 
+		new AiEventHandler(new SimpleAI), 
+		new AiEventHandler(new SimpleAI), 
+		new AiEventHandler(new SimpleAI));
 }
-
+///
 unittest
 {
 	import std.stdio;
@@ -71,9 +74,11 @@ private void startBambooBattle()
 	info("Bamboo battle selected");
 	drawingOpts = new BambooDrawingOpts;
 	gameOpts = new BambooOpts;
-	startGame(new UiEventHandler, new AiEventHandler);
+	startGame(
+		new UiEventHandler, 
+		new AiEventHandler(new SimpleAI));
 }
-
+///
 unittest
 {
 	import std.stdio;

@@ -7,8 +7,8 @@ class DrawFlow : Flow
 {
 	this(Player player, Metagame metagame, Wall wall)
 	{
+		super(metagame);
 		_player = player;
-		this.metagame = metagame;
 		_wall = wall;
 	}
 	
