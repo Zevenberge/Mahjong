@@ -9,7 +9,7 @@ import mahjong.engine.enums.game;
 
 class Tile
 { // FIXME: Increase encapsulation.
-	dchar face; // The unicode face of the tile. TODO: remove dependacy on unicode face.
+	dchar face; // The unicode face of the tile. 
 	const int type;  // Winds, dragons, etc
 	const int value; // East - North, Green - White, one  - nine.
 	const UUID id;

@@ -1,34 +1,33 @@
 ﻿module mahjong.engine.sort;
 
+import std.algorithm.sorting;
+import std.array;
 import mahjong.domain.enums.tile;
 import mahjong.domain.tile;
 
 void sortHand(ref Tile[] hand)
-{  /*
-	    Sort the tiles in the hand. Arrange them by their type and their value.
-	    */
-	for( ; ; )
-	{
-		Tile[] hand_prev = hand.dup;
-		for(int i = 1; i < hand.length; ++i)
-		{  // Sort by type first (dragon, wind, character, bamboo, ball)
-			if(hand[i].type < hand[i-1].type) {
-				swapTiles(hand[i], hand[i-1]);
-			} else if(hand[i].type == hand[i-1].type) {
-				// Then sort them by value.
-				if(hand[i].value < hand[i-1].value)
-				{ swapTiles(hand[i], hand[i-1]);
-				} else if(hand[i].value == hand[i-1].value)
-				{ if(hand[i].dora > hand[i-1].dora)
-					{ swapTiles(hand[i], hand[i-1]);}
-				}
-			}
-		}
-		if(hand_prev == hand)
-		{
-			break;
-		}
-	}
+{  
+	hand = hand.sort!((a, b) => 
+		a.type < b.type || 
+		(a.type == b.type && a.value < b.value))
+		.array;
+}
+unittest
+{
+	import std.algorithm.iteration;
+	import std.conv;
+	import std.stdio;
+	import std.string;
+	import mahjong.engine.creation;
+	writeln("Starting the test of the sort");
+	enum unsortedString = "🀡🀂🀃🀄🀁🀘🀅🀀🀏🀐🀄🀙🀆🀇"d;
+	auto unsortedTiles = unsortedString.convertToTiles;
+	unsortedTiles.sortHand;
+	auto sortedTilesAsString = unsortedTiles.map!(t => t.face).to!dstring;
+	enum sortedString = "🀀🀁🀂🀃🀅🀄🀄🀆🀇🀏🀐🀘🀙🀡"d;
+	assert(sortedString == sortedTilesAsString, 
+		"The ordering is not was expected, is actually %s".format(sortedTilesAsString));
+	writeln("Test of the sorting succeeded");
 }
 
 void swapTiles(ref Tile tileA, ref Tile tileB)
