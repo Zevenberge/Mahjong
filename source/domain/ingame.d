@@ -116,29 +116,13 @@ class Ingame
 		//FIXME: take into account yaku requirement.
 	}
 
-	/*
-	 Discard things you no longer need.
-	 */
-	void discard(UUID discardId)
-	{
-		size_t index;
-		foreach(i, t; closedHand.tiles)
-		{
-			if(t.id == discardId)
-			{
-				index = i;
-				break;
-			}
-		}
-		discard(index);
-	}
-
-	void discard(ulong discardedNr)
+	private void discard(size_t discardedNr)
 	{    
 		takeOutTile(closedHand.tiles, discards, discardedNr);
-		discards[$-1].origin = wind; // Sets the tile to be from the player who discarded it.
-		discards[$-1].open;
-		if( (!discards[$-1].isHonour) && (!discards[$-1].isTerminal) )
+		auto discard = discards[$-1];
+		discard.origin = wind; // Sets the tile to be from the player who discarded it.
+		discard.open;
+		if( (!discard.isHonour) && (!discard.isTerminal) )
 		{
 			if(isNagashiMangan)
 			{
@@ -147,29 +131,27 @@ class Ingame
 			isNagashiMangan = false;
 		}
 	}
+
 	void discard(Tile discardedTile)
 	{
 		ulong i = 0;
-		bool found = false;
 		foreach(tile; closedHand.tiles)
 		{
 			if(tile.isIdentical(discardedTile))
 			{
-				found = true;
 				discard(i);
-				break;
+				return;
 			}
 			++i;
 		}
-		if(!found)
-		{
-			throw new TileNotFoundException(discardedTile);
-		}
+		throw new TileNotFoundException(discardedTile);
 	}
+
 	ref Tile getLastDiscard()
 	{
 		return discards[$-1];
 	}
+
 	ref Tile getLastTile()
 	{
 		return lastTile;
