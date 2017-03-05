@@ -11,19 +11,19 @@ import mahjong.engine.mahjong;
 class OpenHand
 {
 	private Tile[][] _sets;
-	const(Tile[][]) sets() @property
+	const(Tile[][]) sets() @property pure const
 	{
 		return _sets;
 	}
 
 	private ubyte _amountOfPons;
-	ubyte amountOfPons() @property
+	ubyte amountOfPons() @property pure const
 	{
 		return _amountOfPons;
 	}
 
 	private ubyte _amountOfKans;
-	ubyte amountOfKans() @property
+	ubyte amountOfKans() @property pure const
 	{
 		return _amountOfKans;
 	}

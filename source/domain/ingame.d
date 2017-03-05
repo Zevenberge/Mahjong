@@ -25,8 +25,6 @@ class Ingame
 	bool isDoubleRiichi = false;
 	bool isFirstTurn = true;
 	bool isTenpai = false;
-	int pons=0; // Amount of open pons.
-	int chis=0; // Amount of open chis.
 
 	this(int wind)
 	{
@@ -45,27 +43,28 @@ class Ingame
 	/*
 	 Normal functions related to claiming tiles.
 	 */
-	private bool isOwn(const Tile tile)
+	private bool isOwn(const Tile tile) pure const
 	{
 		return tile.origin == wind;
 	}
 
-	bool isPonnable(const Tile discard)
+	bool isPonnable(const Tile discard) pure const
 	{
 		if(isOwn(discard)) return false;
 		return closedHand.isPonnable(discard);
 	}
 
-	bool isKannable(const Tile discard)
+	bool isKannable(const Tile discard) pure const
 	{
 		if(isOwn(discard)) return false;
 		return closedHand.isKannable(discard);
 	}
 
-	bool isRonnable(ref Tile discard)
+	bool isRonnable(const Tile discard) const
 	{
 		if(isOwn(discard)) return false;
-		return scanHand(closedHand.tiles ~ discard) && !isFuriten ;
+		return scanHandForMahjong(closedHand.tiles ~ discard, openHand.amountOfPons).isMahjong
+			&& !isFuriten ;
 	}
 
 	/*
@@ -76,29 +75,29 @@ class Ingame
 	{ /*
 		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
 		   */
-		bool isTenpai = false;
 		for(int type = Types.min; type <= Types.max; ++type)
 		{
 			for(int value = Numbers.min; value <= Numbers.max; ++value)
 			{
 				auto tile = new Tile(type, value);
 				Tile[] temphand = closedHand.tiles ~ tile;
-				if(.scanHandForMahjong(temphand, chis, pons))
+				if(.scanHandForMahjong(temphand, openHand.amountOfPons).isMahjong)
 				{
-					isTenpai = true;
+					this.isTenpai = true;
+					return true;
 				}
 
 			}
 		}
-		this.isTenpai = isTenpai;
-		return isTenpai;
+		this.isTenpai = false;
+		return false;
 	}
 
-	bool isFuriten()
+	bool isFuriten() @property const
 	{
 		foreach(tile; discards)
 		{
-			if(.scanHandForMahjong(closedHand.tiles ~ tile, pons, chis))
+			if(.scanHandForMahjong(closedHand.tiles ~ tile, openHand.amountOfPons).isMahjong)
 			{
 				return true;
 			}
@@ -108,13 +107,7 @@ class Ingame
 
 	bool isMahjong()
 	{
-		return scanHand(closedHand.tiles);
-	}
-
-	private bool scanHand(Tile[] set)
-	{
-		return .scanHandForMahjong(set, pons, chis);
-		//FIXME: take into account yaku requirement.
+		return scanHandForMahjong(closedHand, openHand).isMahjong;
 	}
 
 	private void discard(size_t discardedNr)

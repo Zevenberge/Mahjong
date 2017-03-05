@@ -54,12 +54,12 @@ class ClosedHand
 		return tiles[$-1];
 	}
 
-	bool isPonnable(const Tile discard)
+	bool isPonnable(const Tile discard) pure const
 	{
 		return tiles.filter!(tile => tile.hasEqualValue(discard)).array.length >= 2;
 	}
 
-	bool isKannable(const Tile discard)
+	bool isKannable(const Tile discard) pure const
 	{
 		return tiles.filter!(tile => tile.hasEqualValue(discard)).array.length >= 3;
 	}

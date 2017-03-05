@@ -97,11 +97,11 @@ class Player
 	 Functions with regard to claiming tiles.
 	 */
 
-	bool isPonnable(const Tile discard)
+	bool isPonnable(const Tile discard) pure const
 	{
 		return game.isPonnable(discard);
 	}
-	bool isRonnable(ref Tile discard)
+	bool isRonnable(const Tile discard) const
 	{ // FIXME: Try to make the chain of inputs const.
 		return game.isRonnable(discard);
 	}

@@ -1,5 +1,7 @@
 module mahjong.share.range;
 
+import std.algorithm;
+import std.array;
 import std.experimental.logger;
 
 void remove(alias pred, T)(ref T[] array, T element)
@@ -13,3 +15,12 @@ void remove(alias pred, T)(ref T[] array, T element)
         }
     }
 }
+
+template without(alias equality)
+{
+	T[] without(T)(T[] arr, T[] exclusion)
+	{
+		return arr.filter!(elem => !exclusion.any!(excl => equality(excl, elem))).array;
+	}
+}
+

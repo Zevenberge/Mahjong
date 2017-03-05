@@ -1,6 +1,6 @@
 ﻿module mahjong.share.numbers;
 
-bool isOdd(const int i)
+bool isOdd(const int i) pure
 in
 { 
 	assert(i >= 0); 

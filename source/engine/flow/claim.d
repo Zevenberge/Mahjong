@@ -55,8 +55,10 @@ class ClaimEvent
 	this(const Tile tile, Player player)
 	{
 		this.tile = tile;
+		this.player = player;
 	}
 	const Tile tile;
+	const Player player;
 	private ClaimRequest _claimRequest;
 
 	void handle(ClaimRequest claimRequest)

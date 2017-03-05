@@ -1,17 +1,20 @@
 ﻿module mahjong.engine.sort;
 
+import std.stdio;
+import std.algorithm.iteration;
 import std.algorithm.sorting;
 import std.array;
 import mahjong.domain.enums.tile;
 import mahjong.domain.tile;
 
-void sortHand(ref Tile[] hand)
+auto sortHand(Tile[] hand) pure
 {  
-	hand = hand.sort!((a, b) => 
+	return hand.sort!((a, b) => 
 		a.type < b.type || 
 		(a.type == b.type && a.value < b.value))
 		.array;
 }
+
 unittest
 {
 	import std.algorithm.iteration;
@@ -30,6 +33,30 @@ unittest
 	writeln("Test of the sorting succeeded");
 }
 
+auto sortHand(const(Tile)[] hand) pure
+{
+	return hand.map!(tile => new SortableTile(tile)).array
+			.sort!((a, b) => a.type < b.type || 
+				(a.type == b.type && a.value < b.value)).array
+			.map!(sortable => sortable.tile)
+			.array;
+}
+
+
+private struct SortableTile
+{
+	this(const(Tile) tile) pure
+	{
+		this.tile = tile;
+		type = tile.type;
+		value = tile.value;
+	}
+
+	const(Tile) tile;
+	const int type;
+	const int value;
+}
+
 void swapTiles(ref Tile tileA, ref Tile tileB)
 {
 	Tile tileC = tileA;
@@ -43,7 +70,6 @@ unittest
 	swapTiles(tileA,tileB);
 	assert(tileA.value == 2 && tileA.type == Types.character, "A not swapped");
 	assert(tileB.value == 1 && tileB.type == Types.wind, "B not swapped");
-
 }
 
 /++
