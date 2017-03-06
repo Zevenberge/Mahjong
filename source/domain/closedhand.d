@@ -4,6 +4,7 @@ import std.algorithm.iteration;
 import std.array;
 import std.signals;
 import mahjong.domain;
+import mahjong.engine.chi;
 import mahjong.engine.sort;
 import mahjong.share.range;
 
@@ -52,6 +53,11 @@ class ClosedHand
 	Tile getLastTile()
 	{
 		return tiles[$-1];
+	}
+
+	bool isChiable(const Tile discard) pure const
+	{
+		return !determineChiCandidates(tiles, discard).empty;
 	}
 
 	bool isPonnable(const Tile discard) pure const

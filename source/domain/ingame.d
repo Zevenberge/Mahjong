@@ -48,6 +48,12 @@ class Ingame
 		return tile.origin == wind;
 	}
 
+	bool isChiable(const Tile discard) pure const
+	{
+		if(isOwn(discard)) return false;
+		return closedHand.isChiable(discard);
+	}
+
 	bool isPonnable(const Tile discard) pure const
 	{
 		if(isOwn(discard)) return false;

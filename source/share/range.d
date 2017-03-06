@@ -3,6 +3,7 @@ module mahjong.share.range;
 import std.algorithm;
 import std.array;
 import std.experimental.logger;
+import std.range;
 
 void remove(alias pred, T)(ref T[] array, T element)
 {
@@ -24,3 +25,12 @@ template without(alias equality)
 	}
 }
 
+template first(alias pred)
+{
+	auto first(Range)(Range range) if(isInputRange!Range)
+	{
+		auto foundRange = range.find!pred;
+		if(foundRange.empty) return (ElementType!Range).init;
+		return foundRange.front;
+	}
+}
