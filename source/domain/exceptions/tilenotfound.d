@@ -1,9 +1,10 @@
 ﻿module mahjong.domain.exceptions.tilenotfound;
 
 import std.string;
+import mahjong.domain.exceptions;
 import mahjong.domain.tile;
 
-class TileNotFoundException : Exception
+class TileNotFoundException : MahjongException
 {
 	this(Tile expectedTile)
 	{

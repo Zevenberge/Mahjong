@@ -60,13 +60,44 @@ class ClosedHand
 		return !determineChiCandidates(tiles, discard).empty;
 	}
 
-	bool isPonnable(const Tile discard) pure const
+	Tile[] removeChiTiles(ChiCandidate otherChiTiles)
 	{
-		return tiles.filter!(tile => tile.hasEqualValue(discard)).array.length >= 2;
+		auto chiTiles = tiles.filter!(t => 
+			t.id == otherChiTiles.first.id || 
+			t.id == otherChiTiles.second.id).array;
+		chiTiles.each!(t => removeTile(t));
+		return chiTiles;
 	}
 
-	bool isKannable(const Tile discard) pure const
+	bool isPonnable(const Tile discard) pure
 	{
-		return tiles.filter!(tile => tile.hasEqualValue(discard)).array.length >= 3;
+		return tilesWithEqualValue(discard).length >= 2;
+	}
+
+	Tile[] removePonTiles(const Tile discard)
+	{
+		return removeTilesWithIdenticalValue!2(discard);
+	}
+
+	bool isKannable(const Tile discard) pure
+	{
+		return tilesWithEqualValue(discard).length >= 3;
+	}
+
+	Tile[] removeKanTiles(const Tile discard)
+	{
+		return removeTilesWithIdenticalValue!3(discard);
+	}
+
+	private Tile[] tilesWithEqualValue(const Tile other) pure
+	{
+		return tiles.filter!(tile => tile.hasEqualValue(other)).array;
+	}
+
+	private Tile[] removeTilesWithIdenticalValue(int amount)(const Tile other)
+	{
+		auto removedTiles = tilesWithEqualValue(other)[0 .. amount];
+		removedTiles.each!(t => removeTile(t));
+		return removedTiles;
 	}
 }

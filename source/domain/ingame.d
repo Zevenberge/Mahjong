@@ -7,6 +7,7 @@ import std.uuid;
 import mahjong.domain;
 import mahjong.domain.enums.tile;
 import mahjong.domain.exceptions;
+import mahjong.engine.chi;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.sort;
@@ -54,16 +55,40 @@ class Ingame
 		return closedHand.isChiable(discard);
 	}
 
-	bool isPonnable(const Tile discard) pure const
+	void chi(Tile discard, ChiCandidate otherTiles)
+	{
+		if(!isChiable(discard) || !otherTiles.isChi(discard)) 
+		{
+			throw new IllegalClaimException(discard, "Chi not allowed");
+		}
+		auto chiTiles = closedHand.removeChiTiles(otherTiles) ~ discard;
+		openHand.addChi(chiTiles);
+	}
+
+	bool isPonnable(const Tile discard) pure
 	{
 		if(isOwn(discard)) return false;
 		return closedHand.isPonnable(discard);
 	}
 
-	bool isKannable(const Tile discard) pure const
+	void pon(Tile discard)
+	{
+		if(!isPonnable(discard)) throw new IllegalClaimException(discard, "Pon not allowed");
+		auto ponTiles = closedHand.removePonTiles(discard) ~ discard;
+		openHand.addPon(ponTiles);
+	}
+
+	bool isKannable(const Tile discard) pure
 	{
 		if(isOwn(discard)) return false;
 		return closedHand.isKannable(discard);
+	}
+
+	void kan(Tile discard)
+	{
+		if(!isKannable(discard)) throw new IllegalClaimException(discard, "Kan not allowed");
+		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
+		openHand.addKan(kanTiles);
 	}
 
 	bool isRonnable(const Tile discard) const

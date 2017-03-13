@@ -1,5 +1,7 @@
 ﻿module mahjong.engine.chi;
 
+import std.algorithm;
+import std.array;
 import mahjong.domain.tile;
 import mahjong.share.range;
 
@@ -21,4 +23,16 @@ ChiCandidate[] determineChiCandidates(const(Tile)[] hand, const Tile discard) pu
 		if(firstTile !is null && secondTile !is null) candidates ~= ChiCandidate(firstTile, secondTile);
 	}
 	return candidates;
+}
+
+bool isChi(ChiCandidate candidate, const Tile discard) pure
+{
+	auto isSameType = discard.type == candidate.first.type
+		&& discard.type == candidate.second.type;
+	auto isHonour = discard.isHonour;
+	auto values = [candidate.first.value, candidate.second.value, discard.value];
+	auto minValue = min(values[0], values[1], values[2]);
+	auto hasConstructiveValues = values.any!(v => v == minValue +1) 
+		&& values.any!(v => v == minValue+2);
+	return isSameType && !isHonour && hasConstructiveValues;
 }

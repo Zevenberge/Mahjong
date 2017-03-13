@@ -6,6 +6,7 @@ import std.uuid;
 
 import mahjong.domain.enums.game;
 import mahjong.domain;
+import mahjong.engine.chi;
 import mahjong.engine.flow;
 import mahjong.engine.opts;
 
@@ -102,9 +103,29 @@ class Player
 		return game.isChiable(discard);
 	}
 
-	bool isPonnable(const Tile discard) pure const
+	void chi(Tile discard, ChiCandidate otherTiles)
+	{
+		game.chi(discard, otherTiles);
+	}
+
+	bool isPonnable(const Tile discard) pure
 	{
 		return game.isPonnable(discard);
+	}
+
+	void pon(Tile discard)
+	{
+		game.pon(discard);
+	}
+
+	bool isKannable(const Tile discard) pure
+	{
+		return game.isKannable(discard);
+	}
+
+	void kan(Tile discard)
+	{
+		game.kan(discard);
 	}
 
 	bool isRonnable(const Tile discard) const
@@ -174,4 +195,58 @@ unittest
 	player.game.closedHand.tiles = "🀄🀅"d.convertToTiles;
 	nonChiableTile = "🀆"d.convertToTiles[0];
 	assert(!player.isChiable(nonChiableTile), "The tile should not have been chiable");
+}
+
+unittest
+{
+	import std.exception;
+	import mahjong.domain.exceptions;
+	import mahjong.engine.creation;
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	auto tiles = "🀓🀔"d.convertToTiles;
+	player.game.closedHand.tiles = tiles;
+	auto candidate = ChiCandidate(tiles[0], tiles[1]);
+	auto chiableTile = "🀕"d.convertToTiles[0];
+	player.chi(chiableTile, candidate);
+	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
+	assert(player.game.openHand.amountOfChis == 1, "The open hand should have one chi.");
+	assert(player.game.openHand.sets.length == 1, "The open hand should have one set.");
+	assertThrown!IllegalClaimException(player.chi(chiableTile, candidate), "With no tiles in hand, an exception should be thrown.");
+}
+
+unittest
+{
+	import std.exception;
+	import mahjong.domain.exceptions;
+	import mahjong.engine.creation;
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
+	auto ponnableTile = "🀕"d.convertToTiles[0];
+	player.pon(ponnableTile);
+	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
+	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
+	assert(player.game.openHand.sets.length == 1, "The open hand should have one set.");
+	assertThrown!IllegalClaimException(player.pon(ponnableTile), "With no tiles in hand, an exception should be thrown.");
+}
+
+unittest
+{
+	import std.exception;
+	import mahjong.domain.exceptions;
+	import mahjong.engine.creation;
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
+	auto kannableTile = "🀕"d.convertToTiles[0];
+	player.kan(kannableTile);
+	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
+	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
+	assert(player.game.openHand.amountOfKans == 1, "The open hand should have one kan.");
+	assert(player.game.openHand.sets.length == 1, "The open hand should have one set.");
+	assertThrown!IllegalClaimException(player.kan(kannableTile), "With no tiles in hand, an exception should be thrown.");
 }

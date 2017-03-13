@@ -28,6 +28,12 @@ class OpenHand
 		return _amountOfKans;
 	}
 
+	private ubyte _amountOfChis;
+	ubyte amountOfChis() @property pure const
+	{
+		return _amountOfChis;
+	}
+
 	void addPon(Tile[] tiles)
 	in
 	{
@@ -49,6 +55,17 @@ class OpenHand
 		_sets ~= tiles;
 		++_amountOfPons;
 		++_amountOfKans;
+	}
+
+	void addChi(Tile[] tiles)
+	in 
+	{
+		assert(tiles.length == 3, "A chi should have the length of three tiles");
+	}
+	body
+	{
+		_sets ~= tiles;
+		++_amountOfChis;
 	}
 
 	void promotePonToKan(Tile kanTile)

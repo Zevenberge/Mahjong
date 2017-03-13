@@ -58,7 +58,7 @@ class ClaimEvent
 		this.player = player;
 	}
 	const Tile tile;
-	const Player player;
+	Player player;
 	private ClaimRequest _claimRequest;
 
 	void handle(ClaimRequest claimRequest)
