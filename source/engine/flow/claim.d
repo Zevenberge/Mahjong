@@ -52,7 +52,45 @@ class ClaimFlow : Flow
 		}
 		body
 		{
+			if(applyRons) return;
+			if(applyPon) return;
+			if(applyChi) return;
 			switchFlow(new TurnEndFlow(metagame));
+		}
+
+		bool applyRons()
+		{
+			auto rons = _claimEvents.filter!(ce => ce.request == Request.Ron);
+			if(rons.empty) return false;
+			info("There was a ron!");
+			foreach(ron; rons) ron.apply;
+			switchFlow(new MahjongFlow(metagame));
+			return true;
+		}
+
+		bool applyPon()
+		{
+			return applySingleClaim!(ce => ce.request == Request.Pon || ce.request == Request.Kan)();
+		}
+
+		bool applyChi()
+		{
+			return applySingleClaim!(ce => ce.request == Request.Chi);
+		}
+
+		bool applySingleClaim(bool function(ClaimEvent) pred)()
+		{
+			auto claimingEvent = _claimEvents.filter!pred;
+			if(claimingEvent.empty) return false;
+			claimingEvent.front.apply;
+			switchTurn(claimingEvent.front.player);
+			return true;
+		}
+
+		void switchTurn(Player newTurnPlayer)
+		{
+			metagame.currentPlayer = newTurnPlayer;
+			switchFlow(new TurnFlow(newTurnPlayer, metagame));
 		}
 }
 
@@ -112,6 +150,56 @@ unittest
 	assert(player2.game.closedHand.tiles.empty, "The player should not have any tiles left.");
 }
 
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.test.utils;
+	auto game = setup(3);
+	auto player2 = game.players[1];
+	player2.startGame(0);
+	player2.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
+	auto player3 = game.players[2];
+	player3.startGame(0);
+	player3.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
+	auto ponnableTile = "🀕"d.convertToTiles[0];
+	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	switchFlow(claimFlow);
+	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
+			ChiCandidate(player2.game.closedHand.tiles[0], player2.game.closedHand.tiles[1])));
+	claimFlow._claimEvents[1].handle(new PonRequest(player3, ponnableTile));
+	claimFlow.advanceIfDone;
+	assert(flow.isOfType!TurnFlow, 
+		"After claiming a pon, the flow should be in the turn flow again");
+	assert(game.currentPlayer == player3, "Player 3 claimed a tile and should be the turn player");
+	assert(player2.game.closedHand.tiles.length == 2, 
+		"Player 2 should not have claimed left.");
+	assert(player3.game.closedHand.tiles.empty, 
+		"Player 3 should not have any tiles left as he ponned.");
+}
+
+unittest
+{
+	import core.exception;
+	import std.exception;
+	import mahjong.engine.creation;
+	import mahjong.test.utils;
+	auto game = setup(3);
+	auto player2 = game.players[1];
+	player2.startGame(0);
+	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
+	auto player3 = game.players[2];
+	player3.startGame(0);
+	player3.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
+	auto ponnableTile = "🀕"d.convertToTiles[0];
+	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	switchFlow(claimFlow);
+	claimFlow._claimEvents[0].handle(new NoRequest); 
+	claimFlow._claimEvents[1].handle(new ChiRequest(player3, ponnableTile,
+			ChiCandidate(player3.game.closedHand.tiles[0], player3.game.closedHand.tiles[1])));
+	assertThrown!AssertError(claimFlow.advanceIfDone, 
+		"Player 3 should not be allowed to claim as there is a player in between");
+}
+
 class ClaimEvent
 {
 	this(const Tile tile, Player player)
@@ -138,10 +226,7 @@ class ClaimEvent
 		return _claimRequest !is null;
 	}
 
-	bool isAllowed() @property pure
-	{
-		return _claimRequest.isAllowed;
-	}
+	alias _claimRequest this;
 }
 
 enum Request {None, Chi, Pon, Kan, Ron}
