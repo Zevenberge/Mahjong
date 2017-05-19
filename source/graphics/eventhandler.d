@@ -27,6 +27,7 @@ class UiEventHandler : GameEventHandler
 	override void handle(ClaimEvent event) 
 	{
 		// TODO
+		event.handle(new NoRequest);
 	}
 
 }
