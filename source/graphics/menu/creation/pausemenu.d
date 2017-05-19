@@ -4,8 +4,7 @@ import std.experimental.logger;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
 import mahjong.graphics.controllers.menu.menucontroller;
-import mahjong.graphics.menu.menu;
-import mahjong.graphics.menu.menuitem;
+import mahjong.graphics.menu;
 
 private Menu _pauseMenu;
 Menu composePauseMenu()

@@ -3,7 +3,7 @@ module mahjong.graphics.opts.defaultopts;
 import dsfml.graphics;
 import mahjong.domain.wall;
 import mahjong.graphics.drawing.wall;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 class DefaultDrawingOpts : Opts
 {
@@ -97,6 +97,10 @@ class DefaultStyleOpts : StyleOpts
 	int menuSpacing()
 	{
 		return 20;
+	}
+	int popupFontSize()
+	{
+		return 48;
 	}
 }
 

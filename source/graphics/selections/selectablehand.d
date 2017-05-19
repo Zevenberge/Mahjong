@@ -6,7 +6,7 @@ import std.range;
 import dsfml.graphics;
 import mahjong.domain.closedhand;
 import mahjong.domain.tile;
-import mahjong.engine.mahjong;
+import mahjong.engine.sort;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;

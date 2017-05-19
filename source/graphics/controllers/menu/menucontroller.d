@@ -3,10 +3,10 @@ module mahjong.graphics.controllers.menu.menucontroller;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
-import mahjong.graphics.controllers.menu.menucontrollerbase;
+import mahjong.graphics.controllers.menu;
 import mahjong.graphics.conv;
-import mahjong.graphics.menu.menu;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.menu;
+import mahjong.graphics.opts;
 
 class MenuController : MenuControllerBase!Menu
 {

@@ -1,15 +1,21 @@
 module mahjong.domain.closedhand;
 
 import std.algorithm.iteration;
+import std.array;
 import std.signals;
-import mahjong.domain.tile;
-import mahjong.domain.wall;
-import mahjong.engine.mahjong;
+import mahjong.domain;
+import mahjong.engine.chi;
+import mahjong.engine.sort;
 import mahjong.share.range;
 
 class ClosedHand
 {
 	Tile[] tiles;
+
+	size_t length() @property
+	{
+		return tiles.length;
+	}
 	
 	void addTile(Tile tile)
 	{
@@ -42,7 +48,6 @@ class ClosedHand
 	void drawTile(ref Wall wall)
 	{
 		addTile(wall.drawTile);
-		
 	}
 	
 	Tile getLastTile()
@@ -50,18 +55,49 @@ class ClosedHand
 		return tiles[$-1];
 	}
 
-	void open()
+	bool isChiable(const Tile discard) pure const
 	{
-		foreach(tile; tiles)
-		{
-			tile.open;
-		}
+		return !determineChiCandidates(tiles, discard).empty;
 	}
-	void close()
+
+	Tile[] removeChiTiles(ChiCandidate otherChiTiles)
 	{
-		foreach(tile; tiles)
-		{
-			tile.close;
-		}
+		auto chiTiles = tiles.filter!(t => 
+			t.id == otherChiTiles.first.id || 
+			t.id == otherChiTiles.second.id).array;
+		chiTiles.each!(t => removeTile(t));
+		return chiTiles;
+	}
+
+	bool isPonnable(const Tile discard) pure
+	{
+		return tilesWithEqualValue(discard).length >= 2;
+	}
+
+	Tile[] removePonTiles(const Tile discard)
+	{
+		return removeTilesWithIdenticalValue!2(discard);
+	}
+
+	bool isKannable(const Tile discard) pure
+	{
+		return tilesWithEqualValue(discard).length >= 3;
+	}
+
+	Tile[] removeKanTiles(const Tile discard)
+	{
+		return removeTilesWithIdenticalValue!3(discard);
+	}
+
+	private Tile[] tilesWithEqualValue(const Tile other) pure
+	{
+		return tiles.filter!(tile => tile.hasEqualValue(other)).array;
+	}
+
+	private Tile[] removeTilesWithIdenticalValue(int amount)(const Tile other)
+	{
+		auto removedTiles = tilesWithEqualValue(other)[0 .. amount];
+		removedTiles.each!(t => removeTile(t));
+		return removedTiles;
 	}
 }

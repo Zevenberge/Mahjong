@@ -1,569 +1,401 @@
 module mahjong.engine.mahjong;
 
 import std.experimental.logger;
-import std.string;
-import std.range;
-import std.uni;
 import std.algorithm;
+import std.array;
 import std.random;
 import std.process;
 import std.conv; 
 import std.file;
+import std.string;
 
+import mahjong.domain.closedhand;
 import mahjong.domain.enums.tile;
+import mahjong.domain.openhand;
 import mahjong.domain.tile;
 import mahjong.engine.enums.game;
+import mahjong.engine.sort;
 import mahjong.engine.yaku; 
+import mahjong.share.range;
+import mahjong.share.numbers;
 
-void setUpWall(ref Tile[] wall, int dups = 4)
+struct MahjongResult
 {
-   for(int i = 0; i < dups; ++i)
-   {
-     initialiseWall(wall);
-   }
-   defineDoras(wall);
+	const bool isMahjong;
+	const Set[] sets;
 }
 
-void initialiseWall(ref Tile[] wall) //Optionally change the amount of duplicates in the wall.
+abstract class Set
 {
-   dchar[] tiles = defineTiles(); // First load all mahjong tiles.
-   labelTiles(wall, tiles);
-}
-
-void labelTiles(ref Tile[] tiles, dchar[] faces)
-{
-   foreach(face; stride(faces,1))
-   {
-     tiles ~= getTile(face);
-   }
-   
-}
-
-void defineDoras(ref Tile[] wall)
-in
-{
-  assert(wall.length == 136);
-}
-  /*
-	Define the doras that are in the wall. The way this is programmed, this has to be initialised before the shuffle. It is put in a seperate subroutine to allow for multiple dora definitions.
-*/
-body
-{
-++wall[44].dora;
-++wall[80].dora;
-++wall[116].dora;
-}
-
-
-dchar[] defineTiles()
-{
-/*
-Define the tiles in the wall. For now, use the mahjong tiles provided by the unicode set.
-*/
-dchar[] tiles;
-tiles ~= "🀀🀁🀂🀃🀅🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑🀒🀓🀔🀕🀖🀗🀘🀙🀚🀛🀜🀝🀞🀟🀠🀡"d;
-return tiles;
-/* Set of Mahjong tiles in Unicode format
-🀀 	🀁 	🀂 	🀃 	🀄 	🀅 	🀆 	🀇 	🀈 	🀉 	🀊 	🀋 	🀌 	🀍 	🀎 	🀏
-🀐 	🀑 	🀒 	🀓 	🀔 	🀕 	🀖 	🀗 	🀘 	🀙 	🀚 	🀛 	🀜 	🀝 	🀞 	🀟
-🀠 	🀡 	🀢 	🀣 	🀤 	🀥 	🀦 	🀧 	🀨 	🀩 	🀪 	🀫
-*/
-}
-
-
-private Tile getTile(dchar face)
-{
-	dchar[] tiles = defineTiles(); // Always load the default tile set such that the correct Numbers are compared!!
-	Types typeOfTile;
-	int value;
-	int tileNumber;
-	foreach(stone; stride(tiles,1))
+	this(const Tile[] tiles) pure
 	{
-		 if(stone == face)
-		 {
-			  switch (tileNumber) 
-			  {
-				  case 0: .. case 3:
-						typeOfTile = Types.wind;
-						value = tileNumber;
-						break;
-				  case 4: .. case 6:
-						typeOfTile = Types.dragon;
-						value = tileNumber - 4;
-						break;
-				  case 7: .. case 15:
-						typeOfTile = Types.character;
-						value = tileNumber - 7;
-						break;
-				  case 16: .. case 24:
-						typeOfTile = Types.bamboo;
-						value = tileNumber - 16;
-						break;
-				  case 25: .. case 33:
-						typeOfTile = Types.ball;
-						value = tileNumber - 25;
-						break;
-				  default:
-						fatal("Could not identify tile by the face. Terminating program.");
-			  }
-			  break;
-		 }
-		 ++tileNumber;
+		this.tiles = tiles;
 	}
-	auto tile = new Tile;
-	tile.face = face;
-	tile.type = typeOfTile;
-	tile.value = value;
-	return tile;
-}
-unittest{
-	import std.stdio;
-	writeln("Checking the labelling of the wall...");
-	Tile[] wall;
-	setUpWall(wall);
-	foreach(stone; wall)
-	{
-		if (stone.face==  '🀀')
-		{
-			assert(stone.type == Types.wind);
-			assert(stone.value == Winds.east);
-		} else if (stone.face == '🀏')
-		{  
-			assert(stone.type == Types.character);
-			assert(stone.value == Numbers.nine);
-		}
-	}
-	writeln(" The tiles are correctly labelled.");
+	const Tile[] tiles;
 }
 
-void shuffleWall(ref Tile[] wall)
-  /*
-   Shuffle the tiles in the wall. Take a slice off the middle of the wall and place it at the end.
-  */
-in
+class ThirteenOrphanSet : Set
 {
-  assert(wall.length > 0);
-}
-body
-{
-  for(int i=0; i<500; ++i)
-  {
-    ulong t1 = uniform(0, wall.length);
-    ulong t2 = uniform(0, wall.length);
-    swapTiles(wall[t1],wall[t2]);
-  }
+	this(const Tile[] tiles) pure
+	{
+		super(tiles);
+	}
 }
 
-bool isEqual(const bool exprA, const bool exprB)
+class SevenPairsSet : Set
 {
-  if( exprA && exprB) { return true;}
-  if( !exprA && !exprB) {return true;}
-  return false;
-}
-unittest
-{
-	import std.stdio;
-	 writeln("Checking the isEqual function for bools...");
-	 assert(isEqual(true,true));
-	 assert(isEqual(false,false));
-	 assert(!isEqual(false,true));
-	 assert(!isEqual(true,false));
-}
-bool isEqual(const Tile tileA, const Tile tileB)
-{
-  if((tileA.type == tileB.type) && (tileA.value == tileB.value))
-  { return true; } else { return false;}
-/*  assert(false);
-  return false;*/
-}
-unittest
-{
-	import std.stdio;
-	writeln("Checking the isEqual function for tiles...");
-	Tile[] wall;
-	setUpWall(wall);
-	int i = uniform(0, to!int(wall.length));
-	assert(isEqual(wall[i], wall[i]));
-	writeln(" The isEqual function is correct.");
+	this(const Tile[] tiles) pure
+	{
+		super(tiles);
+	}
 }
 
-bool isIdentical(const ref Tile tileA, const ref Tile tileB)
+class PonSet : Set
 {
-  if((tileA.id == tileB.id) && isEqual(tileA,tileB))
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-/**
-	Checks whether tileB follows on tileA
-*/
-bool isConstructive(const Tile tileA, const Tile tileB)
-{
-	return (tileA.type == tileB.type) 
-		&& (tileA.value == tileB.value - 1);
-}
-///
-unittest
-{
-	import std.stdio;
-	writeln("Checking the isConstructive function...");
-	auto one = new Tile;
-	with(one)
+	this(const Tile[] tiles) pure
 	{
-		value = 1;
-		type = Types.bamboo;
+		super(tiles);
 	}
-	
-	auto two = new Tile;
-	with(two)
-	{
-		value = 2;
-		type = Types.bamboo;
-	}
-	assert(isConstructive(one, two));
-	assert(!isConstructive(two, one));
-	auto three = new Tile;
-	with(three)
-	{
-		value = 3;
-		type = Types.bamboo;
-	}	
-	assert(!isConstructive(one, three));
-	auto otherTwo = new Tile;
-	with(otherTwo)
-	{
-		value = 2;
-		type = Types.ball;
-	}
-	assert(!.isConstructive(one, otherTwo));
-	
-	writeln(" The isConstructive function is correct.");
 }
 
-bool scanHand(Tile[] hand, int chis = 0, int pons = 0, int pairs = 0)
+class ChiSet : Set
+{
+	this(const Tile[] tiles) pure
+	{
+		super(tiles);
+	}
+}
+
+class PairSet : Set
+{
+	this(const Tile[] tiles) pure
+	{
+		super(tiles);
+	}
+}
+
+MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand openHand) 
+{
+	return scanHandForMahjong(closedHand.tiles, openHand.amountOfPons);
+}
+
+MahjongResult scanHandForMahjong(const(Tile)[] hand, int pons = 0)
 in {assert(hand.length > 0);}
 out {assert(hand.length > 0);}
-body{ /*
-    See if the current hand is a legit mahjong hand.
-      */
-  sortHand(hand);
-  bool isMahjong=false;
-  // Run a dedicated scan for the weird hands, like Thirteen Orphans and Seven pairs, but only if the hand has exactly 14 tiles.
-  if(hand.length == 14) 
-  {
-    if(isSevenPairs(hand) || isThirteenOrphans(hand))
-    { 
-        isMahjong = true;
-       return isMahjong;
-    }
-  }
-  Tile[] mahjongHand;
- /*
-  int chis = 0; // Amount of pons in the hand.
-  int pons = 0; // Amount of chis in the hand.
-  int pairs = 0; // Amount of pairs in the hand.
- */
-
-  //  Check the regular hands.
-  isMahjong = scanMahjong(hand, mahjongHand, chis, pairs, pons);
-  return isMahjong;
-}
-
-private bool isSevenPairs(const Tile[] hand)
-in
-{ assert(hand.length == 14);}
-body
-{ /* 
-    This subroutine checks if the hand forms seven pairs. Nothing more, nothing less.
-  */
-  for(int i=0; i<7; ++i)
-  {
-    if(hand.length > 2*i+2) 
-    { // Check if no two pairs are the same, only if the hand size allows it.
-       if(isEqual(hand[2*i],hand[2*i+2]))
-       { 
-          return false;
-       } // Return if we have three identical tiles.
-    }
-    if(!isEqual(hand[2*i],hand[2*i+1]))
-    { // Check whether is is a pair.
-      return false;
-    }  // If it is no pair, it is no seven pairs hand.
-  }
-  return true;
-}
-private bool isThirteenOrphans(const Tile[] hand)
-in
-{ assert(hand.length == 14);}
 body
 { /*
-    This subroutine checks if the hand has thirteen orphans in them.
-  */
-  int pairs = 0;
-  
-  for(int i = 0; i < 13; ++i)
-  { 
-    auto honour = new Tile;
-    
-    switch(i){
-    case 0: .. case 3: // Winds
-         honour.type = Types.wind;
-         honour.value = i;
-         break;
-    case 4: .. case 6: // Dragons
-         honour.type = Types.dragon;
-         honour.value = i % (Winds.max + 1);
-         break;
-    case 7, 8:         // Characters
-         honour.type = Types.character;
-         honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
-         break;
-    case 9, 10:        // Bamboos
-         honour.type = Types.bamboo;
-         honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
-         break;
-    case 11, 12:       // Balls
-         honour.type = Types.ball;
-         honour.value = isOdd(i) ? Numbers.one : Numbers.nine;
-         break;
-    default:
-         assert(false);
-    }
-    if(!isEqual(hand[i+pairs], honour)) //If the tile is not the honour we are looking for
-    { 
-      return false;  
-    }
-    if((i + pairs + 1) < hand.length) 
-    {
-        if(isEqual(hand[i+pairs], hand[i+pairs+1])) // If we have a pair
-        {
-             ++pairs;
-             if(pairs > 1)
-             {
-               return false;
-             }  // If we have more than one pair, it is not thirteen orphans.
-        }
-    }
-  }
-  /*
-    When the code arrives at this point, we have confirmed that the hand has each of the thirteen orphans in it. The final check is whether the hand also has the pair.
-  */
-  if(pairs == 1) { return true; }
-  
-  return false;
-}
-private bool scanMahjong(ref Tile[] hand, ref Tile[] mahjongHand, ref int chis, ref int pairs, ref int pons)
-{ /*
-     This subroutine checks whether the hand at hand is a mahjong hand. It does - most explicitely- NOT take into account yakus. The subroutine brute-forces the possible combinations. It first checks if the first two tiles form a pair (max. 1). Then it checks if the first three tiles form a pon. If it fails, it returns a false.
+	   See if the current hand is a legit mahjong hand.
+	   */
+	auto sortedHand = sortHand(hand);
+	// Run a dedicated scan for the weird hands, like Thirteen Orphans and Seven pairs, 
+	// but only if the hand has exactly 14 tiles.
+	if(hand.length == 14) 
+	{
+		if(isSevenPairs(sortedHand))
+		{
+			return MahjongResult(true, [new SevenPairsSet(sortedHand)]);
+		}
+		if(isThirteenOrphans(hand))
+		{ 
+			return MahjongResult(true, [new ThirteenOrphanSet(sortedHand)]);
+		}
+	}
 
-pairs --- pons  --- chis                <- finds a pair
-       +- pons  --- chis                <- finds a pon
-                 +- pons  -- chis       <- finds nothing and returns to the previous layer, in which it can still find a chi.
-
-  */
-  bool isSet = false;
-  bool isMahjong = false;
-  Tile[] temphand = hand.dup;
-  Tile[] tempmahj = mahjongHand.dup;
-  if(pairs < 1)
-  { // Check if there is a pair, but only if there is not yet a pair.
-    isSet = scanEquals(temphand, tempmahj, pairs, Set.pair);
-    isMahjong = scanProgression(hand, temphand, mahjongHand, tempmahj, chis, pairs, pons, isSet);
-    if(isMahjong) {
-    return isMahjong;
-    } else {
-    assert(!isMahjong); 
-    if(isSet) {
-    --pairs;}} // Decrease the amount of pairs by one if this is not the solution.
-  }
-
-  temphand = hand.dup;
-  tempmahj = mahjongHand.dup;
-    // Check if there is a pon.
-    isSet = scanEquals(temphand, tempmahj, pons, Set.pon);
-    isMahjong = scanProgression(hand, temphand, mahjongHand, tempmahj, chis, pairs, pons, isSet);
-    if(isMahjong) {
-    return isMahjong;
-    } else { 
-    assert(!isMahjong); 
-    if(isSet) {
-    --pons;}} // Decrease the amount of pons by one if this is not the solution.
-
-  temphand = hand.dup;
-  tempmahj = mahjongHand.dup;
-    // Check if there is a chi.
-    isSet = scanChis(temphand, tempmahj, chis);
-    isMahjong = scanProgression(hand, temphand, mahjongHand, tempmahj, chis, pairs, pons, isSet);
-    if(isMahjong) {
-    return isMahjong;
-    } else {
-    assert(!isMahjong); 
-    if(isSet) {
-    --chis;}} // Decrease the amount of pons by one if this is not the solution.
-  return isMahjong;
-}
-private bool scanProgression(ref Tile[] hand, ref Tile[] temphand, ref Tile[] mahjongHand, ref Tile[] tempmahj, ref int chis, ref int pairs, ref int pons, bool isSet)
-{   /* 
-      Check whether the mahjong check can advance to the next stage.
-    */
-
-    bool isMahjong = false;
- if(isSet)
- {
-    int amountOfSets = chis + pons;
-    if((amountOfSets == 4) && (pairs == 1))
-    { isMahjong = true;
-      hand = tempmahj.dup;
-      mahjongHand = tempmahj.dup;
- //writeln();
-      return isMahjong;
-    } else {
-    isMahjong = scanMahjong(temphand, tempmahj, chis, pairs, pons);
-       if(isMahjong){
-       hand = temphand.dup;
-       mahjongHand = tempmahj.dup;
-       }
-    } 
- }
-    return isMahjong;
-}
-private bool scanChis(ref Tile[] hand, ref Tile[] final_hand, ref int chis)
-{ /*
-     This subroutine checks whether there is a chi hidden in the beginning of the hand. It should also take into account that there could be doubles, i.e. 1-2-2-2-3. Subtract the chi from the initial hand.
-  */
-  if(hand[0].type < Types.character)  // If the tile is a wind or a dragon, then abort the function.
-  { return false; }
-
-  Tile[] mutehand = hand.dup; // Create a back-up of the hand that can be mutated at will.
-  Tile[] mutefinal;       // Create a temporary array that collects the chi.
-  mutefinal ~= mutehand[0];
-  mutehand = mutehand[1 .. $]; // Subtract the tile from the hand.
-
-  for(int i=0;(i < 5) && (i < mutehand.length);++i)
-  { 
-    if(isConstructive(mutefinal[$-1], mutehand[i]))
-    {
-      takeOutTile(mutehand, mutefinal, i); // The second tile in a row
-      for( ; (i < 10) && (i < mutehand.length); ++i)
-      {
-        if(isConstructive(mutefinal[$-1], mutehand[i]))
-        {
-           takeOutTile(mutehand, mutefinal, i); // The chi is completed.
-           assert(mutefinal.length == 3);
-           assert(hand.length == mutefinal.length + mutehand.length);
-           
-           hand = mutehand.dup; // Now that the chi is confirmed, the hand can be reduced.
-           final_hand ~= mutefinal; // Add the chi to the winning hand.
-           ++chis;
-           return true;
-        }
-      }
-
-      break;
-    }
-  }
-  
-  return false; // Do not return the modifications to the hand.
-}
-/++
-
-+/
-void takeOutTile(ref Tile[] hand, ref Tile[] output, Tile takenOut)
-{
-   int i = 0;
-   foreach(tile; hand)
-   {
-     if(isIdentical(tile, takenOut))
-     {
-       takeOutTile(hand, output, i);
-       return;
-     }
-     ++i;
-   }
-   throw new Exception("Tile not found");
-}
-/// Ditto
-void takeOutTile(ref Tile[] hand, ref Tile[] output, const size_t index, size_t count = 1)
-{
-	auto end = count + index; 
-    Tile[] temphand;
-    output ~= hand[index .. end];
-    temphand ~= hand[end .. $];
-    hand = hand[0 .. index];
-    hand ~= temphand;
-}
-///
-unittest 
-{
-	import std.stdio;
-	import std.algorithm.searching;
-	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile;
-	Tile a = new Tile, b = new Tile;
-	Tile[] hand;
-	hand = hand ~ a ~ tile ~ b;
-	Tile[] takenOut;	
-	takeOutTile(hand, takenOut, 1);
-	assert(takenOut.length == 1, "Only one tile should be taken out");
-	assert(takenOut[0].id == tile.id, "The tile that was taken out should be the one that was determined");
-	assert(hand.length == 2, "Tile should be taken out");
-	assert(hand.all!(t => t.id != tile.id), "The tile should not be in the wall any more.");
-}
-unittest // Range overload
-{
-	import std.stdio;
-	import std.algorithm.searching;
-	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile;
-	auto a = new Tile, b = new Tile;
-	Tile[] hand;
-	hand = hand ~ a ~ tile ~ b;
-	Tile[] takenOut;	
-	takeOutTile(hand, takenOut, 1, 2);
-	assert(takenOut.length == 2, "Two tiles should be taken out");
-	assert(takenOut[0].id == tile.id, "The first tile that was taken out should be the one that was determined");
-	assert(hand.length == 1, "Only one sould remain.");
-	assert(hand.all!(t => t.id == a.id), "The tile should not be in the wall any more.");
+	auto progress = scanRegularMahjong(new Progress(sortedHand, pons));
+	Set[] sets;
+	sets ~= progress.pons;
+	sets ~= progress.chis;
+	sets ~= progress.pairs;
+	return MahjongResult(progress.isMahjong, sets);
 }
 
-private bool scanEquals(ref Tile[] hand, ref Tile[] final_hand,  ref int pairs, const int distance)
-{ /* distance = set.pair or set.pon
-    This subroutine checks if the first few tiles form a set and then subtracts them from the inititial hand.
-  */
-if(hand.length > distance)
+private bool isSevenPairs(const Tile[] hand) pure
 { 
-  if(!isEqual(hand[0],hand[distance])) 
-  {return false;}
-  
-  final_hand ~= hand[0 .. distance+1];
-  hand = hand[distance+1 .. $];
-  ++pairs;
-  return true;
-} else { return false;}
+	if(hand.length != 14) return false;
+	for(int i=0; i<7; ++i)
+	{
+		if(hand.length > 2*i+2) 
+		{ // Check if no two pairs are the same, only if the hand size allows it.
+			if(hand[2*i].hasEqualValue(hand[2*i+2]))
+			{ 
+				return false;
+			} // Return if we have three identical tiles.
+		}
+		if(!hand[2*i].hasEqualValue(hand[2*i+1]))
+		{ // Check whether is is a pair.
+			return false;
+		}  // If it is no pair, it is no seven pairs hand.
+	}
+	return true;
 }
+private bool isThirteenOrphans(const Tile[] hand) pure
+{
+	struct ComparativeTile
+	{
+		int type;
+		int value;
+
+		bool hasEqualValue(const Tile other) pure const
+		{
+			return other.type == type && other.value == value;
+		}
+	}
+	if(hand.length != 14) return false;
+	int pairs = 0;
+	
+	for(int i = 0; i < 13; ++i)
+	{ 
+		ComparativeTile honour;
+
+		switch(i){
+			case 0: .. case 3: // Winds
+				honour = ComparativeTile(Types.wind, i);
+				break;
+			case 4: .. case 6: // Dragons
+				honour = ComparativeTile(Types.dragon, i % (Winds.max + 1));
+				break;
+			case 7, 8:         // Characters
+				honour = ComparativeTile(Types.character, i.isOdd ? Numbers.one : Numbers.nine);
+				break;
+			case 9, 10:        // Bamboos
+				honour = ComparativeTile(Types.bamboo, i.isOdd ? Numbers.one : Numbers.nine);
+				break;
+			case 11, 12:       // Balls
+				honour = ComparativeTile(Types.ball, i.isOdd ? Numbers.one : Numbers.nine);
+				break;
+			default:
+				assert(false);
+		}
+		if(!honour.hasEqualValue(hand[i+pairs])) //If the tile is not the honour we are looking for
+		{ 
+			return false;  
+		}
+		if((i + pairs + 1) < hand.length) 
+		{
+			if(hand[i+pairs].hasEqualValue(hand[i+pairs+1])) // If we have a pair
+			{
+				++pairs;
+				if(pairs > 1)
+				{
+					return false;
+				}  // If we have more than one pair, it is not thirteen orphans.
+			}
+		}
+	}
+	/*
+	 When the code arrives at this point, we have confirmed that the hand has each of the thirteen orphans in it. The final check is whether the hand also has the pair.
+	 */
+
+	return pairs == 1;
+}
+
+private class Progress
+{
+	this(const(Tile)[] hand, size_t initialSets) pure
+	{
+		this.hand = hand;
+		_initialSets = initialSets;
+	}
+
+	private const size_t _initialSets;
+	const(Tile)[] hand;
+	PairSet[] pairs;
+	PonSet[] pons;
+	ChiSet[] chis;
+
+	void convertToPair(const HandSetSeperation handSetSeperation) pure
+	{
+		if(!handSetSeperation.isSeperated) return;
+		hand = handSetSeperation.hand;
+		pairs ~= new PairSet(handSetSeperation.set);
+	}
+
+	void convertToPon(const HandSetSeperation handSetSeperation) pure
+	{
+		if(!handSetSeperation.isSeperated) return;
+		hand = handSetSeperation.hand;
+		pons ~= new PonSet(handSetSeperation.set);
+	}
+
+	void convertToChi(const HandSetSeperation handSetSeperation) pure
+	{
+		if(!handSetSeperation.isSeperated) return;
+		hand = handSetSeperation.hand;
+		chis ~= new ChiSet(handSetSeperation.set);
+	}
+
+	void subtractPair() pure
+	{
+		auto pair = pairs[$-1];
+		recoverTiles(pair.tiles);
+		pairs = pairs[0 .. $-1];
+	}
+
+	void subtractPon() pure
+	{
+		auto pon = pons[$-1];
+		recoverTiles(pon.tiles);
+		pons = pons[0 .. $-1];
+	}
+
+	void subtractChi() pure
+	{
+		auto chi = chis[$-1];
+		recoverTiles(chi.tiles);
+		chis = chis[0 .. $-1];
+	}
+
+	private void recoverTiles(const(Tile)[] tiles) pure
+	{
+		hand = sortHand(hand ~ tiles);
+	}
+
+	private bool _isMahjong;
+	bool isMahjong() @property pure const
+	{
+		return _isMahjong || (pairs.length == 1 &&
+			pons.length + chis.length + _initialSets == 4);
+	}
+}
+
+private struct HandSetSeperation
+{
+	const (Tile)[] hand;
+	const (Tile)[] set;
+	bool isSeperated() @property pure const
+	{
+		return set.length > 0;
+	}
+}
+
+private Progress scanRegularMahjong(Progress progress) 
+{ 
+	/*
+	   This subroutine checks whether the hand at hand is a mahjong hand. 
+	   It does - most explicitely- NOT take into account yakus. 
+	   The subroutine brute-forces the possible combinations. 
+	   It first checks if the first two tiles form a pair (max. 1). 
+	   Then it checks if the first three tiles form a pon. If it fails, it returns a false.
+
+	   pairs --- pons  --- chis                <- finds a pair
+	   +- pons  --- chis                <- finds a pon
+	   +- pons  -- chis       <- finds nothing and returns to the previous layer, in which it can still find a chi.
+
+	*/
+	if(progress.pairs.length < 1)
+	{ // Check if there is a pair, but only if there is not yet a pair.
+		progress = attemptToResolvePair(progress);
+		if(progress.isMahjong) return progress;
+	}
+	progress = attemptToResolvePon(progress);
+	if(progress.isMahjong) return progress;
+	return attemptToResolveChi(progress);
+}
+
+private Progress attemptToResolvePair(Progress progress) 
+{
+	if(progress.hand.length < 2) return progress;
+	auto pairSeperation = seperateEqualSetOfGivenLength(progress.hand, 2);
+	progress.convertToPair(pairSeperation);
+	if(!pairSeperation.isSeperated) return progress;
+	progress = scanRegularMahjong(progress);
+	if(!progress.isMahjong) 
+	{
+		progress.subtractPair;
+	}
+	return progress;
+}
+
+private Progress attemptToResolvePon(Progress progress) 
+{
+	if(progress.hand.length < 3) return progress;
+	auto ponSeperation = seperateEqualSetOfGivenLength(progress.hand, 3);
+	progress.convertToPon(ponSeperation);
+	if(!ponSeperation.isSeperated) return progress;
+	progress = scanRegularMahjong(progress);
+	if(!progress.isMahjong) 
+	{
+		progress.subtractPon;
+	}
+	return progress;
+}
+
+private Progress attemptToResolveChi(Progress progress) 
+{
+	if(progress.hand.length < 3) return progress;
+	if(progress.hand[0].isHonour)
+	{
+		// Honours cannot be resolved in a chi.
+		return progress;
+	}
+	auto chiSeperation = seperateChi(progress.hand);
+	if(!chiSeperation.isSeperated) return progress;
+	progress.convertToChi(chiSeperation);
+	progress = scanRegularMahjong(progress);
+	if(!progress.isMahjong)
+	{
+		progress.subtractChi;
+	}
+	return progress;
+}
+
+private HandSetSeperation seperateChi(const(Tile)[] hand)
+{ 
+	/*
+	   This subroutine checks whether there is a chi hidden in the beginning of the hand. 
+	   It should also take into account that there could be doubles, 
+	   i.e. 1-2-2-2-3. Subtract the chi from the initial hand.
+	*/
+
+	const(Tile)[] chi;       // Create a temporary array that collects the chi.
+	chi ~= hand[0];
+	foreach(tile; hand.filter!(t => t.type == chi[0].type))
+	{
+		if(tile.value == chi[$-1].value + 1)
+		{
+			chi ~= tile;
+			if(chi.length == 3) 
+			{
+				return HandSetSeperation(hand.without!((a,b) => a.id == b.id)(chi), chi);
+			}
+		}
+	}
+	return HandSetSeperation(hand);
+}
+
+private HandSetSeperation seperateEqualSetOfGivenLength(const(Tile)[] hand, const int distance) pure 
+{ 
+	/* distance = set.pair or set.pon
+	   This subroutine checks if the first few tiles form a set and then subtracts them from the inititial hand.
+	*/
+	if(hand.length < distance) return HandSetSeperation(hand, null);
+	auto tile = hand[0];
+	auto equalTiles = hand.filter!(t => t.hasEqualValue(tile)).array;
+	if(equalTiles.length < distance) return HandSetSeperation(hand, null);
+	auto set = equalTiles[0 .. distance];
+	return HandSetSeperation(
+		hand.without!((a,b) => a.id == b.id)(set), 
+		set);
+}
+
 unittest // Check whether the example hands are seen as mahjong hands.
 {
 	import std.stdio;
 	import std.path;
+	import std.string;
 
 	void testHands(string filename, const bool isHand)
 	{
 		writeln("Looking for ", filename.asAbsolutePath);
-		for( int line_number = 1; ; ++line_number)
+		auto output = readLines(filename);
+		foreach(line; output)
 		{   
-			Tile[] hand;
-			dchar[] handFaces;
-			readline(filename, handFaces, line_number);
-			if(handFaces.length != 14) {break;}
-			labelTiles(hand, handFaces);
+			assert(line.length == 14, "A complete hand is 14 tiles");
+			auto hand = convertToTiles(line);
 			sortHand(hand);
 			bool isMahjong;
-			isMahjong = scanHand(hand);
-			assert(isEqual(isMahjong, isHand));
+			isMahjong = scanHandForMahjong(hand).isMahjong;
+			assert(isHand == isMahjong, "For %s, the mahjong should be %s".format(line, isHand));
 			write("The mahjong is ", isMahjong, ".  ");
 			foreach(stone; hand) {write(stone);}
 			writeln();
@@ -577,108 +409,32 @@ unittest // Check whether the example hands are seen as mahjong hands.
 	testHands("test/example_hands", true);
 	testHands("test/unlegit_hands", false);
 	writeln(" The function reads the example hands correctly.");
-
-	
 }
 
-void sortHand(ref Tile[] hand)
-{  /*
-    Sort the tiles in the hand. Arrange them by their type and their value.
-   */
-   for( ; ; )
-   {
-     Tile[] hand_prev = hand.dup;
-     for(int i = 1; i < hand.length; ++i)
-     {  // Sort by type first (dragon, wind, character, bamboo, ball)
-       if(hand[i].type < hand[i-1].type) {
-         swapTiles(hand[i], hand[i-1]);
-       } else if(hand[i].type == hand[i-1].type) {
-          // Then sort them by value.
-          if(hand[i].value < hand[i-1].value)
-         { swapTiles(hand[i], hand[i-1]);
-         } else if(hand[i].value == hand[i-1].value)
-          { if(hand[i].dora > hand[i-1].dora)
-         { swapTiles(hand[i], hand[i-1]);}
-          }
-       }
-     }
-     if(hand_prev == hand)
-     {
-      break;
-     }
-   }
-}
 
-void toggle(ref bool foo)
-{
-   foo = !foo;
-}
-unittest
-{
-  bool foo = true;
-  toggle(foo); // foo is now false.
-  assert(!foo);
-  toggle(foo); // foo is again true.
-  assert(foo);
-}
-
-void swapTiles(ref Tile tileA, ref Tile tileB)
-{
-   Tile tileC = tileA;
-   tileA = tileB;
-   tileB = tileC;
-}
-unittest
-{
-  auto tileA = new Tile();
-  with(tileA)
-  {
-  	face = 'p';
-  	value = 1;
-  	type = Types.wind;
-  }
-  auto tileB = new Tile();
-  with(tileB)
-  {
-  	face = 'c';
-  	value = 2;
-  	type = Types.character;
-  }
-  swapTiles(tileA,tileB);
-  assert(tileA.value == 2 && tileA.type == Types.character, "A not swapped");
-  assert(tileB.value == 1 && tileB.type == Types.wind, "B not swapped");
-
-}
 version(unittest)
 {
-	void readline(string filename, ref dchar[] output, int line_number)
+	import std.range;
+	import std.stdio;
+	import mahjong.engine.creation;
+	/// Read the given file into dstring lines
+	dstring[] readLines(string filename)
 	{ 
-		import std.stdio;
-		/*
-			Read a line from a file in dchar[] format. For example, read the example hands for unit testing.
-		*/
-		assert(line_number > 0);
 		if(exists(filename))
 		{ 
-			int i=1;
-			File file = File(filename,"r");
+			dstring[] output;
+			auto file = File(filename,"r");
 			while(!file.eof())
 			{
 				string line = chomp(file.readln());
-				if (line_number == i)
-				{ 
-					foreach(face; stride(line,1))
-					{
-						output ~= face;
-					}
-					break;
+				dchar[] dline;
+				foreach(face; stride(line,1))
+				{
+					dline ~= face;
 				}
-				i++;
+				output ~= dline.to!dstring;
 			}
-			if (line_number > i)
-			{ 
-				throw new Exception("The file is not that large."); 
-			}
+			return output;
 		} 
 		else 
 		{
@@ -687,180 +443,3 @@ version(unittest)
 	}
 }
 
-void printTiles(Tile[] wall)
-{
-   for(int i=0; i<5; ++i)
-   {
-     switch (cast(Types)wall[i].type){
-        case Types.dragon:
-			trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", cast(Dragons)wall[i].value, ".");
-			break;
-        case Types.wind:
-			trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", cast(Winds)wall[i].value, ".");
-			break;
-        default:
-			trace(wall[i].face, " is a ", cast(Types)wall[i].type, " with value ", wall[i].value+1, ".");
-     }
-   }
-}
-
-bool isOdd(const int i)
-in{ assert(i >= 0); }
-body{ if( (i % 2) == 0){
-  return false;}
-  if( (i % 2) == 1){
-  return true;}
-  assert(true);
-  return false;
-}
-unittest{
-assert(isOdd(9));
-assert(!isOdd(8));
-}
-
-bool isHonour(const ref Tile tile)
-{
-  if(tile.type < Types.character)
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-///
-unittest
-{
-  auto tile = new Tile;
-  tile.type = Types.wind;
-  assert(isHonour(tile));
-  tile.type = Types.dragon;
-  assert(isHonour(tile));
-  tile.type = Types.character;
-  assert(!isHonour(tile));
-  tile.type = Types.bamboo;
-  assert(!isHonour(tile));
-  tile.type = Types.ball;
-  assert(!isHonour(tile));
-}
-
-bool isTerminal(Tile tile)
-{
-  if(tile.type > Types.dragon)
-  {
-    if((tile.value == Numbers.one) || (tile.value == Numbers.nine))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-unittest
-{
-	auto tile = new Tile;
-	tile.type = Types.character;
-	tile.value = Numbers.one;
-	assert(isTerminal(tile));
-	tile.value = Numbers.two;
-	assert(!isTerminal(tile));
-	tile.value = Numbers.three;
-	assert(!isTerminal(tile));
-	tile.value = Numbers.four;
-	assert(!isTerminal(tile));
-	tile.value = Numbers.five;
-	assert(!isTerminal(tile));
-	tile.value = Numbers.six;
-	assert(!isTerminal(tile));
-	tile.value = Numbers.seven;
-	assert(!isTerminal(tile));
-	tile.value = Numbers.eight;
-	assert(!isTerminal(tile));
-	tile.value = Numbers.nine;
-	assert(isTerminal(tile));
-	tile.type = Types.wind;
-	tile.value = Winds.east;
-	assert(!isTerminal(tile));
-	tile.type = Types.dragon;
-	tile.value = Dragons.green;
-	assert(!isTerminal(tile));
-}
-
-bool isIn(const Tile wanted, const Tile[] deck)
-{
-   foreach(tile; deck)
-     if(isEqual(tile, wanted))
-        return true;
-   return false;
-}
-
-bool isIn(const int wanted, const int[] list)
-{
-   foreach(number; list)
-     if(number == wanted)
-        return true;
-   return false;
-}
-
-// FIXME: Depreciated: use UFCS.
-bool isIn(const ref Tile[] deck, const ref Tile wanted)
-{
-  foreach(tile; deck)
-  {
-    if(isEqual(tile, wanted))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-bool isAnotherIn(const ref Tile[] deck, const ref Tile wanted)
-{
-  foreach(tile; deck)
-  {
-    if(isEqual(tile, wanted) && !isIdentical(tile, wanted))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
-bool isConnected(const ref Tile[] hand, const ref Tile tile)
-{
-  bool connected = false;
-  auto connection = new Tile;
-  connection.type = tile.type;
-
-  if(!isHonour(tile))
-  { // See whether a tile within range 2 of the same suit is in the hand.
-    for(connection.value = tile.value-2; connection.value <= tile.value+2; ++connection.value)
-    {
-      if(connection.value == tile.value)
-      { // Skip the original value, as it requires an extra step.
-        ++connection.value;
-      }
-      if(isIn(hand, connection))
-      {
-        connected = true;
-        return connected;
-      }
-    } 
-  }
-
-  if(isAnotherIn(hand, tile))
-  {
-    connected = true;
-    return connected;
-  }
-  else
-  {
-    connected = false;
-    return connected;
-  }
-}
-
-void message(const dchar[] mail)
-{ // Write a message to the desired output.
-  info(mail);
-}

@@ -1,0 +1,134 @@
+﻿module mahjong.engine.sort;
+
+import std.stdio;
+import std.algorithm.iteration;
+import std.algorithm.sorting;
+import std.array;
+import mahjong.domain.enums.tile;
+import mahjong.domain.tile;
+
+auto sortHand(Tile[] hand) pure
+{  
+	return hand.sort!((a, b) => 
+		a.type < b.type || 
+		(a.type == b.type && a.value < b.value))
+		.array;
+}
+
+unittest
+{
+	import std.algorithm.iteration;
+	import std.conv;
+	import std.stdio;
+	import std.string;
+	import mahjong.engine.creation;
+	writeln("Starting the test of the sort");
+	enum unsortedString = "🀡🀂🀃🀄🀁🀘🀅🀀🀏🀐🀄🀙🀆🀇"d;
+	auto unsortedTiles = unsortedString.convertToTiles;
+	unsortedTiles.sortHand;
+	auto sortedTilesAsString = unsortedTiles.map!(t => t.face).to!dstring;
+	enum sortedString = "🀀🀁🀂🀃🀅🀄🀄🀆🀇🀏🀐🀘🀙🀡"d;
+	assert(sortedString == sortedTilesAsString, 
+		"The ordering is not was expected, is actually %s".format(sortedTilesAsString));
+	writeln("Test of the sorting succeeded");
+}
+
+auto sortHand(const(Tile)[] hand) pure
+{
+	return hand.map!(tile => new SortableTile(tile)).array
+			.sort!((a, b) => a.type < b.type || 
+				(a.type == b.type && a.value < b.value)).array
+			.map!(sortable => sortable.tile)
+			.array;
+}
+
+
+private struct SortableTile
+{
+	this(const(Tile) tile) pure
+	{
+		this.tile = tile;
+		type = tile.type;
+		value = tile.value;
+	}
+
+	const(Tile) tile;
+	const int type;
+	const int value;
+}
+
+void swapTiles(ref Tile tileA, ref Tile tileB)
+{
+	Tile tileC = tileA;
+	tileA = tileB;
+	tileB = tileC;
+}
+unittest
+{
+	auto tileA = new Tile(Types.wind, 1);
+	auto tileB = new Tile(Types.character, 2);
+	swapTiles(tileA,tileB);
+	assert(tileA.value == 2 && tileA.type == Types.character, "A not swapped");
+	assert(tileB.value == 1 && tileB.type == Types.wind, "B not swapped");
+}
+
+/++
+
+ +/
+void takeOutTile(ref Tile[] hand, ref Tile[] output, Tile takenOut)
+{
+	int i = 0;
+	foreach(tile; hand)
+	{
+		if(tile.isIdentical(takenOut))
+		{
+			takeOutTile(hand, output, i);
+			return;
+		}
+		++i;
+	}
+	throw new Exception("Tile not found");
+}
+/// Ditto
+void takeOutTile(ref Tile[] hand, ref Tile[] output, const size_t index, size_t count = 1)
+{
+	auto end = count + index; 
+	Tile[] temphand;
+	output ~= hand[index .. end];
+	temphand ~= hand[end .. $];
+	hand = hand[0 .. index];
+	hand ~= temphand;
+}
+///
+unittest 
+{
+	import std.stdio;
+	import std.algorithm.searching;
+	writeln("Checking the takeOutTile function...");
+	auto tile = new Tile(0, 0);
+	Tile a = new Tile(0,0), b = new Tile(0,0);
+	Tile[] hand;
+	hand = hand ~ a ~ tile ~ b;
+	Tile[] takenOut;	
+	takeOutTile(hand, takenOut, 1);
+	assert(takenOut.length == 1, "Only one tile should be taken out");
+	assert(takenOut[0].id == tile.id, "The tile that was taken out should be the one that was determined");
+	assert(hand.length == 2, "Tile should be taken out");
+	assert(hand.all!(t => t.id != tile.id), "The tile should not be in the wall any more.");
+}
+unittest // Range overload
+{
+	import std.stdio;
+	import std.algorithm.searching;
+	writeln("Checking the takeOutTile function...");
+	auto tile = new Tile(0,0);
+	auto a = new Tile(0,0), b = new Tile(0,0);
+	Tile[] hand;
+	hand = hand ~ a ~ tile ~ b;
+	Tile[] takenOut;	
+	takeOutTile(hand, takenOut, 1, 2);
+	assert(takenOut.length == 2, "Two tiles should be taken out");
+	assert(takenOut[0].id == tile.id, "The first tile that was taken out should be the one that was determined");
+	assert(hand.length == 1, "Only one sould remain.");
+	assert(hand.all!(t => t.id == a.id), "The tile should not be in the wall any more.");
+}

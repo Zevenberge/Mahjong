@@ -48,3 +48,38 @@ class Controller
 }
 
 Controller controller;
+
+version(unittest)
+{
+	class TestController : Controller
+	{
+		import mahjong.test.window;
+
+		this()
+		{
+			super(new TestWindow);
+		}
+
+		override void draw() 
+		{
+		}
+
+		override void roundUp() 
+		{
+		}
+
+		override protected bool handleKeyEvent(Event.KeyEvent key) 
+		{
+			return false;
+		}
+
+		override void yield() 
+		{
+		}
+	}
+
+	void setDefaultTestController()
+	{
+		.controller = new TestController;
+	}
+}

@@ -1,34 +1,46 @@
 module mahjong.domain.metagame;
 
+import std.algorithm;
 import std.experimental.logger;
 import std.random;
 import std.conv;
-import std.signals;
 import std.uuid;
 
 import mahjong.domain.enums.game;
 import mahjong.domain.enums.tile;
 import mahjong.domain.enums.wall;
-import mahjong.domain.player;
-import mahjong.domain.tile;
-import mahjong.domain.wall;
+import mahjong.domain;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
-import mahjong.engine.opts.opts;
+import mahjong.engine.opts;
 import mahjong.graphics.enums.game;
 import mahjong.graphics.enums.kanji;
 
 class Metagame
 {
-   /*
-     Preparation of the game.
-   */
-
-	Player currentPlayer() { return players[_turn]; }
 	Player[] players; 
+
+	Player currentPlayer() @property 
+	{ 
+		return _turn == -1 ? null : players[_turn]; 
+	}
+
+	auto otherPlayers() @property
+	{
+		auto currentPlayer = this.currentPlayer;
+		return players.filter!(p => &p != &currentPlayer);
+	}
+
 	Wall wall;
 	PlayerWinds leadingWind;
+	private int _initialWind;
 	uint round;
+
+	this(Player[] players)
+	{
+		this.players = players;
+		initialise;
+	}
 
 	bool hasStarted()
 	{
@@ -37,71 +49,66 @@ class Metagame
 	void initialise()
 	{
 		info("Initialising metagame");
-		constructPlayers;
-		trace("Constructed players");
-		setPlayers(uniform(0, gameOpts.amountOfPlayers));
+		placePlayers;
+		_initialWind = uniform(0, players.length).to!int; 
 		info("Initialised metagame");
 	}
+
+	/++
+	 + Sets up the round such that it can be started.
+	 +/
 	void nextRound()
 	{
 		info("Moving to the next round");
-		setPlayers(players[playerLocation.bottom].getWind);
-		emit;
+		setPlayers;
+		removeTurnPlayer;
 	}
-	
-	mixin Signal!();
-	
-	private void setPlayers(int initialWind)
+
+	private void setPlayers()
 	{
 		_status = Status.NewGame;
 		leadingWind = PlayerWinds.east;
 		round = 1;
 		info("Setting up the game");
-		setPlayersGame(initialWind);
+		setPlayersGame;
 		trace("Setting up the wall.");
 		wall = getWall;
 		wall.setUp;
 		info("Preparations are finished.");
 	}
-	void beginGame()
+
+	/++
+	 + Begins the round, assuming that it is initialised.
+	 +/
+	void beginRound()
 	{
 		wall.dice;
 		distributeTiles;
-		setFirstTurn;
+		setTurnPlayerToEast;
 		_status = Status.Running;
 
 	}
-   private void setPlayersGame(int initialWind)
-   {
-     foreach(player; players) // Re-initialise the players' game.
-     { 
-       player.firstGame(initialWind % gameOpts.amountOfPlayers);
-       ++initialWind;
-     }
-   }
-
-   void reset()
-   { 
-     int initialWind = uniform(0, gameOpts.amountOfPlayers); 
-     setPlayers(initialWind);
-   }
+	private void setPlayersGame()
+	{
+		foreach(int i, player; players) // Re-initialise the players' game.
+		{ 
+			player.startGame((_initialWind + i) % gameOpts.amountOfPlayers);
+		}
+	}
    
 	protected Wall getWall()
 	{
 		return new Wall;
 	}
 
-   private void constructPlayers()
-   { // FIXME: Encapsulate this in the player class.
-     for(int i=0; i < gameOpts.amountOfPlayers;++i)
-      {
-      // TODO: Idea: Make a number of preset profiles that can be loaded. E.g. player1avatar = Sakura.avatar;
-        trace("Constructing player ", i);
-        auto player = new Player;
-        player.playLoc = i;
-        trace(player.name);
-        players ~= player;
-      }
+   private void placePlayers()
+   { 
+		foreach(i, player; players)
+		{
+        	trace("Placing player \"", player.name, "\" (", i, ")");
+        	player.playLoc = i.to!int;
+
+		}
    }
 
    private void distributeTiles()
@@ -136,7 +143,7 @@ class Metagame
 
 	private Phase _phase = Phase.Draw;
 
-	private void setFirstTurn() 
+	private void setTurnPlayerToEast() 
 	{
 		foreach(i, player; players)
 		{
@@ -149,16 +156,20 @@ class Metagame
 		}
 	}
 
-	void drawTile()
-	{ 
-		currentPlayer.drawTile(wall);
-		_phase = Phase.Discard;
+	private void removeTurnPlayer()
+	{
+		_turn = -1;
 	}
-	
-	void tsumo()
+
+	void tsumo(Player player)
+	in
+	{
+		assert(player == currentPlayer);
+	}
+	body
 	{
 		flipOverWinningTiles();
-		if(hasMahjong)
+		if(player.isMahjong)
 		{
 			info("Player ", cast(Kanji)currentPlayer.getWind, " won");
 			_status = Status.Mahjong;
@@ -170,13 +181,7 @@ class Metagame
 		}
 	}
 
-	void discardTile(UUID discard)
-	{
-		currentPlayer.discard(discard);
-		nextTurn;
-	}
-	
-	private void nextTurn()
+	void advanceTurn()
 	{
 		if(isExhaustiveDraw)
 		{
@@ -191,7 +196,12 @@ class Metagame
 		}
 	}
 
-	private bool isExhaustiveDraw()
+	bool isAbortiveDraw() @property
+	{
+		return false;
+	}
+
+	bool isExhaustiveDraw() @property
 	{
 		return wall.length <= gameOpts.deadWallLength;
 	}
@@ -231,13 +241,9 @@ class Metagame
      }
    }
 
-	Phase phase()
+	Phase phase() @property
 	{
 		return _phase;
-	}
-	bool isPhase(Phase phase)
-	{
-		return _phase == phase;
 	}
 
 	bool isTurn(UUID playerId)
@@ -249,10 +255,6 @@ class Metagame
      Random useful functions.
    */
 
-   private bool hasMahjong()
-   {
-     return currentPlayer.isMahjong;
-   }
 
    private void flipOverWinningTiles()
    {
@@ -264,70 +266,15 @@ class Metagame
           player.closeHand; 
      }
    }
-
-   /*
-      Dump everything related to claiming tiles here.
-   */ 
-
-   private bool _ponnable = false;
-   private bool _chiable = false;
-   private bool _kannable = false;
-   private bool _ronnable = false;
-
-   bool ponnable() { return _ponnable; }
-   bool chiable() { return _chiable; }
-   bool kannable() { return _kannable; }
-   bool ronnable() { return _ronnable; }
-
-   private int[] canClaimTile = [-1]; // The playerLocations that can claim a tile.
-
-   private bool claimable()
-   {
-     return ponnable || chiable || kannable || ronnable;
-   }
-   private int[] isPonnable(const Tile discard)
-   { /*
-        Checks whether a discard can be ponned and returns the player location (.bottom, .right, .etc). If the tile cannot be ponned, it returns a -1.
-     */
-     // Start checking for pons at next player.
-     for(int i = _turn+1; i < _turn + gameOpts.amountOfPlayers; ++i)
-     {
-        if(players[i % gameOpts.amountOfPlayers].isPonnable(discard))
-        {
-          trace(cast(playerLocation)(i % gameOpts.amountOfPlayers), " could have ponned that one.");
-          break;
-        }
-     }
-     canClaimTile = [-1];
-     return canClaimTile;
-   } 
-
-   private int[] isRonnable(Tile discard)
-   { /*
-       Checks whether the discard can be ronned by any player.
-     */
-     // Start checking for rons at the next player.
-     _ronnable = false;
-     canClaimTile = [];
-     for(int i = _turn + 1; i < _turn + gameOpts.amountOfPlayers; ++i)
-     {
-        int pl = i % gameOpts.amountOfPlayers;
-        if(players[pl].isRonnable(discard))
-        {
-           _ronnable = true;
-           canClaimTile ~= pl;
-           trace(cast(playerLocation) pl , "can ron it!"); 
-        }
-     }
-
-     if(!_ronnable)
-        canClaimTile = [-1];
-     return canClaimTile;
-   } 
 }
 
 class BambooMetagame : Metagame
 {
+	this(Player[] players)
+	{
+		super(players);
+	}
+
 	override Wall getWall()
 	{
 		return new BambooWall;
@@ -336,6 +283,11 @@ class BambooMetagame : Metagame
 
 class EightPlayerMetagame : Metagame
 {
+	this(Player[] players)
+	{
+		super(players);
+	}
+
 	override Wall getWall()
 	{
 		return new EightPlayerWall;

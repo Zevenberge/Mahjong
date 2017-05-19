@@ -4,13 +4,13 @@ import std.algorithm.iteration;
 import std.array;
 import std.experimental.logger;
 import std.uuid;
-import mahjong.domain.closedhand;
+import mahjong.domain;
 import mahjong.domain.enums.tile;
-import mahjong.domain.openhand;
-import mahjong.domain.tile;
-import mahjong.domain.wall;
+import mahjong.domain.exceptions;
+import mahjong.engine.chi;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
+import mahjong.engine.sort;
 
 class Ingame
 { 
@@ -26,8 +26,6 @@ class Ingame
 	bool isDoubleRiichi = false;
 	bool isFirstTurn = true;
 	bool isTenpai = false;
-	int pons=0; // Amount of open pons.
-	int chis=0; // Amount of open chis.
 
 	this(int wind)
 	{
@@ -42,114 +40,114 @@ class Ingame
 		return wind;
 	}
 
-
-/*
-   Normal dibsing functions.
-*/
-
-  bool isPonnable(const ref Tile discard)
-  {
-    int i=0;
-    foreach(tile; closedHand.tiles)
-    {
-      if(isEqual(tile, discard))
-      {
-        if((i+1) < closedHand.tiles.length)
-        {
-          if(isEqual(closedHand.tiles[i+1], discard))
-          {
-            return true;
-          }
-          else
-          {
-            return false;
-          }
-        }
-      }
-      ++i;  
-    }
-    return false;
-  }
-
-/*
-   Functions related to the mahjong call.
-*/
-
-  bool checkTenpai()
-  { /*
-      Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
-    */
-    bool isTenpai = false;
-    auto tile = new Tile;
-    for(int t = Types.min; t <= Types.max; ++t)
-    {
-      tile.type = t;
-      for(int i = Numbers.min; i <= Numbers.max; ++i)
-      {
-        tile.value = i;
-        Tile[] temphand = closedHand.tiles ~ tile;
-        if(.scanHand(temphand, chis, pons))
-        {
-          isTenpai = true;
-        }
-
-      }
-    }
-    this.isTenpai = isTenpai;
-    return isTenpai;
-  }
-
-  public bool isFuriten()
-  {
-     foreach(tile; discards)
-     {
-       if(.scanHand(closedHand.tiles ~ tile, pons, chis))
-       {
-          return true;
-       }
-     }
-     return false;
-  }
-
-  public bool isRonnable(ref Tile discard)
-  {
-    return scanHand(closedHand.tiles ~ discard) && !isFuriten ;
-  }
-
-  public bool isMahjong()
-  {
-     return scanHand(closedHand.tiles);
-  }
-
-  private bool scanHand(Tile[] set)
-  {
-     return .scanHand(set, pons, chis);
-     //FIXME: take into account yaku requirement.
-  }
-
-/*
-   Discard things you no longer need.
-*/
-	void discard(UUID discardId)
+	
+	/*
+	 Normal functions related to claiming tiles.
+	 */
+	private bool isOwn(const Tile tile) pure const
 	{
-		size_t index;
-		foreach(i, t; closedHand.tiles)
-		{
-			if(t.id == discardId)
-			{
-				index = i;
-				break;
-			}
-		}
-		discard(index);
+		return tile.origin == wind;
 	}
 
-	void discard(ulong discardedNr)
+	bool isChiable(const Tile discard) pure const
+	{
+		if(isOwn(discard)) return false;
+		return closedHand.isChiable(discard);
+	}
+
+	void chi(Tile discard, ChiCandidate otherTiles)
+	{
+		if(!isChiable(discard) || !otherTiles.isChi(discard)) 
+		{
+			throw new IllegalClaimException(discard, "Chi not allowed");
+		}
+		auto chiTiles = closedHand.removeChiTiles(otherTiles) ~ discard;
+		openHand.addChi(chiTiles);
+	}
+
+	bool isPonnable(const Tile discard) pure
+	{
+		if(isOwn(discard)) return false;
+		return closedHand.isPonnable(discard);
+	}
+
+	void pon(Tile discard)
+	{
+		if(!isPonnable(discard)) throw new IllegalClaimException(discard, "Pon not allowed");
+		auto ponTiles = closedHand.removePonTiles(discard) ~ discard;
+		openHand.addPon(ponTiles);
+	}
+
+	bool isKannable(const Tile discard) pure
+	{
+		if(isOwn(discard)) return false;
+		return closedHand.isKannable(discard);
+	}
+
+	void kan(Tile discard)
+	{
+		if(!isKannable(discard)) throw new IllegalClaimException(discard, "Kan not allowed");
+		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
+		openHand.addKan(kanTiles);
+	}
+
+	bool isRonnable(const Tile discard) const
+	{
+		if(isOwn(discard)) return false;
+		return scanHandForMahjong(closedHand.tiles ~ discard, openHand.amountOfPons).isMahjong
+			&& !isFuriten ;
+	}
+
+	/*
+	 Functions related to the mahjong call.
+	 */
+
+	bool checkTenpai()
+	{ /*
+		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
+		   */
+		for(int type = Types.min; type <= Types.max; ++type)
+		{
+			for(int value = Numbers.min; value <= Numbers.max; ++value)
+			{
+				auto tile = new Tile(type, value);
+				Tile[] temphand = closedHand.tiles ~ tile;
+				if(.scanHandForMahjong(temphand, openHand.amountOfPons).isMahjong)
+				{
+					this.isTenpai = true;
+					return true;
+				}
+
+			}
+		}
+		this.isTenpai = false;
+		return false;
+	}
+
+	bool isFuriten() @property const
+	{
+		foreach(tile; discards)
+		{
+			if(.scanHandForMahjong(closedHand.tiles ~ tile, openHand.amountOfPons).isMahjong)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool isMahjong()
+	{
+		return scanHandForMahjong(closedHand, openHand).isMahjong;
+	}
+
+	private void discard(size_t discardedNr)
 	{    
 		takeOutTile(closedHand.tiles, discards, discardedNr);
-		discards[$-1].origin = wind; // Sets the tile to be from the player who discarded it.
-		discards[$-1].open;
-		if( (!isHonour(discards[$-1])) && (!isTerminal(discards[$-1])) )
+		auto discard = discards[$-1];
+		discard.origin = wind; // Sets the tile to be from the player who discarded it.
+		discard.open;
+		if( (!discard.isHonour) && (!discard.isTerminal) )
 		{
 			if(isNagashiMangan)
 			{
@@ -158,33 +156,31 @@ class Ingame
 			isNagashiMangan = false;
 		}
 	}
+
 	void discard(Tile discardedTile)
 	{
 		ulong i = 0;
-		bool found = false;
 		foreach(tile; closedHand.tiles)
 		{
-			if(isIdentical(tile,discardedTile))
+			if(tile.isIdentical(discardedTile))
 			{
-				found = true;
 				discard(i);
-				break;
+				return;
 			}
 			++i;
 		}
-		if(!found)
-		{
-			throw new Exception("Identical tiles not found!");
-		}
+		throw new TileNotFoundException(discardedTile);
 	}
-  public ref Tile getLastDiscard()
-  {
-     return discards[$-1];
-  }
-  public ref Tile getLastTile()
-  {
-     return lastTile;
-  }
+
+	ref Tile getLastDiscard()
+	{
+		return discards[$-1];
+	}
+
+	ref Tile getLastTile()
+	{
+		return lastTile;
+	}
 
 	void closeHand()
 	{

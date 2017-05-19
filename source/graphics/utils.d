@@ -7,24 +7,20 @@ Transform unity()
 	return Transform(1,0,0, 0,1,0, 0,0,1);
 }
 
-void correctOutOfBounds(ref int position, ulong bounds)
-in
-{
-   assert(bounds < int.max);
-}
+void correctOutOfBounds(ref size_t position, size_t bounds)
 out
 {
-  assert(position >= 0);
-  assert(position < bounds);
+	assert(position >= 0);
+	assert(position < bounds);
 }
 body
 {
-  if(position < 0)
-  {
-    position = 0;
-  }
-  else if(position >= bounds)
-  {
-    position = cast(int)bounds - 1;
-  }
+	if(position < 0)
+	{
+		position = 0;
+	}
+	else if(position >= bounds)
+	{
+		position = bounds - 1;
+	}
 }

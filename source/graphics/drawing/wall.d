@@ -7,14 +7,14 @@ import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
-import mahjong.engine.opts.opts;
+import mahjong.engine.opts;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.game;;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.manipulation;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.opts;
 
 alias drawWall = draw;
 void draw(Wall wall, RenderTarget view)

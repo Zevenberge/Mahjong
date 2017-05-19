@@ -3,17 +3,16 @@ module mahjong.graphics.menu.creation.mainmenu;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain.enums.game;
-import mahjong.engine.gamefront;
-import mahjong.graphics.controllers.controller;
+import mahjong.engine.ai;
+import mahjong.engine.flow;
+import mahjong.engine.opts;
+import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.placeholdercontroller;
-import mahjong.graphics.controllers.game.singleplayercontroller;
 import mahjong.graphics.enums.geometry;
-import mahjong.graphics.enums.resources;;
-import mahjong.graphics.menu.mainmenu;
-import mahjong.graphics.menu.menuitem;
-import mahjong.graphics.opts.bambooopts;
-import mahjong.graphics.opts.defaultopts;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.enums.resources;
+import mahjong.graphics.eventhandler;
+import mahjong.graphics.menu;
+import mahjong.graphics.opts;
 
 private MainMenu _mainMenu;
 MainMenu composeMainMenu()
@@ -45,22 +44,62 @@ private void startRiichiMahjong()
 {
 	info("Riichi mahjong selected");
 	drawingOpts = new DefaultDrawingOpts;
-	startGame(GameMode.Riichi);
+	gameOpts = new DefaultGameOpts;
+	startGame(
+		new UiEventHandler, 
+		new AiEventHandler(new SimpleAI), 
+		new AiEventHandler(new SimpleAI), 
+		new AiEventHandler(new SimpleAI));
+}
+///
+unittest
+{
+	import std.stdio;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
+	writeln("Testing the start of the normal mahjong.");
+	setDefaultTestController;
+	startRiichiMahjong;
+	assert(controller.isOfType!IdleController, 
+		"The controller should be instantiated");
+	assert(drawingOpts.isOfType!DefaultDrawingOpts, 
+		"For simple riichi mahjong, the drawing options should be the default");
+	assert(gameOpts.isOfType!DefaultGameOpts,
+		"For simple riichi mahjong, the game options should be the default");
+	writeln("Test of the start of the normal mahjong succeeded.");
 }
 
 private void startBambooBattle()
 {
 	info("Bamboo battle selected");
 	drawingOpts = new BambooDrawingOpts;
-	startGame(GameMode.Bamboo);
+	gameOpts = new BambooOpts;
+	startGame(
+		new UiEventHandler, 
+		new AiEventHandler(new SimpleAI));
+}
+///
+unittest
+{
+	import std.stdio;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
+	writeln("Testing the start of the bamboo mahjong.");
+	setDefaultTestController;
+	startBambooBattle;
+	assert(controller.isOfType!IdleController, 
+		"The controller should be instantiated");
+	assert(drawingOpts.isOfType!BambooDrawingOpts, 
+		"For bamboo riichi mahjong, the drawing options should be specific");
+	assert(gameOpts.isOfType!BambooOpts,
+		"For bamboo riichi mahjong, the game options should be specific");
+	writeln("Test of the start of the normal mahjong succeeded.");
 }
 
-private void startGame(GameMode gameMode)
+private void startGame(GameEventHandler[] eventHandlers...)
 {
-	auto console = ConsoleFront.boot;
-	auto gameFronts = console.setUp(gameMode);
-	controller = new SinglePlayerController(controller.getWindow, gameFronts);
-	trace("Swapped controller");
+	switchFlow(new GameStartFlow(eventHandlers));
+	trace("Initiated Game Start Flow");
 }
 
 private void startThunderThrill()

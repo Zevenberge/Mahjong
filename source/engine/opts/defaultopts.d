@@ -1,7 +1,11 @@
 module mahjong.engine.opts.defaultopts;
 
+import std.algorithm.iteration;
+import std.array;
+import mahjong.domain;
 import mahjong.domain.enums.game;
-import mahjong.engine.opts.opts;
+import mahjong.engine.flow;
+import mahjong.engine.opts;
 
 class DefaultGameOpts : Opts
 {
@@ -28,5 +32,13 @@ class DefaultGameOpts : Opts
 	int initialScore()
 	{
 		return 30_000;
+	}
+	Metagame createMetagame(GameEventHandler[] delegators)
+	{
+		return new Metagame(createPlayers(delegators));
+	}
+	protected Player[] createPlayers(GameEventHandler[] eventHandlers)
+	{
+		return eventHandlers.map!(d => d.createPlayer).array;
 	}
 }

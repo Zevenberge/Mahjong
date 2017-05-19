@@ -8,5 +8,5 @@ import mahjong.graphics.drawing.tile;
 alias drawOpenHand = draw;
 void draw(OpenHand hand, RenderTarget view)
 {
-	hand.tiles.each!(s => s.each!(t => t.drawTile(view)));
+	hand.sets.each!(s => s.each!(t => t.drawTile(view)));
 }

@@ -13,8 +13,18 @@
 
 # Executables
 *.exe
+mahjong*
+__test__library__
 
 # DUB
 .dub
 docs.json
 __dummy.html
+
+# Coverage
+..-..-..*
+source-*
+
+# Mono
+Mahjong.*
+dub.userprefs

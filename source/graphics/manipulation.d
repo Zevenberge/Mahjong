@@ -16,19 +16,15 @@ import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.ai;
 import mahjong.engine.mahjong;
-import mahjong.engine.opts.bambooopts;
-import mahjong.engine.opts.defaultopts;
-import mahjong.engine.opts.opts;
+import mahjong.engine.opts;
 import mahjong.engine.yaku;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
-import mahjong.graphics.menu.mainmenu;
-import mahjong.graphics.menu.menuitem;
-import mahjong.graphics.opts.defaultopts;
-import mahjong.graphics.opts.opts;
+import mahjong.graphics.menu;
+import mahjong.graphics.opts;
 
 void load(ref Texture texture, ref Sprite sprite, string texturefile,
          uint x0 = 0, uint y0 = 0, uint size_x = 0, uint size_y = 0)
@@ -134,7 +130,7 @@ void setTitle(Text title, string text)
 }
 
 
-void changeOpacity(ref ubyte[] opacities, const int position)
+void changeOpacity(ref ubyte[] opacities, const size_t position)
 {
     /*
       Change the opacity of background images for a more or less fluid transition.
