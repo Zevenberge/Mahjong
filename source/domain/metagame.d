@@ -25,10 +25,16 @@ class Metagame
 		return _turn == -1 ? null : players[_turn]; 
 	}
 
+	Player currentPlayer(Player player) @property
+	{
+		_turn = players.countUntil!(p => p == player);
+		return player;
+	} 
+
 	auto otherPlayers() @property
 	{
 		auto currentPlayer = this.currentPlayer;
-		return players.filter!(p => &p != &currentPlayer);
+		return players.filter!(p => p != currentPlayer);
 	}
 
 	Wall wall;
@@ -46,7 +52,7 @@ class Metagame
 	{
 		return _status != Status.NewGame;
 	}
-	void initialise()
+	private void initialise()
 	{
 		info("Initialising metagame");
 		placePlayers;
@@ -134,7 +140,7 @@ class Metagame
      The game itself.
    */
 
-	private int _turn = 0; 
+	private size_t _turn = 0; 
 	private Status _status = Status.SetUp;
 	const Status status() @property
 	{

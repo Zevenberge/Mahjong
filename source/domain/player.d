@@ -128,7 +128,7 @@ class Player
 		game.kan(discard);
 	}
 
-	bool isRonnable(const Tile discard) const
+	bool isRonnable(const Tile discard) pure const
 	{ 
 		return game.isRonnable(discard);
 	}

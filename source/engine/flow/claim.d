@@ -4,6 +4,7 @@ import std.algorithm;
 import std.array;
 import std.experimental.logger;
 import mahjong.domain;
+import mahjong.engine.chi;
 import mahjong.engine.flow;
 
 class ClaimFlow : Flow
@@ -45,9 +46,70 @@ class ClaimFlow : Flow
 		}
 
 		void branch()
+		in
+		{
+			assert(_claimEvents.all!(ce => ce.isAllowed), "There should be no illegal claims");
+		}
+		body
 		{
 			switchFlow(new TurnEndFlow(metagame));
 		}
+}
+
+version(unittest)
+{
+	Metagame setup(size_t amountOfPlayers)
+	{
+		Player[] players;
+		for(int i = 0; i < amountOfPlayers; ++i)
+		{
+			auto player = new Player(new TestEventHandler);
+			player.startGame(i);
+			players ~= player;
+		}
+		auto metagame = new Metagame(players);
+		metagame.currentPlayer = players[0];
+		return metagame;
+	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.test.utils;
+	auto game = setup(2);
+	auto player2 = game.players[1];
+	player2.startGame(0);
+	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
+	auto ponnableTile = "🀕"d.convertToTiles[0];
+	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	switchFlow(claimFlow);
+	claimFlow._claimEvents[0].handle(new NoRequest);
+	assert(claimFlow.done, "Flow should be done.");
+	claimFlow.advanceIfDone;
+	assert(flow.isOfType!TurnEndFlow, 
+		"When there is no request, the turn should end.");
+	assert(game.currentPlayer == game.players[0], "Player 1 should still be the turn player");
+	assert(player2.game.closedHand.tiles.length == 2, "The player's tiles should be untouched.");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.test.utils;
+	auto game = setup(2);
+	auto player2 = game.players[1];
+	player2.startGame(0);
+	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
+	auto ponnableTile = "🀕"d.convertToTiles[0];
+	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	switchFlow(claimFlow);
+	claimFlow._claimEvents[0].handle(new PonRequest(player2, ponnableTile));
+	claimFlow.advanceIfDone;
+	assert(flow.isOfType!TurnFlow, 
+		"After claiming a pon, the flow should be in the turn flow again");
+	assert(game.currentPlayer == player2, "Player 2 claimed a tile and should be the turn player");
+	assert(player2.game.closedHand.tiles.empty, "The player should not have any tiles left.");
 }
 
 class ClaimEvent
@@ -75,25 +137,30 @@ class ClaimEvent
 	{
 		return _claimRequest !is null;
 	}
+
+	bool isAllowed() @property pure
+	{
+		return _claimRequest.isAllowed;
+	}
 }
 
 enum Request {None, Chi, Pon, Kan, Ron}
 
 interface ClaimRequest
 {
-	void apply(Metagame metagame);
-	bool isAllowed(Metagame metagame);
-	@property Request request() pure const;
+	void apply();
+	bool isAllowed() pure;
+	@property Request request() pure;
 }
 
 class NoRequest : ClaimRequest
 {
-	void apply(Metagame metagame)
+	void apply()
 	{
 		// Do nothing.
 	}
 
-	bool isAllowed(Metagame metagame)
+	bool isAllowed() pure
 	{
 		return true;
 	}
@@ -104,16 +171,31 @@ class NoRequest : ClaimRequest
 	}
 }
 
+unittest
+{
+	auto noRequest = new NoRequest;
+	assert(noRequest.isAllowed(), "Not having a request should always be allowed");
+}
+
 class PonRequest : ClaimRequest
 {
-	void apply(Metagame metagame)
+	this(Player player, Tile discard)
 	{
-		// Do nothing.
+		_player = player;
+		_discard = discard;
 	}
 
-	bool isAllowed(Metagame metagame)
+	private Player _player;
+	private Tile _discard;
+
+	void apply()
 	{
-		return false;
+		_player.pon(_discard);
+	}
+
+	bool isAllowed() pure
+	{
+		return _player.isPonnable(_discard);
 	}
 
 	Request request() @property pure const
@@ -124,14 +206,23 @@ class PonRequest : ClaimRequest
 
 class KanRequest : ClaimRequest
 {
-	void apply(Metagame metagame)
+	this(Player player, Tile discard)
 	{
-		// Do nothing.
+		_player = player;
+		_discard = discard;
 	}
 
-	bool isAllowed(Metagame metagame)
+	private Player _player;
+	private Tile _discard;
+
+	void apply()
 	{
-		return false;
+		_player.kan(_discard);
+	}
+
+	bool isAllowed() pure
+	{
+		return _player.isKannable(_discard);
 	}
 
 	Request request() @property pure const
@@ -142,14 +233,25 @@ class KanRequest : ClaimRequest
 
 class ChiRequest : ClaimRequest
 {
-	void apply(Metagame metagame)
+	this(Player player, Tile discard, ChiCandidate chiCandidate)
 	{
-		// Do nothing.
+		_player = player;
+		_discard = discard;
+		_chiCandidate = chiCandidate;
 	}
 
-	bool isAllowed(Metagame metagame)
+	private Player _player;
+	private Tile _discard;
+	private ChiCandidate _chiCandidate;
+
+	void apply()
 	{
-		return false;
+		_player.chi(_discard, _chiCandidate);
+	}
+
+	bool isAllowed() pure
+	{
+		return _player.isChiable(_discard);
 	}
 
 	Request request() @property pure const
@@ -160,14 +262,23 @@ class ChiRequest : ClaimRequest
 
 class RonRequest : ClaimRequest
 {
-	void apply(Metagame metagame)
+	this(Player player, Tile discard)
 	{
-		// Do nothing.
+		_player = player;
+		_discard = discard;
 	}
 
-	bool isAllowed(Metagame metagame)
+	private Player _player;
+	private Tile _discard;
+
+	void apply()
 	{
-		return false;
+		// Do nothing
+	}
+
+	bool isAllowed() pure
+	{
+		return _player.isRonnable(_discard);
 	}
 
 	Request request() @property pure const

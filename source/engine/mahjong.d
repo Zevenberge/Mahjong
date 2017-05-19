@@ -79,7 +79,7 @@ MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand ope
 	return scanHandForMahjong(closedHand.tiles, openHand.amountOfPons);
 }
 
-MahjongResult scanHandForMahjong(const(Tile)[] hand, int pons = 0)
+MahjongResult scanHandForMahjong(const(Tile)[] hand, int pons = 0) pure 
 in {assert(hand.length > 0);}
 out {assert(hand.length > 0);}
 body
@@ -268,7 +268,7 @@ private struct HandSetSeperation
 	}
 }
 
-private Progress scanRegularMahjong(Progress progress) 
+private Progress scanRegularMahjong(Progress progress) pure
 { 
 	/*
 	   This subroutine checks whether the hand at hand is a mahjong hand. 
@@ -292,7 +292,7 @@ private Progress scanRegularMahjong(Progress progress)
 	return attemptToResolveChi(progress);
 }
 
-private Progress attemptToResolvePair(Progress progress) 
+private Progress attemptToResolvePair(Progress progress) pure
 {
 	if(progress.hand.length < 2) return progress;
 	auto pairSeperation = seperateEqualSetOfGivenLength(progress.hand, 2);
@@ -306,7 +306,7 @@ private Progress attemptToResolvePair(Progress progress)
 	return progress;
 }
 
-private Progress attemptToResolvePon(Progress progress) 
+private Progress attemptToResolvePon(Progress progress) pure
 {
 	if(progress.hand.length < 3) return progress;
 	auto ponSeperation = seperateEqualSetOfGivenLength(progress.hand, 3);
@@ -320,7 +320,7 @@ private Progress attemptToResolvePon(Progress progress)
 	return progress;
 }
 
-private Progress attemptToResolveChi(Progress progress) 
+private Progress attemptToResolveChi(Progress progress) pure
 {
 	if(progress.hand.length < 3) return progress;
 	if(progress.hand[0].isHonour)
@@ -339,7 +339,7 @@ private Progress attemptToResolveChi(Progress progress)
 	return progress;
 }
 
-private HandSetSeperation seperateChi(const(Tile)[] hand)
+private HandSetSeperation seperateChi(const(Tile)[] hand) pure
 { 
 	/*
 	   This subroutine checks whether there is a chi hidden in the beginning of the hand. 

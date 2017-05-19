@@ -1,6 +1,6 @@
 module mahjong.domain.ingame;
 
-import std.algorithm.iteration;
+import std.algorithm;
 import std.array;
 import std.experimental.logger;
 import std.uuid;
@@ -49,6 +49,11 @@ class Ingame
 		return tile.origin == wind;
 	}
 
+	private bool isContainedInDiscards(const Tile tile) pure const
+	{
+		return !discards.any!(t => tile.hasEqualValue(t));
+	}
+
 	bool isChiable(const Tile discard) pure const
 	{
 		if(isOwn(discard)) return false;
@@ -91,9 +96,9 @@ class Ingame
 		openHand.addKan(kanTiles);
 	}
 
-	bool isRonnable(const Tile discard) const
+	bool isRonnable(const Tile discard) pure const
 	{
-		if(isOwn(discard)) return false;
+		if(isContainedInDiscards(discard)) return false;
 		return scanHandForMahjong(closedHand.tiles ~ discard, openHand.amountOfPons).isMahjong
 			&& !isFuriten ;
 	}
@@ -124,7 +129,7 @@ class Ingame
 		return false;
 	}
 
-	bool isFuriten() @property const
+	bool isFuriten() @property pure const
 	{
 		foreach(tile; discards)
 		{
