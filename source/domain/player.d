@@ -51,7 +51,7 @@ class Player
 		return game.getWind();
 	}
 
-	void drawTile(ref Wall wall)
+	void drawTile(Wall wall)
 	{
 		this.game.drawTile(wall);
 	}
@@ -98,8 +98,9 @@ class Player
 	 Functions with regard to claiming tiles.
 	 */
 
-	bool isChiable(const Tile discard) pure const
+	bool isChiable(const Tile discard, const Metagame metagame) pure const
 	{
+		if(metagame.nextPlayer.id != this.id) return false;
 		return game.isChiable(discard);
 	}
 
@@ -170,17 +171,20 @@ unittest
 	auto player = new Player(new TestEventHandler);
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
+	auto player2 = new Player(new TestEventHandler);
+	auto metagame = new Metagame([player, player2]);
+	metagame.currentPlayer = player2;
 	auto chiableTile = "🀕"d.convertToTiles[0];
-	assert(player.isChiable(chiableTile), "Expected the tile to be chiable");
+	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀓🀕"d.convertToTiles;
 	chiableTile = "🀔"d.convertToTiles[0];
-	assert(player.isChiable(chiableTile), "Expected the tile to be chiable");
+	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀔🀕"d.convertToTiles;
 	chiableTile = "🀓"d.convertToTiles[0];
-	assert(player.isChiable(chiableTile), "Expected the tile to be chiable");
+	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto nonChiableTile = "🀔"d.convertToTiles[0];
-	assert(!player.isChiable(nonChiableTile), "The tile should not have been chiable");
+	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 }
 
 unittest
@@ -190,11 +194,14 @@ unittest
 	auto player = new Player(new TestEventHandler);
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀀🀁"d.convertToTiles;
+	auto player2 = new Player(new TestEventHandler);
+	auto metagame = new Metagame([player, player2]);
+	metagame.currentPlayer = player2;
 	auto nonChiableTile = "🀂"d.convertToTiles[0];
-	assert(!player.isChiable(nonChiableTile), "The tile should not have been chiable");
+	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 	player.game.closedHand.tiles = "🀄🀅"d.convertToTiles;
 	nonChiableTile = "🀆"d.convertToTiles[0];
-	assert(!player.isChiable(nonChiableTile), "The tile should not have been chiable");
+	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 }
 
 unittest

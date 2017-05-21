@@ -98,10 +98,11 @@ version(unittest)
 {
 	Metagame setup(size_t amountOfPlayers)
 	{
+		dstring[] names = ["Jan"d, "Piet"d, "Klaas"d, "David"d, "Henk"d, "Ingrid"d];
 		Player[] players;
 		for(int i = 0; i < amountOfPlayers; ++i)
 		{
-			auto player = new Player(new TestEventHandler);
+			auto player = new Player(new TestEventHandler, names[i]);
 			player.startGame(i);
 			players ~= player;
 		}
@@ -165,7 +166,8 @@ unittest
 	auto claimFlow = new ClaimFlow(ponnableTile, game);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
-			ChiCandidate(player2.game.closedHand.tiles[0], player2.game.closedHand.tiles[1])));
+			ChiCandidate(player2.game.closedHand.tiles[0], player2.game.closedHand.tiles[1]),
+			game));
 	claimFlow._claimEvents[1].handle(new PonRequest(player3, ponnableTile));
 	claimFlow.advanceIfDone;
 	assert(flow.isOfType!TurnFlow, 
@@ -195,7 +197,8 @@ unittest
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest); 
 	claimFlow._claimEvents[1].handle(new ChiRequest(player3, ponnableTile,
-			ChiCandidate(player3.game.closedHand.tiles[0], player3.game.closedHand.tiles[1])));
+			ChiCandidate(player3.game.closedHand.tiles[0], player3.game.closedHand.tiles[1]),
+			game));
 	assertThrown!AssertError(claimFlow.advanceIfDone, 
 		"Player 3 should not be allowed to claim as there is a player in between");
 }
@@ -318,16 +321,18 @@ class KanRequest : ClaimRequest
 
 class ChiRequest : ClaimRequest
 {
-	this(Player player, Tile discard, ChiCandidate chiCandidate)
+	this(Player player, Tile discard, ChiCandidate chiCandidate, Metagame metagame)
 	{
 		_player = player;
 		_discard = discard;
 		_chiCandidate = chiCandidate;
+		_metagame = metagame;
 	}
 
 	private Player _player;
 	private Tile _discard;
 	private ChiCandidate _chiCandidate;
+	private Metagame _metagame;
 
 	void apply()
 	{
@@ -336,7 +341,7 @@ class ChiRequest : ClaimRequest
 
 	bool isAllowed() pure
 	{
-		return _player.isChiable(_discard);
+		return _player.isChiable(_discard, _metagame);
 	}
 
 	Request request() @property pure const

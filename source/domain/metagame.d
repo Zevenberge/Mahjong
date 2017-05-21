@@ -29,7 +29,12 @@ class Metagame
 	{
 		_turn = players.countUntil!(p => p == player);
 		return player;
-	} 
+	}
+
+	const(Player) nextPlayer() @property pure const
+	{
+		return players[(_turn+1)%$];
+	}
 
 	auto otherPlayers() @property
 	{
@@ -111,7 +116,7 @@ class Metagame
    { 
 		foreach(i, player; players)
 		{
-        	trace("Placing player \"", player.name, "\" (", i, ")");
+        	trace("Placing player \"", player.name.to!string, "\" (", i, ")");
         	player.playLoc = i.to!int;
 
 		}
@@ -272,6 +277,22 @@ class Metagame
           player.closeHand; 
      }
    }
+}
+
+unittest
+{
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto player3 = new Player(new TestEventHandler);
+	auto metagame = new Metagame([player, player2, player3]);
+	metagame.currentPlayer = player;
+	assert(metagame.currentPlayer == player, "The current player should be set and identical to the value set");
+	assert(metagame.nextPlayer == player2, "If it is player 1's turn, player 2 should be next.");
+	metagame.currentPlayer = player3;
+	assert(metagame.nextPlayer == player, "If it is player 3's turn, the next player should loop back to 1");
 }
 
 class BambooMetagame : Metagame

@@ -197,7 +197,7 @@ class Ingame
 		closedHand.showHand;
 	}
 	
-	void drawTile(ref Wall wall)
+	void drawTile(Wall wall)
 	{
 		closedHand.drawTile(wall);
 		lastTile = closedHand.getLastTile;
