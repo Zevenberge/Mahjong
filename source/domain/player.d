@@ -206,6 +206,24 @@ unittest
 
 unittest
 {
+	import mahjong.engine.creation;
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d.convertToTiles;
+	auto player2 = new Player(new TestEventHandler);
+	auto metagame = new Metagame([player, player2]);
+	metagame.currentPlayer = player2;
+	auto ponnableTile = "🀐"d.convertToTiles[0];
+	assert(player.isRonnable(ponnableTile), "The tile should have been ronnable");
+	player.game.discards = "🀐"d.convertToTiles;
+	assert(!player.isRonnable(ponnableTile), "The tile should have not been ronnable as the tile is included in the discards");
+	player.game.discards = "🀖"d.convertToTiles;
+	assert(!player.isRonnable(ponnableTile), "The tile should have not been ronnable as the");
+}
+
+unittest
+{
 	import std.exception;
 	import mahjong.domain.exceptions;
 	import mahjong.engine.creation;

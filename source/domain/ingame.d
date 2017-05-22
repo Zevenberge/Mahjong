@@ -49,11 +49,6 @@ class Ingame
 		return tile.origin == wind;
 	}
 
-	private bool isContainedInDiscards(const Tile tile) pure const
-	{
-		return !discards.any!(t => tile.hasEqualValue(t));
-	}
-
 	bool isChiable(const Tile discard) pure const
 	{
 		if(isOwn(discard)) return false;
@@ -98,7 +93,6 @@ class Ingame
 
 	bool isRonnable(const Tile discard) pure const
 	{
-		if(isContainedInDiscards(discard)) return false;
 		return scanHandForMahjong(closedHand.tiles ~ discard, openHand.amountOfPons).isMahjong
 			&& !isFuriten ;
 	}

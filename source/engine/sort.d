@@ -24,13 +24,12 @@ unittest
 	import mahjong.engine.creation;
 	writeln("Starting the test of the sort");
 	enum unsortedString = "🀡🀂🀃🀄🀁🀘🀅🀀🀏🀐🀄🀙🀆🀇"d;
-	auto unsortedTiles = unsortedString.convertToTiles;
+	Tile[] unsortedTiles = unsortedString.convertToTiles;
 	unsortedTiles.sortHand;
 	auto sortedTilesAsString = unsortedTiles.map!(t => t.face).to!dstring;
 	enum sortedString = "🀀🀁🀂🀃🀅🀄🀄🀆🀇🀏🀐🀘🀙🀡"d;
 	assert(sortedString == sortedTilesAsString, 
 		"The ordering is not was expected, is actually %s".format(sortedTilesAsString));
-	writeln("Test of the sorting succeeded");
 }
 
 auto sortHand(const(Tile)[] hand) pure
@@ -42,7 +41,21 @@ auto sortHand(const(Tile)[] hand) pure
 			.array;
 }
 
-
+unittest
+{
+	import std.algorithm.iteration;
+	import std.conv;
+	import std.stdio;
+	import std.string;
+	import mahjong.engine.creation;
+	writeln("Starting the test of the sort");
+	enum unsortedString = "🀡🀂🀃🀄🀁🀘🀅🀀🀏🀐🀄🀙🀆🀇"d;
+	const(Tile)[] unsortedTiles = unsortedString.convertToTiles;
+	auto sortedTilesAsString = unsortedTiles.sortHand.map!(t => t.face).to!dstring;
+	enum sortedString = "🀀🀁🀂🀃🀅🀄🀄🀆🀇🀏🀐🀘🀙🀡"d;
+	assert(sortedString == sortedTilesAsString, 
+		"The ordering of const tiles is not was expected, is actually %s".format(sortedTilesAsString));
+}
 private struct SortableTile
 {
 	this(const(Tile) tile) pure

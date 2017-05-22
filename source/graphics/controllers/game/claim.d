@@ -60,12 +60,104 @@ class ClaimOptionFactory
 	}
 
 	private ClaimOption[] _claimOptions;
+	ClaimOption[] claimOptions() @property
+	{
+		return _claimOptions;
+	}
 
 	private bool _areThereClaimOptions;
 	bool areThereClaimOptions() @property
 	{
 		return _areThereClaimOptions;
 	}
+}
+
+unittest
+{
+	import std.algorithm;
+	import std.string;
+	import mahjong.test.utils;
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	void assertIn(T)(ClaimOptionFactory factory)
+	{
+		assert(factory.claimOptions.any!(co => co.isOfType!T), "ClaimOption %s not found.".format(T.stringof));
+	}
+	void assertNotIn(T)(ClaimOptionFactory factory)
+	{
+		assert(factory.claimOptions.all!(co => !co.isOfType!T), "ClaimOption %s found when it should not.".format(T.stringof));
+	}
+	auto player = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	player2.startGame(0);
+	auto player3 = new Player(new TestEventHandler);
+	player3.startGame(1);
+	auto metagame = new Metagame([player, player2, player3]);
+	metagame.currentPlayer = player;
+	ClaimOptionFactory constructFactory(dstring tilesOfSecondPlayer, dstring discard, Player plyr)
+	{
+		plyr.game.closedHand.tiles = tilesOfSecondPlayer.convertToTiles;
+		auto discardedTile = discard.convertToTiles[0];
+		return new ClaimOptionFactory(plyr, discardedTile, metagame);
+	}
+	auto claimFactory = constructFactory("🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀗🀗"d, "🀡"d, player2);
+	assertIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertNotIn!KanClaimOption(claimFactory);
+	assertNotIn!ChiClaimOption(claimFactory);
+	assertNotIn!RonClaimOption(claimFactory);
+
+	claimFactory = constructFactory("🀀🀁🀂🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d, "🀅"d, player2);
+	assertNotIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertNotIn!KanClaimOption(claimFactory);
+	assertNotIn!ChiClaimOption(claimFactory);
+	assertNotIn!RonClaimOption(claimFactory);
+
+	claimFactory = constructFactory("🀐🀐🀑🀒🀓🀔🀗🀘🀘"d, "🀖"d, player2);
+	assertNotIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertNotIn!KanClaimOption(claimFactory);
+	assertIn!ChiClaimOption(claimFactory);
+	assertNotIn!RonClaimOption(claimFactory);
+
+	claimFactory = constructFactory("🀐🀐🀑🀒🀓🀔🀗🀘🀘"d, "🀖"d, player3);
+	assertNotIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertNotIn!KanClaimOption(claimFactory);
+	assertNotIn!ChiClaimOption(claimFactory);
+	assertNotIn!RonClaimOption(claimFactory);
+
+	claimFactory = constructFactory("🀐🀐🀑🀒🀓🀔🀖🀗🀘🀘"d, "🀘"d, player2);
+	assertIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertNotIn!KanClaimOption(claimFactory);
+	assertIn!ChiClaimOption(claimFactory);
+	assertNotIn!RonClaimOption(claimFactory);
+
+	claimFactory = constructFactory("🀐🀐🀑🀔🀗🀘🀘🀘"d, "🀘"d, player2);
+	assertIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertIn!KanClaimOption(claimFactory);
+	assertNotIn!ChiClaimOption(claimFactory);
+	assertNotIn!RonClaimOption(claimFactory);
+
+	claimFactory = constructFactory("🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d, "🀐"d, player2);
+	assertIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertNotIn!KanClaimOption(claimFactory);
+	assertIn!ChiClaimOption(claimFactory);
+	assertIn!RonClaimOption(claimFactory);
+
+	player2.game.discards = "🀐"d.convertToTiles;
+	claimFactory = constructFactory("🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d, "🀐"d, player2);
+	assertIn!PonClaimOption(claimFactory);
+	assertIn!NoClaimOption(claimFactory);
+	assertNotIn!KanClaimOption(claimFactory);
+	assertIn!ChiClaimOption(claimFactory);
+	assertNotIn!RonClaimOption(claimFactory);
 }
 
 class ClaimOption
