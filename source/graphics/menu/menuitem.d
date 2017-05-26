@@ -10,7 +10,7 @@ import mahjong.graphics.opts;
 
 class MenuItem
 {
-	alias Action = void function();
+	alias Action = void delegate();
 	this(string displayName, Action action)
 	{
 		trace("Constructing menu item ", displayName);
@@ -33,7 +33,7 @@ class MenuItem
 		return name.getLocalBounds;
 	}
 		
-	string description;
+    const string description;
 	Text name;
 	Action func;
 	private void setText(string displayName)

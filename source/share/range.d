@@ -34,3 +34,8 @@ template first(alias pred)
 		return foundRange.front;
 	}
 }
+
+size_t indexOf(Range, E)(Range range, E element) if(isInputRange!Range)
+{
+	return range.countUntil!(e => e == element);
+}

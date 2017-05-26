@@ -15,6 +15,7 @@ import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.graphics.enums.game;
 import mahjong.graphics.enums.kanji;
+import mahjong.share.range;
 
 class Metagame
 {
@@ -27,7 +28,7 @@ class Metagame
 
 	Player currentPlayer(Player player) @property
 	{
-		_turn = players.countUntil!(p => p == player);
+		_turn = players.indexOf(player);
 		return player;
 	}
 

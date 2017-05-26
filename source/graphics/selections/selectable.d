@@ -20,6 +20,7 @@ class Selectable(T)
 
 }
 
+// TODO: T should be forced to implement an interface, either explicitely or implicitly
 mixin template Select(T)
 {
 	// HACK: Tile should not be imported here?
@@ -48,7 +49,7 @@ mixin template Select(T)
 		changeOpt(selection.position + 1);
 	}
 	
-	T selectedItem()
+	T selectedItem() @property
 	{
 		return opts[selection.position];
 	}

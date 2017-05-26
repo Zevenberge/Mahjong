@@ -1,17 +1,50 @@
 ﻿module mahjong.graphics.controllers.game.claim;
 
 import std.array;
+import std.string;
 import dsfml.graphics;
 import mahjong.domain;
 import mahjong.engine.chi;
 import mahjong.engine.flow.claim;
+import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
+import mahjong.graphics.controllers.menu;
+import mahjong.graphics.menu;
 
-class ClaimController : GameController
+class ClaimController : MenuController
 {
-	this(RenderWindow window, Metagame metagame)
+	this(RenderWindow window, 
+		Metagame metagame,
+		Controller innerController,
+		ClaimOptionFactory factory)
 	{
-		super(window, metagame);
+		auto menu = new Menu("Claim tile?");
+		foreach(option; factory.claimOptions)
+		{
+			menu.addOption(option);
+		}
+		menu.configureGeometry;
+		menu.selectOption(factory.claimOptions.back);
+		super(window, innerController, menu);
+		_metagame = metagame;
+	}
+
+	private Metagame _metagame;
+
+	void swapIdleController()
+	{
+		auto idleController = cast(IdleController)_innerController;
+		if(!idleController)
+		{
+			idleController = new IdleController(_window, _metagame);
+		}
+		controller = idleController;
+	}
+
+	protected override bool menuClosed() 
+	{
+		controller = new MenuController(_window, this, getPauseMenu);
+		return false;
 	}
 }
 
@@ -19,44 +52,44 @@ private:
 
 class ClaimOptionFactory
 {
-	this(Player player, Tile discard, Metagame metagame)
+	this(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
 	{
-		addRonOption(player, discard);
-		addKanOption(player, discard);
-		addPonOption(player, discard);
-		addChiOptions(player, discard, metagame);
+		addRonOption(player, discard, claimEvent);
+		addKanOption(player, discard, claimEvent);
+		addPonOption(player, discard, claimEvent);
+		addChiOptions(player, discard, metagame, claimEvent);
 		_areThereClaimOptions = !_claimOptions.empty;
-		addDefaultOption;
+		addDefaultOption(claimEvent);
 	}
 
-	private void addRonOption(Player player, Tile discard)
+	private void addRonOption(Player player, Tile discard, ClaimEvent claimEvent)
 	{
-		if(player.isRonnable(discard)) _claimOptions ~= new RonClaimOption(player, discard);
+		if(player.isRonnable(discard)) _claimOptions ~= new RonClaimOption(player, discard, claimEvent);
 	}
 
-	private void addKanOption(Player player, Tile discard)
+	private void addKanOption(Player player, Tile discard, ClaimEvent claimEvent)
 	{
-		if(player.isKannable(discard)) _claimOptions~= new KanClaimOption(player, discard);
+		if(player.isKannable(discard)) _claimOptions~= new KanClaimOption(player, discard, claimEvent);
 	}
 
-	private void addPonOption(Player player, Tile discard)
+	private void addPonOption(Player player, Tile discard, ClaimEvent claimEvent)
 	{
-		if(player.isPonnable(discard)) _claimOptions ~= new PonClaimOption(player, discard);
+		if(player.isPonnable(discard)) _claimOptions ~= new PonClaimOption(player, discard, claimEvent);
 	}
 
-	private void addChiOptions(Player player, Tile discard, Metagame metagame)
+	private void addChiOptions(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
 	{
 		if(!player.isChiable(discard, metagame)) return;
 		auto candidates = determineChiCandidates(player.game.closedHand.tiles, discard);
 		foreach(candidate; candidates)
 		{
-			_claimOptions ~= new ChiClaimOption(player, discard, candidate, metagame);
+			_claimOptions ~= new ChiClaimOption(player, discard, candidate, metagame, claimEvent);
 		}
 	}
 
-	private void addDefaultOption()
+	private void addDefaultOption(ClaimEvent claimEvent)
 	{
-		_claimOptions ~= new NoClaimOption;
+		_claimOptions ~= new NoClaimOption(claimEvent);
 	}
 
 	private ClaimOption[] _claimOptions;
@@ -80,7 +113,10 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	import mahjong.engine.opts;
+	import mahjong.graphics.opts;
 	gameOpts = new DefaultGameOpts;
+	drawingOpts = new DefaultDrawingOpts;
+	styleOpts = new DefaultStyleOpts;
 	void assertIn(T)(ClaimOptionFactory factory)
 	{
 		assert(factory.claimOptions.any!(co => co.isOfType!T), "ClaimOption %s not found.".format(T.stringof));
@@ -100,7 +136,7 @@ unittest
 	{
 		plyr.game.closedHand.tiles = tilesOfSecondPlayer.convertToTiles;
 		auto discardedTile = discard.convertToTiles[0];
-		return new ClaimOptionFactory(plyr, discardedTile, metagame);
+		return new ClaimOptionFactory(plyr, discardedTile, metagame, new ClaimEvent(discardedTile, plyr));
 	}
 	auto claimFactory = constructFactory("🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀗🀗"d, "🀡"d, player2);
 	assertIn!PonClaimOption(claimFactory);
@@ -160,13 +196,31 @@ unittest
 	assertNotIn!RonClaimOption(claimFactory);
 }
 
-class ClaimOption
+class ClaimOption : MenuItem
 {
 	abstract ClaimRequest constructRequest();
+
+	this(string displayName, ClaimEvent event)
+	{
+		super(displayName, &select);
+	}
+
+	void select()
+	{
+		(cast(ClaimController)controller).swapIdleController;
+		_event.handle(constructRequest);
+	}
+
+	private ClaimEvent _event;
 }
 
 class NoClaimOption : ClaimOption
 {
+	this(ClaimEvent claimEvent)
+	{
+		super("Pass", claimEvent);
+	}
+
 	override ClaimRequest constructRequest() 
 	{
 		return new NoRequest;
@@ -175,10 +229,11 @@ class NoClaimOption : ClaimOption
 
 class RonClaimOption : ClaimOption
 {
-	this(Player player, Tile discard)
+	this(Player player, Tile discard, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
+		super("Ron", claimEvent);
 	}
 
 	private Player _player;
@@ -192,10 +247,11 @@ class RonClaimOption : ClaimOption
 
 class KanClaimOption : ClaimOption
 {
-	this(Player player, Tile discard)
+	this(Player player, Tile discard, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
+		super("Kan", claimEvent);
 	}
 
 	private Player _player;
@@ -208,10 +264,11 @@ class KanClaimOption : ClaimOption
 
 class PonClaimOption : ClaimOption
 {
-	this(Player player, Tile discard)
+	this(Player player, Tile discard, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
+		super("Pon", claimEvent);
 	}
 
 	private Player _player;
@@ -225,12 +282,13 @@ class PonClaimOption : ClaimOption
 
 class ChiClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, ChiCandidate chiCandidate, Metagame metagame)
+	this(Player player, Tile discard, ChiCandidate chiCandidate, Metagame metagame, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
 		_chiCandidate = chiCandidate;
 		_metagame = metagame;
+		super("Chi %s%s".format(chiCandidate.first.face, chiCandidate.second.face), claimEvent);
 	}
 
 	private Player _player;
