@@ -7,7 +7,11 @@ import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.openhand;
 import mahjong.domain.tile;
+import mahjong.engine.enums.game;
+import mahjong.graphics.coords;
 import mahjong.graphics.drawing.tile;
+import mahjong.graphics.manipulation;
+import mahjong.graphics.opts;
 
 alias drawOpenHand = draw;
 void draw(OpenHand hand, RenderTarget view)
@@ -66,15 +70,10 @@ class OpenHandVisuals
 
 class SetVisual
 {
-	this(Tile[] set, SetVisual previous)
+	this(const(Tile)[] set, SetVisual previous)
 	{
 		_set = set;
 		placeSet(previous);
-	}
-
-	private void placeSet(SetVisual previous)
-	{
-
 	}
 
 	void draw(RenderTarget view)
@@ -82,5 +81,55 @@ class SetVisual
 		_set.each!(t => t.drawTile(view));
 	}
 
-	private Tile[] _set;
+	private const(Tile)[] _set;
+
+	private void placeSet(SetVisual previous)
+	{
+		auto rightBound = calculateInitialRightBounds(previous);
+		foreach(tile; _set)
+		{
+			rightBound = placeTileAndReturnItsLeftBound(tile, rightBound);
+		}
+	}
+
+	private float calculateInitialRightBounds(SetVisual previous)
+	{
+		if(previous is null)
+		{
+			return styleOpts.gameScreenSize.y - drawingOpts.iconSize;
+		}
+		else
+		{
+			return previous.getGlobalBounds.left;
+		}
+	}
+
+	private float placeTileAndReturnItsLeftBound(const Tile tile, float rightBound)
+	{
+		return tile.origin == Origin.wall ?
+			placeTileVertically(tile, rightBound) :
+			placeTileHorizontally(tile, rightBound);
+	}
+
+	private float placeTileVertically(const Tile tile, float rightBound)
+	{
+		auto topLeft = Vector2f(rightBound - drawingOpts.tileWidth,
+			styleOpts.gameScreenSize.y - drawingOpts.iconSize);
+		tile.move(FloatCoords(topLeft, 0));
+		return topLeft.x;
+	}
+
+	private float placeTileHorizontally(const Tile tile, float rightBound)
+	{
+		auto size = drawingOpts.tileSize;
+		auto topLeft = Vector2f(rightBound,
+			styleOpts.gameScreenSize.y - drawingOpts.iconSize + size.y - size.x);
+		tile.move(FloatCoords(topLeft, 90));
+		return rightBound - size.y;
+	}
+
+	private FloatRect getGlobalBounds()
+	{
+		return calcGlobalBounds(_set);
+	}
 }

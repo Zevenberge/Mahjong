@@ -7,8 +7,6 @@ import std.range;
 import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.ingame;
-import mahjong.graphics.anime.animation;
-import mahjong.graphics.anime.movement;
 import mahjong.graphics.conv;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.closedhand;
@@ -78,10 +76,7 @@ private class IngameDrawable
 		trace("Starting the animation of the last discard");
 		auto tile = _game.discards[$-1];
 		auto coords = getNewCoords;
-		auto sprite = getFrontSprite(tile);
-		auto animation = new MovementAnimation(sprite, coords, 15);
-		animation.objectId = tile.id;
-		addUniqueAnimation(animation);
+		tile.move(coords);
 	}
 	
 	private FloatCoords getNewCoords()
