@@ -2,6 +2,7 @@ module mahjong.domain.openhand;
 
 import std.algorithm.iteration;
 import std.array;
+import std.uuid;
 
 import mahjong.domain;
 import mahjong.domain.enums.game;
@@ -10,6 +11,13 @@ import mahjong.engine.mahjong;
 
 class OpenHand
 {
+	this()
+	{
+		id = randomUUID;
+	}
+
+	const UUID id;
+
 	private Tile[][] _sets;
 	const(Tile[][]) sets() @property pure const
 	{
