@@ -25,6 +25,12 @@ class MenuController : MenuControllerBase!Menu
 		_window.draw(_haze);
 		_menu.draw(_window);
 	}
+
+	override void roundUp() 
+	{
+		super.roundUp;
+		_innerController.roundUp;
+	}
 	
 	protected override bool menuClosed()
 	{
