@@ -15,8 +15,7 @@ class MenuController : MenuControllerBase!Menu
 		trace("Creating menu controller");
 		super(window, menu);
 		_innerController = pausedController;
-		_haze = new RectangleShape(styleOpts.screenSize.toVector2f);
-		_haze.fillColor = Color(126,126,126,126);
+		_haze = constructHaze;
 	}
 	
 	override void draw()
@@ -42,7 +41,13 @@ class MenuController : MenuControllerBase!Menu
 	{
 		controller = _innerController;
 	}
-	
+
+	protected RectangleShape constructHaze()
+	{
+		auto haze = new RectangleShape(styleOpts.screenSize.toVector2f);
+		haze.fillColor = Color(126,126,126,126);
+		return haze;
+	}
 
 	protected Controller _innerController;
 	private RectangleShape _haze;

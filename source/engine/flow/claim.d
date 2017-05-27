@@ -23,7 +23,7 @@ class ClaimFlow : Flow
 	}
 		
 	private:
-		const Tile _tile;
+		Tile _tile;
 		ClaimEvent[] _claimEvents;
 
 		void initialiseClaimEvents()
@@ -35,7 +35,7 @@ class ClaimFlow : Flow
 
 		ClaimEvent createEventAndNotifyHandler(Player player)
 		{
-			auto event = new ClaimEvent(_tile, player);
+			auto event = new ClaimEvent(_tile, player, metagame);
 			player.eventHandler.handle(event);
 			return event;
 		}
@@ -205,13 +205,15 @@ unittest
 
 class ClaimEvent
 {
-	this(const Tile tile, Player player)
+	this(Tile tile, Player player, Metagame metagame)
 	{
 		this.tile = tile;
 		this.player = player;
+		this.metagame = metagame;
 	}
-	const Tile tile;
+	Tile tile;
 	Player player;
+	Metagame metagame;
 	private ClaimRequest _claimRequest;
 
 	void handle(ClaimRequest claimRequest)

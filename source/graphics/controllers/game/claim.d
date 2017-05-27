@@ -9,7 +9,9 @@ import mahjong.engine.flow.claim;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
+import mahjong.graphics.conv;
 import mahjong.graphics.menu;
+import mahjong.graphics.opts;
 
 class ClaimController : MenuController
 {
@@ -41,14 +43,28 @@ class ClaimController : MenuController
 		controller = idleController;
 	}
 
+	override void draw() 
+	{
+		if(controller == this) super.draw;
+		else _innerController.draw;
+	}
+
 	protected override bool menuClosed() 
 	{
 		controller = new MenuController(_window, this, getPauseMenu);
 		return false;
 	}
-}
 
-private:
+	protected override RectangleShape constructHaze() 
+	{
+		auto margin = Vector2f(styleOpts.claimMenuMargin, styleOpts.claimMenuMargin);
+		auto menuBounds = _menu.getGlobalBounds;
+		auto haze = new RectangleShape(menuBounds.size + margin*2);
+		haze.fillColor = Color(100, 100, 100, 158);
+		haze.position = menuBounds.position - margin;
+		return haze;
+	}
+}
 
 class ClaimOptionFactory
 {
@@ -136,7 +152,7 @@ unittest
 	{
 		plyr.game.closedHand.tiles = tilesOfSecondPlayer.convertToTiles;
 		auto discardedTile = discard.convertToTiles[0];
-		return new ClaimOptionFactory(plyr, discardedTile, metagame, new ClaimEvent(discardedTile, plyr));
+		return new ClaimOptionFactory(plyr, discardedTile, metagame, new ClaimEvent(discardedTile, plyr, metagame));
 	}
 	auto claimFactory = constructFactory("🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀗🀗"d, "🀡"d, player2);
 	assertIn!PonClaimOption(claimFactory);
@@ -214,6 +230,7 @@ class ClaimOption : MenuItem
 	private ClaimEvent _event;
 }
 
+private:
 class NoClaimOption : ClaimOption
 {
 	this(ClaimEvent claimEvent)

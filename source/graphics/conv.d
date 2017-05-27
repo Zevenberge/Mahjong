@@ -68,4 +68,12 @@ FloatRect toRect(Vector2f v)
 	return FloatRect(0, 0, v.x, v.y);
 }
 
+Vector2f size(FloatRect rect) @property
+{
+	return Vector2f(rect.width, rect.height);
+}
 
+Vector2f position(FloatRect rect) @property
+{
+	return Vector2f(rect.left, rect.top);
+}

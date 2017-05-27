@@ -26,8 +26,16 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(ClaimEvent event) 
 	{
-		// TODO
-		event.handle(new NoRequest);
+		auto factory = new ClaimOptionFactory(event.player, event.tile, event.metagame, event);
+		if(factory.areThereClaimOptions)
+		{
+			info("UI: Handling turn event by switching to the claim controller");
+			controller = new ClaimController(controller.getWindow, event.metagame, controller, factory);
+		}
+		else
+		{
+			event.handle(new NoRequest);
+		}
 	}
 
 }
