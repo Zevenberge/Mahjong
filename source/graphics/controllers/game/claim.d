@@ -1,6 +1,7 @@
 ﻿module mahjong.graphics.controllers.game.claim;
 
 import std.array;
+import std.experimental.logger;
 import std.string;
 import dsfml.graphics;
 import mahjong.domain;
@@ -219,11 +220,14 @@ class ClaimOption : MenuItem
 	this(string displayName, ClaimEvent event)
 	{
 		super(displayName, &select);
+		_event = event;
 	}
 
 	void select()
 	{
+		trace("Claim option ", typeid(this), " selected. Swapping out ", typeid(controller));
 		(cast(ClaimController)controller).swapIdleController;
+		trace("Idle controller swapped");
 		_event.handle(constructRequest);
 	}
 
