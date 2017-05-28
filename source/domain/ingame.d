@@ -46,7 +46,7 @@ class Ingame
 	 */
 	private bool isOwn(const Tile tile) pure const
 	{
-		return tile.origin == wind;
+		return tile.origin is null;
 	}
 
 	bool isChiable(const Tile discard) pure const
@@ -61,6 +61,7 @@ class Ingame
 		{
 			throw new IllegalClaimException(discard, "Chi not allowed");
 		}
+		discard.claim;
 		auto chiTiles = closedHand.removeChiTiles(otherTiles) ~ discard;
 		openHand.addChi(chiTiles);
 	}
@@ -74,6 +75,7 @@ class Ingame
 	void pon(Tile discard)
 	{
 		if(!isPonnable(discard)) throw new IllegalClaimException(discard, "Pon not allowed");
+		discard.claim;
 		auto ponTiles = closedHand.removePonTiles(discard) ~ discard;
 		openHand.addPon(ponTiles);
 	}
@@ -87,6 +89,7 @@ class Ingame
 	void kan(Tile discard)
 	{
 		if(!isKannable(discard)) throw new IllegalClaimException(discard, "Kan not allowed");
+		discard.claim;
 		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
 		openHand.addKan(kanTiles);
 	}
@@ -144,7 +147,7 @@ class Ingame
 	{    
 		takeOutTile(closedHand.tiles, discards, discardedNr);
 		auto discard = discards[$-1];
-		discard.origin = wind; // Sets the tile to be from the player who discarded it.
+		discard.origin = this; // Sets the tile to be from the player who discarded it.
 		discard.open;
 		if( (!discard.isHonour) && (!discard.isTerminal) )
 		{

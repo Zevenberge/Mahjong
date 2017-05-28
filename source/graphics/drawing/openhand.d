@@ -85,11 +85,18 @@ class SetVisual
 
 	private void placeSet(SetVisual previous)
 	{
+		orderSet;
 		auto rightBound = calculateInitialRightBounds(previous);
 		foreach(tile; _set)
 		{
 			rightBound = placeTileAndReturnItsLeftBound(tile, rightBound);
 		}
+	}
+
+	private void orderSet()
+	{
+		// TODO: The place of the horizontal tile refers to the other player.
+
 	}
 
 	private float calculateInitialRightBounds(SetVisual previous)
@@ -106,7 +113,7 @@ class SetVisual
 
 	private float placeTileAndReturnItsLeftBound(const Tile tile, float rightBound)
 	{
-		return tile.origin == Origin.wall ?
+		return tile.origin is null ?
 			placeTileVertically(tile, rightBound) :
 			placeTileHorizontally(tile, rightBound);
 	}
