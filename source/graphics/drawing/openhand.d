@@ -103,7 +103,7 @@ class SetVisual
 	{
 		if(previous is null)
 		{
-			return styleOpts.gameScreenSize.y - drawingOpts.iconSize;
+			return styleOpts.gameScreenSize.y - drawingOpts.iconSize - drawingOpts.iconSpacing;
 		}
 		else
 		{
