@@ -53,7 +53,7 @@ private Vector2f calculatePosition(const size_t amountOfTiles, const int number)
 	float centering = (screen.x - drawingOpts.iconSpacing - amountOfTiles * tile.displayWidth) / 2.;
 	Vector2f movement = Vector2f(
 		centering + number * tile.displayWidth - position.x,
-		position.y - drawingOpts.iconSize
+		position.y - drawingOpts.iconSize + 1.2*tile.height
 	);
 	return position + movement;
 }
