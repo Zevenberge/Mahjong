@@ -1,5 +1,6 @@
 ﻿module mahjong.graphics.controllers.game.claim;
 
+import std.algorithm;
 import std.array;
 import std.experimental.logger;
 import std.string;
@@ -10,6 +11,7 @@ import mahjong.engine.flow.claim;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.conv;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
@@ -46,8 +48,24 @@ class ClaimController : MenuController
 
 	override void draw() 
 	{
-		if(controller == this) super.draw;
+		if(controller == this) 
+		{
+			super.draw;
+			drawMarkersOnRelevantTiles;
+		}
 		else _innerController.draw;
+	}
+
+	private void drawMarkersOnRelevantTiles()
+	{
+		auto selectedOption = cast(ClaimOption)_menu.selectedItem;
+		auto rectangleShape = new RectangleShape(drawingOpts.tileSize);
+		rectangleShape.fillColor = Color(250, 255, 141, 146);
+		foreach(tile; selectedOption.relevantTiles)
+		{
+			rectangleShape.position = tile.getCoords.position;
+			_window.draw(rectangleShape);
+		}
 	}
 
 	protected override bool menuClosed() 
@@ -245,6 +263,8 @@ class ClaimOption : MenuItem
 	}
 
 	private ClaimEvent _event;
+
+	abstract const(Tile)[] relevantTiles() @property;
 }
 
 private:
@@ -259,6 +279,17 @@ class NoClaimOption : ClaimOption
 	{
 		return new NoRequest;
 	}
+
+	override const(Tile)[] relevantTiles() @property
+	{
+		return null;
+	}
+}
+
+unittest
+{
+	auto noClaim = new NoClaimOption(null);
+	assert(noClaim.relevantTiles.empty, "When not claiming anything, there should be no relevant tiles");
 }
 
 class RonClaimOption : ClaimOption
@@ -277,6 +308,24 @@ class RonClaimOption : ClaimOption
 	{
 		return new RonRequest(_player, _discard);
 	}
+
+	override const(Tile)[] relevantTiles() @property
+	{
+		return _player.game.closedHand.tiles;
+	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d.convertToTiles;
+	auto discard = "🀟"d.convertToTiles[0];
+	auto ronOption = new RonClaimOption(player, discard, null);
+	assert(ronOption.relevantTiles.length == 13, "All of the player's on hand tiles should be relevant");
+	assert(!ronOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
 }
 
 class KanClaimOption : ClaimOption
@@ -294,6 +343,25 @@ class KanClaimOption : ClaimOption
 	{
 		return new KanRequest(_player, _discard);
 	}
+
+	override const(Tile)[] relevantTiles() @property
+	{
+		return _player.game.closedHand.tiles.filter!(t => _discard.hasEqualValue(t)).array;
+	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
+	auto discard = "🀟"d.convertToTiles[0];
+	auto kanOption = new KanClaimOption(player, discard, null);
+	assert(kanOption.relevantTiles.length == 3, "For a kan, only three tiles are relevant");
+	assert(kanOption.relevantTiles.all!(t => discard.hasEqualValue(t)), "The relevant tiles should all have the same value as the discard");
+	assert(!kanOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
 }
 
 class PonClaimOption : ClaimOption
@@ -312,6 +380,25 @@ class PonClaimOption : ClaimOption
 	{
 		return new PonRequest(_player, _discard);
 	}
+
+	override const(Tile)[] relevantTiles() @property
+	{
+		return _player.game.closedHand.tiles.filter!(t => _discard.hasEqualValue(t)).array[0..2];
+	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
+	auto discard = "🀟"d.convertToTiles[0];
+	auto ponOption = new PonClaimOption(player, discard, null);
+	assert(ponOption.relevantTiles.length == 2, "For a pon, only three tiles are relevant");
+	assert(ponOption.relevantTiles.all!(t => discard.hasEqualValue(t)), "The relevant tiles should all have the same value as the discard");
+	assert(!ponOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
 }
 
 class ChiClaimOption : ClaimOption
@@ -322,7 +409,7 @@ class ChiClaimOption : ClaimOption
 		_discard = discard;
 		_chiCandidate = chiCandidate;
 		_metagame = metagame;
-		super("Chi %s%s".format(chiCandidate.first.face, chiCandidate.second.face), claimEvent);
+		super("Chi", claimEvent);
 	}
 
 	private Player _player;
@@ -333,5 +420,10 @@ class ChiClaimOption : ClaimOption
 	override ClaimRequest constructRequest() 
 	{
 		return new ChiRequest(_player, _discard, _chiCandidate, _metagame);
+	}
+
+	override const(Tile)[] relevantTiles() @property
+	{
+		return [_chiCandidate.first, _chiCandidate.second];
 	}
 }
