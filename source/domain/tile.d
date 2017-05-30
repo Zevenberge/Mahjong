@@ -7,7 +7,6 @@ import std.uuid;
 import mahjong.domain.enums.tile;
 import mahjong.domain.ingame;
 import mahjong.engine.enums.game;
-import mahjong.share.range;
 
 class Tile
 { // FIXME: Increase encapsulation.
@@ -75,8 +74,7 @@ class Tile
 
 	void claim()
 	{
-		// TODO: be able to be furiten on a claimed tile.
-		origin.discards.remove!((a,b) => a == b)(this);
+		origin.claim(this);
 	}
  }
 

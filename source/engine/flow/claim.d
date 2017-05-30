@@ -137,10 +137,13 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.test.utils;
 	auto game = setup(2);
+	auto player1 = game.players[0];
+	player1.startGame(3);
 	auto player2 = game.players[1];
 	player2.startGame(0);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
+	ponnableTile.origin = player1.game;
 	auto claimFlow = new ClaimFlow(ponnableTile, game);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new PonRequest(player2, ponnableTile));
@@ -163,6 +166,7 @@ unittest
 	player3.startGame(0);
 	player3.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
+	ponnableTile.origin = new Ingame(1);
 	auto claimFlow = new ClaimFlow(ponnableTile, game);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
@@ -193,6 +197,7 @@ unittest
 	player3.startGame(0);
 	player3.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
+	ponnableTile.origin = new Ingame(1);
 	auto claimFlow = new ClaimFlow(ponnableTile, game);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest); 

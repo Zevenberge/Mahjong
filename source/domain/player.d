@@ -69,7 +69,7 @@ class Player
 	 Functions with regard to placing tiles and displays.
 	 */
 
-	public void discard(T) (T disc)
+	public void discard(Tile disc)
 	{
 		game.discard(disc);
 	}
@@ -129,7 +129,7 @@ class Player
 		game.kan(discard);
 	}
 
-	bool isRonnable(const Tile discard) pure const
+	bool isRonnable(const Tile discard) pure
 	{ 
 		return game.isRonnable(discard);
 	}
@@ -159,6 +159,7 @@ unittest
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
+	ponnableTile.origin = new Ingame(1);
 	assert(player.isPonnable(ponnableTile), "Expected the tile to be ponnable");
 	auto nonPonnableTile = "🀃"d.convertToTiles[0];
 	assert(!player.isPonnable(nonPonnableTile), "The tile should not have been ponnable");
@@ -175,15 +176,19 @@ unittest
 	auto metagame = new Metagame([player, player2]);
 	metagame.currentPlayer = player2;
 	auto chiableTile = "🀕"d.convertToTiles[0];
+	chiableTile.origin = new Ingame(1);
 	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀓🀕"d.convertToTiles;
 	chiableTile = "🀔"d.convertToTiles[0];
+	chiableTile.origin = new Ingame(1);
 	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀔🀕"d.convertToTiles;
 	chiableTile = "🀓"d.convertToTiles[0];
+	chiableTile.origin = new Ingame(1);
 	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto nonChiableTile = "🀔"d.convertToTiles[0];
+	nonChiableTile.origin = new Ingame(1);
 	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 }
 
@@ -198,14 +203,21 @@ unittest
 	auto metagame = new Metagame([player, player2]);
 	metagame.currentPlayer = player2;
 	auto nonChiableTile = "🀂"d.convertToTiles[0];
+	nonChiableTile.origin = new Ingame(1);
 	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 	player.game.closedHand.tiles = "🀄🀅"d.convertToTiles;
 	nonChiableTile = "🀆"d.convertToTiles[0];
+	nonChiableTile.origin = new Ingame(1);
 	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 }
 
 unittest
 {
+	void addTileToDiscard(Player player, Tile tile)
+	{
+		player.game.closedHand.tiles ~= tile;
+		player.discard(tile);
+	}
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
 	auto player = new Player(new TestEventHandler);
@@ -215,11 +227,12 @@ unittest
 	auto metagame = new Metagame([player, player2]);
 	metagame.currentPlayer = player2;
 	auto ponnableTile = "🀐"d.convertToTiles[0];
+	ponnableTile.origin = new Ingame(1);
 	assert(player.isRonnable(ponnableTile), "The tile should have been ronnable");
-	player.game.discards = "🀐"d.convertToTiles;
+	addTileToDiscard(player, "🀐"d.convertToTiles[0]);
 	assert(!player.isRonnable(ponnableTile), "The tile should have not been ronnable as the tile is included in the discards");
-	player.game.discards = "🀖"d.convertToTiles;
-	assert(!player.isRonnable(ponnableTile), "The tile should have not been ronnable as the");
+	addTileToDiscard(player, "🀖"d.convertToTiles[0]);
+	assert(!player.isRonnable(ponnableTile), "The tile should have not been ronnable as the player is furiten");
 }
 
 unittest
@@ -234,6 +247,7 @@ unittest
 	player.game.closedHand.tiles = tiles;
 	auto candidate = ChiCandidate(tiles[0], tiles[1]);
 	auto chiableTile = "🀕"d.convertToTiles[0];
+	chiableTile.origin = new Ingame(1);
 	player.chi(chiableTile, candidate);
 	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
 	assert(player.game.openHand.amountOfChis == 1, "The open hand should have one chi.");
@@ -251,6 +265,7 @@ unittest
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
+	ponnableTile.origin = new Ingame(1);
 	player.pon(ponnableTile);
 	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
 	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
@@ -268,6 +283,7 @@ unittest
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
+	kannableTile.origin = new Ingame(1);
 	player.kan(kannableTile);
 	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
 	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
