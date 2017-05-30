@@ -67,7 +67,7 @@ class OpenHandVisuals
 		if(_sets.length != _hand.sets.length)
 		{
 			auto previousSet = _sets.empty ? null : _sets.back;
-			_sets ~= new SetVisual(_hand.sets.back, previousSet, _ingame);
+			_sets ~= new SetVisual(_hand.sets.back.tiles, previousSet, _ingame);
 		}
 		// TODO: when kakan is implemented: also check set length
 	}

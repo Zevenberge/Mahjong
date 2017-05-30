@@ -74,12 +74,37 @@ class PairSet : Set
 	}
 }
 
-MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand openHand) 
+MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand openHand, const Tile discard) pure
 {
-	return scanHandForMahjong(closedHand.tiles, openHand.amountOfPons);
+	return scanHandForMahjong(closedHand.tiles ~ discard, openHand.sets);
 }
 
-MahjongResult scanHandForMahjong(const(Tile)[] hand, int pons = 0) pure 
+MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand openHand) pure
+{
+	return scanHandForMahjong(closedHand.tiles, openHand.sets);
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto closedHand = new ClosedHand;
+	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto openHand = new OpenHand;
+	openHand.addPon("🀃🀃🀃"d.convertToTiles);
+	assert(scanHandForMahjong(closedHand, openHand).isMahjong, "An open pon should count towards mahjong");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto closedHand = new ClosedHand;
+	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto openHand = new OpenHand;
+	openHand.addChi("🀓🀔🀕"d.convertToTiles);
+	assert(scanHandForMahjong(closedHand, openHand).isMahjong, "An open chi should count towards mahjong");
+}
+
+private MahjongResult scanHandForMahjong(const(Tile)[] hand, const(Set[]) openSets) pure 
 in {assert(hand.length > 0);}
 out {assert(hand.length > 0);}
 body
@@ -101,8 +126,8 @@ body
 		}
 	}
 
-	auto progress = scanRegularMahjong(new Progress(sortedHand, pons));
-	Set[] sets;
+	auto progress = scanRegularMahjong(new Progress(sortedHand, openSets));
+	const(Set)[] sets;
 	sets ~= progress.pons;
 	sets ~= progress.chis;
 	sets ~= progress.pairs;
@@ -191,17 +216,22 @@ private bool isThirteenOrphans(const Tile[] hand) pure
 
 private class Progress
 {
-	this(const(Tile)[] hand, size_t initialSets) pure
+	this(const(Tile)[] hand, const(Set[]) initialSets) pure
 	{
 		this.hand = hand;
-		_initialSets = initialSets;
+		foreach(set; initialSets)
+		{
+			auto pon = cast(const(PonSet))set;
+			if(pon) pons ~= pon;
+			auto chi = cast(const(ChiSet))set;
+			if(chi) chis ~= chi;
+		}
 	}
 
-	private const size_t _initialSets;
 	const(Tile)[] hand;
-	PairSet[] pairs;
-	PonSet[] pons;
-	ChiSet[] chis;
+	const(PairSet)[] pairs;
+	const(PonSet)[] pons;
+	const(ChiSet)[] chis;
 
 	void convertToPair(const HandSetSeperation handSetSeperation) pure
 	{
@@ -254,7 +284,7 @@ private class Progress
 	bool isMahjong() @property pure const
 	{
 		return _isMahjong || (pairs.length == 1 &&
-			pons.length + chis.length + _initialSets == 4);
+			pons.length + chis.length == 4);
 	}
 }
 
@@ -394,7 +424,7 @@ unittest // Check whether the example hands are seen as mahjong hands.
 			auto hand = convertToTiles(line);
 			sortHand(hand);
 			bool isMahjong;
-			isMahjong = scanHandForMahjong(hand).isMahjong;
+			isMahjong = scanHandForMahjong(hand, null).isMahjong;
 			assert(isHand == isMahjong, "For %s, the mahjong should be %s".format(line, isHand));
 			write("The mahjong is ", isMahjong, ".  ");
 			foreach(stone; hand) {write(stone);}

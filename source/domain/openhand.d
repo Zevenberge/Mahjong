@@ -1,6 +1,6 @@
 module mahjong.domain.openhand;
 
-import std.algorithm.iteration;
+import std.algorithm;
 import std.array;
 import std.uuid;
 
@@ -8,6 +8,7 @@ import mahjong.domain;
 import mahjong.domain.enums.game;
 import mahjong.domain.exceptions;
 import mahjong.engine.mahjong;
+import mahjong.share.range;
 
 class OpenHand
 {
@@ -18,28 +19,26 @@ class OpenHand
 
 	const UUID id;
 
-	private Tile[][] _sets;
-	const(Tile[][]) sets() @property pure const
+	private Set[] _sets;
+	const(Set[]) sets() @property pure const
 	{
 		return _sets;
 	}
 
-	private ubyte _amountOfPons;
-	ubyte amountOfPons() @property pure const
+	size_t amountOfPons() @property pure const
 	{
-		return _amountOfPons;
+		return _sets.count!(s => cast(PonSet)s !is null);
 	}
 
 	private ubyte _amountOfKans;
-	ubyte amountOfKans() @property pure const
+	size_t amountOfKans() @property pure const
 	{
 		return _amountOfKans;
 	}
 
-	private ubyte _amountOfChis;
-	ubyte amountOfChis() @property pure const
+	size_t amountOfChis() @property pure const
 	{
-		return _amountOfChis;
+		return _sets.count!(s => cast(ChiSet)s !is null);
 	}
 
 	void addPon(Tile[] tiles)
@@ -49,8 +48,7 @@ class OpenHand
 	}
 	body
 	{
-		_sets ~= tiles;
-		++_amountOfPons;
+		_sets ~= new PonSet(tiles);
 	}
 
 	void addKan(Tile[] tiles)
@@ -60,8 +58,7 @@ class OpenHand
 	}
 	body
 	{
-		_sets ~= tiles;
-		++_amountOfPons;
+		_sets ~= new PonSet(tiles);
 		++_amountOfKans;
 	}
 
@@ -72,17 +69,17 @@ class OpenHand
 	}
 	body
 	{
-		_sets ~= tiles;
-		++_amountOfChis;
+		_sets ~= new ChiSet(tiles);
 	}
 
 	void promotePonToKan(Tile kanTile)
 	{
-		foreach(set; _sets)
+		foreach(i, set; _sets)
 		{
-			if(set.length != 3) continue;
-			if(!kanTile.hasEqualValue(set[0])) continue;
-			set ~= kanTile;
+			if(set.tiles.length != 3) continue;
+			if(!kanTile.hasEqualValue(set.tiles[0])) continue;
+			_sets.remove(i);
+			_sets.insertAt(new PonSet(set.tiles ~ kanTile), i);
 			++_amountOfKans;
 			return;
 		}

@@ -58,7 +58,6 @@ class Ingame
 	bool isRiichi = false;
 	bool isDoubleRiichi = false;
 	bool isFirstTurn = true;
-	bool isTenpai = false;
 
 	this(int wind)
 	{
@@ -129,7 +128,7 @@ class Ingame
 
 	bool isRonnable(const Tile discard) pure
 	{
-		return scanHandForMahjong((cast(const(Tile)[])closedHand.tiles) ~ discard, openHand.amountOfPons).isMahjong
+		return scanHandForMahjong(closedHand, openHand, discard).isMahjong
 			&& !isFuriten ;
 	}
 
@@ -146,16 +145,13 @@ class Ingame
 			for(int value = Numbers.min; value <= Numbers.max; ++value)
 			{
 				auto tile = new Tile(type, value);
-				Tile[] temphand = closedHand.tiles ~ tile;
-				if(.scanHandForMahjong(temphand, openHand.amountOfPons).isMahjong)
+				if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
 				{
-					this.isTenpai = true;
 					return true;
 				}
 
 			}
 		}
-		this.isTenpai = false;
 		return false;
 	}
 
@@ -163,7 +159,7 @@ class Ingame
 	{
 		foreach(tile; allDiscards)
 		{
-			if(.scanHandForMahjong(closedHand.tiles ~ tile, openHand.amountOfPons).isMahjong)
+			if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
 			{
 				return true;
 			}
