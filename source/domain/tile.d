@@ -75,6 +75,7 @@ class Tile
 
 	void claim()
 	{
+		// TODO: be able to be furiten on a claimed tile.
 		origin.discards.remove!((a,b) => a == b)(this);
 	}
  }
