@@ -68,6 +68,10 @@ private class IngameDrawable
 			animateLastDiscard;
 			previousAmountOfDiscards = amountOfDiscards;
 		}
+		else if(amountOfDiscards == previousAmountOfDiscards -1)
+		{
+			previousAmountOfDiscards = amountOfDiscards;
+		}
 		ingame.discards.each!(t => t.drawTile(view));
 	}
 
