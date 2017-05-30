@@ -55,7 +55,7 @@ private class IngameDrawable
 	void draw(RenderTarget target)
 	{
 		_game.closedHand.drawClosedHand(target);
-		_game.openHand.drawOpenHand(target);
+		_game.openHand.drawOpenHand(_game, target);
 		drawDiscards(_game, target);
 	}
 

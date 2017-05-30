@@ -39,3 +39,26 @@ size_t indexOf(Range, E)(Range range, E element) if(isInputRange!Range)
 {
 	return range.countUntil!(e => e == element);
 }
+
+T[] insertAt(T)(T[] collection, T element, size_t index)
+{
+	T[] placeholder;
+	if(index != 0)
+	{
+		placeholder ~= collection[0 .. index];
+	}
+	placeholder ~= element;
+	if(index != collection.length)
+	{
+		placeholder ~= collection[index .. $];
+	}
+	collection = placeholder;
+	return placeholder;
+}
+
+unittest
+{
+	assert([0,1,2] == [1,2].insertAt(0,0), "New element should be inserted at 0");
+	assert([1,0,2] == [1,2].insertAt(0,1), "New element should be inserted at 1");
+	assert([1,2,0] == [1,2].insertAt(0,2), "New element should be inserted at 2");
+}
