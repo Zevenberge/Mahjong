@@ -71,6 +71,7 @@ class ClaimOptionFactory
 {
 	this(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
 	{
+		player.game.showHand;
 		addRonOption(player, discard, claimEvent);
 		addKanOption(player, discard, claimEvent);
 		addPonOption(player, discard, claimEvent);
