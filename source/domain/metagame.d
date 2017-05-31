@@ -54,10 +54,6 @@ class Metagame
 		initialise;
 	}
 
-	bool hasStarted()
-	{
-		return _status != Status.NewGame;
-	}
 	private void initialise()
 	{
 		info("Initialising metagame");
@@ -78,7 +74,6 @@ class Metagame
 
 	private void setPlayers()
 	{
-		_status = Status.NewGame;
 		leadingWind = PlayerWinds.east;
 		round = 1;
 		info("Setting up the game");
@@ -97,8 +92,6 @@ class Metagame
 		wall.dice;
 		distributeTiles;
 		setTurnPlayerToEast;
-		_status = Status.Running;
-
 	}
 	private void setPlayersGame()
 	{
@@ -147,11 +140,6 @@ class Metagame
    */
 
 	private size_t _turn = 0; 
-	private Status _status = Status.SetUp;
-	const Status status() @property
-	{
-		return _status;
-	}
 
 	private Phase _phase = Phase.Draw;
 
@@ -184,12 +172,10 @@ class Metagame
 		if(player.isMahjong)
 		{
 			info("Player ", cast(Kanji)currentPlayer.getWind, " won");
-			_status = Status.Mahjong;
 		}
 		else
 		{
 			info("Player ", cast(Kanji)currentPlayer.getWind, " chombo'd");
-			_status = Status.AbortiveDraw;
 		}
 	}
 
@@ -220,7 +206,6 @@ class Metagame
 
 	private void exhaustiveDraw()
 	{
-		_status = Status.ExhaustiveDraw;
 		checkNagashiMangan;
 		checkTenpai;
 	}
@@ -232,7 +217,6 @@ class Metagame
        if(player.isNagashiMangan)
        {
          // Go ro results screen.
-         _status = Status.Mahjong;
          info("Nagashi Mangan!");
        }
      }
