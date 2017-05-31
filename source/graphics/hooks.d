@@ -9,7 +9,7 @@ class GraphicalFlowHooks : FlowHooks
 	void onRoundStarted()	
 	{
 		info("Handling start of round in the graphical flow");
-		updateWindsOfExistingPlayers;
+	//	updateWindsOfExistingPlayers;
 	}
 }
 
