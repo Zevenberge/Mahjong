@@ -24,8 +24,8 @@ void draw(Player player, RenderTarget view, float rotation)
 	PlayerVisuals visual;
 	if(player.id !in _players)
 	{
+		visual = new PlayerVisuals(defaultTexture, player, rotation);
 		trace("Adding new player.");
-		visual.initialise(defaultTexture, player, rotation);
 		_players[player.id] = visual;
 	}
 	else
@@ -34,14 +34,6 @@ void draw(Player player, RenderTarget view, float rotation)
 	}
 	visual.draw(view);
 	if(player.game !is null) player.game.drawIngame(view);
-}
-
-void updateWindsOfExistingPlayers()
-{
-	foreach(player; _players)
-	{
-		player.updateWind;
-	}
 }
 
 void clearPlayerCache()
@@ -53,7 +45,7 @@ void clearPlayerCache()
 
 private PlayerVisuals[UUID] _players;
 
-private struct PlayerVisuals
+private class PlayerVisuals
 {
 	private
 	{
@@ -62,7 +54,8 @@ private struct PlayerVisuals
 		Texture _iconTexture;
 		Sprite _icon;
 		Text _score;
-		int _numberedScore;
+		int _numberedScore = -1;
+		int _numberedWind = -1;
 		Text _wind;
 		Player _player;
 		
@@ -84,19 +77,20 @@ private struct PlayerVisuals
 			info("Initialised player icon");
 		}
 		
-		void initialiseScore(int score)
+		void initialiseScore()
 		{
 			info("Initialising the score");
 			_score = new Text;
 			_score.setFont(pointsFont);
 			_score.setCharacterSize(pointsSize);
-			updateScore(score);
+			updateScore();
 			info("Initialised the score");
 		}
 		
 		void updateScore()
 		{
 			trace("Updating score");
+			_numberedScore = _player.score;
 			_score.setString(_numberedScore.to!string);
 			if(_numberedScore < drawingOpts.criticalScore)
 			{
@@ -144,44 +138,33 @@ private struct PlayerVisuals
 			_sprite.setRotationAroundCenter(-rotation);
 			trace("Placed the sprite");
 		}
-	}
-	
-	public:
-		void draw(RenderTarget view)
+
+		void updateIfRequired()
 		{
-			view.draw(_sprite);
+			bool updated = false;
+			if(_player.getWind != _numberedWind) 
+			{
+				updateWind;
+				updated = true;
+			}
+			if(_player.score != _numberedScore)
+			{
+				updateScore;
+				updated = true;
+			}
+			if(updated) redrawTexture;
 		}
-		
-		void initialise(string iconFile, Player player, float rotation)
-		{
-			info("Initialising player visuals");
-			_player = player;
-			initialiseNewTexture;
-			initialiseIcon(iconFile);
-			initialiseScoreLabel;
-			initialiseScore(player.score);
-			initialiseSprite(rotation);
-			info("Initialised player visuals");
-		}
-		
-		void updateScore(int score)
-		{
-			trace("Updating score");
-			_numberedScore = score;
-			updateScore;
-			trace("Updated score");
-		}
-		
+
 		void updateWind()
 		{
-			auto wind = _player.getWind.to!Kanji.to!string;
-			if(_wind is null) initialiseWind;
+			_numberedWind = _player.getWind;
+			if(_numberedWind < 0) return;
+			auto windSymbol = _numberedWind.to!Kanji.to!string;
 			trace("Updating wind");
-			_wind.setString(wind);
+			_wind.setString(windSymbol);
 			_wind.alignTopLeft(iconBounds);
 			trace("Updated wind");
 		}
-		
 		void redrawTexture()
 		{
 			info("Redrawing the player render texture");
@@ -195,6 +178,27 @@ private struct PlayerVisuals
 				display;
 			}
 			info("Redrawn the player texture");
+		}
+	}
+	
+	public:
+		void draw(RenderTarget view)
+		{
+			updateIfRequired;
+			view.draw(_sprite);
+		}
+		
+		this(string iconFile, Player player, float rotation)
+		{
+			info("Initialising player visuals");
+			_player = player;
+			initialiseNewTexture;
+			initialiseIcon(iconFile);
+			initialiseScoreLabel;
+			initialiseScore();
+			initialiseSprite(rotation);
+			initialiseWind;
+			info("Initialised player visuals");
 		}
 } 
 
