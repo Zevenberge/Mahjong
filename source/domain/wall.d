@@ -1,6 +1,6 @@
 module mahjong.domain.wall;
 
-import std.algorithm.mutation;
+import std.algorithm;
 import std.conv;
 import std.experimental.logger;
 import std.random;
@@ -113,7 +113,8 @@ class Wall
 	
 	protected void flipDoraIndicator()
 	{
-		// TODO
+		auto indexOfLastOpenedDoraIndicator = _tiles.countUntil!(t => t.isOpen);
+		_tiles[indexOfLastOpenedDoraIndicator-2].open;
 	}
 
 	Tile drawTile()
