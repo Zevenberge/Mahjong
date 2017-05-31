@@ -1,10 +1,11 @@
 module mahjong.graphics.selections.selectable;
 
 import dsfml.graphics;
+import mahjong.graphics.drawing.tile;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.selections.selection;
 
-class Selectable(T)
+class Selectable(T) if(hasGlobalBounds!T)
 {
 	mixin Select!T;
 
@@ -20,8 +21,7 @@ class Selectable(T)
 
 }
 
-// TODO: T should be forced to implement an interface, either explicitely or implicitly
-mixin template Select(T)
+mixin template Select(T) if(hasGlobalBounds!T)
 {
 	// HACK: Tile should not be imported here?
 	import mahjong.graphics.drawing.tile;
@@ -54,7 +54,6 @@ mixin template Select(T)
 		return opts[selection.position];
 	}
 
-	
 	protected void selectOpt()
 	{
 		// Firstly check whether the selection does not fall out of bounds.
@@ -71,4 +70,10 @@ mixin template Select(T)
 		selection.position = i;
 		selectOpt;
 	}
+}
+
+template hasGlobalBounds(S)
+{
+	enum bool hasGlobalBounds = 
+		__traits(compiles, (S.init).getGlobalBounds);
 }
