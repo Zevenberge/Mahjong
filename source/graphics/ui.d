@@ -2,16 +2,12 @@ module mahjong.graphics.ui;
 
 import std.experimental.logger;
 import dsfml.graphics;
-import mahjong.engine.flow.hooks;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
 import mahjong.graphics.opts;
-import mahjong.graphics.hooks;
 
 void run()
 {
-	trace("Setting the flow hooks handler to the graphics hooks handler.");
-	hooks = new GraphicalFlowHooks;
 	trace("Setting drawing options");
 	styleOpts = new DefaultStyleOpts;
 	trace("Creating window.");

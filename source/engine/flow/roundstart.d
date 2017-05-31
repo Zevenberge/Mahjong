@@ -28,8 +28,6 @@ class RoundStartFlow : Flow
 		{
 			info("All players are ready. Initialising game");
 			metagame.beginRound;
-			info("Poking hooks");
-			hooks.onRoundStarted;
 			info("Started round. Switching to draw flow");
 			switchFlow(new DrawFlow(metagame.currentPlayer, metagame, metagame.wall));
 		}
