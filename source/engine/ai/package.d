@@ -35,9 +35,6 @@ class SimpleAI : AI
 
 	void claim(ClaimEvent event)
 	{
-		// TODO
-		//if(event.player.isRonnable(event.tile)) event.handle(new RonRequest);
-		//if(event.player.isPonnable(event.tile)) event.handle(new PonRequest);
 		event.handle(new NoRequest);
 	}
 }
