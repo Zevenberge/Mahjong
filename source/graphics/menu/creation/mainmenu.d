@@ -24,15 +24,15 @@ MainMenu composeMainMenu()
 	with(_mainMenu)
 	{
 		addOption(new MainMenuItem("Riichi Mahjong", 
-				&startRiichiMahjong, riichiFile, IntRect(314,0,2*screen.x,2*screen.y)));
+				{startRiichiMahjong;}, riichiFile, IntRect(314,0,2*screen.x,2*screen.y)));
 		addOption(new MainMenuItem("Bamboo Battle", 
-				&startBambooBattle, bambooFile, IntRect(314,0,4*screen.x,4*screen.y)));
+				{startBambooBattle;}, bambooFile, IntRect(314,0,4*screen.x,4*screen.y)));
 		addOption(new MainMenuItem("Thunder Thrill", 
-				&startThunderThrill, eightPlayerFile, IntRect(100,0,768,768)));
+				{startThunderThrill;}, eightPlayerFile, IntRect(100,0,768,768)));
 		addOption(new MainMenuItem("Simple Mahjong", 
-				&startSimpleMahjong, chineseFile, IntRect(314,0,2*screen.x,2*screen.y)));
+				{startSimpleMahjong;}, chineseFile, IntRect(314,0,2*screen.x,2*screen.y)));
 		addOption(new MainMenuItem("Quit", 
-				&quit, quitFile, IntRect(150,0,700,700)));
+				{quit;}, quitFile, IntRect(150,0,700,700)));
 	}
 	trace("Constructed all options.");
 	_mainMenu.configureGeometry;

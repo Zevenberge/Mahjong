@@ -9,7 +9,7 @@ import mahjong.engine.flow;
 
 class TurnFlow : Flow
 {
-	this(Player player, Metagame meta, Tile drawnTile)
+	this(Player player, Metagame meta)
 	{
 		_player = player;
 		super(meta);
@@ -102,7 +102,7 @@ unittest
 	player.startGame(0);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(0,0);
-	auto flow = new TurnFlow(player, metagame, tile);
+	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
 	writeln("Testing whether the flow advances when it should not");
@@ -129,7 +129,7 @@ unittest
 	auto wall = new Wall;
 	wall.tiles ~= tile;
 	player.drawTile(wall);
-	auto flow = new TurnFlow(player, metagame, tile);
+	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	flow._event.discard(tile);
 	writeln("Testing whether the flow advances when it should");
@@ -152,7 +152,7 @@ unittest
 	player.startGame(0);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(0, 0);
-	auto flow = new TurnFlow(player, metagame, tile);
+	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
 	flow._event.claimTsumo;

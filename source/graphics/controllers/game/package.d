@@ -1,5 +1,6 @@
 module mahjong.graphics.controllers.game;
 
+public import mahjong.graphics.controllers.game.claim;
 public import mahjong.graphics.controllers.game.idle;
 public import mahjong.graphics.controllers.game.turn;
 

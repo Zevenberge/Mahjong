@@ -16,6 +16,7 @@ import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.menu.creation.pausemenu;
 import mahjong.graphics.selections.selectable;
+import mahjong.share.range;
 
 class Menu : Selectable!MenuItem
 {
@@ -30,6 +31,11 @@ class Menu : Selectable!MenuItem
 		opts ~= item;
 	}
 
+	void selectOption(MenuItem item)
+	{
+		changeOpt(opts.indexOf(item));
+	}
+
 	void configureGeometry()
 	{
 		opts.spaceMenuItems;
@@ -41,11 +47,11 @@ class Menu : Selectable!MenuItem
 		drawSelection(window);
 		drawOpts(window);
 	}
-	void drawSelection(RenderTarget window)
+	private void drawSelection(RenderTarget window)
 	{
 		window.draw(selection.visual);
 	}
-	void drawOpts(RenderTarget window)
+	private void drawOpts(RenderTarget window)
 	{
 		foreach(opt; opts)
 		{

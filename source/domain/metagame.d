@@ -15,6 +15,7 @@ import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.graphics.enums.game;
 import mahjong.graphics.enums.kanji;
+import mahjong.share.range;
 
 class Metagame
 {
@@ -25,10 +26,21 @@ class Metagame
 		return _turn == -1 ? null : players[_turn]; 
 	}
 
+	Player currentPlayer(Player player) @property
+	{
+		_turn = players.indexOf(player);
+		return player;
+	}
+
+	const(Player) nextPlayer() @property pure const
+	{
+		return players[(_turn+1)%$];
+	}
+
 	auto otherPlayers() @property
 	{
 		auto currentPlayer = this.currentPlayer;
-		return players.filter!(p => &p != &currentPlayer);
+		return players.filter!(p => p != currentPlayer);
 	}
 
 	Wall wall;
@@ -46,7 +58,7 @@ class Metagame
 	{
 		return _status != Status.NewGame;
 	}
-	void initialise()
+	private void initialise()
 	{
 		info("Initialising metagame");
 		placePlayers;
@@ -105,7 +117,7 @@ class Metagame
    { 
 		foreach(i, player; players)
 		{
-        	trace("Placing player \"", player.name, "\" (", i, ")");
+        	trace("Placing player \"", player.name.to!string, "\" (", i, ")");
         	player.playLoc = i.to!int;
 
 		}
@@ -134,7 +146,7 @@ class Metagame
      The game itself.
    */
 
-	private int _turn = 0; 
+	private size_t _turn = 0; 
 	private Status _status = Status.SetUp;
 	const Status status() @property
 	{
@@ -266,6 +278,22 @@ class Metagame
           player.closeHand; 
      }
    }
+}
+
+unittest
+{
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto player3 = new Player(new TestEventHandler);
+	auto metagame = new Metagame([player, player2, player3]);
+	metagame.currentPlayer = player;
+	assert(metagame.currentPlayer == player, "The current player should be set and identical to the value set");
+	assert(metagame.nextPlayer == player2, "If it is player 1's turn, player 2 should be next.");
+	metagame.currentPlayer = player3;
+	assert(metagame.nextPlayer == player, "If it is player 3's turn, the next player should loop back to 1");
 }
 
 class BambooMetagame : Metagame

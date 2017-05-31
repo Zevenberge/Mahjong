@@ -47,6 +47,7 @@ interface StyleOpts
 	Color menuFontColor();
 	int menuTop();
 	int menuSpacing();
+	int claimMenuMargin();
 	int popupFontSize();
 }
 

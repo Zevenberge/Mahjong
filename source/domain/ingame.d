@@ -1,6 +1,6 @@
 module mahjong.domain.ingame;
 
-import std.algorithm.iteration;
+import std.algorithm;
 import std.array;
 import std.experimental.logger;
 import std.uuid;
@@ -11,6 +11,7 @@ import mahjong.engine.chi;
 import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.sort;
+import mahjong.share.range;
 
 class Ingame
 { 
@@ -19,13 +20,44 @@ class Ingame
 	int wind = -1; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
 	OpenHand openHand; // The open pons/chis/kans 
-	Tile[]  discards; // All of the personal discards.
-	private Tile lastTile;  // The last tile, to determine whether or not this is a tsumo or a ron.
-	bool isNagashiMangan = true;
+
+	private Tile[] _discards;
+	Tile[] discards() @property pure
+	{
+		return _discards;
+	}
+
+	version(unittest)
+	{
+		void setDiscards(Tile[] discs)
+		{
+			_discards = discs;
+			foreach(tile; _discards)
+			{
+				tile.origin = this;
+			}
+		}
+	}
+
+	private Tile[] _claimedDiscards;
+	private Tile[] allDiscards() @property pure
+	{
+		return discards ~_claimedDiscards;
+	}
+
+	void claim(Tile tile)
+	{
+		_discards.remove!((a, b) => a == b)(tile);
+		_claimedDiscards ~= tile;
+	}
+
+	bool isNagashiMangan() @property
+	{
+		return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
+	}
 	bool isRiichi = false;
 	bool isDoubleRiichi = false;
 	bool isFirstTurn = true;
-	bool isTenpai = false;
 
 	this(int wind)
 	{
@@ -46,7 +78,7 @@ class Ingame
 	 */
 	private bool isOwn(const Tile tile) pure const
 	{
-		return tile.origin == wind;
+		return tile.origin is null;
 	}
 
 	bool isChiable(const Tile discard) pure const
@@ -61,6 +93,7 @@ class Ingame
 		{
 			throw new IllegalClaimException(discard, "Chi not allowed");
 		}
+		discard.claim;
 		auto chiTiles = closedHand.removeChiTiles(otherTiles) ~ discard;
 		openHand.addChi(chiTiles);
 	}
@@ -74,6 +107,7 @@ class Ingame
 	void pon(Tile discard)
 	{
 		if(!isPonnable(discard)) throw new IllegalClaimException(discard, "Pon not allowed");
+		discard.claim;
 		auto ponTiles = closedHand.removePonTiles(discard) ~ discard;
 		openHand.addPon(ponTiles);
 	}
@@ -87,14 +121,14 @@ class Ingame
 	void kan(Tile discard)
 	{
 		if(!isKannable(discard)) throw new IllegalClaimException(discard, "Kan not allowed");
+		discard.claim;
 		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
 		openHand.addKan(kanTiles);
 	}
 
-	bool isRonnable(const Tile discard) const
+	bool isRonnable(const Tile discard) pure
 	{
-		if(isOwn(discard)) return false;
-		return scanHandForMahjong(closedHand.tiles ~ discard, openHand.amountOfPons).isMahjong
+		return scanHandForMahjong(closedHand, openHand, discard).isMahjong
 			&& !isFuriten ;
 	}
 
@@ -111,24 +145,21 @@ class Ingame
 			for(int value = Numbers.min; value <= Numbers.max; ++value)
 			{
 				auto tile = new Tile(type, value);
-				Tile[] temphand = closedHand.tiles ~ tile;
-				if(.scanHandForMahjong(temphand, openHand.amountOfPons).isMahjong)
+				if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
 				{
-					this.isTenpai = true;
 					return true;
 				}
 
 			}
 		}
-		this.isTenpai = false;
 		return false;
 	}
 
-	bool isFuriten() @property const
+	bool isFuriten() @property pure
 	{
-		foreach(tile; discards)
+		foreach(tile; allDiscards)
 		{
-			if(.scanHandForMahjong(closedHand.tiles ~ tile, openHand.amountOfPons).isMahjong)
+			if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
 			{
 				return true;
 			}
@@ -143,18 +174,10 @@ class Ingame
 
 	private void discard(size_t discardedNr)
 	{    
-		takeOutTile(closedHand.tiles, discards, discardedNr);
+		takeOutTile(closedHand.tiles, _discards, discardedNr);
 		auto discard = discards[$-1];
-		discard.origin = wind; // Sets the tile to be from the player who discarded it.
+		discard.origin = this; // Sets the tile to be from the player who discarded it.
 		discard.open;
-		if( (!discard.isHonour) && (!discard.isTerminal) )
-		{
-			if(isNagashiMangan)
-			{
-				info(cast(PlayerWinds)wind, " has lost Nagashi Mangan!");
-			}
-			isNagashiMangan = false;
-		}
 	}
 
 	void discard(Tile discardedTile)
@@ -172,14 +195,15 @@ class Ingame
 		throw new TileNotFoundException(discardedTile);
 	}
 
-	ref Tile getLastDiscard()
+	Tile getLastDiscard()
 	{
 		return discards[$-1];
 	}
 
-	ref Tile getLastTile()
+	private Tile _lastTile; 
+	Tile getLastTile()
 	{
-		return lastTile;
+		return _lastTile;
 	}
 
 	void closeHand()
@@ -192,10 +216,10 @@ class Ingame
 		closedHand.showHand;
 	}
 	
-	void drawTile(ref Wall wall)
+	void drawTile(Wall wall)
 	{
 		closedHand.drawTile(wall);
-		lastTile = closedHand.getLastTile;
+		_lastTile = closedHand.getLastTile;
 	}
 
 }

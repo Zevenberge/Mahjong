@@ -5,6 +5,9 @@ import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.enums.tile;
 import mahjong.domain.tile;
+import mahjong.graphics.anime.animation;
+import mahjong.graphics.anime.movement;
+import mahjong.graphics.conv;
 import mahjong.graphics.cache.texture;
 import mahjong.graphics.conv;
 import mahjong.graphics.coords;
@@ -35,7 +38,7 @@ FloatCoords getCoords(const Tile tile)
 	return getTileVisuals(tile).getCoords;
 }
 
-Sprite getFrontSprite(Tile tile)
+Sprite getFrontSprite(const Tile tile)
 {
 	return getTileVisuals(tile)._sprite;
 }
@@ -48,6 +51,15 @@ FloatRect getLocalBounds(const Tile tile)
 {
 	return getTileVisuals(tile).getLocalBounds;
 }
+
+void move(const Tile tile, FloatCoords coords)
+{
+	auto sprite = getFrontSprite(tile);
+	auto animation = new MovementAnimation(sprite, coords, 15);
+	animation.objectId = tile.id;
+	addUniqueAnimation(animation);
+}
+
 deprecated void setPosition(Tile tile, Vector2f pos)
 {
 	trace("Setting the position of the tile");

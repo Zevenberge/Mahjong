@@ -5,6 +5,7 @@ import std.math;
 import std.uuid;
 
 import mahjong.domain.enums.tile;
+import mahjong.domain.ingame;
 import mahjong.engine.enums.game;
 
 class Tile
@@ -15,7 +16,7 @@ class Tile
 	const UUID id;
 
 	int dora = 0;
-	int origin = Origin.wall; // Origin of the tile in in-game winds.
+	Ingame origin = null;
 	private bool _isOpen = false;
    
     this(int type, int value)
@@ -69,6 +70,11 @@ class Tile
 	bool hasEqualValue(const Tile other) pure const
 	{
 		return type == other.type && value == other.value;
+	}
+
+	void claim()
+	{
+		origin.claim(this);
 	}
  }
 

@@ -25,7 +25,7 @@ class ClosedHand
 
 	void removeTile(Tile tile)
 	{
-		tiles.remove!((a,b)=> a.id == b.id)(tile);
+		tiles.remove!((a,b) => a == b)(tile);
 	}
 	
 	mixin Signal!(Tile);

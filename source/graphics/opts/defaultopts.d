@@ -98,6 +98,10 @@ class DefaultStyleOpts : StyleOpts
 	{
 		return 20;
 	}
+	int claimMenuMargin()
+	{
+		return 30;
+	}
 	int popupFontSize()
 	{
 		return 48;

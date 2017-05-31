@@ -18,7 +18,7 @@ class DrawFlow : Flow
 	override void advanceIfDone()
 	{
 		_player.drawTile(_wall);
-		switchFlow(new TurnFlow(_player, metagame, _player.getLastTile));
+		switchFlow(new TurnFlow(_player, metagame));
 	}
 }
 ///
