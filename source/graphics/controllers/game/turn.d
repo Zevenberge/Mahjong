@@ -38,11 +38,9 @@ class TurnController : GameController
 		switch(key.code) with (Keyboard.Key)
 		{
 			case Left:
-				// TODO Move the selection left
 				selectPrevious;
 				break;
 			case Right:
-				// TODO Move the selection right
 				selectNext;
 				break;
 			case Return:
