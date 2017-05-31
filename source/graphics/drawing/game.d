@@ -21,7 +21,6 @@ alias drawGame = draw;
 void draw(Metagame game, RenderTarget target)
 {
 	drawPlayers(game, target);
-	if(game.status < Status.Running) return;
 	drawWal(game, target);
 	drawGameInfo(game, target);
 }
@@ -42,6 +41,7 @@ private void drawPlayers(Metagame game, RenderTarget target)
 
 private void drawWal(Metagame game, RenderTarget target)
 {
+	if(game.wall is null) return;
 	game.wall.drawWall(target);
 }
 
@@ -141,10 +141,13 @@ private class GameInfo
 		
 		void update(Metagame game)
 		{
-			_roundInfo.setString(game.leadingWind.to!int.to!Kanji.to!string 
-				~ game.round.toKanji);
+			auto roundInfo = game.leadingWind.to!int.to!Kanji.to!string;
+			if(game.round > 0) roundInfo ~= game.round.toKanji;
+			_roundInfo.setString(roundInfo);
 			_roundInfo.center!(CenterDirection.Vertical)(_background.getGlobalBounds);
-			_turnPlayerInfo.setString(game.currentPlayer.name.to!string);
+			auto currentPlayer = game.currentPlayer;
+			if(currentPlayer !is null) _turnPlayerInfo.setString(game.currentPlayer.name.to!string);
+			else _turnPlayerInfo.setString("");
 			_turnInfo.setString(game.phase.to!string);
 		}
 }
