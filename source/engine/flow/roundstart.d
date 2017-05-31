@@ -39,29 +39,6 @@ class RoundStartFlow : Flow
 	}
 }
 
-private class DistributeTilesIterator
-{
-	alias Action = void delegate();
-	this(Action[] actions)
-	{
-		_actions = actions;
-	}
-
-	private Action[] _actions;
-	private int _iteration = 0;
-
-	bool isDone() @property
-	{
-		return _iteration == _actions.length;
-	}
-
-	void advanceDistribution()
-	{
-		_actions[_iteration]();
-		++_iteration;
-	}
-}
-
 class RoundStartEvent
 {
 	this(Metagame metagame)
