@@ -16,8 +16,13 @@ import mahjong.engine.opts;
 class Wall
 {
 	UUID id;
-	Tile[] tiles;
-   private int amountOfKans = 0;
+	private Tile[] _tiles;
+	const(Tile)[] tiles() @property
+	{
+		return _tiles;
+	}
+
+	private int amountOfKans = 0;
 
 	this()
 	{
@@ -25,11 +30,11 @@ class Wall
 		id = randomUUID;
 	}
 
-
-   @property public size_t length()
-   {
-     return tiles.length;
-   }
+	
+	@property public size_t length()
+	{
+		return _tiles.length;
+	}
 
 	void dice()
 	{
@@ -51,10 +56,9 @@ class Wall
 
 	protected void initialise()
 	{
-		setUpWall(tiles);
+		.setUpWall(_tiles);
 	}
 
-   
 	private void shuffle()
 	in
 	{
@@ -66,7 +70,7 @@ class Wall
 		{
 			ulong t1 = uniform(0, length);
 			ulong t2 = uniform(0, length);
-			swap(tiles[t1],tiles[t2]);
+			swap(_tiles[t1],_tiles[t2]);
 		}
 	}
 
@@ -80,7 +84,7 @@ class Wall
 		splitWall(split);
 	}
 	
-	protected final int rollDice(int amountOfDice)
+	private int rollDice(int amountOfDice)
 	{
 		int result = 0;
 		for(int i = 0; i < amountOfDice; ++i)
@@ -89,22 +93,22 @@ class Wall
 		}
 		return result;
 	}
-   private int calculateWallShift(int diceRoll)
-   {
-      auto plyrs = gameOpts.amountOfPlayers;
-      int wallSide = (diceRoll-1)%plyrs;
-      return ((plyrs - wallSide-1) % plyrs) * to!int(length)/plyrs;
-   }
-   private void splitWall(const int shift)
-   {
-      int _shift = (shift+to!int(length)) % cast(int)length;
-      auto twall = this.tiles[_shift .. $] ~ this.tiles[0 .. _shift];
-      this.tiles = twall;
-   }
-   
+	private int calculateWallShift(int diceRoll)
+	{
+		auto plyrs = gameOpts.amountOfPlayers;
+		int wallSide = (diceRoll-1)%plyrs;
+		return ((plyrs - wallSide-1) % plyrs) * to!int(length)/plyrs;
+	}
+	private void splitWall(const int shift)
+	{
+		int _shift = (shift+to!int(length)) % cast(int)length;
+		auto twall = this._tiles[_shift .. $] ~ this._tiles[0 .. _shift];
+		this._tiles = twall;
+	}
+	
 	protected void flipFirstDoraIndicator()
 	{
-		tiles[$-5].open;
+		_tiles[$-5].open;
 	}   
 	
 	protected void flipDoraIndicator()
@@ -112,43 +116,31 @@ class Wall
 		// TODO
 	}
 
-/*
-   In-game functions.
-*/
 	Tile drawTile()
 	{ 
-		Tile drawnTile = tiles[0];
-		tiles = tiles[1 .. $];
+		Tile drawnTile = _tiles[0];
+		_tiles = _tiles[1 .. $];
 		return drawnTile;
 	}
 
-   public Tile drawKanTile()
-   { // Not to be confused with the graphical draw functions nor the normal draw. In addition, this function also flips the dora indictor.
-      flipDoraIndicator;
-      return getKanTile;      
-   }
-   
+	public Tile drawKanTile()
+	{ 
+		flipDoraIndicator;
+		return getKanTile;      
+	}
+	
 	protected Tile getKanTile()
 	{
-		Tile kanTile = tiles[$-1];
-		tiles = tiles[0 .. $-1];
+		Tile kanTile = _tiles[$-1];
+		_tiles = _tiles[0 .. $-1];
 		return kanTile;
 	}
 
-	public bool isExhaustiveDraw()
+	bool isExhaustiveDraw()
 	{
-		return tiles.length <= gameOpts.deadWallLength;
+		return _tiles.length <= gameOpts.deadWallLength;
 	}
 
-   public bool isAbortiveDraw()
-   { // FIXME: Take into account that this is invalid in the ultrarare case in which all of the kans belong to a single player.
-      return amountOfKans == 4;
-   }
-
-	public bool canStillKan()
-	{
-		return tiles.length > gameOpts.deadWallLength + gameOpts.kanBuffer && amountOfKans < gameOpts.maxAmountOfKans;
-	}
 }
 
 class BambooWall : Wall
@@ -159,13 +151,13 @@ class BambooWall : Wall
 		{
 			for(int i = 0; i < 4; ++i)
 			{
-				tiles ~= new Tile(Types.bamboo, j);
+				_tiles ~= new Tile(Types.bamboo, j);
 				if(j == Numbers.five && i == 0)
-					++tiles[$-1].dora;
+					++_tiles[$-1].dora;
 			}
 		}
 	}
-	
+
 	protected override void diceToStartPoint()
 	{
 		// Do nothing
@@ -185,11 +177,7 @@ class BambooWall : Wall
 	{
 		return drawTile;
 	}
-	
-	public override bool canStillKan()
-	{
-		return tiles.length > 0;
-	}
+
 }
 
 class EightPlayerWall : Wall

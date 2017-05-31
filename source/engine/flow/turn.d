@@ -116,7 +116,21 @@ unittest
 	import std.stdio;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
+	import mahjong.domain.tile;
 	import mahjong.domain.wall;
+
+	class MockWall : Wall
+	{
+		this(Tile tileToDraw)
+		{
+			_tileToDraw = tileToDraw;
+		}
+		private Tile _tileToDraw;
+		override Tile drawTile()
+		{
+			return _tileToDraw;
+		}
+	}
 
 	writeln("Testing flow of turn when discarding.");
 	gameOpts = new DefaultGameOpts;
@@ -126,8 +140,7 @@ unittest
 	player.startGame(0);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(0,0);
-	auto wall = new Wall;
-	wall.tiles ~= tile;
+	auto wall = new MockWall(tile);
 	player.drawTile(wall);
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
