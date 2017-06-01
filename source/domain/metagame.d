@@ -204,6 +204,7 @@ class Metagame
 		return wall.length <= gameOpts.deadWallLength;
 	}
 
+	deprecated("Move to exhaustive draw flow.")
 	private void exhaustiveDraw()
 	{
 		checkNagashiMangan;
