@@ -2,7 +2,6 @@ module mahjong.domain.closedhand;
 
 import std.algorithm.iteration;
 import std.array;
-import std.signals;
 import mahjong.domain;
 import mahjong.engine.chi;
 import mahjong.engine.sort;
@@ -20,15 +19,12 @@ class ClosedHand
 	void addTile(Tile tile)
 	{
 		tiles ~= tile;
-		emit(tile);
 	}
 
 	void removeTile(Tile tile)
 	{
 		tiles.remove!((a,b) => a == b)(tile);
 	}
-	
-	mixin Signal!(Tile);
 	
 	void sortHand()
 	{

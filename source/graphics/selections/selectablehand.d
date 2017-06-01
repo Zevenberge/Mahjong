@@ -17,11 +17,11 @@ class SelectableHand : Selectable!Tile
 	this(ClosedHand hand)
 	{
 		_hand = hand;
-		_hand.connect(&newTileAdded);
 	}
 	
-	private void newTileAdded(Tile newTile)
+	private void newTileAdded()
 	{
+		auto newTile = _hand.lastTile;
 		trace("Adding new tile to selectable hand.");
 		_hand.tiles.sortHand;
 		_hand.placeHand;
@@ -37,9 +37,11 @@ class SelectableHand : Selectable!Tile
 	}
 	
 	private ClosedHand _hand;
+	private size_t _handSize;
 	
 	void draw(RenderTarget target)
 	{
+		if(_hand.length != _handSize) newTileAdded;
 		if(opts.empty) return;
 		opts = _hand.tiles;
 		selectOpt;
