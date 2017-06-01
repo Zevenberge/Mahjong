@@ -283,8 +283,6 @@ unittest
 	auto wall = new Wall;
 	wall.setUp;
 	wall.dice;
-	auto initialWallLength = wall.length;
-	auto lastTile = wall.tiles.back;
 	auto player = new Player(new TestEventHandler);
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
@@ -292,8 +290,6 @@ unittest
 	kannableTile.origin = new Ingame(1);
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.length == 1, "The tiles should have been removed from the hand and one tile drawn from the wall.");
-	assert(player.game.closedHand.tiles.front == lastTile, "The last tile of the wall should have been drawn");
-	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
 	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
 	assert(player.game.openHand.amountOfKans == 1, "The open hand should have one kan.");
 	assert(player.game.openHand.sets.length == 1, "The open hand should have one set.");
