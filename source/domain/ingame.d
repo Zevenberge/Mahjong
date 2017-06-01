@@ -55,9 +55,6 @@ class Ingame
 	{
 		return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
 	}
-	bool isRiichi = false;
-	bool isDoubleRiichi = false;
-	bool isFirstTurn = true;
 
 	this(int wind)
 	{
@@ -118,14 +115,42 @@ class Ingame
 		discard.claim;
 		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
 		openHand.addKan(kanTiles);
-		closedHand.drawKanTile(wall);
-		_lastTile = closedHand.lastTile;
+		drawKanTile(wall);
 	}
 
 	bool isRonnable(const Tile discard) pure
 	{
 		return scanHandForMahjong(closedHand, openHand, discard).isMahjong
 			&& !isFuriten ;
+	}
+	
+	bool canDeclareClosedKan(const Tile tile)
+	{
+		return closedHand.canDeclareClosedKan(tile);
+	}
+
+	void declareClosedKan(const Tile tile, Wall wall)
+	{
+		auto kanTiles = closedHand.declareClosedKan(tile);
+		openHand.addKan(kanTiles);
+		drawKanTile(wall);
+	}
+
+	bool canPromoteToKan(Tile tile)
+	{
+		return openHand.canPromoteToKan(tile);
+	}
+
+	void promoteToKan(Tile tile, Wall wall)
+	{
+		openHand.promoteToKan(tile);
+		drawKanTile(wall);
+	}
+
+	private void drawKanTile(Wall wall)
+	{
+		closedHand.drawKanTile(wall);
+		_lastTile = closedHand.lastTile;
 	}
 
 	/*
@@ -189,11 +214,6 @@ class Ingame
 			++i;
 		}
 		throw new TileNotFoundException(discardedTile);
-	}
-
-	Tile getLastDiscard()
-	{
-		return discards[$-1];
 	}
 
 	private Tile _lastTile; 

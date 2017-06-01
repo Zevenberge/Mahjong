@@ -62,10 +62,6 @@ class Player
 		this.game.drawTile(wall);
 	}
 
-	Tile getLastDiscard()
-	{
-		return game.getLastDiscard;
-	}
 	Tile getLastTile()
 	{
 		return game.getLastTile;
