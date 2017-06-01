@@ -19,6 +19,7 @@ class Player
 	int score; 
 
 	Ingame game; // Resets after every round.
+	alias game this;
 	GameEventHandler eventHandler; // Allows for distribution of the flow logic
 
 	this(GameEventHandler eventHandler)
@@ -45,10 +46,15 @@ class Player
 		game = new Ingame(wind);
 	}
 
-	int getWind()
+	int wind() @property
 	{
 		if(game is null) return -1;
 		return game.getWind();
+	}
+	bool isChiable(const Tile discard, const Metagame metagame) pure const
+	{
+		if(metagame.nextPlayer.id != this.id) return false;
+		return game.isChiable(discard);
 	}
 
 	void drawTile(Wall wall)
@@ -65,89 +71,16 @@ class Player
 		return game.getLastTile;
 	}
 
-	/*
-	 Functions with regard to placing tiles and displays.
-	 */
-
-	public void discard(Tile disc)
-	{
-		game.discard(disc);
-	}
-
-	override string toString() const
-	{
-		return(format("%s-san",name));
-	}
-
-	bool isMahjong()
-	{
-		return game.isMahjong();
-	}
-
-	bool isTenpai()
-	{
-		return game.checkTenpai;
-	}
-
-	bool isNagashiMangan()
-	{
-		return game.isNagashiMangan;
-	}
-
-	/*
-	 Functions with regard to claiming tiles.
-	 */
-
-	bool isChiable(const Tile discard, const Metagame metagame) pure const
-	{
-		if(metagame.nextPlayer.id != this.id) return false;
-		return game.isChiable(discard);
-	}
-
-	void chi(Tile discard, ChiCandidate otherTiles)
-	{
-		game.chi(discard, otherTiles);
-	}
-
-	bool isPonnable(const Tile discard) pure
-	{
-		return game.isPonnable(discard);
-	}
-
-	void pon(Tile discard)
-	{
-		game.pon(discard);
-	}
-
-	bool isKannable(const Tile discard) pure
-	{
-		return game.isKannable(discard);
-	}
-
-	void kan(Tile discard, Wall wall)
-	{
-		game.kan(discard, wall);
-	}
-
-	bool isRonnable(const Tile discard) pure
-	{ 
-		return game.isRonnable(discard);
-	}
-
-	void showHand()
-	{
-		game.showHand();
-	}
-	void closeHand()
-	{
-		game.closeHand();
-	}
-
 	override bool opEquals(Object o)
 	{
 		auto p = cast(Player)o;
 		if(p is null) return false;
 		return p.id == id;
+	}
+
+	override string toString() const
+	{
+		return(format("%s-san",name));
 	}
 }
 

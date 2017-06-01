@@ -138,7 +138,7 @@ class Ingame
 	 Functions related to the mahjong call.
 	 */
 
-	bool checkTenpai()
+	bool isTenpai()
 	{ /*
 		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
 		   */

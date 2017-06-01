@@ -147,7 +147,7 @@ class Metagame
 	{
 		foreach(i, player; players)
 		{
-			if(player.game.wind == Winds.east)
+			if(player.wind == Winds.east)
 			{
 				_turn = i.to!int;
 				_phase = Phase.Draw;
@@ -171,11 +171,11 @@ class Metagame
 		flipOverWinningTiles();
 		if(player.isMahjong)
 		{
-			info("Player ", cast(Kanji)currentPlayer.getWind, " won");
+			info("Player ", cast(Kanji)currentPlayer.wind, " won");
 		}
 		else
 		{
-			info("Player ", cast(Kanji)currentPlayer.getWind, " chombo'd");
+			info("Player ", cast(Kanji)currentPlayer.wind, " chombo'd");
 		}
 	}
 
@@ -229,7 +229,7 @@ class Metagame
        if(player.isTenpai)
        {
          player.showHand;
-         info(cast(Kanji)player.getWind, " is tenpai!");
+         info(cast(Kanji)player.wind, " is tenpai!");
        }
        else
        {
