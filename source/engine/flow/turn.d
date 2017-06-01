@@ -13,7 +13,7 @@ class TurnFlow : Flow
 	{
 		_player = player;
 		super(meta);
-		_event = new TurnEvent(this, meta, player, player.getLastTile);
+		_event = new TurnEvent(this, meta, player, player.lastTile);
 		_player.eventHandler.handle(_event);
 	}
 	
@@ -40,6 +40,18 @@ class TurnFlow : Flow
 		{
 			_player.discard(tile);
 			_flow = new ClaimFlow(tile, metagame);
+		}
+
+		void promoteToKan(Tile tile)
+		{
+			_player.promoteToKan(tile, metagame.wall);
+			_flow = new TurnFlow(_player, metagame);
+		}
+
+		void declareClosedKan(Tile tile)
+		{
+			_player.declareClosedKan(tile, metagame.wall);
+			_flow = new TurnFlow(_player, metagame);
 		}
 
 		void claimTsumo()
@@ -76,6 +88,28 @@ class TurnEvent
 	{
 		isHandled = true;
 		_flow.discard(tile);
+	}
+
+	void promoteToKan(Tile tile)
+	in
+	{
+		assert(!isHandled, "The event should not be handled twice.");
+	}
+	body
+	{
+		isHandled = true;
+		_flow.promoteToKan(tile);
+	}
+
+	void declareClosedKan(Tile tile)
+	in
+	{
+		assert(!isHandled, "The event should not be handled twice.");
+	}
+	body
+	{
+		isHandled = true;
+		_flow.declareClosedKan(tile);
 	}
 
 	void claimTsumo()

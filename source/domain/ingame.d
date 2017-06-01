@@ -217,7 +217,7 @@ class Ingame
 	}
 
 	private Tile _lastTile; 
-	Tile getLastTile()
+	Tile lastTile() @property
 	{
 		return _lastTile;
 	}

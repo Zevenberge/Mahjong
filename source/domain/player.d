@@ -62,11 +62,6 @@ class Player
 		this.game.drawTile(wall);
 	}
 
-	Tile getLastTile()
-	{
-		return game.getLastTile;
-	}
-
 	override bool opEquals(Object o)
 	{
 		auto p = cast(Player)o;
