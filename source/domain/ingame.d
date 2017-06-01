@@ -125,7 +125,7 @@ class Ingame
 		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
 		openHand.addKan(kanTiles);
 		closedHand.drawKanTile(wall);
-		_lastTile = closedHand.getLastTile;
+		_lastTile = closedHand.lastTile;
 	}
 
 	bool isRonnable(const Tile discard) pure
@@ -221,7 +221,7 @@ class Ingame
 	void drawTile(Wall wall)
 	{
 		closedHand.drawTile(wall);
-		_lastTile = closedHand.getLastTile;
+		_lastTile = closedHand.lastTile;
 	}
 
 }

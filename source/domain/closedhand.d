@@ -55,7 +55,7 @@ class ClosedHand
 		addTile(wall.drawKanTile);
 	}
 
-	Tile getLastTile()
+	Tile lastTile() @property
 	{
 		return tiles[$-1];
 	}
