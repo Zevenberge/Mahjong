@@ -124,9 +124,9 @@ class Player
 		return game.isKannable(discard);
 	}
 
-	void kan(Tile discard)
+	void kan(Tile discard, Wall wall)
 	{
-		game.kan(discard);
+		game.kan(discard, wall);
 	}
 
 	bool isRonnable(const Tile discard) pure
@@ -275,19 +275,27 @@ unittest
 
 unittest
 {
+	import std.array;
 	import std.exception;
 	import mahjong.domain.exceptions;
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
+	auto initialWallLength = wall.length;
+	auto lastTile = wall.tiles.back;
 	auto player = new Player(new TestEventHandler);
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
 	kannableTile.origin = new Ingame(1);
-	player.kan(kannableTile);
-	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
+	player.kan(kannableTile, wall);
+	assert(player.game.closedHand.length == 1, "The tiles should have been removed from the hand and one tile drawn from the wall.");
+	assert(player.game.closedHand.tiles.front == lastTile, "The last tile of the wall should have been drawn");
+	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
 	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
 	assert(player.game.openHand.amountOfKans == 1, "The open hand should have one kan.");
 	assert(player.game.openHand.sets.length == 1, "The open hand should have one set.");
-	assertThrown!IllegalClaimException(player.kan(kannableTile), "With no tiles in hand, an exception should be thrown.");
+	assertThrown!IllegalClaimException(player.kan(kannableTile, wall), "With no tiles in hand, an exception should be thrown.");
 }

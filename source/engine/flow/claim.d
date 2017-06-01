@@ -301,18 +301,20 @@ class PonRequest : ClaimRequest
 
 class KanRequest : ClaimRequest
 {
-	this(Player player, Tile discard)
+	this(Player player, Tile discard, Wall wall)
 	{
 		_player = player;
 		_discard = discard;
+		_wall = wall;
 	}
 
 	private Player _player;
 	private Tile _discard;
+	private Wall _wall;
 
 	void apply()
 	{
-		_player.kan(_discard);
+		_player.kan(_discard, _wall);
 	}
 
 	bool isAllowed() pure

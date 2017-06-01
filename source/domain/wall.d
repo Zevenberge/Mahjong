@@ -15,7 +15,7 @@ import mahjong.engine.opts;
 
 class Wall
 {
-	UUID id;
+	const UUID id;
 	private Tile[] _tiles;
 	const(Tile)[] tiles() @property
 	{

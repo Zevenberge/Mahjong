@@ -91,7 +91,7 @@ class ClaimOptionFactory
 	{
 		player.game.showHand;
 		addRonOption(player, discard, claimEvent);
-		addKanOption(player, discard, claimEvent);
+		addKanOption(player, discard, metagame.wall, claimEvent);
 		addPonOption(player, discard, claimEvent);
 		addChiOptions(player, discard, metagame, claimEvent);
 		_areThereClaimOptions = !_claimOptions.empty;
@@ -103,9 +103,9 @@ class ClaimOptionFactory
 		if(player.isRonnable(discard)) _claimOptions ~= new RonClaimOption(player, discard, claimEvent);
 	}
 
-	private void addKanOption(Player player, Tile discard, ClaimEvent claimEvent)
+	private void addKanOption(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
 	{
-		if(player.isKannable(discard)) _claimOptions~= new KanClaimOption(player, discard, claimEvent);
+		if(player.isKannable(discard)) _claimOptions~= new KanClaimOption(player, discard, wall, claimEvent);
 	}
 
 	private void addPonOption(Player player, Tile discard, ClaimEvent claimEvent)
@@ -330,18 +330,20 @@ unittest
 
 class KanClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, ClaimEvent claimEvent)
+	this(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
+		_wall = wall;
 		super("Kan", claimEvent);
 	}
 
 	private Player _player;
 	private Tile _discard;
+	private Wall _wall;
 	override ClaimRequest constructRequest() 
 	{
-		return new KanRequest(_player, _discard);
+		return new KanRequest(_player, _discard, _wall);
 	}
 
 	override const(Tile)[] relevantTiles() @property
@@ -358,7 +360,7 @@ unittest
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
-	auto kanOption = new KanClaimOption(player, discard, null);
+	auto kanOption = new KanClaimOption(player, discard, null, null);
 	assert(kanOption.relevantTiles.length == 3, "For a kan, only three tiles are relevant");
 	assert(kanOption.relevantTiles.all!(t => discard.hasEqualValue(t)), "The relevant tiles should all have the same value as the discard");
 	assert(!kanOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");

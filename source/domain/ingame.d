@@ -15,9 +15,9 @@ import mahjong.share.range;
 
 class Ingame
 { 
-	UUID id;
+	const UUID id;
 	// Ingame variables.
-	int wind = -1; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+	const int wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
 	OpenHand openHand; // The open pons/chis/kans 
 
@@ -118,12 +118,14 @@ class Ingame
 		return closedHand.isKannable(discard);
 	}
 
-	void kan(Tile discard)
+	void kan(Tile discard, Wall wall)
 	{
 		if(!isKannable(discard)) throw new IllegalClaimException(discard, "Kan not allowed");
 		discard.claim;
 		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
 		openHand.addKan(kanTiles);
+		closedHand.drawKanTile(wall);
+		_lastTile = closedHand.getLastTile;
 	}
 
 	bool isRonnable(const Tile discard) pure

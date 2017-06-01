@@ -45,11 +45,16 @@ class ClosedHand
 		tiles.each!(t => t.open);
 	}
 
-	void drawTile(ref Wall wall)
+	void drawTile(Wall wall)
 	{
 		addTile(wall.drawTile);
 	}
-	
+
+	void drawKanTile(Wall wall)
+	{
+		addTile(wall.drawKanTile);
+	}
+
 	Tile getLastTile()
 	{
 		return tiles[$-1];
