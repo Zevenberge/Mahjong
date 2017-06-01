@@ -11,6 +11,7 @@ import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.selections;
+import mahjong.share.range;
 
 class TurnController : GameController
 {
@@ -38,11 +39,9 @@ class TurnController : GameController
 		switch(key.code) with (Keyboard.Key)
 		{
 			case Left:
-				// TODO Move the selection left
 				selectPrevious;
 				break;
 			case Right:
-				// TODO Move the selection right
 				selectNext;
 				break;
 			case Return:
@@ -78,21 +77,8 @@ class TurnController : GameController
 		_event.player.game.closedHand.tiles.sortHand;
 		opts = _event.player.game.closedHand.tiles;
 		initSelection;
-		auto index = getIndexOfDrawnTile;
+		auto index = opts.indexOf(_event.drawnTile);
 		changeOpt(index);
-	}
-
-	private size_t getIndexOfDrawnTile()
-	{
-		// TODO use std.algorithm.searching
-		foreach(i, tile; opts)
-		{
-			if(tile.id == _event.drawnTile.id)
-			{
-				return i;
-			}
-		}
-		return 0;
 	}
 
 	mixin Select!Tile;
