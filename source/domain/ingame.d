@@ -67,12 +67,6 @@ class Ingame
 		id = randomUUID;
 	}
 
-	int getWind()
-	{
-		return wind;
-	}
-
-	
 	/*
 	 Normal functions related to claiming tiles.
 	 */

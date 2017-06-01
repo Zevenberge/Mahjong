@@ -72,12 +72,16 @@ class OpenHand
 		_sets ~= new ChiSet(tiles);
 	}
 
-	void promotePonToKan(Tile kanTile)
+	bool canPromoteToKan(Tile tile)
+	{
+		return _sets.any!(s => s.canPromoteSetToKan(tile));
+	}
+
+	void promoteToKan(Tile kanTile)
 	{
 		foreach(i, set; _sets)
 		{
-			if(set.tiles.length != 3) continue;
-			if(!kanTile.hasEqualValue(set.tiles[0])) continue;
+			if(!set.canPromoteSetToKan(kanTile)) continue;
 			_sets.remove(i);
 			_sets.insertAt(new PonSet(set.tiles ~ kanTile), i);
 			++_amountOfKans;
@@ -114,7 +118,43 @@ unittest
 	auto pon = "🀀🀀🀀"d.convertToTiles;
 	auto kanTile = "🀀"d.convertToTiles[0];
 	openHand.addPon(pon);
-	openHand.promotePonToKan(kanTile);
+	openHand.promoteToKan(kanTile);
 	assert(openHand.amountOfPons == 1, "Hand should have one pon");
 	assert(openHand.amountOfKans == 1, "Hand should have one kan");
+}
+
+private bool canPromoteSetToKan(const Set set, const Tile kanTile)
+{
+	return set.tiles.length == 3 &&
+			kanTile.hasEqualValue(set.tiles[0]) &&
+			cast(PonSet)set;
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
+	auto kanTile = "🀀"d.convertToTiles[0];
+	assert(pon.canPromoteSetToKan(kanTile), "Pon should be promotable to kan.");
+}
+unittest
+{
+	import mahjong.engine.creation;
+	auto pon = new PonSet("🀀🀀🀀🀀"d.convertToTiles);
+	auto kanTile = "🀀"d.convertToTiles[0];
+	assert(!pon.canPromoteSetToKan(kanTile), "Kan should not be promotable to kan.");
+}
+unittest
+{
+	import mahjong.engine.creation;
+	auto pon = new PonSet("🀟🀟🀟"d.convertToTiles);
+	auto kanTile = "🀀"d.convertToTiles[0];
+	assert(!pon.canPromoteSetToKan(kanTile), "A different pon should not be promotable to kan.");
+}
+unittest
+{
+	import mahjong.engine.creation;
+	auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
+	auto kanTile = "🀟"d.convertToTiles[0];
+	assert(!chi.canPromoteSetToKan(kanTile), "A different chi should not be promotable to kan.");
 }

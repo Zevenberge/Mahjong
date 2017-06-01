@@ -36,7 +36,7 @@ class Player
 
 	void nextRound(bool passWinds)
 	{
-		int wind = (game.getWind + passWinds ? 1 : 0) % gameOpts.amountOfPlayers;
+		int wind = (game.wind + passWinds ? 1 : 0) % gameOpts.amountOfPlayers;
 		startGame(wind);
 	}
 
@@ -49,7 +49,7 @@ class Player
 	int wind() @property
 	{
 		if(game is null) return -1;
-		return game.getWind();
+		return game.wind;
 	}
 	bool isChiable(const Tile discard, const Metagame metagame) pure const
 	{
