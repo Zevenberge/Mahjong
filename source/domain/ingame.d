@@ -143,6 +143,7 @@ class Ingame
 
 	void promoteToKan(Tile tile, Wall wall)
 	{
+		closedHand.removeTile(tile);
 		openHand.promoteToKan(tile);
 		drawKanTile(wall);
 	}
@@ -237,5 +238,39 @@ class Ingame
 		closedHand.drawTile(wall);
 		_lastTile = closedHand.lastTile;
 	}
+}
 
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(1);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+	auto tile = ingame.closedHand.tiles.back;
+	auto initialLength = ingame.closedHand.tiles.length;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
+	ingame.declareClosedKan(tile, wall);
+	assert(ingame.closedHand.tiles.length == initialLength - 3, "Four tiles should have been subtracted from the hand and one added");
+	assert(ingame.openHand.amountOfKans == 1, "The open hand should have a kan");
+}
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(1);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+	auto tile = ingame.closedHand.tiles.back;
+	tile.origin = new Ingame(2);
+	ingame.pon(tile);
+	auto initialLength = ingame.closedHand.tiles.length;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
+	ingame.promoteToKan(ingame.closedHand.tiles.back, wall);
+	assert(ingame.closedHand.tiles.length == initialLength, "One tile should have been subtracted from the hand and one added");
+	assert(ingame.openHand.amountOfKans == 1, "The open hand should have a kan");
 }
