@@ -1,4 +1,4 @@
-﻿module mahjong.graphics.controllers.game.discard;
+﻿module mahjong.graphics.controllers.game.turnoption;
 
 import std.algorithm;
 import std.array;
@@ -12,9 +12,42 @@ alias TurnOptionController = IngameOptionsController!(TurnOptionFactory, "");
 
 class TurnOptionFactory
 {
-	this()
+	this(Player player, Tile selectedTile, Metagame metagame, TurnEvent turnEvent)
 	{
+		addTsumoOption(metagame, player, turnEvent);
+		addPromoteToKanOption(metagame, player, selectedTile, turnEvent);
+		addDeclareClosedKanOption(metagame, player, selectedTile, turnEvent);
+		addDiscardOption(metagame, selectedTile, turnEvent);
+		_isDiscardTheOnlyOption = _options.length == 1;
+		addCancelOption;
+	}
 
+	private void addTsumoOption(Metagame metagame, Player player, TurnEvent turnEvent)
+	{
+		if(!player.isMahjong) return;
+		_options ~= new TsumoOption(metagame, player, turnEvent);
+	}
+
+	private void addPromoteToKanOption(Metagame metagame, Player player, Tile selectedTile, TurnEvent turnEvent)
+	{
+		if(!player.canPromoteToKan(selectedTile)) return;
+		_options ~= new PromoteToKanOption(metagame, player, selectedTile, turnEvent);
+	}
+
+	private void addDeclareClosedKanOption(Metagame metagame, Player player, Tile selectedTile, TurnEvent turnEvent)
+	{
+		if(!player.canDeclareClosedKan(selectedTile)) return;
+		_options ~= new DeclareClosedKanOption(metagame, player, selectedTile, turnEvent);
+	}
+
+	private void addDiscardOption(Metagame metagame, Tile selectedTile, TurnEvent turnEvent)
+	{
+		_options = new DiscardOption(metagame, selectedTile, turnEvent) ~_options;
+	}
+
+	private void addCancelOption()
+	{
+		_options ~= new CancelOption;
 	}
 
 	private TurnOption[] _options;
@@ -23,10 +56,10 @@ class TurnOptionFactory
 		return _options;
 	}
 
-	private bool _areThereClaimOptions;
-	bool areThereClaimOptions() @property
+	private bool _isDiscardTheOnlyOption;
+	bool isDiscardTheOnlyOption() @property
 	{
-		return _areThereClaimOptions;
+		return _isDiscardTheOnlyOption;
 	}
 }
 
