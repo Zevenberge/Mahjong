@@ -19,6 +19,11 @@ class OpenHand
 
 	const UUID id;
 
+	const(Tile)[] tiles() @property
+	{
+		return _sets.map!(set => set.tiles).fold!((a, b) => a ~ b);
+	}
+
 	private Set[] _sets;
 	const(Set[]) sets() @property pure const
 	{
@@ -88,6 +93,16 @@ class OpenHand
 			return;
 		}
 		throw new SetNotFoundException(kanTile);
+	}
+
+	const(Set) findCorrespondingPon(const(Tile) tile)
+	{
+		foreach(set; _sets)
+		{
+			if(set.canPromoteSetToKan(tile)) return set;
+		}
+		throw new SetNotFoundException(tile);
+
 	}
 }
 
