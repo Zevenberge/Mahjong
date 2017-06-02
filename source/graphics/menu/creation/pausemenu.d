@@ -14,8 +14,8 @@ Menu composePauseMenu()
 	_pauseMenu = new Menu("");
 	with(_pauseMenu)
 	{
-		addOption(new MenuItem("Continue", {continueGame;}));
-		addOption(new MenuItem("Quit", {quitGame;}));
+		addOption(new DelegateMenuItem("Continue", {continueGame;}));
+		addOption(new DelegateMenuItem("Quit", {quitGame;}));
 	}
 	trace("Constructed all options.");
 	_pauseMenu.configureGeometry;

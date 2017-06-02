@@ -45,7 +45,7 @@ abstract class MenuControllerBase(TMenu) : Controller
 	
 	protected void optionSelected()
 	{
-		_menu.selectedItem.func();
+		_menu.selectedItem.select;
 	} 
 	
 	protected abstract bool menuClosed();

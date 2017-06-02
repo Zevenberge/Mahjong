@@ -10,11 +10,9 @@ import mahjong.graphics.opts;
 
 class MenuItem
 {
-	alias Action = void delegate();
-	this(string displayName, Action action)
+	this(string displayName)
 	{
 		trace("Constructing menu item ", displayName);
-		func = action;
 		setText(displayName);
 		description = displayName;
 	}
@@ -35,7 +33,9 @@ class MenuItem
 		
     const string description;
 	Text name;
-	Action func;
+
+	abstract void select();
+
 	private void setText(string displayName)
 	{
 		auto text = new Text;
@@ -53,7 +53,23 @@ class MenuItem
 	}
 }
 
-class MainMenuItem : MenuItem
+class DelegateMenuItem : MenuItem
+{
+	alias Action = void delegate();
+	this(string displayName, Action action)
+	{
+		super(displayName);
+		_func = action;
+	}
+	private Action _func;
+
+	override void select() 
+	{
+		_func();
+	}
+}
+
+class MainMenuItem : DelegateMenuItem
 {
 	Sprite background;
 	

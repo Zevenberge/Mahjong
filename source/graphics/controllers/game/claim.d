@@ -183,11 +183,11 @@ class ClaimOption : MenuItem, IRelevantTiles
 
 	this(string displayName, ClaimEvent event)
 	{
-		super(displayName, &select);
+		super(displayName);
 		_event = event;
 	}
 
-	void select()
+	override void select()
 	{
 		trace("Claim option ", typeid(this), " selected. Swapping out ", typeid(controller));
 		(cast(ClaimController)controller).swapIdleController;

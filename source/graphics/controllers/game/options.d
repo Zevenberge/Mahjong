@@ -122,7 +122,7 @@ interface IRelevantTiles
 
 unittest
 {
-	class ValidOption : MenuItem, IRelevantTiles
+	class ValidOption : DelegateMenuItem, IRelevantTiles
 	{
 		this()
 		{
@@ -145,7 +145,7 @@ unittest
 }
 unittest
 {
-	class ValidOption : MenuItem, IRelevantTiles
+	class ValidOption : DelegateMenuItem, IRelevantTiles
 	{
 		this()
 		{
@@ -168,7 +168,7 @@ unittest
 }
 unittest
 {
-	class InvalidOption : MenuItem
+	class InvalidOption : DelegateMenuItem
 	{
 		this()
 		{
