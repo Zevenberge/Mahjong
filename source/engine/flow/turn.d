@@ -126,11 +126,9 @@ class TurnEvent
 
 unittest
 {
-	import std.stdio;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 
-	writeln("Testing flow of turn when nothing happened.");
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
 	player.startGame(0);
@@ -139,15 +137,12 @@ unittest
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
-	writeln("Testing whether the flow advances when it should not");
 	flow.advanceIfDone;
 	assert(.flow.isOfType!TurnFlow, "As the player is not ready, the flow should not have advanced");
-	writeln("Idle turn flow test succeeded");
 }
 
 unittest
 {
-	import std.stdio;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 	import mahjong.domain.tile;
@@ -166,7 +161,6 @@ unittest
 		}
 	}
 
-	writeln("Testing flow of turn when discarding.");
 	gameOpts = new DefaultGameOpts;
 
 	auto eventHandler = new TestEventHandler;
@@ -179,20 +173,16 @@ unittest
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	flow._event.discard(tile);
-	writeln("Testing whether the flow advances when it should");
 	flow.advanceIfDone;
 	assert(.flow.isOfType!ClaimFlow, "A tile is discarded, therefore the flow should move over to a ron.");
-	writeln("Turn to Ron flow test succeeded.");
 }
 
 unittest
 {
-	import std.stdio;
 	import mahjong.engine.creation;
 	import mahjong.engine.mahjong;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
-	writeln("Testing flow of turn when claiming tsumo.");
 
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
@@ -205,5 +195,51 @@ unittest
 	flow._event.claimTsumo;
 	flow.advanceIfDone;
 	assert(.flow.isOfType!MahjongFlow, "A tsumo is claimed, therefore the flow should move over to the defeault mahjong flow.");
-	writeln("Turn to Mahjong flow test succeeded.");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
+	gameOpts = new DefaultGameOpts;
+	auto eventHandler = new TestEventHandler;
+	auto player = new Player(eventHandler);
+	player.startGame(0);
+	auto metagame = new Metagame([player]);
+	metagame.nextRound;
+	metagame.beginRound;
+	auto flow = new TurnFlow(player, metagame);
+	switchFlow(flow);
+	player.closedHand.tiles = "🀐🀐🀐🀐🀘🀘"d.convertToTiles;
+	auto kanTile = player.closedHand.tiles[0];
+	flow._event.declareClosedKan(kanTile);
+	flow.advanceIfDone;
+	assert(.flow.isOfType!TurnFlow, "After declaring a closed kan, the flow should be at the turn again");
+	assert(.flow !is flow, "The flow should be another instance");
+	assert(player.openHand.amountOfKans == 1, "The player should have one kan");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
+	gameOpts = new DefaultGameOpts;
+	auto eventHandler = new TestEventHandler;
+	auto player = new Player(eventHandler);
+	player.startGame(0);
+	auto metagame = new Metagame([player]);
+	metagame.nextRound;
+	metagame.beginRound;
+	auto flow = new TurnFlow(player, metagame);
+	switchFlow(flow);
+	player.closedHand.tiles = "🀐🀘🀘"d.convertToTiles;
+	player.openHand.addPon("🀐🀐🀐"d.convertToTiles);
+	auto kanTile = player.closedHand.tiles[0];
+	flow._event.promoteToKan(kanTile);
+	flow.advanceIfDone;
+	assert(.flow.isOfType!TurnFlow, "After declaring a closed kan, the flow should be at the turn again");
+	assert(.flow !is flow, "The flow should be another instance");
+	assert(player.openHand.amountOfKans == 1, "The player should have one kan");
 }
