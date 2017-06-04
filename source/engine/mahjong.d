@@ -12,6 +12,7 @@ import std.string;
 import mahjong.domain.closedhand;
 import mahjong.domain.enums.tile;
 import mahjong.domain.openhand;
+import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.enums.game;
 import mahjong.engine.sort;
@@ -72,6 +73,11 @@ class PairSet : Set
 	{
 		super(tiles);
 	}
+}
+
+MahjongResult scanHandForMahjong(const Player player)
+{
+	return scanHandForMahjong(player.closedHand, player.openHand);
 }
 
 MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand openHand, const Tile discard) pure

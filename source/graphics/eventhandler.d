@@ -38,4 +38,8 @@ class UiEventHandler : GameEventHandler
 		}
 	}
 
+	override void handle(MahjongEvent event)
+	{
+		// TODO
+	}
 }
