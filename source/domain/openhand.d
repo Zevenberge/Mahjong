@@ -5,7 +5,6 @@ import std.array;
 import std.uuid;
 
 import mahjong.domain;
-import mahjong.domain.enums.game;
 import mahjong.domain.exceptions;
 import mahjong.engine.mahjong;
 import mahjong.share.range;

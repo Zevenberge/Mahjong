@@ -8,7 +8,7 @@ import dsfml.graphics;
 import mahjong.domain.ingame;
 import mahjong.domain.openhand;
 import mahjong.domain.tile;
-import mahjong.engine.enums.game;
+import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.tile;
@@ -64,12 +64,25 @@ class OpenHandVisuals
 
 	private void updateIfNecessary()
 	{
+		updateExistingSets;
+		updateNewSet;
+	}
+
+	private void updateExistingSets()
+	{
+		foreach(i, set; _sets)
+		{
+			set.update(_hand.sets[i]);
+		}
+	}
+
+	private void updateNewSet()
+	{
 		if(_sets.length != _hand.sets.length)
 		{
 			auto previousSet = _sets.empty ? null : _sets.back;
 			_sets ~= new SetVisual(_hand.sets.back.tiles, previousSet, _ingame);
 		}
-		// TODO: when kakan is implemented: also check set length
 	}
 }
 
@@ -84,6 +97,12 @@ class SetVisual
 	void draw(RenderTarget view)
 	{
 		_set.each!(t => t.drawTile(view));
+	}
+
+	void update(const(Set) set)
+	{
+		if(set.tiles.length == _set.length) return;
+		placeAdditionalKanTile(set.tiles.back);
 	}
 
 	private const(Tile)[] _set;
@@ -145,6 +164,16 @@ class SetVisual
 			styleOpts.gameScreenSize.y - drawingOpts.iconSize + size.y - size.x);
 		tile.move(FloatCoords(topLeft, 90));
 		return rightBound - size.y;
+	}
+
+	private void placeAdditionalKanTile(const Tile tile)
+	{
+		_set ~= tile;
+		auto horizontalTile = _set.first!(t => t.origin !is null);
+		auto coordsOfHorizontalTile = horizontalTile.getCoords;
+		auto topLeft = Vector2f(coordsOfHorizontalTile.x,
+			coordsOfHorizontalTile.y - drawingOpts.tileWidth);
+		tile.move(FloatCoords(topLeft, 90));
 	}
 
 	private FloatRect getGlobalBounds()

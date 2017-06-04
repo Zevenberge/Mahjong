@@ -52,10 +52,10 @@ FloatRect getLocalBounds(const Tile tile)
 	return getTileVisuals(tile).getLocalBounds;
 }
 
-void move(const Tile tile, FloatCoords coords)
+void move(const Tile tile, FloatCoords finalCoords)
 {
 	auto sprite = getFrontSprite(tile);
-	auto animation = new MovementAnimation(sprite, coords, 15);
+	auto animation = new MovementAnimation(sprite, finalCoords, 15);
 	animation.objectId = tile.id;
 	addUniqueAnimation(animation);
 }
