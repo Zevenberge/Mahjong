@@ -121,6 +121,7 @@ class SetVisual
 
 	private void orderSet(Ingame ingame)
 	{
+		if(isClosedKan) return;
 		auto isKan = _set.length == 4;
 		auto tileFromOtherPlayer = _set.first!(t => t.origin !is null);
 		_set.remove!((a, b) => a == b)(tileFromOtherPlayer);
@@ -181,9 +182,14 @@ class SetVisual
 
 	private void flipTilesfaceDownIfTheSetIsAClosedKan()
 	{
-		if(_set.length != 4 || _set.any!(t => t.origin !is null)) return;
+		if(!isClosedKan) return;
 		_set[0].dontDisplay;
 		_set[3].dontDisplay;
+	}
+
+	private bool isClosedKan()
+	{
+		return _set.length == 4 && !_set.any!(t => t.origin !is null);
 	}
 
 	private FloatRect getGlobalBounds()
@@ -208,6 +214,7 @@ unittest
 	assert(_hands[firstIngame.openHand.id]._sets.length == 1, "The one open hand should have one set");
 	assert(_hands[firstIngame.openHand.id]._sets[0]._set.length == 3, "The one set should have three tiles");
 	clearOpenHandCache;
+	clearTileCache;
 }
 unittest
 {
@@ -227,6 +234,7 @@ unittest
 	assert(_hands[firstIngame.openHand.id]._sets.length == 1, "The one open hand should have one set");
 	assert(_hands[firstIngame.openHand.id]._sets[0]._set.length == 3, "The one set should have three tiles");
 	clearOpenHandCache;
+	clearTileCache;
 }
 unittest
 {
@@ -243,9 +251,28 @@ unittest
 	draw(firstIngame.openHand, firstIngame, new RenderTexture);
 	firstIngame.openHand.promoteToKan(kanTile);
 	draw(firstIngame.openHand, firstIngame, new RenderTexture);
-	// Drawing a second time should have no effect as nothing is changed.
+	// Drawing a second time should update the set.
 	assert(_hands.length == 1, "One open hand visual should have been created");
 	assert(_hands[firstIngame.openHand.id]._sets.length == 1, "The one open hand should have one set");
 	assert(_hands[firstIngame.openHand.id]._sets[0]._set.length == 4, "The one set should have four tiles");
 	clearOpenHandCache;
+	clearTileCache;
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	drawingOpts = new DefaultDrawingOpts;
+	styleOpts = new DefaultStyleOpts;
+	gameOpts = new DefaultGameOpts;
+	auto firstIngame = new Ingame(1);
+	auto tiles = "🀡🀡🀡🀡"d.convertToTiles;
+	firstIngame.openHand.addKan(tiles);
+	draw(firstIngame.openHand, firstIngame, new RenderTexture);
+	assert(_hands.length == 1, "One open hand visual should have been created");
+	assert(_hands[firstIngame.openHand.id]._sets.length == 1, "The one open hand should have one set");
+	auto kan = _hands[firstIngame.openHand.id]._sets[0]._set;
+	assert(kan.length == 4, "The one set should have four tiles");
+	clearOpenHandCache;
+	clearTileCache;
 }
