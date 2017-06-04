@@ -108,7 +108,7 @@ class PromoteToKanOption : TurnOption
 {
 	this(Metagame metagame, Player player, Tile selectedTile, TurnEvent event)
 	{
-		super("Promote to kan");
+		super("Kan");
 		_metagame = metagame;
 		_player = player;
 		_selectedTile = selectedTile;
@@ -136,7 +136,7 @@ class DeclareClosedKanOption : TurnOption
 {
 	this(Metagame metagame, Player player, Tile selectedTile, TurnEvent event)
 	{
-		super("Declare closed kan");
+		super("Kan");
 		_metagame = metagame;
 		_player = player;
 		_selectedTile = selectedTile;
@@ -190,7 +190,7 @@ class DiscardOption : TurnOption
 {
 	this(Metagame metagame, Tile selectedTile, TurnEvent event)
 	{
-		super("Kan");
+		super("Discard");
 		_metagame = metagame;
 		_selectedTile = selectedTile;
 		_event = event;

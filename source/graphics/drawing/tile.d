@@ -22,6 +22,16 @@ void draw(const Tile tile, RenderTarget view)
 	getTileVisuals(tile).draw(tile, view);
 }
 
+void display(const Tile tile)
+{
+	getTileVisuals(tile).display;
+}
+
+void dontDisplay(const Tile tile)
+{
+	getTileVisuals(tile).dontDisplay;
+}
+
 void clearTileCache()
 {
 	_tiles.clear;
@@ -98,11 +108,11 @@ private class TileVisuals
 	{
 		return _sprite.getLocalBounds;
 	}
-	
+
 	void draw(const Tile tile, RenderTarget view)
 	{
 		updateCoords;
-		if(tile.isOpen)
+		if(shouldDrawFrontSprite(tile))
 		{
 			view.draw(_sprite); 
 		}
@@ -110,6 +120,22 @@ private class TileVisuals
 		{
 			view.draw(_backSprite);
 		}
+	}
+
+	private bool shouldDrawFrontSprite(const Tile tile)
+	{
+		return tile.isOpen || _shouldBeDisplayed;
+	}
+
+	private bool _shouldBeDisplayed;
+	void display()
+	{
+		_shouldBeDisplayed = true;
+	}
+
+	void dontDisplay()
+	{
+		_shouldBeDisplayed = false;
 	}
 	
 	private void updateCoords()

@@ -17,7 +17,6 @@ class Tile
 
 	int dora = 0;
 	Ingame origin = null;
-	private bool _isOpen = false;
    
     this(int type, int value)
     {
@@ -44,17 +43,18 @@ class Tile
 
     void close() 
     {
-   		this._isOpen = false;
+   		_isOpen = false;
     }
     
     void open() 
     {
-     	this._isOpen = true;
+     	_isOpen = true;
     }
 
+	private bool _isOpen = false;
     bool isOpen() @property pure const
     {
-      	return this._isOpen;
+      	return _isOpen;
     }
 
     override string toString() const

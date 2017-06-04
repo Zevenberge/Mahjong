@@ -9,6 +9,7 @@ import mahjong.engine.sort;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
+import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.selections;
 import mahjong.share.range;
@@ -26,7 +27,7 @@ class TurnController : GameController
 	private void initialise()
 	{
 		trace("Initialising selection of turn controller");
-		_event.player.game.closedHand.showHand;
+		_event.player.game.closedHand.displayHand;
 		_event.player.game.closedHand.tiles.sortHand;
 		opts = _event.player.game.closedHand.tiles;
 		initSelection;
