@@ -25,7 +25,9 @@ class TurnOptionFactory
 	private void addTsumoOption(Metagame metagame, Player player, TurnEvent turnEvent)
 	{
 		if(!player.canTsumo) return;
-		_options ~= new TsumoOption(metagame, player, turnEvent);
+		auto tsumoOption = new TsumoOption(metagame, player, turnEvent);
+		_options ~= tsumoOption;
+		_defaultOption = tsumoOption;
 	}
 
 	private void addPromoteToKanOption(Metagame metagame, Player player, Tile selectedTile, TurnEvent turnEvent)
@@ -42,7 +44,12 @@ class TurnOptionFactory
 
 	private void addDiscardOption(Metagame metagame, Tile selectedTile, TurnEvent turnEvent)
 	{
-		_options = new DiscardOption(metagame, selectedTile, turnEvent) ~_options;
+		auto discardOption = new DiscardOption(metagame, selectedTile, turnEvent);
+		_options = discardOption ~ _options;
+		if(_defaultOption is null)
+		{
+			_defaultOption = discardOption;
+		}
 	}
 
 	private void addCancelOption()
@@ -54,6 +61,12 @@ class TurnOptionFactory
 	TurnOption[] options() @property
 	{
 		return _options;
+	}
+
+	private TurnOption _defaultOption;
+	TurnOption defaultOption() @property
+	{
+		return _defaultOption;
 	}
 
 	private bool _isDiscardTheOnlyOption;
@@ -242,6 +255,7 @@ unittest
 	assertNotIn!PromoteToKanOption(factory);
 	assertNotIn!DeclareClosedKanOption(factory);
 	assertNotIn!TsumoOption(factory);
+	assert(factory.defaultOption.isOfType!DiscardOption, "The discard option should be the default");
 	assert(factory.isDiscardTheOnlyOption, "Only the discard option should be in there.");
 }
 
@@ -260,6 +274,7 @@ unittest
 	assertNotIn!PromoteToKanOption(factory);
 	assertNotIn!DeclareClosedKanOption(factory);
 	assertIn!TsumoOption(factory);
+	assert(factory.defaultOption.isOfType!TsumoOption, "The tsumo option should be the default");
 	assert(!factory.isDiscardTheOnlyOption, "Next to discarding the tile, the player can also claim tsumo.");
 }
 
@@ -278,6 +293,7 @@ unittest
 	assertNotIn!PromoteToKanOption(factory);
 	assertIn!DeclareClosedKanOption(factory);
 	assertNotIn!TsumoOption(factory);
+	assert(factory.defaultOption.isOfType!DiscardOption, "The discard option should be the default");
 	assert(!factory.isDiscardTheOnlyOption, "Next to discarding the tile, the player can also declare a closed kan.");
 }
 unittest
@@ -297,5 +313,6 @@ unittest
 	assertIn!PromoteToKanOption(factory);
 	assertNotIn!DeclareClosedKanOption(factory);
 	assertNotIn!TsumoOption(factory);
+	assert(factory.defaultOption.isOfType!DiscardOption, "The discard option should be the default");
 	assert(!factory.isDiscardTheOnlyOption, "Next to discarding the tile, the player can also upgrade to an open kan.");
 }

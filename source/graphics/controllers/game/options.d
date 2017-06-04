@@ -30,9 +30,21 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 			menu.addOption(option);
 		}
 		menu.configureGeometry;
-		menu.selectOption(factory.options.back);
+		selectDefaultOption(menu, factory);
 		super(window, innerController, menu);
 		_metagame = metagame;
+	}
+
+	private void selectDefaultOption(Menu menu, Factory factory)
+	{
+		static if(hasDefaultOption!Factory)
+		{
+			menu.selectOption(factory.defaultOption);
+		}
+		else
+		{
+			menu.selectOption(factory.options.back);
+		}
 	}
 
 	private Metagame _metagame;
@@ -201,4 +213,32 @@ unittest
 		}
 	}
 	assert(!isIngameOptionsFactory!ValidFactory, "The options is not valid, so the template should return false.");
+}
+
+template hasDefaultOption(Factory)
+{
+	enum bool hasDefaultOption = __traits(compiles, (Factory.init).defaultOption);
+}
+
+unittest
+{
+	class FactoryWithoutDefaultOption
+	{
+
+	}
+
+	assert(!hasDefaultOption!FactoryWithoutDefaultOption, "The factory has no default option");
+}
+
+unittest
+{
+	class FactoryWithDefaultOption
+	{
+		int defaultOption()@property
+		{
+			return 0;
+		}
+	}
+
+	assert(hasDefaultOption!FactoryWithDefaultOption, "The factory has a default option");
 }
