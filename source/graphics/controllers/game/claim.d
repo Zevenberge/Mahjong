@@ -11,6 +11,7 @@ import mahjong.engine.flow.claim;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
+import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.conv;
 import mahjong.graphics.menu;
@@ -22,7 +23,7 @@ class ClaimOptionFactory
 {
 	this(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
 	{
-		player.game.showHand;
+		player.closedHand.displayHand;
 		addRonOption(player, discard, claimEvent);
 		addKanOption(player, discard, metagame.wall, claimEvent);
 		addPonOption(player, discard, claimEvent);

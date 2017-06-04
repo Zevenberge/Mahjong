@@ -185,6 +185,7 @@ class SetVisual
 		if(!isClosedKan) return;
 		_set[0].dontDisplay;
 		_set[3].dontDisplay;
+		assert(!_set.any!(t => t.isOpen));
 	}
 
 	private bool isClosedKan()

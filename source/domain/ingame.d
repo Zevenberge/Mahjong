@@ -233,7 +233,7 @@ class Ingame
 	{
 		closedHand.closeHand;
 	}
-	
+
 	void showHand()
 	{
 		closedHand.showHand;
