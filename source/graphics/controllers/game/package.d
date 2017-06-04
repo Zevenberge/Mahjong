@@ -4,6 +4,7 @@ public import mahjong.graphics.controllers.game.claim;
 public import mahjong.graphics.controllers.game.idle;
 public import mahjong.graphics.controllers.game.options;
 public import mahjong.graphics.controllers.game.turn;
+public import mahjong.graphics.controllers.game.turnoption;
 
 import dsfml.graphics;
 import mahjong.domain;
