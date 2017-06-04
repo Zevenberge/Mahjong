@@ -23,9 +23,12 @@ void draw(Ingame ingame, RenderTarget view)
 	drawable.draw(view);
 }
 
-void clearDiscards()
+void clearIngameCache()
 {
+	info("Clearing ingame cache");
 	_ingameDrawables.clear;
+	clearOpenHandCache;
+	clearTileCache;
 }
 
 private IngameDrawable[UUID] _ingameDrawables;
