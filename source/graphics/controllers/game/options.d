@@ -76,7 +76,9 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		rectangleShape.fillColor = Color(250, 255, 141, 146);
 		foreach(tile; selectedOption.relevantTiles)
 		{
-			rectangleShape.position = tile.getCoords.position;
+			auto coords = tile.getCoords;
+			rectangleShape.position = coords.position;
+			rectangleShape.rotation = coords.rotation;
 			_window.draw(rectangleShape);
 		}
 	}
