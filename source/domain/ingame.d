@@ -15,6 +15,14 @@ import mahjong.share.range;
 
 class Ingame
 { 
+	this(int wind)
+	{
+		this.wind = wind;
+		closedHand = new ClosedHand;
+		openHand = new OpenHand;
+		id = randomUUID;
+	}
+
 	const UUID id;
 	// Ingame variables.
 	const int wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
@@ -55,15 +63,6 @@ class Ingame
 	{
 		return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
 	}
-
-	this(int wind)
-	{
-		this.wind = wind;
-		closedHand = new ClosedHand;
-		openHand = new OpenHand;
-		id = randomUUID;
-	}
-
 	/*
 	 Normal functions related to claiming tiles.
 	 */

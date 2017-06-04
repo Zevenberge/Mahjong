@@ -86,8 +86,8 @@ class OpenHand
 		foreach(i, set; _sets)
 		{
 			if(!set.canPromoteSetToKan(kanTile)) continue;
-			_sets.remove(i);
-			_sets.insertAt(new PonSet(set.tiles ~ kanTile), i);
+			_sets = _sets.remove(i);
+			_sets = _sets.insertAt(new PonSet(set.tiles ~ kanTile), i);
 			++_amountOfKans;
 			return;
 		}

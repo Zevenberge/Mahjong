@@ -1,6 +1,6 @@
 module mahjong.graphics.drawing.openhand;
 
-import std.algorithm.iteration;
+import std.algorithm;
 import std.array;
 import std.experimental.logger;
 import std.uuid;
@@ -113,8 +113,10 @@ class SetVisual
 		auto rightBound = calculateInitialRightBounds(previous);
 		foreach(tile; _set)
 		{
+			tile.display;
 			rightBound = placeTileAndReturnItsLeftBound(tile, rightBound);
 		}
+		flipTilesfaceDownIfTheSetIsAClosedKan;
 	}
 
 	private void orderSet(Ingame ingame)
@@ -169,6 +171,7 @@ class SetVisual
 	private void placeAdditionalKanTile(const Tile tile)
 	{
 		_set ~= tile;
+		tile.display;
 		auto horizontalTile = _set.first!(t => t.origin !is null);
 		auto coordsOfHorizontalTile = horizontalTile.getCoords;
 		auto topLeft = Vector2f(coordsOfHorizontalTile.x,
@@ -176,8 +179,73 @@ class SetVisual
 		tile.move(FloatCoords(topLeft, 90));
 	}
 
+	private void flipTilesfaceDownIfTheSetIsAClosedKan()
+	{
+		if(_set.length != 4 || _set.any!(t => t.origin !is null)) return;
+		_set[0].dontDisplay;
+		_set[3].dontDisplay;
+	}
+
 	private FloatRect getGlobalBounds()
 	{
 		return calcGlobalBounds(_set);
 	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	drawingOpts = new DefaultDrawingOpts;
+	styleOpts = new DefaultStyleOpts;
+	gameOpts = new DefaultGameOpts;
+	auto firstIngame = new Ingame(1);
+	auto secondIngame = new Ingame(2);
+	auto tiles = "🀡🀡🀡"d.convertToTiles;
+	tiles[0].origin = secondIngame;
+	firstIngame.openHand.addPon(tiles);
+	draw(firstIngame.openHand, firstIngame, new RenderTexture);
+	assert(_hands.length == 1, "One open hand visual should have been created");
+	assert(_hands[firstIngame.openHand.id]._sets.length == 1, "The one open hand should have one set");
+	assert(_hands[firstIngame.openHand.id]._sets[0]._set.length == 3, "The one set should have three tiles");
+	clearOpenHandCache;
+}
+unittest
+{
+	import mahjong.engine.creation;
+	drawingOpts = new DefaultDrawingOpts;
+	styleOpts = new DefaultStyleOpts;
+	gameOpts = new DefaultGameOpts;
+	auto firstIngame = new Ingame(1);
+	auto secondIngame = new Ingame(2);
+	auto tiles = "🀡🀡🀡"d.convertToTiles;
+	tiles[0].origin = secondIngame;
+	firstIngame.openHand.addPon(tiles);
+	draw(firstIngame.openHand, firstIngame, new RenderTexture);
+	draw(firstIngame.openHand, firstIngame, new RenderTexture);
+	// Drawing a second time should have no effect as nothing is changed.
+	assert(_hands.length == 1, "One open hand visual should have been created");
+	assert(_hands[firstIngame.openHand.id]._sets.length == 1, "The one open hand should have one set");
+	assert(_hands[firstIngame.openHand.id]._sets[0]._set.length == 3, "The one set should have three tiles");
+	clearOpenHandCache;
+}
+unittest
+{
+	import mahjong.engine.creation;
+	drawingOpts = new DefaultDrawingOpts;
+	styleOpts = new DefaultStyleOpts;
+	gameOpts = new DefaultGameOpts;
+	auto firstIngame = new Ingame(1);
+	auto secondIngame = new Ingame(2);
+	auto tiles = "🀡🀡🀡"d.convertToTiles;
+	auto kanTile = "🀡"d.convertToTiles[0];
+	tiles[0].origin = secondIngame;
+	firstIngame.openHand.addPon(tiles);
+	draw(firstIngame.openHand, firstIngame, new RenderTexture);
+	firstIngame.openHand.promoteToKan(kanTile);
+	draw(firstIngame.openHand, firstIngame, new RenderTexture);
+	// Drawing a second time should have no effect as nothing is changed.
+	assert(_hands.length == 1, "One open hand visual should have been created");
+	assert(_hands[firstIngame.openHand.id]._sets.length == 1, "The one open hand should have one set");
+	assert(_hands[firstIngame.openHand.id]._sets[0]._set.length == 4, "The one set should have four tiles");
+	clearOpenHandCache;
 }

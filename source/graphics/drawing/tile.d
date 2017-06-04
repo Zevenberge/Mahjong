@@ -57,10 +57,6 @@ FloatRect getGlobalBounds(const Tile tile)
 {
 	return  getTileVisuals(tile).getGlobalBounds;
 }
-FloatRect getLocalBounds(const Tile tile)
-{
-	return getTileVisuals(tile).getLocalBounds;
-}
 
 void move(const Tile tile, FloatCoords finalCoords)
 {
@@ -102,11 +98,6 @@ private class TileVisuals
 	FloatRect getGlobalBounds()
 	{
 		return _sprite.getGlobalBounds;
-	}
-	
-	FloatRect getLocalBounds()
-	{
-		return _sprite.getLocalBounds;
 	}
 
 	void draw(const Tile tile, RenderTarget view)
