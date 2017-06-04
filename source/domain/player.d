@@ -19,6 +19,7 @@ class Player
 	int score; 
 
 	Ingame game; // Resets after every round.
+	alias game this;
 	GameEventHandler eventHandler; // Allows for distribution of the flow logic
 
 	this(GameEventHandler eventHandler)
@@ -35,7 +36,7 @@ class Player
 
 	void nextRound(bool passWinds)
 	{
-		int wind = (game.getWind + passWinds ? 1 : 0) % gameOpts.amountOfPlayers;
+		int wind = (game.wind + passWinds ? 1 : 0) % gameOpts.amountOfPlayers;
 		startGame(wind);
 	}
 
@@ -45,10 +46,15 @@ class Player
 		game = new Ingame(wind);
 	}
 
-	int getWind()
+	int wind() @property
 	{
 		if(game is null) return -1;
-		return game.getWind();
+		return game.wind;
+	}
+	bool isChiable(const Tile discard, const Metagame metagame) pure const
+	{
+		if(metagame.nextPlayer.id != this.id) return false;
+		return game.isChiable(discard);
 	}
 
 	void drawTile(Wall wall)
@@ -56,98 +62,16 @@ class Player
 		this.game.drawTile(wall);
 	}
 
-	Tile getLastDiscard()
-	{
-		return game.getLastDiscard;
-	}
-	Tile getLastTile()
-	{
-		return game.getLastTile;
-	}
-
-	/*
-	 Functions with regard to placing tiles and displays.
-	 */
-
-	public void discard(Tile disc)
-	{
-		game.discard(disc);
-	}
-
-	override string toString() const
-	{
-		return(format("%s-san",name));
-	}
-
-	bool isMahjong()
-	{
-		return game.isMahjong();
-	}
-
-	bool isTenpai()
-	{
-		return game.checkTenpai;
-	}
-
-	bool isNagashiMangan()
-	{
-		return game.isNagashiMangan;
-	}
-
-	/*
-	 Functions with regard to claiming tiles.
-	 */
-
-	bool isChiable(const Tile discard, const Metagame metagame) pure const
-	{
-		if(metagame.nextPlayer.id != this.id) return false;
-		return game.isChiable(discard);
-	}
-
-	void chi(Tile discard, ChiCandidate otherTiles)
-	{
-		game.chi(discard, otherTiles);
-	}
-
-	bool isPonnable(const Tile discard) pure
-	{
-		return game.isPonnable(discard);
-	}
-
-	void pon(Tile discard)
-	{
-		game.pon(discard);
-	}
-
-	bool isKannable(const Tile discard) pure
-	{
-		return game.isKannable(discard);
-	}
-
-	void kan(Tile discard)
-	{
-		game.kan(discard);
-	}
-
-	bool isRonnable(const Tile discard) pure
-	{ 
-		return game.isRonnable(discard);
-	}
-
-	void showHand()
-	{
-		game.showHand();
-	}
-	void closeHand()
-	{
-		game.closeHand();
-	}
-
 	override bool opEquals(Object o)
 	{
 		auto p = cast(Player)o;
 		if(p is null) return false;
 		return p.id == id;
+	}
+
+	override string toString() const
+	{
+		return(format("%s-san",name));
 	}
 }
 
@@ -275,19 +199,23 @@ unittest
 
 unittest
 {
+	import std.array;
 	import std.exception;
 	import mahjong.domain.exceptions;
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
 	auto player = new Player(new TestEventHandler);
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
 	kannableTile.origin = new Ingame(1);
-	player.kan(kannableTile);
-	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
+	player.kan(kannableTile, wall);
+	assert(player.game.closedHand.length == 1, "The tiles should have been removed from the hand and one tile drawn from the wall.");
 	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
 	assert(player.game.openHand.amountOfKans == 1, "The open hand should have one kan.");
 	assert(player.game.openHand.sets.length == 1, "The open hand should have one set.");
-	assertThrown!IllegalClaimException(player.kan(kannableTile), "With no tiles in hand, an exception should be thrown.");
+	assertThrown!IllegalClaimException(player.kan(kannableTile, wall), "With no tiles in hand, an exception should be thrown.");
 }

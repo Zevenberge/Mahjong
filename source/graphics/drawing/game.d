@@ -25,6 +25,12 @@ void draw(Metagame game, RenderTarget target)
 	drawGameInfo(game, target);
 }
 
+void clearCache()
+{
+	info("Clearing metagame cache");
+	clearPlayerCache;
+}
+
 private void drawPlayers(Metagame game, RenderTarget target)
 {
 	auto renderTexture = getPlayerTexture; 

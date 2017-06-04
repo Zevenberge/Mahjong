@@ -15,9 +15,17 @@ import mahjong.share.range;
 
 class Ingame
 { 
-	UUID id;
+	this(int wind)
+	{
+		this.wind = wind;
+		closedHand = new ClosedHand;
+		openHand = new OpenHand;
+		id = randomUUID;
+	}
+
+	const UUID id;
 	// Ingame variables.
-	int wind = -1; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+	const int wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
 	OpenHand openHand; // The open pons/chis/kans 
 
@@ -55,24 +63,6 @@ class Ingame
 	{
 		return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
 	}
-	bool isRiichi = false;
-	bool isDoubleRiichi = false;
-	bool isFirstTurn = true;
-
-	this(int wind)
-	{
-		this.wind = wind;
-		closedHand = new ClosedHand;
-		openHand = new OpenHand;
-		id = randomUUID;
-	}
-
-	int getWind()
-	{
-		return wind;
-	}
-
-	
 	/*
 	 Normal functions related to claiming tiles.
 	 */
@@ -96,6 +86,7 @@ class Ingame
 		discard.claim;
 		auto chiTiles = closedHand.removeChiTiles(otherTiles) ~ discard;
 		openHand.addChi(chiTiles);
+		_lastTile = discard;
 	}
 
 	bool isPonnable(const Tile discard) pure
@@ -110,6 +101,7 @@ class Ingame
 		discard.claim;
 		auto ponTiles = closedHand.removePonTiles(discard) ~ discard;
 		openHand.addPon(ponTiles);
+		_lastTile = discard;
 	}
 
 	bool isKannable(const Tile discard) pure
@@ -118,12 +110,13 @@ class Ingame
 		return closedHand.isKannable(discard);
 	}
 
-	void kan(Tile discard)
+	void kan(Tile discard, Wall wall)
 	{
 		if(!isKannable(discard)) throw new IllegalClaimException(discard, "Kan not allowed");
 		discard.claim;
 		auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
 		openHand.addKan(kanTiles);
+		drawKanTile(wall);
 	}
 
 	bool isRonnable(const Tile discard) pure
@@ -131,12 +124,42 @@ class Ingame
 		return scanHandForMahjong(closedHand, openHand, discard).isMahjong
 			&& !isFuriten ;
 	}
+	
+	bool canDeclareClosedKan(const Tile tile)
+	{
+		return closedHand.canDeclareClosedKan(tile);
+	}
+
+	void declareClosedKan(const Tile tile, Wall wall)
+	{
+		auto kanTiles = closedHand.declareClosedKan(tile);
+		openHand.addKan(kanTiles);
+		drawKanTile(wall);
+	}
+
+	bool canPromoteToKan(Tile tile)
+	{
+		return openHand.canPromoteToKan(tile);
+	}
+
+	void promoteToKan(Tile tile, Wall wall)
+	{
+		closedHand.removeTile(tile);
+		openHand.promoteToKan(tile);
+		drawKanTile(wall);
+	}
+
+	private void drawKanTile(Wall wall)
+	{
+		closedHand.drawKanTile(wall);
+		_lastTile = closedHand.lastTile;
+	}
 
 	/*
 	 Functions related to the mahjong call.
 	 */
 
-	bool checkTenpai()
+	bool isTenpai()
 	{ /*
 		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
 		   */
@@ -167,6 +190,11 @@ class Ingame
 		return false;
 	}
 
+	bool canTsumo()
+	{
+		return  isOwn(_lastTile) && isMahjong;
+	}
+
 	bool isMahjong()
 	{
 		return scanHandForMahjong(closedHand, openHand).isMahjong;
@@ -195,13 +223,8 @@ class Ingame
 		throw new TileNotFoundException(discardedTile);
 	}
 
-	Tile getLastDiscard()
-	{
-		return discards[$-1];
-	}
-
 	private Tile _lastTile; 
-	Tile getLastTile()
+	Tile lastTile() @property
 	{
 		return _lastTile;
 	}
@@ -210,7 +233,7 @@ class Ingame
 	{
 		closedHand.closeHand;
 	}
-	
+
 	void showHand()
 	{
 		closedHand.showHand;
@@ -219,7 +242,65 @@ class Ingame
 	void drawTile(Wall wall)
 	{
 		closedHand.drawTile(wall);
-		_lastTile = closedHand.getLastTile;
+		_lastTile = closedHand.lastTile;
 	}
+}
 
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(1);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+	auto tile = ingame.closedHand.tiles.back;
+	auto initialLength = ingame.closedHand.tiles.length;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
+	ingame.declareClosedKan(tile, wall);
+	assert(ingame.closedHand.tiles.length == initialLength - 3, "Four tiles should have been subtracted from the hand and one added");
+	assert(ingame.openHand.amountOfKans == 1, "The open hand should have a kan");
+}
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(1);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+	auto tile = ingame.closedHand.tiles.back;
+	tile.origin = new Ingame(2);
+	ingame.pon(tile);
+	auto initialLength = ingame.closedHand.tiles.length;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
+	ingame.promoteToKan(ingame.closedHand.tiles.back, wall);
+	assert(ingame.closedHand.tiles.length == initialLength, "One tile should have been subtracted from the hand and one added");
+	assert(ingame.openHand.amountOfKans == 1, "The open hand should have a kan");
+}
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(1);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+	auto ponTile = "🀟"d.convertToTiles[0];
+	ponTile.origin = new Ingame(2);
+	ingame.pon(ponTile);
+	assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
+}
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(1);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+	auto chiTile = "🀡"d.convertToTiles[0];
+	chiTile.origin = new Ingame(2);
+	ingame.chi(chiTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
+	assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
 }

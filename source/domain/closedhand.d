@@ -1,9 +1,9 @@
 module mahjong.domain.closedhand;
 
-import std.algorithm.iteration;
+import std.algorithm;
 import std.array;
-import std.signals;
 import mahjong.domain;
+import mahjong.domain.exceptions;
 import mahjong.engine.chi;
 import mahjong.engine.sort;
 import mahjong.share.range;
@@ -16,19 +16,11 @@ class ClosedHand
 	{
 		return tiles.length;
 	}
-	
-	void addTile(Tile tile)
-	{
-		tiles ~= tile;
-		emit(tile);
-	}
 
 	void removeTile(Tile tile)
 	{
 		tiles.remove!((a,b) => a == b)(tile);
 	}
-	
-	mixin Signal!(Tile);
 	
 	void sortHand()
 	{
@@ -45,12 +37,22 @@ class ClosedHand
 		tiles.each!(t => t.open);
 	}
 
-	void drawTile(ref Wall wall)
+	void drawTile(Wall wall)
 	{
 		addTile(wall.drawTile);
 	}
-	
-	Tile getLastTile()
+
+	void drawKanTile(Wall wall)
+	{
+		addTile(wall.drawKanTile);
+	}
+
+	private void addTile(Tile tile)
+	{
+		tiles ~= tile;
+	}
+
+	Tile lastTile() @property
 	{
 		return tiles[$-1];
 	}
@@ -89,6 +91,17 @@ class ClosedHand
 		return removeTilesWithIdenticalValue!3(discard);
 	}
 
+	bool canDeclareClosedKan(const Tile tile)
+	{
+		return tiles.count!(t => tile.hasEqualValue(t)) >= 4;
+	}
+
+	Tile[] declareClosedKan(const Tile tile)
+	{
+		if(!canDeclareClosedKan(tile)) throw new IllegalClaimException(tile, "Cannot declare a closed kan");
+		return removeTilesWithIdenticalValue!4(tile);
+	}
+
 	private Tile[] tilesWithEqualValue(const Tile other) pure
 	{
 		return tiles.filter!(tile => tile.hasEqualValue(other)).array;
@@ -97,7 +110,41 @@ class ClosedHand
 	private Tile[] removeTilesWithIdenticalValue(int amount)(const Tile other)
 	{
 		auto removedTiles = tilesWithEqualValue(other)[0 .. amount];
-		removedTiles.each!(t => removeTile(t));
+		tiles = tiles.without!((a,b) => a == b)(removedTiles);
 		return removedTiles;
 	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto closedHand = new ClosedHand;
+	closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+	assert(!closedHand.canDeclareClosedKan(closedHand.tiles.front), 
+		"As there are only three copies of the tile in the hand, no closed kan can be claimed");
+	assert(closedHand.canDeclareClosedKan(closedHand.tiles.back), 
+		"As there are four copies of the tile, a closed kan can be declared.");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto closedHand = new ClosedHand;
+	closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+	auto initialLength = closedHand.tiles.length;
+	auto tile = closedHand.tiles.back;
+	auto kanTiles = closedHand.declareClosedKan(tile);
+	assert(kanTiles.length == 4, "Four tiles should be returned when a closed kan is declared");
+	assert(kanTiles.all!(kt => tile.hasEqualValue(kt)), "All returned tiles should have the same value as the requested tile");
+	assert(closedHand.tiles.length == initialLength - 4, "Four tiles should have been subtracted from the hand");
+	assert(!closedHand.tiles.any!(t => tile.hasEqualValue(t)), "All tiles with the requested value should have been removed");
+}
+unittest
+{
+	import std.exception;
+	import mahjong.engine.creation;
+	auto closedHand = new ClosedHand;
+	closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+	assertThrown!IllegalClaimException(closedHand.declareClosedKan(closedHand.tiles.front), 
+		"Trying to declare a closed kan when it is not allowed should be rewarded with an exception.");
 }

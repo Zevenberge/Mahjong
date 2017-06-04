@@ -59,6 +59,7 @@ class Metagame
 		info("Initialising metagame");
 		placePlayers;
 		_initialWind = uniform(0, players.length).to!int; 
+		leadingWind = PlayerWinds.east;
 		info("Initialised metagame");
 	}
 
@@ -68,20 +69,29 @@ class Metagame
 	void nextRound()
 	{
 		info("Moving to the next round");
-		setPlayers;
+		round = 1;
+		startPlayersGame;
+		setUpWall;
 		removeTurnPlayer;
 	}
 
-	private void setPlayers()
+	private void startPlayersGame()
 	{
-		leadingWind = PlayerWinds.east;
-		round = 1;
-		info("Setting up the game");
-		setPlayersGame;
-		trace("Setting up the wall.");
+		foreach(int i, player; players) // Re-initialise the players' game.
+		{ 
+			player.startGame((_initialWind + i) % gameOpts.amountOfPlayers);
+		}
+	}
+   
+	private void removeTurnPlayer()
+	{
+		_turn = -1;
+	}
+
+	private void setUpWall()
+	{
 		wall = getWall;
 		wall.setUp;
-		info("Preparations are finished.");
 	}
 
 	/++
@@ -93,14 +103,7 @@ class Metagame
 		distributeTiles;
 		setTurnPlayerToEast;
 	}
-	private void setPlayersGame()
-	{
-		foreach(int i, player; players) // Re-initialise the players' game.
-		{ 
-			player.startGame((_initialWind + i) % gameOpts.amountOfPlayers);
-		}
-	}
-   
+
 	protected Wall getWall()
 	{
 		return new Wall;
@@ -147,18 +150,13 @@ class Metagame
 	{
 		foreach(i, player; players)
 		{
-			if(player.game.wind == Winds.east)
+			if(player.wind == Winds.east)
 			{
 				_turn = i.to!int;
 				_phase = Phase.Draw;
 				break;
 			}
 		}
-	}
-
-	private void removeTurnPlayer()
-	{
-		_turn = -1;
 	}
 
 	void tsumo(Player player)
@@ -171,11 +169,11 @@ class Metagame
 		flipOverWinningTiles();
 		if(player.isMahjong)
 		{
-			info("Player ", cast(Kanji)currentPlayer.getWind, " won");
+			info("Player ", cast(Kanji)currentPlayer.wind, " won");
 		}
 		else
 		{
-			info("Player ", cast(Kanji)currentPlayer.getWind, " chombo'd");
+			info("Player ", cast(Kanji)currentPlayer.wind, " chombo'd");
 		}
 	}
 
@@ -229,7 +227,7 @@ class Metagame
        if(player.isTenpai)
        {
          player.showHand;
-         info(cast(Kanji)player.getWind, " is tenpai!");
+         info(cast(Kanji)player.wind, " is tenpai!");
        }
        else
        {

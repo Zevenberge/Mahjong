@@ -1,5 +1,6 @@
 module mahjong.graphics.drawing.closedhand;
 
+import std.algorithm;
 import std.conv;
 import std.experimental.logger;
 import dsfml.graphics;
@@ -43,6 +44,11 @@ void moveTile(Tile tile, size_t i, size_t total)
 		anime.objectId = tile.id;
 		anime.addIfNonExistent;
 	}
+}
+
+void displayHand(const ClosedHand closedHand)
+{
+	closedHand.tiles.each!(t => t.display);
 }
 
 private Vector2f calculatePosition(const size_t amountOfTiles, const int number)

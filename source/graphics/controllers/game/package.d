@@ -2,8 +2,11 @@ module mahjong.graphics.controllers.game;
 
 public import mahjong.graphics.controllers.game.claim;
 public import mahjong.graphics.controllers.game.idle;
+public import mahjong.graphics.controllers.game.options;
 public import mahjong.graphics.controllers.game.turn;
+public import mahjong.graphics.controllers.game.turnoption;
 
+import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain;
 import mahjong.engine.flow;
@@ -57,7 +60,9 @@ class GameController : Controller
 
 	override void roundUp() 
 	{
+		info("Rouding up game comtroller.");
 		.flow = null;
+		clearCache;
 	}
 
 	override void yield() 

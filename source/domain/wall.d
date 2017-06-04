@@ -15,7 +15,7 @@ import mahjong.engine.opts;
 
 class Wall
 {
-	UUID id;
+	const UUID id;
 	private Tile[] _tiles;
 	const(Tile)[] tiles() @property
 	{
@@ -144,6 +144,31 @@ class Wall
 
 }
 
+unittest
+{
+	import std.array;
+	import std.exception;
+	import mahjong.domain.exceptions;
+	import mahjong.domain.ingame;
+	import mahjong.domain.player;
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	gameOpts = new DefaultGameOpts;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
+	auto initialWallLength = wall.length;
+	auto lastTile = wall.tiles.back;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
+	auto kannableTile = "🀕"d.convertToTiles[0];
+	kannableTile.origin = new Ingame(1);
+	player.kan(kannableTile, wall);
+	assert(player.game.closedHand.tiles.front == lastTile, "The last tile of the wall should have been drawn");
+	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
+}
+
 class BambooWall : Wall
 {
 	protected override void initialise()
@@ -181,6 +206,30 @@ class BambooWall : Wall
 
 }
 
+unittest
+{
+	import std.array;
+	import std.exception;
+	import mahjong.domain.exceptions;
+	import mahjong.domain.ingame;
+	import mahjong.domain.player;
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	gameOpts = new DefaultGameOpts;
+	auto wall = new BambooWall;
+	wall.setUp;
+	wall.dice;
+	auto initialWallLength = wall.length;
+	auto firstTile = wall.tiles.front;
+	auto player = new Player(new TestEventHandler);
+	player.startGame(0);
+	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
+	auto kannableTile = "🀕"d.convertToTiles[0];
+	kannableTile.origin = new Ingame(1);
+	player.kan(kannableTile, wall);
+	assert(player.game.closedHand.tiles.front == firstTile, "The first tile of the wall should have been drawn");
+	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
+}
 class EightPlayerWall : Wall
 {
 	

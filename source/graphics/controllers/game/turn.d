@@ -9,6 +9,7 @@ import mahjong.engine.sort;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
+import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.selections;
 import mahjong.share.range;
@@ -21,6 +22,17 @@ class TurnController : GameController
 		_event = event;
 		super(window, metagame);
 		initialise;
+	}
+
+	private void initialise()
+	{
+		trace("Initialising selection of turn controller");
+		_event.player.game.closedHand.displayHand;
+		_event.player.game.closedHand.tiles.sortHand;
+		opts = _event.player.game.closedHand.tiles;
+		initSelection;
+		auto index = opts.indexOf(_event.drawnTile);
+		changeOpt(index);
 	}
 
 	private TurnEvent _event;
@@ -45,14 +57,24 @@ class TurnController : GameController
 				selectNext;
 				break;
 			case Return:
-				discardSelectedTile;
-				break;
-			case Space:
-				claimTsumo;
+				confirmSelectedTile;
 				break;
 			default:
 				// Do nothing
 				break;
+		}
+	}
+
+	private void confirmSelectedTile()
+	{
+		auto factory = new TurnOptionFactory(_event.player, selectedItem, _metagame, _event);
+		if(factory.isDiscardTheOnlyOption)
+		{
+			discardSelectedTile;
+		}	
+		else
+		{
+			showTurnOptionMenu(factory);
 		}
 	}
 
@@ -63,22 +85,9 @@ class TurnController : GameController
 		_event.discard(selectedItem);
 	}
 
-	private void claimTsumo()
+	private void showTurnOptionMenu(TurnOptionFactory factory)
 	{
-		info("Claiming tsumo");
-		controller = new IdleController(_window, _metagame);
-		_event.claimTsumo;
-	}
-
-	private void initialise()
-	{
-		trace("Initialising selection of turn controller");
-		_event.player.game.closedHand.showHand;
-		_event.player.game.closedHand.tiles.sortHand;
-		opts = _event.player.game.closedHand.tiles;
-		initSelection;
-		auto index = opts.indexOf(_event.drawnTile);
-		changeOpt(index);
+		controller = new TurnOptionController(_window, _metagame, this, factory);
 	}
 
 	mixin Select!Tile;

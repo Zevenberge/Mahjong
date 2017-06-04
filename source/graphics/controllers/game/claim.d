@@ -11,106 +11,40 @@ import mahjong.engine.flow.claim;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
+import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.conv;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
 
-class ClaimController : MenuController
-{
-	this(RenderWindow window, 
-		Metagame metagame,
-		Controller innerController,
-		ClaimOptionFactory factory)
-	{
-		auto menu = new Menu("Claim tile?");
-		foreach(option; factory.claimOptions)
-		{
-			menu.addOption(option);
-		}
-		menu.configureGeometry;
-		menu.selectOption(factory.claimOptions.back);
-		super(window, innerController, menu);
-		_metagame = metagame;
-	}
-
-	private Metagame _metagame;
-
-	void swapIdleController()
-	{
-		auto idleController = cast(IdleController)_innerController;
-		if(!idleController)
-		{
-			idleController = new IdleController(_window, _metagame);
-		}
-		controller = idleController;
-	}
-
-	override void draw() 
-	{
-		if(controller == this) 
-		{
-			super.draw;
-			drawMarkersOnRelevantTiles;
-		}
-		else _innerController.draw;
-	}
-
-	private void drawMarkersOnRelevantTiles()
-	{
-		auto selectedOption = cast(ClaimOption)_menu.selectedItem;
-		auto rectangleShape = new RectangleShape(drawingOpts.tileSize);
-		rectangleShape.fillColor = Color(250, 255, 141, 146);
-		foreach(tile; selectedOption.relevantTiles)
-		{
-			rectangleShape.position = tile.getCoords.position;
-			_window.draw(rectangleShape);
-		}
-	}
-
-	protected override bool menuClosed() 
-	{
-		controller = new MenuController(_window, this, getPauseMenu);
-		return false;
-	}
-
-	protected override RectangleShape constructHaze() 
-	{
-		auto margin = Vector2f(styleOpts.claimMenuMargin, styleOpts.claimMenuMargin);
-		auto menuBounds = _menu.getGlobalBounds;
-		auto haze = new RectangleShape(menuBounds.size + margin*2);
-		haze.fillColor = Color(100, 100, 100, 158);
-		haze.position = menuBounds.position - margin;
-		return haze;
-	}
-}
+alias ClaimController = IngameOptionsController!(ClaimOptionFactory, "Claim tile?");
 
 class ClaimOptionFactory
 {
 	this(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
 	{
-		player.game.showHand;
+		player.closedHand.displayHand;
 		addRonOption(player, discard, claimEvent);
-		addKanOption(player, discard, claimEvent);
+		addKanOption(player, discard, metagame.wall, claimEvent);
 		addPonOption(player, discard, claimEvent);
 		addChiOptions(player, discard, metagame, claimEvent);
-		_areThereClaimOptions = !_claimOptions.empty;
+		_areThereClaimOptions = !_options.empty;
 		addDefaultOption(claimEvent);
 	}
 
 	private void addRonOption(Player player, Tile discard, ClaimEvent claimEvent)
 	{
-		if(player.isRonnable(discard)) _claimOptions ~= new RonClaimOption(player, discard, claimEvent);
+		if(player.isRonnable(discard)) _options ~= new RonClaimOption(player, discard, claimEvent);
 	}
 
-	private void addKanOption(Player player, Tile discard, ClaimEvent claimEvent)
+	private void addKanOption(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
 	{
-		if(player.isKannable(discard)) _claimOptions~= new KanClaimOption(player, discard, claimEvent);
+		if(player.isKannable(discard)) _options~= new KanClaimOption(player, discard, wall, claimEvent);
 	}
 
 	private void addPonOption(Player player, Tile discard, ClaimEvent claimEvent)
 	{
-		if(player.isPonnable(discard)) _claimOptions ~= new PonClaimOption(player, discard, claimEvent);
+		if(player.isPonnable(discard)) _options ~= new PonClaimOption(player, discard, claimEvent);
 	}
 
 	private void addChiOptions(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
@@ -119,19 +53,19 @@ class ClaimOptionFactory
 		auto candidates = determineChiCandidates(player.game.closedHand.tiles, discard);
 		foreach(candidate; candidates)
 		{
-			_claimOptions ~= new ChiClaimOption(player, discard, candidate, metagame, claimEvent);
+			_options ~= new ChiClaimOption(player, discard, candidate, metagame, claimEvent);
 		}
 	}
 
 	private void addDefaultOption(ClaimEvent claimEvent)
 	{
-		_claimOptions ~= new NoClaimOption(claimEvent);
+		_options ~= new NoClaimOption(claimEvent);
 	}
 
-	private ClaimOption[] _claimOptions;
-	ClaimOption[] claimOptions() @property
+	private ClaimOption[] _options;
+	ClaimOption[] options() @property
 	{
-		return _claimOptions;
+		return _options;
 	}
 
 	private bool _areThereClaimOptions;
@@ -145,21 +79,21 @@ unittest
 {
 	import std.algorithm;
 	import std.string;
-	import mahjong.test.utils;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	import mahjong.engine.opts;
 	import mahjong.graphics.opts;
+	import mahjong.test.utils;
 	gameOpts = new DefaultGameOpts;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	void assertIn(T)(ClaimOptionFactory factory)
 	{
-		assert(factory.claimOptions.any!(co => co.isOfType!T), "ClaimOption %s not found.".format(T.stringof));
+		assert(factory.options.any!(co => co.isOfType!T), "ClaimOption %s not found.".format(T.stringof));
 	}
 	void assertNotIn(T)(ClaimOptionFactory factory)
 	{
-		assert(factory.claimOptions.all!(co => !co.isOfType!T), "ClaimOption %s found when it should not.".format(T.stringof));
+		assert(factory.options.all!(co => !co.isOfType!T), "ClaimOption %s found when it should not.".format(T.stringof));
 	}
 	auto player = new Player(new TestEventHandler);
 	player.startGame(3);
@@ -244,17 +178,17 @@ unittest
 	assertNotIn!RonClaimOption(claimFactory);
 }
 
-class ClaimOption : MenuItem
+class ClaimOption : MenuItem, IRelevantTiles
 {
 	abstract ClaimRequest constructRequest();
 
 	this(string displayName, ClaimEvent event)
 	{
-		super(displayName, &select);
+		super(displayName);
 		_event = event;
 	}
 
-	void select()
+	override void select()
 	{
 		trace("Claim option ", typeid(this), " selected. Swapping out ", typeid(controller));
 		(cast(ClaimController)controller).swapIdleController;
@@ -330,18 +264,20 @@ unittest
 
 class KanClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, ClaimEvent claimEvent)
+	this(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
+		_wall = wall;
 		super("Kan", claimEvent);
 	}
 
 	private Player _player;
 	private Tile _discard;
+	private Wall _wall;
 	override ClaimRequest constructRequest() 
 	{
-		return new KanRequest(_player, _discard);
+		return new KanRequest(_player, _discard, _wall);
 	}
 
 	override const(Tile)[] relevantTiles() @property
@@ -358,7 +294,7 @@ unittest
 	player.startGame(0);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
-	auto kanOption = new KanClaimOption(player, discard, null);
+	auto kanOption = new KanClaimOption(player, discard, null, null);
 	assert(kanOption.relevantTiles.length == 3, "For a kan, only three tiles are relevant");
 	assert(kanOption.relevantTiles.all!(t => discard.hasEqualValue(t)), "The relevant tiles should all have the same value as the discard");
 	assert(!kanOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");

@@ -39,7 +39,7 @@ void draw(Player player, RenderTarget view, float rotation)
 void clearPlayerCache()
 {
 	_players.clear;
-	clearDiscards;
+	clearIngameCache;
 	trace("Cleared player cache");
 }
 
@@ -142,7 +142,7 @@ private class PlayerVisuals
 		void updateIfRequired()
 		{
 			bool updated = false;
-			if(_player.getWind != _numberedWind) 
+			if(_player.wind != _numberedWind) 
 			{
 				updateWind;
 				updated = true;
@@ -157,7 +157,7 @@ private class PlayerVisuals
 
 		void updateWind()
 		{
-			_numberedWind = _player.getWind;
+			_numberedWind = _player.wind;
 			if(_numberedWind < 0) return;
 			auto windSymbol = _numberedWind.to!Kanji.to!string;
 			trace("Updating wind");
