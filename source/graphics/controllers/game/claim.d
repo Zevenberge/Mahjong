@@ -78,11 +78,11 @@ unittest
 {
 	import std.algorithm;
 	import std.string;
-	import mahjong.test.utils;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	import mahjong.engine.opts;
 	import mahjong.graphics.opts;
+	import mahjong.test.utils;
 	gameOpts = new DefaultGameOpts;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
