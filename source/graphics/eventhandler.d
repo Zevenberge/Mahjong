@@ -3,6 +3,7 @@
 import std.experimental.logger;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers;
+import mahjong.graphics.drawing.ingame;
 
 class UiEventHandler : GameEventHandler
 {
@@ -21,6 +22,7 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(RoundStartEvent event)
 	{
+		clearIngameCache;
 		event.isReady = true;
 	}
 
@@ -40,6 +42,6 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(MahjongEvent event)
 	{
-		// TODO
+		controller = new MahjongController(controller.getWindow, event.metagame, event);
 	}
 }

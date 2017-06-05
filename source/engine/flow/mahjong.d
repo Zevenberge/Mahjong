@@ -30,7 +30,7 @@ class MahjongFlow : Flow
 	{
 		foreach(player; metagame.players)
 		{
-			auto event = new MahjongEvent(data);
+			auto event = new MahjongEvent(metagame, data);
 			_events ~= event;
 			player.eventHandler.handle(event);
 		}
@@ -41,16 +41,20 @@ class MahjongFlow : Flow
 	override void advanceIfDone()
 	{
 		if(!_events.all!(e => e.isHandled)) return;
-		
+		flow = new RoundStartFlow(metagame);
 	}
 }
 
 class MahjongEvent
 {
-	this(const(MahjongData)[] data)
+	this(Metagame metagame,
+		const(MahjongData)[] data)
 	{
 		_data = data;
+		this.metagame = metagame;
 	}
+
+	Metagame metagame;
 
 	private const(MahjongData)[] _data;
 	const(MahjongData)[] data() @property
