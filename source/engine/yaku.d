@@ -1,18 +1,41 @@
 module mahjong.engine.yaku;
 
-import std.stdio;
-import std.string;
-import std.range;
-import std.uni;
-import std.algorithm;
-import std.random;
-import std.process;
-import std.conv;
-import std.file;
+enum Yaku {riichi, doubleRiichi, ippatsu, tsumo, tanyao, pinfu, iipeikou, sanShoukuDoujun, itsu, fanpai, chanta, rinshanKaihou, chanKan, haitei, 
+            chiiToitsu, sanShokuDokou, sanAnkou, sanKanTsu, toiToiHou, honitsu, shouSangen, honroutou, junchan, ryanPeikou, chinitsu, nagashiMangan,
+            kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, suuKanTsu, ryuuIisou, chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii};
 
-import mahjong.domain.tile;
-import mahjong.engine.enums.hands;
+size_t convertToFan(const Yaku yaku, bool isClosedHand)
+{
+	final switch(yaku) with(Yaku)
+	{
+		case riichi, ippatsu, tsumo, tanyao, pinfu, iipeikou, 
+				fanpai, rinshanKaihou, chanKan, haitei:
+			return 1;
+		case sanShoukuDoujun, itsu, chanta:
+			// One fan and one extra for a closed hand.
+			return isClosedHand ? 2 : 1;
+		case doubleRiichi, chiiToitsu, sanShokuDokou, sanAnkou, sanKanTsu, 
+				toiToiHou, shouSangen, honroutou:
+			return 2;
+		case honitsu, junchan:
+			// Two fan and one extra for a closed hand.
+			return isClosedHand ? 3 : 2;
+		case ryanPeikou:
+			return 3;
+		case nagashiMangan:
+			return 5;
+		case chinitsu:
+			// Five fan and one extra for a closed hand.
+			return isClosedHand ? 6 : 5;
+		case kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, 
+				suuKanTsu, ryuuIisou, chinrouto, tsuuIisou, daiSangen, shouSuushii:
+			return 13;
+		case daiSuushii:
+			return 26;
+	}
+}
 
+/+
 enum yakus {iihan = 1, ryanan = 2, sanhan = 3, uhan = 5, yakuman = 13, double_yakuman = 26};
 class yaku
 { 
@@ -131,3 +154,4 @@ class yaku
      return yaku;
     }
 }
++/

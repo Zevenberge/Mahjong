@@ -62,3 +62,24 @@ unittest
 	assert([1,0,2] == [1,2].insertAt(0,1), "New element should be inserted at 1");
 	assert([1,2,0] == [1,2].insertAt(0,2), "New element should be inserted at 2");
 }
+
+
+template sum(fun...) if(fun.length >= 1)
+{
+	alias yeOldeSum = std.algorithm.sum;
+	auto sum(Range)(Range range) if(isInputRange!(Unqual!Range))
+	{
+		return yeOldeSum(range.map!fun);
+	}
+}
+
+unittest
+{
+	struct Wrapper
+	{
+		int value;
+	}
+
+	auto result = [Wrapper(5), Wrapper(18)].sum!(w => w.value);
+	assert(result == 23, "The sum should give the sum of the wrapped numbers");
+}
