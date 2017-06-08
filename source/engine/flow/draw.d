@@ -33,7 +33,7 @@ unittest
 	gameOpts = new DefaultGameOpts ;
 	
 	auto player = new Player(new TestEventHandler);
-	player.startGame(Winds.east);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	auto wall = new Wall;
 	wall.setUp;

@@ -79,6 +79,7 @@ unittest
 {
 	import std.algorithm;
 	import std.string;
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	import mahjong.engine.opts;
@@ -96,11 +97,11 @@ unittest
 		assert(factory.options.all!(co => !co.isOfType!T), "ClaimOption %s found when it should not.".format(T.stringof));
 	}
 	auto player = new Player(new TestEventHandler);
-	player.startGame(3);
+	player.startGame(PlayerWinds.north);
 	auto player2 = new Player(new TestEventHandler);
-	player2.startGame(0);
+	player2.startGame(PlayerWinds.east);
 	auto player3 = new Player(new TestEventHandler);
-	player3.startGame(1);
+	player3.startGame(PlayerWinds.south);
 	auto metagame = new Metagame([player, player2, player3]);
 	metagame.currentPlayer = player;
 	ClaimOptionFactory constructFactory(dstring tilesOfClaimingPlayer, dstring discard, 
@@ -251,10 +252,11 @@ class RonClaimOption : ClaimOption
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
 	auto ronOption = new RonClaimOption(player, discard, null);
@@ -288,10 +290,11 @@ class KanClaimOption : ClaimOption
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
 	auto kanOption = new KanClaimOption(player, discard, null, null);
@@ -325,10 +328,11 @@ class PonClaimOption : ClaimOption
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
 	auto ponOption = new PonClaimOption(player, discard, null);

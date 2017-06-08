@@ -14,7 +14,7 @@ import mahjong.share.range;
 
 class Ingame
 { 
-	this(int wind)
+	this(PlayerWinds wind)
 	{
 		this.wind = wind;
 		closedHand = new ClosedHand;
@@ -24,7 +24,7 @@ class Ingame
 
 	const UUID id;
 	// Ingame variables.
-	const int wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+	const PlayerWinds wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
 	OpenHand openHand; // The open pons/chis/kans 
 
@@ -250,7 +250,7 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
 	auto tile = ingame.closedHand.tiles.back;
 	auto initialLength = ingame.closedHand.tiles.length;
@@ -266,10 +266,10 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
 	auto tile = ingame.closedHand.tiles.back;
-	tile.origin = new Ingame(2);
+	tile.origin = new Ingame(PlayerWinds.south);
 	ingame.pon(tile);
 	auto initialLength = ingame.closedHand.tiles.length;
 	auto wall = new Wall;
@@ -284,10 +284,10 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
 	auto ponTile = "🀟"d.convertToTiles[0];
-	ponTile.origin = new Ingame(2);
+	ponTile.origin = new Ingame(PlayerWinds.south);
 	ingame.pon(ponTile);
 	assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
 }
@@ -296,10 +296,10 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
 	auto chiTile = "🀡"d.convertToTiles[0];
-	chiTile.origin = new Ingame(2);
+	chiTile.origin = new Ingame(PlayerWinds.south);
 	ingame.chi(chiTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
 	assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
 }

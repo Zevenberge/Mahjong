@@ -4,7 +4,6 @@ import std.experimental.logger;
 import std.algorithm;
 import std.array;
 import std.random;
-import std.process;
 import std.conv; 
 import std.file;
 import std.string;
@@ -138,7 +137,7 @@ unittest
 	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
 	auto openHand = new OpenHand;
 	openHand.addPon("🀃🀃🀃"d.convertToTiles);
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.south);
 	ingame.closedHand = closedHand;
 	ingame.openHand = openHand;
 	assert(scanHandForMahjong(ingame).isMahjong, "An open pon should count towards mahjong");
@@ -151,7 +150,7 @@ unittest
 	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
 	auto openHand = new OpenHand;
 	openHand.addChi("🀓🀔🀕"d.convertToTiles);
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand = closedHand;
 	ingame.openHand = openHand;
 	assert(scanHandForMahjong(ingame).isMahjong, "An open chi should count towards mahjong");

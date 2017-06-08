@@ -76,7 +76,8 @@ class Metagame
 	{
 		foreach(int i, player; players) // Re-initialise the players' game.
 		{ 
-			player.startGame((_initialWind + i) % gameOpts.amountOfPlayers);
+			auto wind = ((_initialWind + i) % gameOpts.amountOfPlayers).to!PlayerWinds;
+			player.startGame(wind);
 		}
 	}
    

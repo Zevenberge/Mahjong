@@ -158,10 +158,10 @@ unittest
 	auto initialWallLength = wall.length;
 	auto lastTile = wall.tiles.back;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
-	kannableTile.origin = new Ingame(1);
+	kannableTile.origin = new Ingame(PlayerWinds.south);
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.tiles.front == lastTile, "The last tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
@@ -220,10 +220,10 @@ unittest
 	auto initialWallLength = wall.length;
 	auto firstTile = wall.tiles.front;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
-	kannableTile.origin = new Ingame(1);
+	kannableTile.origin = new Ingame(PlayerWinds.south);
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.tiles.front == firstTile, "The first tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");

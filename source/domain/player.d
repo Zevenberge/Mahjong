@@ -36,11 +36,13 @@ class Player
 
 	void nextRound(bool passWinds)
 	{
+		// TODO
+		import std.conv;
 		int wind = (game.wind + passWinds ? 1 : 0) % gameOpts.amountOfPlayers;
-		startGame(wind);
+		startGame(wind.to!PlayerWinds);
 	}
 
-	void startGame(int wind)
+	void startGame(PlayerWinds wind)
 	{
 		trace("Starting game for ", wind);
 		game = new Ingame(wind);
@@ -80,10 +82,10 @@ unittest
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(1);
+	ponnableTile.origin = new Ingame(PlayerWinds.south);
 	assert(player.isPonnable(ponnableTile), "Expected the tile to be ponnable");
 	auto nonPonnableTile = "🀃"d.convertToTiles[0];
 	assert(!player.isPonnable(nonPonnableTile), "The tile should not have been ponnable");
@@ -94,25 +96,25 @@ unittest
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto player2 = new Player(new TestEventHandler);
 	auto metagame = new Metagame([player, player2]);
 	metagame.currentPlayer = player2;
 	auto chiableTile = "🀕"d.convertToTiles[0];
-	chiableTile.origin = new Ingame(1);
+	chiableTile.origin = new Ingame(PlayerWinds.south);
 	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀓🀕"d.convertToTiles;
 	chiableTile = "🀔"d.convertToTiles[0];
-	chiableTile.origin = new Ingame(1);
+	chiableTile.origin = new Ingame(PlayerWinds.south);
 	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀔🀕"d.convertToTiles;
 	chiableTile = "🀓"d.convertToTiles[0];
-	chiableTile.origin = new Ingame(1);
+	chiableTile.origin = new Ingame(PlayerWinds.south);
 	assert(player.isChiable(chiableTile, metagame), "Expected the tile to be chiable");
 	player.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto nonChiableTile = "🀔"d.convertToTiles[0];
-	nonChiableTile.origin = new Ingame(1);
+	nonChiableTile.origin = new Ingame(PlayerWinds.south);
 	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 }
 
@@ -121,17 +123,17 @@ unittest
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀁"d.convertToTiles;
 	auto player2 = new Player(new TestEventHandler);
 	auto metagame = new Metagame([player, player2]);
 	metagame.currentPlayer = player2;
 	auto nonChiableTile = "🀂"d.convertToTiles[0];
-	nonChiableTile.origin = new Ingame(1);
+	nonChiableTile.origin = new Ingame(PlayerWinds.south);
 	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 	player.game.closedHand.tiles = "🀄🀅"d.convertToTiles;
 	nonChiableTile = "🀆"d.convertToTiles[0];
-	nonChiableTile.origin = new Ingame(1);
+	nonChiableTile.origin = new Ingame(PlayerWinds.south);
 	assert(!player.isChiable(nonChiableTile, metagame), "The tile should not have been chiable");
 }
 
@@ -145,13 +147,13 @@ unittest
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d.convertToTiles;
 	auto player2 = new Player(new TestEventHandler);
 	auto metagame = new Metagame([player, player2]);
 	metagame.currentPlayer = player2;
 	auto ponnableTile = "🀐"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(1);
+	ponnableTile.origin = new Ingame(PlayerWinds.south);
 	assert(player.isRonnable(ponnableTile), "The tile should have been ronnable");
 	addTileToDiscard(player, "🀐"d.convertToTiles[0]);
 	assert(!player.isRonnable(ponnableTile), "The tile should have not been ronnable as the tile is included in the discards");
@@ -166,12 +168,12 @@ unittest
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto tiles = "🀓🀔"d.convertToTiles;
 	player.game.closedHand.tiles = tiles;
 	auto candidate = ChiCandidate(tiles[0], tiles[1]);
 	auto chiableTile = "🀕"d.convertToTiles[0];
-	chiableTile.origin = new Ingame(1);
+	chiableTile.origin = new Ingame(PlayerWinds.south);
 	player.chi(chiableTile, candidate);
 	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
 	assert(player.game.openHand.amountOfChis == 1, "The open hand should have one chi.");
@@ -186,10 +188,10 @@ unittest
 	import mahjong.engine.creation;
 	gameOpts = new DefaultGameOpts;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(1);
+	ponnableTile.origin = new Ingame(PlayerWinds.south);
 	player.pon(ponnableTile);
 	assert(player.game.closedHand.length == 0, "The tiles should have been removed from the hand,");
 	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");
@@ -208,10 +210,10 @@ unittest
 	wall.setUp;
 	wall.dice;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
-	kannableTile.origin = new Ingame(1);
+	kannableTile.origin = new Ingame(PlayerWinds.south);
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.length == 1, "The tiles should have been removed from the hand and one tile drawn from the wall.");
 	assert(player.game.openHand.amountOfPons == 1, "The open hand should have one pon.");

@@ -126,12 +126,13 @@ class TurnEvent
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(0,0);
 	auto flow = new TurnFlow(player, metagame);
@@ -143,10 +144,11 @@ unittest
 
 unittest
 {
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
+	import mahjong.domain.enums;
 	import mahjong.domain.tile;
 	import mahjong.domain.wall;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
 
 	class MockWall : Wall
 	{
@@ -165,7 +167,7 @@ unittest
 
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(0,0);
 	auto wall = new MockWall(tile);
@@ -179,6 +181,7 @@ unittest
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.mahjong;
 	import mahjong.engine.opts;
@@ -186,7 +189,7 @@ unittest
 
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(0, 0);
 	auto flow = new TurnFlow(player, metagame);
@@ -199,13 +202,14 @@ unittest
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 	gameOpts = new DefaultGameOpts;
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	metagame.nextRound;
 	metagame.beginRound;
@@ -222,13 +226,14 @@ unittest
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 	gameOpts = new DefaultGameOpts;
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	metagame.nextRound;
 	metagame.beginRound;
