@@ -6,9 +6,7 @@ import std.experimental.logger;
 import std.random;
 import std.uuid;
 
-import mahjong.domain.enums.game;
-import mahjong.domain.enums.tile;
-import mahjong.domain.enums.wall;
+import mahjong.domain.enums;
 import mahjong.domain.tile;
 import mahjong.engine.creation;
 import mahjong.engine.opts;

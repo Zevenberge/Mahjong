@@ -4,7 +4,7 @@ import std.experimental.logger;
 import std.range;
 import std.random;
 import std.string;
-import mahjong.domain.enums.tile;
+import mahjong.domain.enums;
 import mahjong.domain.tile;
 import mahjong.engine.sort;
 

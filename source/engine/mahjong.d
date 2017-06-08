@@ -10,11 +10,10 @@ import std.file;
 import std.string;
 
 import mahjong.domain.closedhand;
-import mahjong.domain.enums.tile;
+import mahjong.domain.enums;
 import mahjong.domain.openhand;
-import mahjong.domain.player;
+import mahjong.domain.ingame;
 import mahjong.domain.tile;
-import mahjong.engine.enums.game;
 import mahjong.engine.sort;
 import mahjong.engine.yaku; 
 import mahjong.share.range;
@@ -33,6 +32,7 @@ abstract class Set
 		this.tiles = tiles;
 	}
 	const Tile[] tiles;
+	abstract size_t miniPoints() @property;
 }
 
 class ThirteenOrphanSet : Set
@@ -41,6 +41,12 @@ class ThirteenOrphanSet : Set
 	{
 		super(tiles);
 	}
+
+	override size_t miniPoints() @property
+	{
+		return 0;
+	}
+
 }
 
 class SevenPairsSet : Set
@@ -48,6 +54,12 @@ class SevenPairsSet : Set
 	this(const Tile[] tiles) pure
 	{
 		super(tiles);
+	}
+
+
+	override size_t miniPoints() @property
+	{
+		return 0;
 	}
 }
 
@@ -57,6 +69,30 @@ class PonSet : Set
 	{
 		super(tiles);
 	}
+
+	override size_t miniPoints() @property
+	{
+		size_t points = 4;
+		if(isOpen) points /= 2;
+		if(isKan) points *= 4;
+		if(isSetOfHonoursOrTerminals) points *= 2;
+		return points;
+	}
+
+	private bool isKan()
+	{
+		return tiles.length == 4;
+	}
+
+	private bool isSetOfHonoursOrTerminals()
+	{
+		return tiles[0].isHonour || tiles[0].isTerminal;
+	}
+
+	private bool isOpen()
+	{
+		return tiles.any!(t => t.origin !is null);
+	}
 }
 
 class ChiSet : Set
@@ -64,6 +100,11 @@ class ChiSet : Set
 	this(const Tile[] tiles) pure
 	{
 		super(tiles);
+	}
+
+	override size_t miniPoints() @property
+	{
+		return 0;
 	}
 }
 
@@ -73,21 +114,21 @@ class PairSet : Set
 	{
 		super(tiles);
 	}
+
+	override size_t miniPoints() @property
+	{
+		return 0;
+	}
 }
 
-MahjongResult scanHandForMahjong(const Player player)
+MahjongResult scanHandForMahjong(const Ingame player) pure
 {
-	return scanHandForMahjong(player.closedHand, player.openHand);
+	return scanHandForMahjong(player.closedHand.tiles, player.openHand.sets);
 }
 
-MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand openHand, const Tile discard) pure
+MahjongResult scanHandForMahjong(const Ingame player, const Tile discard) pure
 {
-	return scanHandForMahjong(closedHand.tiles ~ discard, openHand.sets);
-}
-
-MahjongResult scanHandForMahjong(const ClosedHand closedHand, const OpenHand openHand) pure
-{
-	return scanHandForMahjong(closedHand.tiles, openHand.sets);
+	return scanHandForMahjong(player.closedHand.tiles ~ discard, player.openHand.sets);
 }
 
 unittest
@@ -97,7 +138,10 @@ unittest
 	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
 	auto openHand = new OpenHand;
 	openHand.addPon("🀃🀃🀃"d.convertToTiles);
-	assert(scanHandForMahjong(closedHand, openHand).isMahjong, "An open pon should count towards mahjong");
+	auto ingame = new Ingame(1);
+	ingame.closedHand = closedHand;
+	ingame.openHand = openHand;
+	assert(scanHandForMahjong(ingame).isMahjong, "An open pon should count towards mahjong");
 }
 
 unittest
@@ -107,7 +151,10 @@ unittest
 	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
 	auto openHand = new OpenHand;
 	openHand.addChi("🀓🀔🀕"d.convertToTiles);
-	assert(scanHandForMahjong(closedHand, openHand).isMahjong, "An open chi should count towards mahjong");
+	auto ingame = new Ingame(1);
+	ingame.closedHand = closedHand;
+	ingame.openHand = openHand;
+	assert(scanHandForMahjong(ingame).isMahjong, "An open chi should count towards mahjong");
 }
 
 private MahjongResult scanHandForMahjong(const(Tile)[] hand, const(Set[]) openSets) pure 

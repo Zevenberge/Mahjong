@@ -4,7 +4,7 @@ import std.stdio;
 import std.algorithm.iteration;
 import std.algorithm.sorting;
 import std.array;
-import mahjong.domain.enums.tile;
+import mahjong.domain.enums;
 import mahjong.domain.tile;
 
 auto sortHand(Tile[] hand) pure

@@ -5,7 +5,7 @@ public import mahjong.engine.opts.defaultopts;
 public import mahjong.engine.opts.eightplayeropts;
 
 import mahjong.domain;
-import mahjong.domain.enums.game;
+import mahjong.domain.enums;
 import mahjong.engine.flow;
 
 Opts gameOpts;

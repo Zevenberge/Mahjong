@@ -25,7 +25,7 @@ class DrawFlow : Flow
 unittest
 {
 	import std.stdio;
-	import mahjong.domain.enums.tile;
+	import mahjong.domain.enums;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 	

@@ -10,7 +10,7 @@ import std.format;
 import std.math;
 import std.range;
 
-import mahjong.domain.enums.game;
+import mahjong.domain.enums;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;

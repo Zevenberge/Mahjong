@@ -6,11 +6,8 @@ import std.random;
 import std.conv;
 import std.uuid;
 
-import mahjong.domain.enums.game;
-import mahjong.domain.enums.tile;
-import mahjong.domain.enums.wall;
+import mahjong.domain.enums;
 import mahjong.domain;
-import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.graphics.enums.game;
@@ -121,9 +118,9 @@ class Metagame
 
    private void distributeTiles()
    {
-     for(int i = 0; i < 12/tilesAtOnce; ++i)
+     for(int i = 0; i < 3; ++i)
      {
-       distributeXTiles(tilesAtOnce);
+       distributeXTiles(4);
      }
      distributeXTiles(1);
    }
@@ -144,8 +141,6 @@ class Metagame
 
 	private size_t _turn = 0; 
 
-	private Phase _phase = Phase.Draw;
-
 	private void setTurnPlayerToEast() 
 	{
 		foreach(i, player; players)
@@ -153,7 +148,6 @@ class Metagame
 			if(player.wind == Winds.east)
 			{
 				_turn = i.to!int;
-				_phase = Phase.Draw;
 				break;
 			}
 		}
@@ -187,7 +181,6 @@ class Metagame
 		else
 		{
 			trace("Advancing turn.");
-			_phase = Phase.Draw;
 			_turn = (_turn + 1) % gameOpts.amountOfPlayers;
 		}
 	}
@@ -235,11 +228,6 @@ class Metagame
        }
      }
    }
-
-	Phase phase() @property
-	{
-		return _phase;
-	}
 
 	bool isTurn(UUID playerId)
 	{

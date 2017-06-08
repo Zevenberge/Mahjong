@@ -4,7 +4,7 @@ import std.experimental.logger;
 import std.string;
 import std.uuid;
 
-import mahjong.domain.enums.game;
+import mahjong.domain.enums;
 import mahjong.domain;
 import mahjong.engine.chi;
 import mahjong.engine.flow;

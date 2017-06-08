@@ -4,9 +4,8 @@ import std.conv;
 import std.math;
 import std.uuid;
 
-import mahjong.domain.enums.tile;
+import mahjong.domain.enums;
 import mahjong.domain.ingame;
-import mahjong.engine.enums.game;
 
 class Tile
 { 

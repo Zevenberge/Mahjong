@@ -5,10 +5,9 @@ import std.array;
 import std.experimental.logger;
 import std.uuid;
 import mahjong.domain;
-import mahjong.domain.enums.tile;
+import mahjong.domain.enums;
 import mahjong.domain.exceptions;
 import mahjong.engine.chi;
-import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.sort;
 import mahjong.share.range;
@@ -121,7 +120,7 @@ class Ingame
 
 	bool isRonnable(const Tile discard) pure
 	{
-		return scanHandForMahjong(closedHand, openHand, discard).isMahjong
+		return scanHandForMahjong(this, discard).isMahjong
 			&& !isFuriten ;
 	}
 	
@@ -168,7 +167,7 @@ class Ingame
 			for(int value = Numbers.min; value <= Numbers.max; ++value)
 			{
 				auto tile = new Tile(type, value);
-				if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
+				if(.scanHandForMahjong(this, tile).isMahjong)
 				{
 					return true;
 				}
@@ -182,7 +181,7 @@ class Ingame
 	{
 		foreach(tile; allDiscards)
 		{
-			if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
+			if(.scanHandForMahjong(this, tile).isMahjong)
 			{
 				return true;
 			}
@@ -197,7 +196,7 @@ class Ingame
 
 	bool isMahjong()
 	{
-		return scanHandForMahjong(closedHand, openHand).isMahjong;
+		return scanHandForMahjong(this).isMahjong;
 	}
 
 	private void discard(size_t discardedNr)
