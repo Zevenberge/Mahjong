@@ -4,6 +4,7 @@ import std.algorithm;
 import std.array;
 import std.experimental.logger;
 import std.range;
+import std.traits;
 
 void remove(alias pred, T)(ref T[] array, T element)
 {
@@ -82,4 +83,22 @@ unittest
 
 	auto result = [Wrapper(5), Wrapper(18)].sum!(w => w.value);
 	assert(result == 23, "The sum should give the sum of the wrapped numbers");
+}
+
+template flatMap(alias fun) //if(isInputRange!(ReturnType!fun))
+{
+	auto flatMap(Range)(Range range) if(isInputRange!Range)
+	{
+		return .fold!((a,b) => a ~ b)(range.map!(fun));
+	}
+}
+
+unittest
+{
+	struct Bubble
+	{
+		int[] ints;
+	}
+	auto flattened = [Bubble([1,2]), Bubble([3,4])].flatMap!(x => x.ints).array;
+	assert([1, 2, 3, 4].equal(flattened), "The two arrays should be joined");
 }

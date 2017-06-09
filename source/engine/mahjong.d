@@ -26,6 +26,10 @@ struct MahjongResult
 	{
 		return sets.sum!(s => s.miniPoints);
 	}
+	auto tiles() @property pure const
+	{
+		return sets.flatMap!(s => s.tiles);
+	}
 }
 
 abstract class Set

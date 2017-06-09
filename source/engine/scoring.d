@@ -211,13 +211,131 @@ private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall 
 {
 	auto doraIndicators = wall.doraIndicators;
 	size_t doras = 0;
+	foreach(doraIndicator; doraIndicators)
+	{
+		auto dora = doraIndicator.getDoraValue;
+		doras += mahjongResult.tiles.count!(tile => dora.hasEqualValue(tile));
+	}
 	return doras;
+}
+
+version(unittest)
+{
+	class DoraIndicatorWall : Wall
+	{
+		this(const(Tile)[] doraIndicators)
+		{
+			_doraIndicators = doraIndicators;
+		}
+		private const(Tile)[] _doraIndicators;
+
+		override const(Tile)[] doraIndicators() pure const @property
+		{
+			return _doraIndicators;
+		}
+	}
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.bamboo, Numbers.eight);
+	auto mahjongResult = MahjongResult(false, 
+		[new ChiSet([
+				new Tile(Types.bamboo, Numbers.six),
+				new Tile(Types.bamboo, Numbers.seven),
+				new Tile(Types.bamboo, Numbers.eight)
+				])]);
+	auto doras = mahjongResult.countAmountOfDoras(new DoraIndicatorWall([doraIndicator]));
+	assert(doras == 0, "No doras should be found");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
+	auto mahjongResult = MahjongResult(false, 
+		[new ChiSet([
+				new Tile(Types.bamboo, Numbers.six),
+				new Tile(Types.bamboo, Numbers.seven),
+				new Tile(Types.bamboo, Numbers.eight)
+				])]);
+	auto doras = mahjongResult.countAmountOfDoras(new DoraIndicatorWall([doraIndicator]));
+	assert(doras == 1, "Only one dora should be found");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
+	auto mahjongResult = MahjongResult(false, 
+		[new PonSet([
+				new Tile(Types.bamboo, Numbers.six),
+				new Tile(Types.bamboo, Numbers.six),
+				new Tile(Types.bamboo, Numbers.six)
+				])]);
+	auto doras = mahjongResult.countAmountOfDoras(
+		new DoraIndicatorWall([doraIndicator]));
+	assert(doras == 3, "All three tiles are doras");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
+	auto mahjongResult = MahjongResult(false, 
+		[new ChiSet([
+				new Tile(Types.bamboo, Numbers.six),
+				new Tile(Types.bamboo, Numbers.seven),
+				new Tile(Types.bamboo, Numbers.eight)
+				])]);
+	auto doras = mahjongResult.countAmountOfDoras(
+		new DoraIndicatorWall([doraIndicator, doraIndicator]));
+	assert(doras == 2, "When the indicator is in there twice, the doras count double");
 }
 
 private const(ComparativeTile) getDoraValue(const Tile doraIndicator)
 {
 	return ComparativeTile(doraIndicator.type,
 		(doraIndicator.value + 1) % doraIndicator.type.amountOfTiles);
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.dragon, Dragons.green);
+	auto dora = doraIndicator.getDoraValue;
+	assert(ComparativeTile(Types.dragon, Dragons.red) == dora, "Green dragon points to red dragon as a dora");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.dragon, Dragons.white);
+	auto dora = doraIndicator.getDoraValue;
+	assert(ComparativeTile(Types.dragon, Dragons.green) == dora, "White dragon points to green dragon as a dora");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.wind, Winds.south);
+	auto dora = doraIndicator.getDoraValue;
+	assert(ComparativeTile(Types.wind, Winds.west) == dora, "West should be a dora");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.wind, Winds.north);
+	auto dora = doraIndicator.getDoraValue;
+	assert(ComparativeTile(Types.wind, Winds.east) == dora, "East should be a dora");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
+	auto dora = doraIndicator.getDoraValue;
+	assert(ComparativeTile(Types.bamboo, Numbers.six) == dora, "Bamboo six should be a dora");
+}
+
+unittest
+{
+	auto doraIndicator = new Tile(Types.bamboo, Numbers.nine);
+	auto dora = doraIndicator.getDoraValue;
+	assert(ComparativeTile(Types.bamboo, Numbers.one) == dora, "Bamboo one should be a dora");
 }
 
 enum limit_hands {mangan = 5, haneman = 6, baiman = 8, 
