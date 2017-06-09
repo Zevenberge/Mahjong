@@ -186,34 +186,30 @@ template Chain(TAnimation : Animation)
 		}
 	}
 }
-/+
- class ChainAnimation : Animation
- {
- this(Animation[] anime...)
- {
- _animations = anime;
- }
- 
- void addAnimation(Animation anime)
- in
- {
- assert(anime !is null);
- }
- body
- {
- _animations ~= anime;
- }
- 
- protected override void nextFrame()
- {
- _animations.front.nextFrame;
- if(_animations.front.done)
- {
- _animations.popFront;
- done = _animations.empty;
- }
- }
- 
- private Animation[] _animations;
- }
- +/
+
+unittest
+{
+	auto innerAnimation = new DummyAnimation(1);
+	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 1);
+	chainAnimation.animate;
+	assert(innerAnimation.done, "The inner animation should be handled first");
+	assert(!chainAnimation.done, "The outer animation should not be done yet.");
+}
+
+unittest
+{
+	auto innerAnimation = new DummyAnimation(0);
+	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 1);
+	chainAnimation.animate;
+	assert(chainAnimation.done, "The chain animation should be done.");
+}
+
+unittest
+{
+	auto innerAnimation = new DummyAnimation(1);
+	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 1);
+	_animations = [chainAnimation];
+	chainAnimation.animate;
+	assert(_animations == [chainAnimation], "Even though the inner animation finished, the outher should not have been removed");
+	_animations = null;
+}
