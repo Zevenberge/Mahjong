@@ -10,14 +10,14 @@ import mahjong.domain.ingame;
 class Tile
 { 
 	dchar face; // The unicode face of the tile. 
-	const int type;  // Winds, dragons, etc
+	const Types type;  // Winds, dragons, etc
 	const int value; // East - North, Green - White, one  - nine.
 	const UUID id;
 
 	int dora = 0;
 	Ingame origin = null;
    
-    this(int type, int value)
+    this(Types type, int value)
     {
 		id = randomUUID;
     	this.type = type;
@@ -79,9 +79,9 @@ class Tile
 
 unittest
 {
-	auto tile = new Tile(1, 4);
+	auto tile = new Tile(Types.wind, 4);
 	assert(tile.isIdentical(tile), "Tile was not identical with itself");
-	auto anotherTile = new Tile(1, 4);
+	auto anotherTile = new Tile(Types.wind, 4);
 	assert(!tile.isIdentical(anotherTile), "Tile was a different tile");
 }
 
@@ -151,4 +151,34 @@ unittest
 	auto otherTwo = new Tile(Types.ball, 2);
 	assert(!one.isConstructive(otherTwo));
 	writeln(" The isConstructive function is correct.");
+}
+
+struct ComparativeTile
+{
+	Types type;
+	int value;
+
+	bool hasEqualValue(const Tile other) pure const
+	{
+		return other.type == type && other.value == value;
+	}
+}
+
+unittest
+{
+	auto tile = new Tile(Types.dragon, Dragons.green);
+	auto comparativeTile = ComparativeTile(Types.dragon, Dragons.green);
+	assert(comparativeTile.hasEqualValue(tile), "Comparative tile should have an equal value");
+}
+unittest
+{
+	auto tile = new Tile(Types.dragon, Dragons.red);
+	auto comparativeTile = ComparativeTile(Types.dragon, Dragons.green);
+	assert(!comparativeTile.hasEqualValue(tile), "Comparative tile should not have an equal value");
+}
+unittest
+{
+	auto tile = new Tile(Types.wind, Dragons.green);
+	auto comparativeTile = ComparativeTile(Types.dragon, Dragons.green);
+	assert(!comparativeTile.hasEqualValue(tile), "Comparative tile should not have an equal value");
 }

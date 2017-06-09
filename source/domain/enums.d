@@ -7,3 +7,16 @@ enum Seasons {spring, summer, autumn, fall};
 enum Winds {east, south, west, north};
 enum Dragons {green, red, white};
 enum Numbers {one, two, three, four, five, six, seven, eight, nine};
+
+int amountOfTiles(const Types type)
+{
+	final switch(type) with(Types)
+	{
+		case season, wind:
+			return 4;
+		case dragon:
+			return 3;
+		case character, bamboo, ball:
+			return 9;
+	}
+}

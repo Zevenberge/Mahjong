@@ -134,7 +134,7 @@ unittest
 	auto player = new Player(eventHandler);
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	auto tile = new Tile(0,0);
+	auto tile = new Tile(Types.dragon, Dragons.green);
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
@@ -169,7 +169,7 @@ unittest
 	auto player = new Player(eventHandler);
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	auto tile = new Tile(0,0);
+	auto tile = new Tile(Types.dragon, Dragons.green);
 	auto wall = new MockWall(tile);
 	player.drawTile(wall);
 	auto flow = new TurnFlow(player, metagame);
@@ -191,7 +191,7 @@ unittest
 	auto player = new Player(eventHandler);
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	auto tile = new Tile(0, 0);
+	auto tile = new Tile(Types.dragon, Dragons.green);
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;

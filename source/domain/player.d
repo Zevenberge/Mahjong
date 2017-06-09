@@ -12,7 +12,7 @@ import mahjong.engine.opts;
 
 class Player
 { // General variables.
-	UUID id;
+	const UUID id;
 	dstring name = "Cal"d;
 
 	int playLoc = -10;

@@ -210,16 +210,7 @@ private bool isSevenPairs(const Tile[] hand) pure
 }
 private bool isThirteenOrphans(const Tile[] hand) pure
 {
-	struct ComparativeTile
-	{
-		int type;
-		int value;
 
-		bool hasEqualValue(const Tile other) pure const
-		{
-			return other.type == type && other.value == value;
-		}
-	}
 	if(hand.length != 14) return false;
 	int pairs = 0;
 	

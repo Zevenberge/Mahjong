@@ -4,8 +4,10 @@ import std.algorithm;
 import std.array;
 import std.conv;
 import std.math;
+import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
+import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
@@ -18,11 +20,6 @@ Scoring calculateScoring(const MahjongResult mahjongResult, const Ingame player,
 	auto miniPoints = mahjongResult.miniPoints;
 	auto amountOfDoras = mahjongResult.countAmountOfDoras(metagame.wall);
 	return new Scoring(yaku, miniPoints, amountOfDoras, player.isClosedHand);
-}
-
-private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall metagame)
-{
-	return 42;
 }
 
 class Scoring
@@ -208,6 +205,19 @@ unittest
 	assert(25 == roundMiniPoints(25), "25 is the magic number that should stay itself.");
 	assert(30 == roundMiniPoints(22), "22 should be rounded up to 30.");
 	assert(30 == roundMiniPoints(30), "When the number is dividable by 10, the rounded minipoints don't change");
+}
+
+private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall wall)
+{
+	auto doraIndicators = wall.doraIndicators;
+	size_t doras = 0;
+	return doras;
+}
+
+private const(ComparativeTile) getDoraValue(const Tile doraIndicator)
+{
+	return ComparativeTile(doraIndicator.type,
+		(doraIndicator.value + 1) % doraIndicator.type.amountOfTiles);
 }
 
 enum limit_hands {mangan = 5, haneman = 6, baiman = 8, 

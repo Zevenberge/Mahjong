@@ -118,8 +118,8 @@ unittest
 	import std.stdio;
 	import std.algorithm.searching;
 	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile(0, 0);
-	Tile a = new Tile(0,0), b = new Tile(0,0);
+	auto tile = new Tile(Types.dragon, 0);
+	Tile a = new Tile(Types.dragon,0), b = new Tile(Types.dragon,0);
 	Tile[] hand;
 	hand = hand ~ a ~ tile ~ b;
 	Tile[] takenOut;	
@@ -134,8 +134,8 @@ unittest // Range overload
 	import std.stdio;
 	import std.algorithm.searching;
 	writeln("Checking the takeOutTile function...");
-	auto tile = new Tile(0,0);
-	auto a = new Tile(0,0), b = new Tile(0,0);
+	auto tile = new Tile(Types.dragon,0);
+	auto a = new Tile(Types.dragon,0), b = new Tile(Types.dragon,0);
 	Tile[] hand;
 	hand = hand ~ a ~ tile ~ b;
 	Tile[] takenOut;	

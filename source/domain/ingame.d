@@ -3,6 +3,7 @@ module mahjong.domain.ingame;
 import std.algorithm;
 import std.array;
 import std.experimental.logger;
+import std.traits;
 import std.uuid;
 import mahjong.domain;
 import mahjong.domain.enums;
@@ -165,10 +166,8 @@ class Ingame
 	 */
 
 	bool isTenpai()
-	{ /*
-		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
-		   */
-		for(int type = Types.min; type <= Types.max; ++type)
+	{
+		foreach(type; EnumMembers!Types)
 		{
 			for(int value = Numbers.min; value <= Numbers.max; ++value)
 			{
