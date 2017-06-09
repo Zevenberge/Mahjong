@@ -1,8 +1,22 @@
 module mahjong.engine.yaku;
 
-enum Yaku {riichi, doubleRiichi, ippatsu, tsumo, tanyao, pinfu, iipeikou, sanShoukuDoujun, itsu, fanpai, chanta, rinshanKaihou, chanKan, haitei, 
-            chiiToitsu, sanShokuDokou, sanAnkou, sanKanTsu, toiToiHou, honitsu, shouSangen, honroutou, junchan, ryanPeikou, chinitsu, nagashiMangan,
-            kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, suuKanTsu, ryuuIisou, chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii};
+import mahjong.domain.ingame;
+import mahjong.domain.metagame;
+import mahjong.engine.mahjong;
+
+enum Yaku {riichi, doubleRiichi, ippatsu, tsumo, tanyao, pinfu, 
+			iipeikou, sanShoukuDoujun, itsu, fanpai, chanta, rinshanKaihou, chanKan, haitei, 
+            chiiToitsu, sanShokuDokou, sanAnkou, sanKanTsu, toiToiHou, honitsu, shouSangen, 
+			honroutou, junchan, ryanPeikou, chinitsu, nagashiMangan,
+            kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, suuKanTsu, ryuuIisou, 
+			chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii};
+
+const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
+{
+	auto leadingWind = metagame.leadingWind;
+	auto ownWind = player.wind;
+	return [Yaku.riichi, Yaku.ippatsu, Yaku.tsumo];
+}
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand)
 {

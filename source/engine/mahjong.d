@@ -22,6 +22,10 @@ struct MahjongResult
 {
 	const bool isMahjong;
 	const Set[] sets;
+	size_t miniPoints() @property pure const
+	{
+		return sets.sum!(s => s.miniPoints);
+	}
 }
 
 abstract class Set
@@ -31,7 +35,11 @@ abstract class Set
 		this.tiles = tiles;
 	}
 	const Tile[] tiles;
-	abstract size_t miniPoints() @property;
+	abstract size_t miniPoints() @property pure const;
+	bool isOpen() @property pure const
+	{
+		return tiles.any!(t => t.origin !is null);
+	}
 }
 
 class ThirteenOrphanSet : Set
@@ -41,7 +49,7 @@ class ThirteenOrphanSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property
+	override size_t miniPoints() @property pure const
 	{
 		return 0;
 	}
@@ -56,7 +64,7 @@ class SevenPairsSet : Set
 	}
 
 
-	override size_t miniPoints() @property
+	override size_t miniPoints() @property pure const
 	{
 		return 0;
 	}
@@ -69,7 +77,7 @@ class PonSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property
+	override size_t miniPoints() @property pure const
 	{
 		size_t points = 4;
 		if(isOpen) points /= 2;
@@ -78,19 +86,14 @@ class PonSet : Set
 		return points;
 	}
 
-	private bool isKan()
+	private bool isKan() pure const
 	{
 		return tiles.length == 4;
 	}
 
-	private bool isSetOfHonoursOrTerminals()
+	private bool isSetOfHonoursOrTerminals() pure const
 	{
 		return tiles[0].isHonour || tiles[0].isTerminal;
-	}
-
-	private bool isOpen()
-	{
-		return tiles.any!(t => t.origin !is null);
 	}
 }
 
@@ -101,7 +104,7 @@ class ChiSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property
+	override size_t miniPoints() @property pure const
 	{
 		return 0;
 	}
@@ -114,7 +117,7 @@ class PairSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property
+	override size_t miniPoints() @property pure const
 	{
 		return 0;
 	}

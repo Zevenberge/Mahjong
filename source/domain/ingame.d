@@ -62,6 +62,12 @@ class Ingame
 	{
 		return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
 	}
+
+	bool isClosedHand() @property pure const
+	{
+		return openHand.isClosedHand;
+	}
+
 	/*
 	 Normal functions related to claiming tiles.
 	 */

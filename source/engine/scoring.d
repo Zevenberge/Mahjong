@@ -4,10 +4,26 @@ import std.algorithm;
 import std.array;
 import std.conv;
 import std.math;
+import mahjong.domain.ingame;
+import mahjong.domain.metagame;
+import mahjong.domain.wall;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.engine.yaku;
 import mahjong.share.range;
+
+Scoring calculateScoring(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
+{
+	auto yaku = mahjongResult.determineYaku(player, metagame);
+	auto miniPoints = mahjongResult.miniPoints;
+	auto amountOfDoras = mahjongResult.countAmountOfDoras(metagame.wall);
+	return new Scoring(yaku, miniPoints, amountOfDoras, player.isClosedHand);
+}
+
+private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall metagame)
+{
+	return 42;
+}
 
 class Scoring
 {
