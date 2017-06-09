@@ -31,12 +31,13 @@ class MovementAnimation : Animation
 		_transformable.position = _transformable.position + _deltaCoords.position;
 		_transformable.rotation = _transformable.rotation + _deltaCoords.rotation;
 		_amountOfFrames--;
-		if(_amountOfFrames == 0)
-		{
-			done = true;
-		}
 	}
-	
+
+	protected override bool done()
+	{
+		return _amountOfFrames == 0;
+	}
+
 	private:
 		Transformable _transformable;
 		FloatCoords _deltaCoords;

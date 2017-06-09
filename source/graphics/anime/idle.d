@@ -18,10 +18,11 @@ class Idle : Animation
 	protected override void nextFrame()
 	{
 		_amountOfFrames--;
-		if(_amountOfFrames == 0)
-		{
-			done = true;
-		}
+	}
+
+	protected override bool done()
+	{
+		return _amountOfFrames == 0;
 	}
 	
 	private int _amountOfFrames;

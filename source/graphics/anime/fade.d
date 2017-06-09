@@ -4,7 +4,7 @@ import std.algorithm;
 import std.conv;
 import dsfml.graphics;
 import mahjong.graphics.anime.animation;
-
+/+
 alias FadeRect = FadeAnimation!RectangleShape;
 alias FadeSprite = FadeAnimation!Sprite;
 
@@ -35,3 +35,4 @@ class FadeAnimation(T) : Animation
 		int _speed;
 		T _fader;
 }
++/
