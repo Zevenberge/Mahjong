@@ -109,7 +109,7 @@ class DefaultStyleOpts : StyleOpts
 	}
 	Color mahjongResultsHazeColor()
 	{
-		return ingameMenuHazeColor;
+		return Color(25, 25, 25, 200);
 	}
 	int ingameMenuMargin()
 	{

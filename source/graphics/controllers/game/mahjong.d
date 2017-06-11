@@ -37,8 +37,7 @@ class MahjongController: GameController
 
 	private void setHaze()
 	{
-		auto margin = Vector2f(10,10);
-		auto screen = styleOpts.screenSize;
+		auto screen = styleOpts.gameScreenSize;
 		_haze = new RectangleShape(
 			Vector2f(screen.x - 2*margin.x, screen.y - 2*margin.y));
 		_haze.position = margin;
@@ -63,8 +62,8 @@ class MahjongController: GameController
 	override void draw()
 	{
 		_window.draw(_game);
-		_resultScreens.front.draw(_window);
 		_window.draw(_haze);
+		_resultScreens.front.draw(_window);
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) 
@@ -119,6 +118,11 @@ class MahjongController: GameController
 	}
 }
 
+private enum margin = Vector2f(50,50);
+private enum innerMargin = margin*1.4;
+private enum resultScreenTileSpacing = Vector2f(20,25);
+private enum iconScale = 1.5;
+
 private class ResultScreen
 {
 	this(const MahjongData mahjongData)
@@ -139,21 +143,23 @@ private class ResultScreen
 		_playerIcon = _mahjongData.player.getIcon.dup;
 		_playerIcon.rotation = 0;
 		_playerIcon.position = 
-			Vector2f(styleOpts.screenSize.x - 20 - drawingOpts.iconSize, 20);
+			Vector2f(styleOpts.screenSize.x - innerMargin.x - iconScale* drawingOpts.iconSize, 
+				innerMargin.y);
+		_playerIcon.scale = _playerIcon.scale * iconScale;
 	}
 
 	private void placeTiles()
 	{
 		_tiles = _mahjongData.result.tiles.array;
-		float initialLeftBound = 40;
+		float initialLeftBound = innerMargin.x;
 		float leftBound = initialLeftBound;
-		float topBound = 40;
+		float topBound = innerMargin.y;
 		foreach(i, set; _mahjongData.result.sets)
 		{
-			if(i == 4) // Make new row.
+			if(i == 3) // Make new row.
 			{
 				leftBound = initialLeftBound;
-				topBound += 5 + drawingOpts.tileSize.y;
+				topBound += resultScreenTileSpacing.y + drawingOpts.tileSize.y;
 			}
 			foreach(tile; set.tiles)
 			{
@@ -173,7 +179,7 @@ private class ResultScreen
 					leftBound += drawingOpts.tileSize.y;
 				}
 			}
-			leftBound += 10;
+			leftBound += resultScreenTileSpacing.x;
 		}
 	}
 
