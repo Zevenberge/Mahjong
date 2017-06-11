@@ -43,6 +43,11 @@ void clearPlayerCache()
 	trace("Cleared player cache");
 }
 
+const(Sprite) getIcon(const Player player)
+{
+	return _players[player.id]._icon;
+}
+
 private PlayerVisuals[UUID] _players;
 
 private class PlayerVisuals
