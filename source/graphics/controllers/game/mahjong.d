@@ -22,6 +22,7 @@ class MahjongController: GameController
 		_event = event;
 		freezeGameGraphics;
 		setHaze;
+		createResultScreens;
 	}
 
 	private void freezeGameGraphics()

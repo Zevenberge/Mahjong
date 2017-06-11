@@ -80,3 +80,71 @@ struct MahjongData
 	const(MahjongResult) result;
 	// More e.g. yaku rating.
 }
+
+unittest
+{
+	import mahjong.domain.closedhand;
+	import mahjong.domain.enums;
+	import mahjong.domain.ingame;
+	import mahjong.engine.creation;
+	auto eventhandler = new TestEventHandler;
+	auto player1 = new Player(eventhandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
+	auto metagame = new Metagame([player1]);
+	auto flow = new MahjongFlow(metagame);
+	assert(eventhandler.mahjongEvent !is null, "A mahjong event should have been distributed.");
+	assert(eventhandler.mahjongEvent.data.empty, "No player has a mahjong, so the data should be empty.");
+}
+unittest
+{
+	import mahjong.domain.closedhand;
+	import mahjong.domain.enums;
+	import mahjong.domain.ingame;
+	import mahjong.engine.creation;
+	auto eventhandler = new TestEventHandler;
+	auto player1 = new Player(eventhandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto metagame = new Metagame([player1]);
+	auto flow = new MahjongFlow(metagame);
+	assert(eventhandler.mahjongEvent.data.length == 1, "As the only player has a mahjong, one data should be added");
+}
+unittest
+{
+	import mahjong.domain.closedhand;
+	import mahjong.domain.enums;
+	import mahjong.domain.ingame;
+	import mahjong.engine.creation;
+	auto eventhandler = new TestEventHandler;
+	auto player1 = new Player(eventhandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto player2 = new Player(eventhandler);
+	player2.game = new Ingame(PlayerWinds.south);
+	player2.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
+	auto metagame = new Metagame([player1, player2]);
+	auto flow = new MahjongFlow(metagame);
+	assert(eventhandler.mahjongEvent.data.length == 1, "As only one of two players has a mahjong, one data should be added");
+	assert(eventhandler.mahjongEvent.data[0].player == player1, "The mahjong player is player 1");
+}
+unittest
+{
+	import mahjong.domain.closedhand;
+	import mahjong.domain.enums;
+	import mahjong.domain.ingame;
+	import mahjong.engine.creation;
+	auto eventhandler = new TestEventHandler;
+	auto player1 = new Player(eventhandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto player2 = new Player(eventhandler);
+	player2.game = new Ingame(PlayerWinds.south);
+	player2.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
+	auto player3 = new Player(eventhandler);
+	player3.game = new Ingame(PlayerWinds.west);
+	player3.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto metagame = new Metagame([player1, player2, player3]);
+	auto flow = new MahjongFlow(metagame);
+	assert(eventhandler.mahjongEvent.data.length == 2, "As two out of three players have a mahjong");
+}
