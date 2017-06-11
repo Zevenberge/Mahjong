@@ -130,6 +130,16 @@ class Ingame
 		return scanHandForMahjong(this, discard).isMahjong
 			&& !isFuriten ;
 	}
+
+	void ron(Tile discard)
+	{
+		if(!isRonnable(discard)) 
+		{
+			throw new IllegalClaimException(discard, "The tile could not have been ronned.");
+		}
+		_lastTile = discard;
+		closedHand.tiles ~= discard;
+	}
 	
 	bool canDeclareClosedKan(const Tile tile)
 	{
@@ -307,4 +317,18 @@ unittest
 	chiTile.origin = new Ingame(PlayerWinds.south);
 	ingame.chi(chiTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
 	assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(PlayerWinds.east);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+	auto ronTile = "🀡"d.convertToTiles[0];
+	ronTile.origin = new Ingame(PlayerWinds.south);
+	ingame.ron(ronTile);
+	assert(ingame.isMahjong, "After ronning, the player should have mahjong");
+	assert(ingame.lastTile == ronTile, "The player should confess they claimed the last tile");
 }

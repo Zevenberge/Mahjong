@@ -374,7 +374,7 @@ class RonRequest : ClaimRequest
 
 	void apply()
 	{
-		// Do nothing
+		_player.ron(_discard);
 	}
 
 	bool isAllowed() pure
