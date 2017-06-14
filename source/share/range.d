@@ -6,6 +6,23 @@ import std.experimental.logger;
 import std.range;
 import std.traits;
 
+template max(alias pred, TReturn)
+{
+	auto max(Range)(Range range) if(isInputRange!Range)
+	{
+		auto myMax = TReturn.init;
+		foreach(element; range)
+		{
+			auto value = pred(element);
+			if(value > myMax)
+			{
+				myMax = value;
+			}
+		}
+		return myMax;
+	}
+}
+
 void remove(alias pred, T)(ref T[] array, T element)
 {
     foreach(i, e; array)

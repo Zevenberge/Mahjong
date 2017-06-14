@@ -1,6 +1,6 @@
 module mahjong.graphics.anime.animation;
 
-import std.algorithm.iteration;
+import std.algorithm;
 import std.experimental.logger;
 import std.range;
 import std.uuid;
@@ -212,4 +212,59 @@ unittest
 	chainAnimation.animate;
 	assert(_animations == [chainAnimation], "Even though the inner animation finished, the outher should not have been removed");
 	_animations = null;
+}
+
+class ParallelAnimation : Animation
+{
+	// Array instead of varargs https://issues.dlang.org/show_bug.cgi?id=17504
+	this(Animation[] animations)
+	{
+		_animations = animations;
+	}
+
+	private Animation[] _animations;
+
+	protected override void nextFrame()
+	{
+		_animations.each!(a => a.animate);
+	}
+
+	protected override bool done() @property
+	{
+		return _animations.all!(a => a.done);
+	}
+}
+
+unittest
+{
+	Animation animationA = new DummyAnimation(1);
+	Animation animationB = new DummyAnimation(1);
+	auto parallelAnimation = new ParallelAnimation([animationA, animationB]);
+	parallelAnimation.animate;
+	assert(animationA.done, "The first wrapped animation should be done");
+	assert(animationB.done, "The second wrapped animation should be done");
+	assert(parallelAnimation.done, "The parallel animation should be done");
+}
+unittest
+{
+	Animation animationA = new DummyAnimation(1);
+	Animation animationB = new DummyAnimation(2);
+	auto parallelAnimation = new ParallelAnimation([animationA, animationB]);
+	parallelAnimation.animate;
+	assert(!parallelAnimation.done, "One of the inner animations is not finished so the parallel animation is not either.");
+}
+
+unittest
+{
+	import std.stdio;
+	auto chainedAnimation = new DummyAnimation(1);
+	Animation animationA = new DummyAnimation(1);
+	Animation animationB = new DummyAnimation(1);
+	auto parallelChainedAnimation = new Chain!ParallelAnimation(chainedAnimation, [animationA, animationB]);
+	assert(parallelChainedAnimation._animations.length == 2, "There should be two parallel animations");
+	parallelChainedAnimation.animate;
+	assert(chainedAnimation.done, "The inner animation should be done");
+	assert(!parallelChainedAnimation.done, "The outer animation should not be done");
+	parallelChainedAnimation.animate;
+	assert(parallelChainedAnimation.done, "The whole chain should be done now");
 }

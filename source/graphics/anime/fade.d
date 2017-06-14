@@ -4,35 +4,55 @@ import std.algorithm;
 import std.conv;
 import dsfml.graphics;
 import mahjong.graphics.anime.animation;
-/+
-alias FadeRect = FadeAnimation!RectangleShape;
-alias FadeSprite = FadeAnimation!Sprite;
 
-class FadeAnimation(T) : Animation
+class AppearTextAnimation : Animation
 {
-	this(T fadable, int fadeSpeed)
+	this(Text text, int amountOfFrames)
 	{
-		_speed = fadeSpeed;
-		_fader = fadable;
+		_text = text;
+		_amountOfFrames = amountOfFrames;
 	}
+
+	private Text _text;
+	private int _amountOfFrames;
+
+	protected override void nextFrame()
+	{
+		auto color = _text.getColor;
+		auto increment = (255 - color.a)/_amountOfFrames;
+		_text.setColor(
+			Color(color.r, color.g, color.b, (color.a + increment).to!ubyte)
+			);
+		--_amountOfFrames;
+	}
+
+	override protected bool done() @property
+	{
+		return _amountOfFrames == 0;
+	}
+}
+
+class FadeSpriteAnimation : Animation
+{
+	this(Sprite sprite, int amountOfFrames)
+	{
+		_sprite = sprite;
+		_amountOfFrames = amountOfFrames;
+	}
+
+	private Sprite _sprite;
+	private int _amountOfFrames;
 	
 	protected override void nextFrame()
 	{
-		static if(is(T == Sprite))
-		{
-			_fader.color.a = max(0, _fader.color.a - _speed).to!ubyte;
-			done = _fader.color.a == 0;
-		}
-		else static if(is(T == Shape))
-		{
-			_fader.fillColor.a = max(0, _fader.fillColor.a - _speed).to!ubyte;
-			_fader.outlineColor.a = max(0, _fader.outlineColor.a - _speed).to!ubyte;
-			done = _fader.color.a == 0 && _fader.outlineColor.a == 0;
-		}
+		auto color = _sprite.color;
+		auto increment = color.a/_amountOfFrames;
+		_sprite.color = Color(color.r, color.g, color.b, (color.a - increment).to!ubyte);
+		--_amountOfFrames;
 	}
 
-	private:
-		int _speed;
-		T _fader;
+	protected override bool done() @property
+	{
+		return _amountOfFrames == 0;
+	}
 }
-+/

@@ -63,6 +63,11 @@ string toKanji(uint number)
 	return builder.to!string;
 }
 
+IntRect toRect(Vector2i v)
+{
+	return IntRect(0,0, v.x, v.y);
+}
+
 FloatRect toRect(Vector2f v)
 {
 	return FloatRect(0, 0, v.x, v.y);
