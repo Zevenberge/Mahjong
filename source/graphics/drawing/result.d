@@ -2,6 +2,7 @@
 
 import std.array;
 import std.conv;
+import std.experimental.logger;
 import std.string : format;
 import std.uuid;
 import dsfml.graphics;
@@ -40,9 +41,11 @@ public class ResultScreen
 
 	void initialize()
 	{
+		info("Initialising result screen");
 		loadPlayerIcon;
 		placeTiles;
 		createYakuTextAnimation;
+		placeTexts;
 	}
 
 	private void loadPlayerIcon()
@@ -119,11 +122,14 @@ public class ResultScreen
 
 	private void placeTexts()
 	{
-		float top = 250;
+		float top = iconScale * drawingOpts.iconSize + 10 + innerMargin.y;
 		auto maxWidthOfYakuText = _yakuTexts.max!(yt => yt.widthOfYakuText, float);
+		trace("Max width of the yaku text is ", maxWidthOfYakuText);
 		auto maxWidthOfFanText = _yakuTexts.max!(yt => yt.widthOfFanText, float);
+		trace("Max width of the fan text is ", maxWidthOfFanText);
 		foreach(yakuText; _yakuTexts)
 		{
+			trace("Top is ", top);
 			yakuText.alignText(top, maxWidthOfFanText, maxWidthOfYakuText);
 			top += 5 + yakuText.height;
 		}
@@ -154,17 +160,31 @@ public class ResultScreen
 
 	void forceFinish()
 	{
-
+		trace("Forcing the result screen to short-circuit its animations");
 	}
 }
 
+private enum textMargin = 10;
 private enum maxYakuDescriptionWidth = 500;
 private enum goldenRatio = 1.618;
 private float splitter()
 {
 	return styleOpts.gameScreenSize.x/goldenRatio;
 }
-private enum textMargin = 10;
+
+unittest
+{
+	class TestStyleOpts : DefaultStyleOpts
+	{
+		override Vector2i gameScreenSize()
+		{
+			return Vector2i(1618, 0);
+		}
+	}
+	styleOpts = new TestStyleOpts;
+	assert(splitter == 1000, "The splitter should be at the larger end of the golden ratio");
+	styleOpts = null;
+}
 
 private class YakuText
 {
@@ -262,4 +282,70 @@ private class YakuText
 			return new Chain!ParallelAnimation(previousAnimation, [yakuAnimation, fanAnimation]);
 		}
 	}
+}
+
+unittest
+{
+	import std.math;
+	styleOpts = new DefaultStyleOpts;
+	auto yakuText = new YakuText("Short text", 10);
+	assert(!yakuText.widthOfFanText.isNaN, "The fan text should have a determined width");
+	assert(!yakuText.widthOfYakuText.isNaN, "The yaku text should have a determined width.");
+}
+
+unittest
+{
+	class TestStyleOpts : DefaultStyleOpts
+	{
+		override Vector2i gameScreenSize()
+		{
+			return Vector2i(1618, 0);
+		}
+	}
+	styleOpts = new TestStyleOpts;
+	auto yakuText = new YakuText("Short text", 10);
+	yakuText.alignText(200, yakuText.widthOfFanText, yakuText.widthOfYakuText);
+	assert(yakuText._yaku.position.x > 490, "The left position of the yaku text should be larger than its minimal position");
+	assert(yakuText._yaku.position.y == 200, "The yaku should be aligned at 200");
+	assert(yakuText._fan.position.x == 1010, "The left position of the fan text should be the splitter plus the margin");
+	assert(yakuText._fan.position.y == 200, "The fan should be aligned at 200");
+}
+
+unittest
+{
+	class TestStyleOpts : DefaultStyleOpts
+	{
+		override Vector2i gameScreenSize()
+		{
+			return Vector2i(1618, 0);
+		}
+	}
+	styleOpts = new TestStyleOpts;
+	auto yakuText = new YakuText("I am a very long text that should be shortened because of display reasons", 10);
+	yakuText.alignText(200, yakuText.widthOfFanText, yakuText.widthOfYakuText);
+	assert(yakuText._yaku.position.x >= 490, "The left position of the yaku text should be larger or equal than its minimal position because the text is shrunk");
+	assert(yakuText._yaku.position.y > 200, "Because the yaku is shrinked, the position should be slightyly higher than the top of 200");
+	assert(yakuText._fan.position.x == 1010, "The left position of the fan text should be the splitter plus the margin");
+	assert(yakuText._fan.position.y == 200, "The fan should be aligned at 200");
+}
+
+unittest
+{
+	styleOpts = new DefaultStyleOpts;
+	auto yakuText = new YakuText("Short text", 10);
+	assert(yakuText._fan.getColor.a == 0, "The text should be completely faded");
+	assert(yakuText._yaku.getColor.a == 0, "The text should be completely faded");
+	Animation anime = null;
+	foreach(i; 0..10)
+	{
+		// Also test if the chaining of animations does not give a segfault
+		anime = yakuText.chainAnimations(anime);
+	}
+	while(!anime.done)
+	{
+		anime.animate;
+	}
+	assert(yakuText._fan.getColor.a == 255, "The text should be completely visible");
+	assert(yakuText._yaku.getColor.a == 255, "The text should be completely visible");
+
 }

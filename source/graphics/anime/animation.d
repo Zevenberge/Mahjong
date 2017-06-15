@@ -20,7 +20,7 @@ class Animation
 		}
 	}
 
-	protected abstract bool done() @property;
+	abstract bool done() @property;
 	
 	protected abstract void nextFrame();
 }

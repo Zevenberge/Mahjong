@@ -3,12 +3,14 @@ module mahjong.share.range;
 import std.algorithm;
 import std.array;
 import std.experimental.logger;
+import std.math;
 import std.range;
 import std.traits;
 
 template max(alias pred, TReturn)
 {
-	auto max(Range)(Range range) if(isInputRange!Range)
+	auto max(Range)(Range range) 
+		if(isInputRange!Range && isNumeric!TReturn)
 	{
 		auto myMax = TReturn.init;
 		foreach(element; range)
@@ -18,9 +20,23 @@ template max(alias pred, TReturn)
 			{
 				myMax = value;
 			}
+			static if(isFloatingPoint!TReturn)
+			{
+				if(myMax.isNaN)
+				{
+					myMax = value;
+				}
+			}
 		}
 		return myMax;
 	}
+}
+unittest
+{
+	assert([0,1,2,3,4,5].max!(s => s % 5, int) == 4, "It takes the max of the evaluated expression");
+	assert([0f,1f,2f,3f,4f,5f].max!(s => s % 5, float) == 4, "It should work for floats");
+	assert([0f,1f,2f,3f,float.nan,5f].max!(s => s % 5, float) == 3, "The max function should ignore NaN");
+	assert([0f,3f,2f,float.nan,1f,5f].max!(s => s % 5, float) == 3, "The max function is independent on order");
 }
 
 void remove(alias pred, T)(ref T[] array, T element)
