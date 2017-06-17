@@ -7,6 +7,7 @@ import std.math;
 import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
+import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.flow.mahjong;
@@ -143,6 +144,48 @@ unittest
 	assert(payment.east == 2000, "The east value should have been initialized at 2000 and is invariant of who won.");
 	// Non east is not actually relevant.
 	assert(payment.ron == 2000, "The ron payment should be simply east, because there are no other players and is invariant of who won.");
+}
+
+struct Transaction
+{
+	const Player player;
+	const int amount;
+
+	Transaction opBinary(string op)(Transaction rhs)
+	in
+	{
+		assert(player == rhs.player, "Cannot sum the transactions of two players");
+	}
+	body
+	{
+		static if(op == "+") return Transaction(player, amount + rhs.amount);
+		else static if(op == "-") return Transaction(player, amount - rhs.amount);
+		else static assert(false, "Operator " ~ op ~ " not supported");
+	}
+}
+
+unittest
+{
+	import mahjong.engine.flow;
+	auto player = new Player(new TestEventHandler);
+	auto transactionA = Transaction(player, 1234);
+	auto transactionB = Transaction(player, 5678);
+	auto sumOfTransactions = transactionA + transactionB;
+	assert(sumOfTransactions.amount == 6912, "The transactions are summed together.");
+	auto differenceOfTransactions = transactionB - transactionA;
+	assert(differenceOfTransactions.amount == 4444, "The transactions should be subtracted.");
+}
+
+unittest
+{
+	import std.exception;
+	import core.exception;
+	import mahjong.engine.flow;
+	auto player = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto transactionA = Transaction(player, 123);
+	auto transactionB = Transaction(player2, 456);
+	assertThrown!AssertError(transactionA + transactionB, "Summing transactions of two different player is not allowed.");
 }
 
 private enum prelimitScores = initializePreLimitPayments();
