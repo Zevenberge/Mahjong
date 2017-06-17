@@ -48,7 +48,7 @@ class Player
 		game = new Ingame(wind);
 	}
 
-	int wind() @property
+	int wind() @property pure const
 	{
 		if(game is null) return -1;
 		return game.wind;

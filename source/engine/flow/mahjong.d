@@ -3,6 +3,7 @@ module mahjong.engine.flow.mahjong;
 import std.algorithm;
 import std.array;
 import std.experimental.logger;
+import mahjong.domain.enums;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.engine.mahjong;
@@ -78,6 +79,10 @@ struct MahjongData
 {
 	const(Player) player;
 	const(MahjongResult) result;
+	bool isWinningPlayerEast() pure const
+	{
+		return player.wind == PlayerWinds.east;
+	}
 	// More e.g. yaku rating.
 }
 

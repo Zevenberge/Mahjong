@@ -97,40 +97,60 @@ public class ResultScreen
 	{
 		auto scoring = calculateScoring(_mahjongData.result, _mahjongData.player, _metagame);
 		auto isClosedHand = _mahjongData.player.isClosedHand;
+		createFanTexts(scoring, isClosedHand);
+		createMiscTexts(scoring, isClosedHand);
+		_animation.objectId = randomUUID;
+		addUniqueAnimation(_animation);
+	}
+
+	private void createFanTexts(Scoring scoring, bool isClosedHand)
+	{
 		auto totalAmountOfFan = 0;
 		foreach(yaku; scoring.yakus)
 		{
 			auto fan = yaku.convertToFan(isClosedHand);
 			totalAmountOfFan += fan;
-			createTextAndAddAnimation(yaku.translate, fan);
+			createYakuTextAndAddAnimation(yaku.translate, fan);
 		}
 		if(scoring.amountOfDoras > 0)
 		{
-			createTextAndAddAnimation("doras".translate, scoring.amountOfDoras);
+			createYakuTextAndAddAnimation("doras".translate, scoring.amountOfDoras);
 		}
-		createTextAndAddAnimation("total".translate, totalAmountOfFan);
-		_animation.objectId = randomUUID;
-		addUniqueAnimation(_animation);
+		createYakuTextAndAddAnimation("total".translate, totalAmountOfFan);
 	}
 
-	private void createTextAndAddAnimation(string text, size_t fan)
+	private void createMiscTexts(Scoring scoring, bool isClosedHand)
+	{
+		auto minipoints = new DoubleText("Minipoints", scoring.miniPoints.to!string);
+		addTextAndAnimation(minipoints);
+		auto score = new DoubleText("Score", 
+			scoring.calculatePayment(_mahjongData.isWinningPlayerEast).ron.to!string);
+		addTextAndAnimation(score);
+	}
+
+	private void createYakuTextAndAddAnimation(string text, size_t fan)
 	{
 		auto yakuText = new YakuText(text, fan);
-		_yakuTexts ~= yakuText;
-		_animation = yakuText.chainAnimations(_animation);
+		addTextAndAnimation(yakuText);
+	}
+
+	private void addTextAndAnimation(DoubleText text)
+	{
+		_yakuTexts ~= text;
+		_animation = text.chainAnimations(_animation);
 	}
 
 	private void placeTexts()
 	{
 		float top = iconScale * drawingOpts.iconSize + 10 + innerMargin.y;
-		auto maxWidthOfYakuText = _yakuTexts.max!(yt => yt.widthOfYakuText, float);
+		auto maxWidthOfYakuText = _yakuTexts.max!(yt => yt.widthOfLeftText, float);
 		trace("Max width of the yaku text is ", maxWidthOfYakuText);
-		auto maxWidthOfFanText = _yakuTexts.max!(yt => yt.widthOfFanText, float);
+		auto maxWidthOfFanText = _yakuTexts.max!(yt => yt.widthOfRightText, float);
 		trace("Max width of the fan text is ", maxWidthOfFanText);
 		foreach(yakuText; _yakuTexts)
 		{
 			trace("Top is ", top);
-			yakuText.alignText(top, maxWidthOfFanText, maxWidthOfYakuText);
+			yakuText.alignText(top, maxWidthOfYakuText, maxWidthOfFanText, splitter);
 			top += 5 + yakuText.height;
 		}
 	}
@@ -138,7 +158,7 @@ public class ResultScreen
 	private Sprite _playerIcon;
 	private const(Tile)[] _tiles;
 	private Animation _animation;
-	private YakuText[] _yakuTexts;
+	private DoubleText[] _yakuTexts;
 
 	void draw(RenderTarget target)
 	{
@@ -186,34 +206,42 @@ unittest
 	styleOpts = null;
 }
 
-private class YakuText
+private class YakuText : DoubleText
 {
 	this(string yakuName, size_t amountOfFan)
 	{
-		setFan(amountOfFan);
-		setYakuDescription(yakuName);
+		super(yakuName, "%s fan".format(amountOfFan));
+	}
+}
+
+private class DoubleText
+{
+	this(string leftText, string rightText)
+	{
+		setLeftText(leftText);
+		setRightText(rightText);
 	}
 
-	private void setFan(size_t amountOfFan)
+	private void setRightText(string text)
 	{
-		_fan = createText;
-		_fan.setString("%s fan".format(amountOfFan));
+		_rightText = createText;
+		_rightText.setString(text);
 	}
 
-	private void setYakuDescription(string yakuName)
+	private void setLeftText(string yakuName)
 	{
-		_yaku = createText;
-		_yaku.setString(yakuName);
+		_leftText = createText;
+		_leftText.setString(yakuName);
 		correctYakuDescriptionWidthIfNecessary;
 	}
 
 	private void correctYakuDescriptionWidthIfNecessary()
 	{
-		auto width = _yaku.getLocalBounds.width;
+		auto width = _leftText.getLocalBounds.width;
 		if(width > maxYakuDescriptionWidth)
 		{
-			auto newCharacterSize = _yaku.getCharacterSize * maxYakuDescriptionWidth / width;
-			_yaku.setCharacterSize(newCharacterSize.floor.to!uint);
+			auto newCharacterSize = _leftText.getCharacterSize * maxYakuDescriptionWidth / width;
+			_leftText.setCharacterSize(newCharacterSize.floor.to!uint);
 		}
 	}
 
@@ -226,53 +254,53 @@ private class YakuText
 		return text;
 	}
 
-	private Text _fan;
-	private Text _yaku;
+	private Text _leftText;
+	private Text _rightText;
 
 	float height() @property const
 	{
-		return _fan.getLocalBounds.height;
+		return _rightText.getLocalBounds.height;
 	}
 
-	float widthOfFanText() @property const
+	float widthOfRightText() @property const
 	{
-		return _fan.getLocalBounds.width;
+		return _rightText.getLocalBounds.width;
 	}
 
-	float widthOfYakuText() @property const
+	float widthOfLeftText() @property const
 	{
-		return _yaku.getLocalBounds.width;
+		return _leftText.getLocalBounds.width;
 	}
 
-	void alignText(float top, float maxWidthOfFanText, float maxWidthOfYakuText)
+	void alignText(float top, float maxWidthOfLeftText, float maxWidthOfRightText, float splitter)
 	{
-		alignYakuDescription(top, maxWidthOfYakuText);
-		alignAmountOfFan(top, maxWidthOfFanText);
+		alignLeftTextLeft(top, maxWidthOfLeftText, splitter);
+		alightRightTextRight(top, maxWidthOfRightText, splitter);
 	}
 
-	private void alignYakuDescription(float top, float maxWidthOfYakuText)
+	private void alignLeftTextLeft(float top, float maxWidthOfLeftText, float splitter)
 	{
-		auto bounds = FloatRect(splitter - textMargin - maxWidthOfYakuText, 
-			top, maxWidthOfYakuText, height);
-		_yaku.alignLeft(bounds);
+		auto bounds = FloatRect(splitter - textMargin - maxWidthOfLeftText, 
+			top, maxWidthOfLeftText, height);
+		_leftText.alignLeft(bounds);
 	}
 
-	private void alignAmountOfFan(float top, float maxWidthOfFanText)
+	private void alightRightTextRight(float top, float maxWidthOfRightText, float splitter)
 	{
-		auto bounds = FloatRect(splitter + textMargin, top, maxWidthOfFanText, height);
-		_fan.alignRight(bounds);
+		auto bounds = FloatRect(splitter + textMargin, top, maxWidthOfRightText, height);
+		_rightText.alignRight(bounds);
 	}
 
 	void draw(RenderTarget target)
 	{
-		target.draw(_yaku);
-		target.draw(_fan);
+		target.draw(_leftText);
+		target.draw(_rightText);
 	}
 
 	Animation chainAnimations(Animation previousAnimation)
 	{
-		Animation yakuAnimation = new AppearTextAnimation(_yaku, amountOfFramesPerLineOfText);
-		Animation fanAnimation = new AppearTextAnimation(_fan, amountOfFramesPerLineOfText);
+		Animation yakuAnimation = new AppearTextAnimation(_leftText, amountOfFramesPerLineOfText);
+		Animation fanAnimation = new AppearTextAnimation(_rightText, amountOfFramesPerLineOfText);
 		if(previousAnimation is null)
 		{
 			return new ParallelAnimation([yakuAnimation, fanAnimation]);
@@ -289,8 +317,8 @@ unittest
 	import std.math;
 	styleOpts = new DefaultStyleOpts;
 	auto yakuText = new YakuText("Short text", 10);
-	assert(!yakuText.widthOfFanText.isNaN, "The fan text should have a determined width");
-	assert(!yakuText.widthOfYakuText.isNaN, "The yaku text should have a determined width.");
+	assert(!yakuText.widthOfRightText.isNaN, "The fan text should have a determined width");
+	assert(!yakuText.widthOfLeftText.isNaN, "The yaku text should have a determined width.");
 }
 
 unittest
@@ -304,11 +332,11 @@ unittest
 	}
 	styleOpts = new TestStyleOpts;
 	auto yakuText = new YakuText("Short text", 10);
-	yakuText.alignText(200, yakuText.widthOfFanText, yakuText.widthOfYakuText);
-	assert(yakuText._yaku.position.x > 490, "The left position of the yaku text should be larger than its minimal position");
-	assert(yakuText._yaku.position.y == 200, "The yaku should be aligned at 200");
-	assert(yakuText._fan.position.x == 1010, "The left position of the fan text should be the splitter plus the margin");
-	assert(yakuText._fan.position.y == 200, "The fan should be aligned at 200");
+	yakuText.alignText(200, yakuText.widthOfLeftText, yakuText.widthOfRightText, 1000);
+	assert(yakuText._leftText.position.x > 490, "The left position of the yaku text should be larger than its minimal position");
+	assert(yakuText._leftText.position.y == 200, "The yaku should be aligned at 200");
+	assert(yakuText._rightText.position.x == 1010, "The left position of the fan text should be the splitter plus the margin");
+	assert(yakuText._rightText.position.y == 200, "The fan should be aligned at 200");
 }
 
 unittest
@@ -322,19 +350,19 @@ unittest
 	}
 	styleOpts = new TestStyleOpts;
 	auto yakuText = new YakuText("I am a very long text that should be shortened because of display reasons", 10);
-	yakuText.alignText(200, yakuText.widthOfFanText, yakuText.widthOfYakuText);
-	assert(yakuText._yaku.position.x >= 490, "The left position of the yaku text should be larger or equal than its minimal position because the text is shrunk");
-	assert(yakuText._yaku.position.y > 200, "Because the yaku is shrinked, the position should be slightyly higher than the top of 200");
-	assert(yakuText._fan.position.x == 1010, "The left position of the fan text should be the splitter plus the margin");
-	assert(yakuText._fan.position.y == 200, "The fan should be aligned at 200");
+	yakuText.alignText(200, yakuText.widthOfLeftText, yakuText.widthOfRightText, 1000);
+	assert(yakuText._leftText.position.x >= 490, "The left position of the yaku text should be larger or equal than its minimal position because the text is shrunk");
+	assert(yakuText._leftText.position.y > 200, "Because the yaku is shrinked, the position should be slightyly higher than the top of 200");
+	assert(yakuText._rightText.position.x == 1010, "The left position of the fan text should be the splitter plus the margin");
+	assert(yakuText._rightText.position.y == 200, "The fan should be aligned at 200");
 }
 
 unittest
 {
 	styleOpts = new DefaultStyleOpts;
 	auto yakuText = new YakuText("Short text", 10);
-	assert(yakuText._fan.getColor.a == 0, "The text should be completely faded");
-	assert(yakuText._yaku.getColor.a == 0, "The text should be completely faded");
+	assert(yakuText._rightText.getColor.a == 0, "The text should be completely faded");
+	assert(yakuText._leftText.getColor.a == 0, "The text should be completely faded");
 	Animation anime = null;
 	foreach(i; 0..10)
 	{
@@ -345,7 +373,7 @@ unittest
 	{
 		anime.animate;
 	}
-	assert(yakuText._fan.getColor.a == 255, "The text should be completely visible");
-	assert(yakuText._yaku.getColor.a == 255, "The text should be completely visible");
+	assert(yakuText._rightText.getColor.a == 255, "The text should be completely visible");
+	assert(yakuText._leftText.getColor.a == 255, "The text should be completely visible");
 
 }
