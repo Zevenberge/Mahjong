@@ -34,10 +34,15 @@ class Metagame
 		return players[(_turn+1)%$];
 	}
 
-	auto otherPlayers() @property
+	auto otherPlayers() 
 	{
 		auto currentPlayer = this.currentPlayer;
 		return players.filter!(p => p != currentPlayer);
+	}
+
+	auto otherPlayers(const Player player) const
+	{
+		return players.filter!(p => p != player);
 	}
 
 	Wall wall;

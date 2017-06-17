@@ -150,7 +150,7 @@ struct MahjongData
 	const(MahjongResult) result;
 	bool isWinningPlayerEast() @property pure const
 	{
-		return player.wind == PlayerWinds.east;
+		return player.isEast;
 	}
 	size_t calculateMiniPoints(PlayerWinds leadingWind) pure const
 	{
