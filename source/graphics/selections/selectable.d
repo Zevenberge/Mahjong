@@ -4,6 +4,7 @@ import dsfml.graphics;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.selections.selection;
+import mahjong.graphics.traits;
 
 class Selectable(T) if(hasGlobalBounds!T)
 {
@@ -72,8 +73,3 @@ mixin template Select(T) if(hasGlobalBounds!T)
 	}
 }
 
-template hasGlobalBounds(S)
-{
-	enum bool hasGlobalBounds = 
-		__traits(compiles, (S.init).getGlobalBounds);
-}

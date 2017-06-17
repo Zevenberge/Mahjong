@@ -10,6 +10,7 @@ void main(string[] args)
 {
 	static if (is(typeof(registerMemoryErrorHandler)))
 		registerMemoryErrorHandler(); 
+
 	sharedLog.logLevel = LogLevel.info;
 
 	info("Starting mahjong application.");

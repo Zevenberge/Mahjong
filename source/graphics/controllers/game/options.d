@@ -91,10 +91,10 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 
 	protected override RectangleShape constructHaze() 
 	{
-		auto margin = Vector2f(styleOpts.claimMenuMargin, styleOpts.claimMenuMargin);
+		auto margin = Vector2f(styleOpts.ingameMenuMargin, styleOpts.ingameMenuMargin);
 		auto menuBounds = _menu.getGlobalBounds;
 		auto haze = new RectangleShape(menuBounds.size + margin*2);
-		haze.fillColor = Color(100, 100, 100, 158);
+		haze.fillColor = styleOpts.ingameMenuHazeColor;
 		haze.position = menuBounds.position - margin;
 		return haze;
 	}

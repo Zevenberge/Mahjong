@@ -2,7 +2,7 @@ module mahjong.graphics.menu.creation.mainmenu;
 
 import std.experimental.logger;
 import dsfml.graphics;
-import mahjong.domain.enums.game;
+import mahjong.domain.enums;
 import mahjong.engine.ai;
 import mahjong.engine.flow;
 import mahjong.engine.opts;

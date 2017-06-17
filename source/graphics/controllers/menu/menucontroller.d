@@ -45,7 +45,7 @@ class MenuController : MenuControllerBase!Menu
 	protected RectangleShape constructHaze()
 	{
 		auto haze = new RectangleShape(styleOpts.screenSize.toVector2f);
-		haze.fillColor = Color(126,126,126,126);
+		haze.fillColor = styleOpts.menuHazeColor;
 		return haze;
 	}
 

@@ -4,7 +4,6 @@ import std.conv;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain.metagame;
-import mahjong.engine.enums.game;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
 import mahjong.graphics.conv;
@@ -96,13 +95,11 @@ private class GameInfo
 		update(game);
 		target.draw(_background);
 		target.draw(_roundInfo);
-		target.draw(_turnInfo);
 		target.draw(_turnPlayerInfo);
 	}
 	
 	private:
 		Text _roundInfo;
-		Text _turnInfo;
 		Text _turnPlayerInfo;
 		Sprite _background;
 		
@@ -113,8 +110,6 @@ private class GameInfo
 			_roundInfo = new Text;
 			initText(_roundInfo, Vector2f(30, 10), infoFont, fs);
 			_roundInfo.setStyle(Text.Style.Bold);
-			_turnInfo = new Text;
-			initText(_turnInfo, Vector2f(600,49-fs/2), fontReg, fs/2);
 			_turnPlayerInfo = new Text;
 			initText(_turnPlayerInfo, Vector2f(600,51), fontReg, fs/2);
 			initBg;
@@ -154,7 +149,6 @@ private class GameInfo
 			auto currentPlayer = game.currentPlayer;
 			if(currentPlayer !is null) _turnPlayerInfo.setString(game.currentPlayer.name.to!string);
 			else _turnPlayerInfo.setString("");
-			_turnInfo.setString(game.phase.to!string);
 		}
 }
 

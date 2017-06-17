@@ -10,7 +10,7 @@ import std.format;
 import std.math;
 import std.range;
 
-import mahjong.domain.enums.game;
+import mahjong.domain.enums;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
@@ -25,6 +25,7 @@ import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
+import mahjong.graphics.traits;
 
 void load(ref Texture texture, ref Sprite sprite, string texturefile,
          uint x0 = 0, uint y0 = 0, uint size_x = 0, uint size_y = 0)
@@ -71,10 +72,35 @@ void load(ref Texture texture)
    load(texture, defaultTexture);
 }
 
-void alignLeft(T) (T sprite, const FloatRect box)
+void alignLeft(T) (T transformable, const FloatRect box)
+	if(hasGlobalBounds!T && hasFloatPosition!T)
 {
-  sprite.position = Vector2f(box.left, box.top);
-  center(sprite, "vertical", box.left, box.top, box.width, box.height);
+	transformable.position = Vector2f(box.left, box.top);
+	center!(CenterDirection.Vertical)(transformable, box);
+}
+
+unittest
+{
+	auto rect = new RectangleShape(Vector2f(100, 50));
+	auto bounds = FloatRect(200, 300, 500, 500);
+	rect.alignLeft(bounds);
+	assert(rect.position == Vector2f(200, 525), "The rectangle is not left-aligned properly");
+}
+
+void alignRight(T)(T transformable, const FloatRect box) 
+	if(hasGlobalBounds!T && hasFloatPosition!T)
+{
+	auto size = transformable.getGlobalBounds;
+	transformable.position = Vector2f(box.left + box.width - size.width, box.top);
+	center!(CenterDirection.Vertical)(transformable, box);
+}
+
+unittest
+{
+	auto rect = new RectangleShape(Vector2f(100, 50));
+	auto bounds = FloatRect(200, 300, 500, 500);
+	rect.alignRight(bounds);
+	assert(rect.position == Vector2f(600, 525), "The rectangle is not right-aligned properly");
 }
 
 void alignTopLeft(T) (T sprite, const FloatRect box)
@@ -82,7 +108,8 @@ void alignTopLeft(T) (T sprite, const FloatRect box)
   sprite.position = Vector2f(box.left, box.top);
 }
 
-void center(CenterDirection direction, T)(T sprite, const FloatRect rect)
+void center(CenterDirection direction, T)(T sprite, const FloatRect rect) 
+	if(hasGlobalBounds!T && hasFloatPosition!T)
 {
 	auto x0 = rect.left;
 	auto h0 = rect.top;

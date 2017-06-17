@@ -3,7 +3,7 @@ module mahjong.graphics.drawing.tile;
 import std.experimental.logger;
 import std.uuid;
 import dsfml.graphics;
-import mahjong.domain.enums.tile;
+import mahjong.domain.enums;
 import mahjong.domain.tile;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.movement;
