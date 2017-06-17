@@ -61,7 +61,12 @@ class ThirteenOrphanSet : Set
 	{
 		return 0;
 	}
+}
 
+unittest
+{
+	auto set = new ThirteenOrphanSet(null);
+	assert(set.miniPoints(PlayerWinds.east, PlayerWinds.north) == 0, "A thirteen orphan set should have no minipoints whatshowever");
 }
 
 class SevenPairsSet : Set
@@ -75,6 +80,12 @@ class SevenPairsSet : Set
 	{
 		return 0;
 	}
+}
+
+unittest
+{
+	auto set = new SevenPairsSet(null);
+	assert(set.miniPoints(PlayerWinds.west, PlayerWinds.east) == 0, "A seven pairs set should have no minipoints whatshowever");
 }
 
 class PonSet : Set
@@ -104,6 +115,65 @@ class PonSet : Set
 	}
 }
 
+unittest
+{
+	import mahjong.engine.creation;
+	auto normalPon = "🀝🀝🀝"d.convertToTiles;
+	auto ponSet = new PonSet(normalPon);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 4, "A closed normal is 4 points");
+	normalPon[0].origin = new Ingame(PlayerWinds.east);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 2, "An open normal pon is 2");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto terminalPon = "🀡🀡🀡"d.convertToTiles;
+	auto ponSet = new PonSet(terminalPon);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 8, "A closed terminal is 8 points");
+	terminalPon[0].origin = new Ingame(PlayerWinds.east);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 4, "An open terminal pon is 4");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto honourPon = "🀃🀃🀃"d.convertToTiles;
+	auto ponSet = new PonSet(honourPon);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 8, "A closed honour is 8 points");
+	honourPon[0].origin = new Ingame(PlayerWinds.east);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 4, "An open honour pon is 4");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto normalKan = "🀝🀝🀝🀝"d.convertToTiles;
+	auto ponSet = new PonSet(normalKan);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 16, "A closed normal kan is 16 points");
+	normalKan[0].origin = new Ingame(PlayerWinds.east);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 8, "An open normal kan is 8");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto terminalKan = "🀡🀡🀡🀡"d.convertToTiles;
+	auto ponSet = new PonSet(terminalKan);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 32, "A closed terminal is 32 points");
+	terminalKan[0].origin = new Ingame(PlayerWinds.east);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 16, "An open terminal pon is 16");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto honourKan = "🀃🀃🀃🀃"d.convertToTiles;
+	auto ponSet = new PonSet(honourKan);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 32, "A closed honour is 32 points");
+	honourKan[0].origin = new Ingame(PlayerWinds.east);
+	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 16, "An open honour pon is 16");
+}
 class ChiSet : Set
 {
 	this(const Tile[] tiles) pure
@@ -117,6 +187,12 @@ class ChiSet : Set
 	}
 }
 
+unittest
+{
+	auto chiSet = new ChiSet(null);
+	assert(chiSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 0, "A chi should give no minipoints whatshowever");
+}
+
 class PairSet : Set
 {
 	this(const Tile[] tiles) pure
@@ -126,8 +202,44 @@ class PairSet : Set
 
 	override size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const
 	{
+		if(tiles[0].type == Types.dragon)
+		{
+			return 2;
+		}
+		if(tiles[0].type == Types.wind)
+		{
+			return tiles[0].value == ownWind || tiles[0].value == leadingWind
+				? 2 
+				: 0;
+		}
 		return 0;
 	}
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto normalPair = "🀡🀡"d.convertToTiles;
+	auto pairSet = new PairSet(normalPair);
+	assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 0, "A normal pair should have no minipoints");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto pairOfNorths = "🀃🀃"d.convertToTiles;
+	auto pairSet = new PairSet(pairOfNorths);
+	assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.south) == 0, "A pair of winds that is not leading nor own does not give minipoints");
+	assert(pairSet.miniPoints(PlayerWinds.north, PlayerWinds.south) == 2, "If the wind is the own wind, it is 2 points");
+	assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 2, "If the wind is the leading wind, it is 2 points");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	auto pairOfDragons = "🀄🀄"d.convertToTiles;
+	auto pairSet = new PairSet(pairOfDragons);
+	assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 2, "A dragon pair is always 2 points");
 }
 
 MahjongResult scanHandForMahjong(const Ingame player) pure

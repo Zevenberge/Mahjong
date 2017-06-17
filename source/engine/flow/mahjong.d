@@ -96,7 +96,6 @@ struct MahjongData
 	{
 		return player.lastTile.isOwn;
 	}
-	// More e.g. yaku rating.
 }
 
 unittest
