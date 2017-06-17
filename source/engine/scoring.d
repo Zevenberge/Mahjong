@@ -29,7 +29,7 @@ class Scoring
 		size_t amountOfDoras, bool isClosedHand)
 	{
 		this.yakus = yakus;
-		this.miniPoints = miniPoints;
+		this.miniPoints = miniPoints.roundMiniPoints;
 		this.amountOfDoras = amountOfDoras;
 		_isClosedHand = isClosedHand;
 	}
@@ -42,7 +42,11 @@ class Scoring
 	Payment calculatePayment(bool isWinningPlayerEast)
 	{
 		auto fan = yakus.sum!(yaku => yaku.convertToFan(_isClosedHand));
-		return new Payment(0, 0, true);
+		if(fan >= 5)
+		{
+			return calculatePaymentForLimitHands(fan, isWinningPlayerEast);
+		}
+		return calculatePaymentForNonLimitHands(fan, isWinningPlayerEast);
 	}
 
 	private Payment calculatePaymentForLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
@@ -53,9 +57,38 @@ class Scoring
 
 	private Payment calculatePaymentForNonLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
 	{
-		auto rawPayment = prelimitScores[miniPoints][amountOfFan];
+		auto rawPayment = prelimitScores[amountOfFan][miniPoints];
 		return new Payment(rawPayment.east, rawPayment.nonEast, isWinningPlayerEast);
 	}
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, false);
+	auto payment = scoring.calculatePayment(false);
+	assert(payment.east == 4000, "Payment should be issued for a mangan");
+	assert(payment.nonEast == 2000, "Payment should be issued for a mangan");
+	assert(payment.ron == 8000, "Payment should be issued for a mangan");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou], 46, 0, false);
+	auto payment = scoring.calculatePayment(false);
+	assert(payment.east == 3200, "3 fan 50 is 3200 for east");
+	assert(payment.nonEast == 1600, "3 fan 50 is 1600 for non-east");
+	assert(payment.ron == 6400, "3 fan 50 is 6400 for all");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.chiiToitsu], 25, 0, false);
+	auto payment = scoring.calculatePayment(false);
+	// Tsumo is not possible.
+	assert(payment.ron == 1600, "2 fan 25 mp equals 2000 in a non-east ron");
 }
 
 class Payment
@@ -133,6 +166,7 @@ private RawPayment[size_t][size_t] initializePreLimitPayments()
 	];
 	prelimitPayments[2] = [
 		20: RawPayment( 700, 400),
+		25: RawPayment( 800, 400),
 		30: RawPayment(1000, 500),
 		40: RawPayment(1300, 700),
 		50: RawPayment(1600, 800),
