@@ -95,7 +95,7 @@ public class ResultScreen
 
 	private void createYakuTextAnimation()
 	{
-		auto scoring = calculateScoring(_mahjongData.result, _mahjongData.player, _metagame);
+		auto scoring = calculateScoring(_mahjongData, _metagame);
 		auto isClosedHand = _mahjongData.player.isClosedHand;
 		createFanTexts(scoring, isClosedHand);
 		createMiscTexts(scoring, isClosedHand);

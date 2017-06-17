@@ -9,17 +9,18 @@ import mahjong.domain.ingame;
 import mahjong.domain.metagame;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
+import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.engine.yaku;
 import mahjong.share.range;
 
-Scoring calculateScoring(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
+Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
 {
-	auto yaku = mahjongResult.determineYaku(player, metagame);
-	auto miniPoints = mahjongResult.calculateMiniPoints(player.wind, metagame.leadingWind);
-	auto amountOfDoras = mahjongResult.countAmountOfDoras(metagame.wall);
-	return new Scoring(yaku, miniPoints, amountOfDoras, player.isClosedHand);
+	auto yaku = mahjong.result.determineYaku(mahjong.player, metagame);
+	auto miniPoints = mahjong.calculateMiniPoints(metagame.leadingWind);
+	auto amountOfDoras = mahjong.result.countAmountOfDoras(metagame.wall);
+	return new Scoring(yaku, miniPoints, amountOfDoras, mahjong.player.isClosedHand);
 }
 
 class Scoring

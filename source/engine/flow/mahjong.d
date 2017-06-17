@@ -89,8 +89,9 @@ struct MahjongData
 		if(result.isSevenPairs) return 25;
 		auto miniPointsFromSets = result.calculateMiniPoints(player.wind.to!PlayerWinds, leadingWind);
 		auto miniPointsFromWinning = isTsumo ? 30 : 20;
-		return miniPointsFromSets;
+		return miniPointsFromSets + miniPointsFromWinning;
 	}
+
 	private bool isTsumo() @property pure const
 	{
 		return player.lastTile.isOwn;
