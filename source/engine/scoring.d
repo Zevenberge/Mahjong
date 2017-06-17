@@ -17,7 +17,7 @@ import mahjong.share.range;
 Scoring calculateScoring(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
 {
 	auto yaku = mahjongResult.determineYaku(player, metagame);
-	auto miniPoints = mahjongResult.miniPoints;
+	auto miniPoints = mahjongResult.calculateMiniPoints(player.wind, metagame.leadingWind);
 	auto amountOfDoras = mahjongResult.countAmountOfDoras(metagame.wall);
 	return new Scoring(yaku, miniPoints, amountOfDoras, player.isClosedHand);
 }

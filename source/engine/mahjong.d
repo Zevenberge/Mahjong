@@ -22,13 +22,17 @@ struct MahjongResult
 {
 	const bool isMahjong;
 	const Set[] sets;
-	size_t miniPoints() @property pure const
+	size_t calculateMiniPoints(const PlayerWinds ownWind, const PlayerWinds leadingWind) pure const
 	{
-		return sets.sum!(s => s.miniPoints);
+		return sets.sum!(s => s.miniPoints(ownWind, leadingWind));
 	}
 	auto tiles() @property pure const
 	{
 		return sets.flatMap!(s => s.tiles);
+	}
+	bool isSevenPairs() @property pure const
+	{
+		return sets.length == 1 && cast(SevenPairsSet)sets[0];
 	}
 }
 
@@ -39,7 +43,7 @@ abstract class Set
 		this.tiles = tiles;
 	}
 	const Tile[] tiles;
-	abstract size_t miniPoints() @property pure const;
+	abstract size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const;
 	bool isOpen() @property pure const
 	{
 		return tiles.any!(t => t.origin !is null);
@@ -53,7 +57,7 @@ class ThirteenOrphanSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property pure const
+	override size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const
 	{
 		return 0;
 	}
@@ -67,8 +71,7 @@ class SevenPairsSet : Set
 		super(tiles);
 	}
 
-
-	override size_t miniPoints() @property pure const
+	override size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const
 	{
 		return 0;
 	}
@@ -81,7 +84,7 @@ class PonSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property pure const
+	override size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const
 	{
 		size_t points = 4;
 		if(isOpen) points /= 2;
@@ -108,7 +111,7 @@ class ChiSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property pure const
+	override size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const
 	{
 		return 0;
 	}
@@ -121,7 +124,7 @@ class PairSet : Set
 		super(tiles);
 	}
 
-	override size_t miniPoints() @property pure const
+	override size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const
 	{
 		return 0;
 	}

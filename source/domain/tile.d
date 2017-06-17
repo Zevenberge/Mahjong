@@ -16,6 +16,10 @@ class Tile
 
 	int dora = 0;
 	Ingame origin = null;
+	bool isOwn() @property pure const
+	{
+		return origin is null;
+	}
    
     this(Types type, int value)
     {

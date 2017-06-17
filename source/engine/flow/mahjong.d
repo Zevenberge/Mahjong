@@ -2,6 +2,7 @@ module mahjong.engine.flow.mahjong;
 
 import std.algorithm;
 import std.array;
+import std.conv;
 import std.experimental.logger;
 import mahjong.domain.enums;
 import mahjong.domain.metagame;
@@ -79,9 +80,20 @@ struct MahjongData
 {
 	const(Player) player;
 	const(MahjongResult) result;
-	bool isWinningPlayerEast() pure const
+	bool isWinningPlayerEast() @property pure const
 	{
 		return player.wind == PlayerWinds.east;
+	}
+	size_t calculateMiniPoints(PlayerWinds leadingWind) pure const
+	{
+		if(result.isSevenPairs) return 25;
+		auto miniPointsFromSets = result.calculateMiniPoints(player.wind.to!PlayerWinds, leadingWind);
+		auto miniPointsFromWinning = isTsumo ? 30 : 20;
+		return miniPointsFromSets;
+	}
+	private bool isTsumo() @property pure const
+	{
+		return player.lastTile.isOwn;
 	}
 	// More e.g. yaku rating.
 }

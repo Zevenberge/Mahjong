@@ -238,7 +238,7 @@ class Ingame
 	}
 
 	private Tile _lastTile; 
-	Tile lastTile() @property
+	const(Tile) lastTile() @property pure const
 	{
 		return _lastTile;
 	}

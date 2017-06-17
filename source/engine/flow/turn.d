@@ -64,7 +64,7 @@ class TurnFlow : Flow
 
 class TurnEvent
 {
-	this(TurnFlow flow, Metagame metagame, Player player, Tile drawnTile)
+	this(TurnFlow flow, Metagame metagame, Player player, const Tile drawnTile)
 	{
 		_flow = flow;
 		this.player = player;
@@ -77,7 +77,7 @@ class TurnEvent
 	
 	Player player;
 	Metagame metagame;
-	Tile drawnTile;
+	const Tile drawnTile;
 	
 	void discard(Tile tile)
 	in
