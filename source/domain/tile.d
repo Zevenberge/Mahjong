@@ -186,3 +186,13 @@ unittest
 	auto comparativeTile = ComparativeTile(Types.dragon, Dragons.green);
 	assert(!comparativeTile.hasEqualValue(tile), "Comparative tile should not have an equal value");
 }
+
+// HACK this should be configured somewhere else.
+version(unittest)
+{
+	static this()
+	{
+		import std.experimental.logger;
+		sharedLog.logLevel = LogLevel.warning;
+	}
+}

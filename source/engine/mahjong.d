@@ -466,9 +466,6 @@ private struct HandSetSeperation
 private Progress scanRegularMahjong(Progress progress) pure
 { 
 	/*
-	   This subroutine checks whether the hand at hand is a mahjong hand. 
-	   It does - most explicitely- NOT take into account yakus. 
-	   The subroutine brute-forces the possible combinations. 
 	   It first checks if the first two tiles form a pair (max. 1). 
 	   Then it checks if the first three tiles form a pon. If it fails, it returns a false.
 
@@ -542,7 +539,7 @@ private HandSetSeperation seperateChi(const(Tile)[] hand) pure
 	   i.e. 1-2-2-2-3. Subtract the chi from the initial hand.
 	*/
 
-	const(Tile)[] chi;       // Create a temporary array that collects the chi.
+	const(Tile)[] chi;
 	chi ~= hand[0];
 	foreach(tile; hand.filter!(t => t.type == chi[0].type))
 	{

@@ -76,28 +76,6 @@ class MahjongEvent
 	}
 }
 
-struct MahjongData
-{
-	const(Player) player;
-	const(MahjongResult) result;
-	bool isWinningPlayerEast() @property pure const
-	{
-		return player.wind == PlayerWinds.east;
-	}
-	size_t calculateMiniPoints(PlayerWinds leadingWind) pure const
-	{
-		if(result.isSevenPairs) return 25;
-		auto miniPointsFromSets = result.calculateMiniPoints(player.wind.to!PlayerWinds, leadingWind);
-		auto miniPointsFromWinning = isTsumo ? 30 : 20;
-		return miniPointsFromSets + miniPointsFromWinning;
-	}
-
-	private bool isTsumo() @property pure const
-	{
-		return player.lastTile.isOwn;
-	}
-}
-
 unittest
 {
 	import mahjong.domain.closedhand;
@@ -164,4 +142,79 @@ unittest
 	auto metagame = new Metagame([player1, player2, player3]);
 	auto flow = new MahjongFlow(metagame);
 	assert(eventhandler.mahjongEvent.data.length == 2, "As two out of three players have a mahjong");
+}
+
+struct MahjongData
+{
+	const(Player) player;
+	const(MahjongResult) result;
+	bool isWinningPlayerEast() @property pure const
+	{
+		return player.wind == PlayerWinds.east;
+	}
+	size_t calculateMiniPoints(PlayerWinds leadingWind) pure const
+	{
+		if(result.isSevenPairs) return 25;
+		auto miniPointsFromSets = result.calculateMiniPoints(player.wind.to!PlayerWinds, leadingWind);
+		auto miniPointsFromWinning = isTsumo ? 30 : 20;
+		return miniPointsFromSets + miniPointsFromWinning;
+	}
+
+	private bool isTsumo() @property pure const
+	{
+		return player.lastTile.isOwn;
+	}
+}
+
+unittest
+{
+	import mahjong.domain.ingame;
+	import mahjong.domain.tile;
+	import mahjong.domain.wall;
+	import mahjong.engine.creation;
+	auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
+	auto player = new Player(new TestEventHandler);
+	player.game = new Ingame(PlayerWinds.east);
+	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
+	player.drawTile(wall);
+	auto mahjongResult = player.scanHandForMahjong;
+	auto data = MahjongData(player, mahjongResult);
+	assert(data.isTsumo, "Being mahjong after drawing a tile is a tsumo"); 
+	assert(data.calculateMiniPoints(PlayerWinds.south) == 40, "Pon of honours + pair of dragons + tsumo = 40");
+}
+
+unittest
+{
+	import mahjong.domain.ingame;
+	import mahjong.domain.tile;
+	import mahjong.engine.creation;
+	auto player = new Player(new TestEventHandler);
+	player.game = new Ingame(PlayerWinds.east);
+	player.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗"d.convertToTiles;
+	auto tile = new Tile(Types.bamboo, Numbers.eight);
+	tile.origin = new Ingame(PlayerWinds.south);
+	player.ron(tile);
+	auto mahjongResult = player.scanHandForMahjong;
+	auto data = MahjongData(player, mahjongResult);
+	assert(!data.isTsumo, "Being mahjong after ron is not a tsumo"); 
+	assert(data.calculateMiniPoints(PlayerWinds.south) == 25, "Seven pairs is always 25, regardless of what pairs");
+}
+
+unittest
+{
+	import mahjong.domain.ingame;
+	import mahjong.domain.tile;
+	import mahjong.domain.wall;
+	import mahjong.engine.creation;
+	auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
+	auto player = new Player(new TestEventHandler);
+	player.game = new Ingame(PlayerWinds.east);
+	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
+	auto tile = new Tile(Types.wind, Winds.east);
+	tile.origin = new Ingame(PlayerWinds.south);
+	player.kan(tile, wall);
+	auto mahjongResult = player.scanHandForMahjong;
+	auto data = MahjongData(player, mahjongResult);
+	assert(data.isTsumo, "Being mahjong after kan is a tsumo"); 
+	assert(data.calculateMiniPoints(PlayerWinds.south) == 48, "Open kan of honours + pair of dragons + tsumo = 48");
 }

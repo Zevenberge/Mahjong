@@ -244,6 +244,28 @@ class EightPlayerWall : Wall
 	
 }
 
+version(unittest)
+{
+	class MockWall : Wall
+	{
+		this(Tile tileToDraw)
+		{
+			_tileToDraw = tileToDraw;
+		}
+
+		private Tile _tileToDraw;
+
+		override Tile drawTile() 
+		{
+			return _tileToDraw;
+		}
+
+		override Tile drawKanTile() 
+		{
+			return  _tileToDraw;
+		}
+	}
+}
 
 
 
