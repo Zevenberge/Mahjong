@@ -246,7 +246,7 @@ unittest
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto tiles = "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d;
 	auto factory = constructFactory(tiles, 13, player, metagame);
@@ -265,7 +265,7 @@ unittest
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d;
 	auto factory = constructFactory(tiles, 0, player, metagame);
@@ -284,7 +284,7 @@ unittest
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d;
 	auto factory = constructFactory(tiles, 9, player, metagame);
@@ -302,7 +302,7 @@ unittest
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀗🀗"d;
 	auto openPon = "🀌🀌🀌"d.convertToTiles;

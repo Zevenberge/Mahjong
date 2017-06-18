@@ -211,7 +211,7 @@ unittest
 	auto player = new Player(eventHandler);
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
@@ -235,7 +235,7 @@ unittest
 	auto player = new Player(eventHandler);
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);

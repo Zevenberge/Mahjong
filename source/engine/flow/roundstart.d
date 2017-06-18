@@ -11,7 +11,7 @@ class RoundStartFlow : Flow
 	{
 		info("Starting round.");
 		super(metagame);
-		metagame.nextRound;
+		metagame.initializeRound;
 		foreach(player; metagame.players)
 		{
 			auto event = new RoundStartEvent(metagame);
