@@ -176,12 +176,13 @@ public class ResultScreen
 
 	bool done() @property
 	{
-		return true;
+		return _animation.done;
 	}
 
 	void forceFinish()
 	{
 		trace("Forcing the result screen to short-circuit its animations");
+		_animation.forceFinish;
 	}
 }
 

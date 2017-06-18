@@ -25,7 +25,14 @@ class AppearTextAnimation : Animation
 		--_amountOfFrames;
 	}
 
-	override protected bool done() @property
+	protected override void finishNow() 
+	{
+		_amountOfFrames = 1;
+		nextFrame;
+	}
+
+
+	protected override bool done() @property
 	{
 		return _amountOfFrames == 0;
 	}
@@ -42,6 +49,16 @@ unittest
 	animation.animate;
 	assert(text.getColor.a == 255, "The text should have fully appeared");
 	assert(animation.done, "The animation should be done");
+}
+
+unittest
+{
+	import mahjong.graphics.cache.font;
+	auto text = new Text;
+	text.setColor(Color(255,255,255,0));
+	auto animation = new AppearTextAnimation(text, 300);
+	animation.forceFinish;
+	assert(text.getColor.a == 255, "A short-circuit of the animation should result in a fully opaque text");
 }
 
 class FadeSpriteAnimation : Animation
@@ -63,6 +80,13 @@ class FadeSpriteAnimation : Animation
 		--_amountOfFrames;
 	}
 
+	protected override void finishNow() 
+	{
+		_amountOfFrames = 1;
+		nextFrame;
+	}
+
+
 	protected override bool done() @property
 	{
 		return _amountOfFrames == 0;
@@ -79,4 +103,13 @@ unittest
 	animation.animate;
 	assert(sprite.color.a == 0, "The sprite should be gone");
 	assert(animation.done, "The fade should be over");
+}
+
+unittest
+{
+	auto sprite = new Sprite;
+	sprite.color = Color(255, 255, 255, 255);
+	auto animation = new FadeSpriteAnimation(sprite, 300);
+	animation.forceFinish;
+	assert(sprite.color.a == 0, "The sprite should be gone after being forced to finish");
 }

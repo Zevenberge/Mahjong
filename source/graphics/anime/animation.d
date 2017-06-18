@@ -15,14 +15,32 @@ class Animation
 		nextFrame;
 		if(done)
 		{
-			trace("Animation (", objectId, ") finished.");
-			_animations.remove!((a,b) => a == b)(this);
+			onDone;
 		}
+	}
+
+	void forceFinish()
+	out
+	{
+		// Enforce universal state.
+		assert(done, "The animation didn't finish even though it was forced to.");
+	}
+	body
+	{
+		finishNow;
+		onDone;
+	}
+
+	private void onDone()
+	{
+		trace("Animation (", objectId, ") finished.");
+		_animations.remove!((a,b) => a == b)(this);
 	}
 
 	abstract bool done() @property;
 	
 	protected abstract void nextFrame();
+	protected abstract void finishNow();
 }
 
 unittest
@@ -39,6 +57,14 @@ unittest
 	dummyAnimation.animate;
 	assert(_animations.length == 0, "The finished animation should be removed from the stack");
 	_animations = null;
+}
+
+unittest
+{
+	auto dummyAnimation = new DummyAnimation(420);
+	_animations = [dummyAnimation];
+	dummyAnimation.forceFinish;
+	assert(_animations.length == 0, "The dummy animation should have removed itself from the array after being forced to finish");
 }
 
 void addUniqueAnimation(Animation anime)
@@ -144,6 +170,11 @@ version(unittest)
 			--amountOfFrames;
 		}
 
+		override protected void finishNow() 
+		{
+			amountOfFrames = 0;
+		}
+
 		override protected bool done() 
 		{
 			return amountOfFrames == 0;
@@ -180,6 +211,12 @@ template Chain(TAnimation : Animation)
 			}
 		}
 
+		override protected void finishNow() 
+		{
+			_inner.finishNow;
+			super.finishNow;
+		}
+
 		override protected bool done() @property
 		{
 			return _inner.done && super.done;
@@ -214,6 +251,14 @@ unittest
 	_animations = null;
 }
 
+unittest
+{
+	auto innerAnimation = new DummyAnimation(200);
+	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 400);
+	chainAnimation.forceFinish;
+	// Implicit assert check in the out-contract
+}
+
 class ParallelAnimation : Animation
 {
 	// Array instead of varargs https://issues.dlang.org/show_bug.cgi?id=17504
@@ -227,6 +272,11 @@ class ParallelAnimation : Animation
 	protected override void nextFrame()
 	{
 		_animations.each!(a => a.animate);
+	}
+
+	protected override void finishNow() 
+	{
+		_animations.each!(a => a.forceFinish);
 	}
 
 	protected override bool done() @property
@@ -256,7 +306,15 @@ unittest
 
 unittest
 {
-	import std.stdio;
+	Animation animationA = new DummyAnimation(100);
+	Animation animationB = new DummyAnimation(200);
+	auto parallelAnimation = new ParallelAnimation([animationA, animationB]);
+	parallelAnimation.forceFinish;
+	// Implicit assert check in the out-contract
+}
+
+unittest
+{
 	auto chainedAnimation = new DummyAnimation(1);
 	Animation animationA = new DummyAnimation(1);
 	Animation animationB = new DummyAnimation(1);

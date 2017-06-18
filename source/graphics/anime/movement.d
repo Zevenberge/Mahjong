@@ -14,6 +14,7 @@ class MovementAnimation : Animation
 	}
 	body
 	{
+		_finalCoords = finalCoords;
 		_amountOfFrames = amountOfFrames;
 		_transformable = transformable;
 		auto pos = _transformable.position;
@@ -33,6 +34,13 @@ class MovementAnimation : Animation
 		_amountOfFrames--;
 	}
 
+	protected override void finishNow() 
+	{
+		_transformable.position = _finalCoords.position;
+		_transformable.rotation = _finalCoords.rotation;
+		_amountOfFrames = 0;
+	}
+
 	protected override bool done()
 	{
 		return _amountOfFrames == 0;
@@ -41,6 +49,7 @@ class MovementAnimation : Animation
 	private:
 		Transformable _transformable;
 		FloatCoords _deltaCoords;
+		FloatCoords _finalCoords;
 		int _amountOfFrames;
 		
 		float calculateDelta(float init, float target)
@@ -48,4 +57,26 @@ class MovementAnimation : Animation
 			return (target - init)/_amountOfFrames;
 		}
 
+}
+
+unittest
+{
+	auto shape = new RectangleShape;
+	auto animation = new MovementAnimation(shape, FloatCoords(500, 400, 90), 2);
+	animation.animate;
+	auto coords = FloatCoords(shape.position, shape.rotation);
+	assert(coords == FloatCoords(250, 200, 45), "The movement is half-way");
+	animation.animate;
+	coords = FloatCoords(shape.position, shape.rotation);
+	assert(coords == FloatCoords(500, 400, 90), "The movement is done");
+	assert(animation.done, "The animation is done");
+}
+
+unittest
+{
+	auto shape = new RectangleShape;
+	auto animation = new MovementAnimation(shape, FloatCoords(500, 400, 90), 500);
+	animation.forceFinish;
+	auto coords = FloatCoords(shape.position, shape.rotation);
+	assert(coords == FloatCoords(500, 400, 90), "The movement is done after a forced finish");
 }
