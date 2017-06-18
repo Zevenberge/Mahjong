@@ -153,7 +153,7 @@ struct MahjongData
 		return miniPointsFromSets + miniPointsFromWinning;
 	}
 
-	private bool isTsumo() @property pure const
+	bool isTsumo() @property pure const
 	{
 		return player.lastTile.isOwn;
 	}
