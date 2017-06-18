@@ -43,6 +43,7 @@ class Scoring
 	Payment calculatePayment(bool isWinningPlayerEast)
 	{
 		auto fan = yakus.sum!(yaku => yaku.convertToFan(_isClosedHand));
+		fan += amountOfDoras;
 		if(fan >= 5)
 		{
 			return calculatePaymentForLimitHands(fan, isWinningPlayerEast);
@@ -90,6 +91,14 @@ unittest
 	auto payment = scoring.calculatePayment(false);
 	// Tsumo is not possible.
 	assert(payment.ron == 1600, "2 fan 25 mp equals 2000 in a non-east ron");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.riichi], 30, 4, false);
+	auto payment = scoring.calculatePayment(false);
+	assert(payment.ron == 8000, "1 yaku + 4 dora is a mangan");
 }
 
 class Payment

@@ -114,6 +114,7 @@ public class ResultScreen
 		}
 		if(scoring.amountOfDoras > 0)
 		{
+			totalAmountOfFan += scoring.amountOfDoras;
 			createYakuTextAndAddAnimation("doras".translate, scoring.amountOfDoras);
 		}
 		createYakuTextAndAddAnimation("total".translate, totalAmountOfFan);
