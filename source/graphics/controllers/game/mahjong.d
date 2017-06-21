@@ -35,9 +35,7 @@ class MahjongController: GameController
 		texture.display;
 		_game = new Sprite;
 		_game.setTexture = texture.getTexture;
-		auto animation = new FadeSpriteAnimation(_game, 60);
-		animation.objectId = randomUUID;
-		addUniqueAnimation(animation);
+		_renderTexture = texture;
 	}
 
 	private void setHaze()
@@ -55,6 +53,7 @@ class MahjongController: GameController
 		currentScreen.initialize;
 	}
 
+	private RenderTexture _renderTexture;
 	private MahjongEvent _event;
 	private Sprite _game;
 	private RectangleShape _haze;
