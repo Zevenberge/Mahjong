@@ -13,17 +13,17 @@ import mahjong.engine.scoring;
 import mahjong.engine.yaku;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
-import mahjong.graphics.cache.font;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.player;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.i18n;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
+import mahjong.graphics.text;
 import mahjong.share.range;
 
 enum margin = Vector2f(50,50);
-private enum innerMargin = margin*1.4;
+enum innerMargin = margin*1.4;
 private enum resultScreenTileSpacing = Vector2f(20,25);
 private enum iconScale = 1.5;
 private enum amountOfFramesPerLineOfText = 90;
@@ -226,13 +226,13 @@ private class DoubleText
 
 	private void setRightText(string text)
 	{
-		_rightText = createText;
+		_rightText = TextFactory.resultText;
 		_rightText.setString(text);
 	}
 
 	private void setLeftText(string yakuName)
 	{
-		_leftText = createText;
+		_leftText = TextFactory.resultText;
 		_leftText.setString(yakuName);
 		correctYakuDescriptionWidthIfNecessary;
 	}
@@ -245,15 +245,6 @@ private class DoubleText
 			auto newCharacterSize = _leftText.getCharacterSize * maxYakuDescriptionWidth / width;
 			_leftText.setCharacterSize(newCharacterSize.floor.to!uint);
 		}
-	}
-
-	private Text createText()
-	{
-		auto text = new Text;
-		text.setFont(fontInfo);
-		text.setCharacterSize(20);
-		text.setColor(Color(255,255,255,0));
-		return text;
 	}
 
 	private Text _leftText;

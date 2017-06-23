@@ -27,11 +27,11 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 	private Vector2f _scale;
 	private FloatRect _size;
 	
-	this(FloatRect initRect)
+	this(FloatRect initialRect)
 	{
-		_size = initRect;
-		_transform.x = initRect.left;
-		_transform.y = initRect.top;
+		_size = initialRect;
+		_transform.x = initialRect.left;
+		_transform.y = initialRect.top;
 	}
 	
 	void draw(RenderTarget target, RenderStates states)

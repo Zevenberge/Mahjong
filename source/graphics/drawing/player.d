@@ -17,6 +17,7 @@ import mahjong.graphics.enums.resources;
 import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
+import mahjong.graphics.text;
 
 alias drawPlayer = draw;
 void draw(Player player, RenderTarget view, float rotation)
@@ -78,7 +79,7 @@ private class PlayerVisuals
 			_iconTexture = new Texture;
 			_iconTexture.loadFromFile(iconFile);
 			_icon = new Sprite(_iconTexture);
-			_icon.pix2scale(drawingOpts.iconSize);
+			_icon.setSize(drawingOpts.iconSize);
 			info("Initialised player icon");
 		}
 		
@@ -97,16 +98,7 @@ private class PlayerVisuals
 			trace("Updating score");
 			_numberedScore = _player.score;
 			_score.setString(_numberedScore.to!string);
-			if(_numberedScore < drawingOpts.criticalScore)
-			{
-				trace("Setting the critical color");
-				_score.setColor(pointsCriticalColor);
-			}
-			else
-			{
-				trace("Setting the normal color");
-				_score.setColor(pointsColor);
-			}
+			_score.changeScoreHighlighting;
 			_score.center!(CenterDirection.Both)(_scoreLabel.getGlobalBounds);
 			trace("Updated the score");
 		}
@@ -126,7 +118,7 @@ private class PlayerVisuals
 			info("Initialising player sprite");
 			redrawTexture;
 			_sprite = new Sprite(_renderTexture.getTexture);
-			_sprite.pix2scale(styleOpts.gameScreenSize.x);
+			_sprite.setSize(styleOpts.gameScreenSize.x);
 			placeSprite(rotation);
 			info("Initialized player sprite");
 		}
@@ -135,7 +127,7 @@ private class PlayerVisuals
 		{
 			trace("Placing sprite");
 			auto screen = styleOpts.gameScreenSize;
-			_sprite.pix2scale(drawingOpts.iconSize);
+			_sprite.setSize(drawingOpts.iconSize);
 			_sprite.position = Vector2f(
 				screen.x - (drawingOpts.iconSize + drawingOpts.iconSpacing),
 				screen.y - drawingOpts.iconSize
@@ -215,7 +207,7 @@ private void initialiseScoreLabel()
 		auto texture = new Texture;
 		texture.loadFromFile(sticksFile, stick);
 		_scoreLabel = new Sprite(texture);
-		_scoreLabel.pix2scale(drawingOpts.iconSize);
+		_scoreLabel.setSize(drawingOpts.iconSize);
 		_scoreLabel.scale = Vector2f(_scoreLabel.scale.x, 2*_scoreLabel.scale.y); // TODO unhack
 		_scoreLabel.alignBottom(iconBounds);
 		info("Initialised the score label");

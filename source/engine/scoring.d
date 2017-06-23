@@ -290,6 +290,11 @@ class Transaction
 		else static if(op == "-") return new Transaction(player, amount - rhs.amount);
 		else static assert(false, "Operator " ~ op ~ " not supported");
 	}
+
+	bool isPayment() pure const @property
+	{
+		return amount < 0;
+	}
 }
 
 unittest
