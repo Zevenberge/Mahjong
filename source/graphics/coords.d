@@ -57,6 +57,14 @@ struct Coords(T) if(isNumeric!T)
 	}
 }
 
+unittest
+{
+	import fluent.asserts;
+	auto coords = FloatCoords(1,2,3);
+	coords.move(Vector2f(4,6));
+	coords.position.should.equal(Vector2f(5, 8));
+}
+
 FloatCoords getFloatCoords(Transformable t)
 {
 	return FloatCoords(t.position, t.rotation);

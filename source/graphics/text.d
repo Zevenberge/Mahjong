@@ -16,9 +16,17 @@ class TextFactory
 		text.setColor(Color(255,255,255,0));
 		return text;
 	}
+	static Text transferText()
+	{
+		auto text = new Text;
+		text.setFont(fontInfo);
+		text.setCharacterSize(40);
+		text.setColor(Color(255,255,255,0));
+		return text;
+	}
 }
 
-void changeScoreHighlighting(Text text)
+void changeScoreHighlighting(Text text, Color defaultColor = pointsColor)
 {
 	auto score = text.getString.to!int;
 	if(score < drawingOpts.criticalScore)
@@ -27,6 +35,6 @@ void changeScoreHighlighting(Text text)
 	}
 	else
 	{
-		text.setColor(pointsColor);
+		text.setColor(defaultColor);
 	}
 }

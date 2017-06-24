@@ -106,8 +106,8 @@ class TransferScreen
 private enum marginBetweenTransferElements = 30f;
 private FloatRect box()
 {
-	auto totalSpace = styleOpts.screenSize.toVector2f - innerMargin;
-	auto boxSize = (totalSpace.x - marginBetweenTransferElements)/4;
+	auto totalSpace = styleOpts.screenSize.toVector2f - innerMargin*2;
+	auto boxSize = (totalSpace.x - 3*marginBetweenTransferElements)/4;
 	return FloatRect(0, 0, boxSize, boxSize);
 }
 
@@ -150,14 +150,7 @@ private class Transfer
 	private Text composeTransactionText(Transaction transaction)
 	{
 		auto transactionText = TextFactory.resultText;
-		if(transaction.isPayment)
-		{
-			transactionText.setString(transaction.amount.to!string);
-		}
-		else
-		{
-			transactionText.setString("0");
-		}
+		transactionText.setString(transaction.amount.to!string);
 		transactionText.alignRight(box);
 		_transaction = transactionText;
 		return transactionText;
@@ -166,7 +159,7 @@ private class Transfer
 	private Text composeRemainingPoints(const Player player)
 	{
 		auto points = player.score;
-		auto remainingPoints = TextFactory.resultText;
+		auto remainingPoints = TextFactory.transferText;
 		remainingPoints.setString(points.to!string);
 		remainingPoints.alignRight(box);
 		_remainingPoints = remainingPoints;
@@ -189,8 +182,7 @@ private class Transfer
 	private void setAnimation(Transaction transaction)
 	{
 		Animation appearAnimation = new AppearTextAnimation(_transaction, 90);
-		auto finalCoords = _transaction.getFloatCoords;
-		finalCoords.move(Vector2f(0, -50));
+		auto finalCoords = FloatCoords(_transaction.position - Vector2f(0, 40), 0);
 		Animation movementAnimation = new MovementAnimation(_transaction, finalCoords, 90);
 		Animation appearMoveTextAnimation = new ParallelAnimation([appearAnimation, movementAnimation]);
 		Animation countTransferAnimation = new CountAnimation(_transaction, transaction.amount, 0);
@@ -216,7 +208,7 @@ private class Transfer
 
 	void draw(RenderTarget target)
 	{
-		_remainingPoints.changeScoreHighlighting;
+		_remainingPoints.changeScoreHighlighting(Color.White);
 		target.draw(_renderSprite);
 	}
 }
