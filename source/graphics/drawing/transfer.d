@@ -1,6 +1,9 @@
 ﻿module mahjong.graphics.drawing.transfer;
 
+import std.algorithm.iteration;
+import std.array;
 import std.conv;
+import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.player;
 import mahjong.engine.scoring;
@@ -22,6 +25,7 @@ class TransferScreen
 	this(Transaction[] transactions)
 	{
 		composeTransfers(transactions);
+		composeAnimation;
 	}
 
 	private void composeTransfers(Transaction[] transactions)
@@ -70,7 +74,15 @@ class TransferScreen
 		}
 	}
 
+	private void composeAnimation()
+	{
+		_animation = new ParallelAnimation(_transfers.map!(t => t.animation).array);
+		_animation.objectId = randomUUID;
+		addUniqueAnimation(_animation);
+	}
+
 	private Transfer[] _transfers;
+	private Animation _animation;
 
 	void draw(RenderTarget target)
 	{
@@ -78,6 +90,16 @@ class TransferScreen
 		{
 			transfer.draw(target);
 		}
+	}
+
+	bool done() @property
+	{
+		return _animation.done;
+	}
+
+	void forceFinish()
+	{
+		_animation.forceFinish;
 	}
 }
 
@@ -102,6 +124,9 @@ private class Transfer
 		auto icon = composeIcon(transaction.player);
 		auto texts = composeTexts(transaction);
 		placeTextAndIcon(icon, texts, transaction);
+		_renderSprite = new RenderSprite(FloatRect(0, 0, 2*box.width + marginBetweenTransferElements, box.height));
+		_renderSprite.draw(icon);
+		_renderSprite.draw(texts);
 	}
 
 	private Sprite composeIcon(const Player player)
