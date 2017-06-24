@@ -5,28 +5,7 @@
 	"authors": ["marco"],
 	"lflags" : ["-L/usr/local/lib/dsfml"],
 	"dependencies": {
-		"dsfml": "~master"
-	},
-	"configurations": [
-        { 
-			"name": "executable",
-            "targetType": "executable"
-		},
-        {
-            "name": "unittest",
-            "targetType": "executable",
-            "excludedSourceFiles": ["src/main.d"],
-            "dependencies": {
-				"fluent-asserts": "~>0.5.0"
-            }
-        },
-		{
-            "name": "unittest-cov",
-            "targetType": "executable",
-            "excludedSourceFiles": ["src/main.d"],
-            "dependencies": {
-				"fluent-asserts": "~>0.5.0"
-            }
-        }
-    ]
+		"dsfml": "~master",
+		"fluent-asserts": "~>0.5.0"
+	}
 }

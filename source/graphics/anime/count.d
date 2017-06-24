@@ -56,9 +56,10 @@ class CountAnimation : Animation
 
 	private void updateText()
 	{
-		auto bounds = _text.getGlobalBounds;
+		auto bounds = _text.getLocalBounds;
+		auto position = _text.position;
 		_text.setString = _value.to!string;
-		_text.alignRight(bounds);
+		_text.alignRight(FloatRect(position.x, position.y, bounds.width, bounds.height));
 	}
 }
 
@@ -135,14 +136,14 @@ unittest
 	auto text = new Text;
 	text.position = Vector2f(100, 1500);
 	text.setFont = infoFont;
+	text.setCharacterSize = 16;
 	text.setString = "0";
 	auto boundsBeforeCounting = text.getGlobalBounds;
 	auto animation = new CountAnimation(text, 0, 1000);
 	animation.forceFinish;
 	auto boundsAfterCounting = text.getGlobalBounds;
-	boundsBeforeCounting.top.should.equal(1500).because("The top should not have moved");
-	boundsAfterCounting.top.should.equal(1500).because("The top should not have moved");
-	(boundsBeforeCounting.left + boundsBeforeCounting.width).should.equal(
-		boundsAfterCounting.left + boundsAfterCounting.width).because( 
+	text.position.y.should.equal(1500).because("The top should not have moved");
+	(boundsBeforeCounting.left + boundsBeforeCounting.width).should.be.approximately(
+		boundsAfterCounting.left + boundsAfterCounting.width, 2).because( 
 		"The right of the text should be kept constant as this feels more natural");
 }
