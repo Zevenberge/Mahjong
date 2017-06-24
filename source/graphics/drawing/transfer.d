@@ -5,6 +5,7 @@ import dsfml.graphics;
 import mahjong.domain.player;
 import mahjong.engine.scoring;
 import mahjong.graphics.anime.animation;
+import mahjong.graphics.anime.count;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.anime.movement;
 import mahjong.graphics.coords;
@@ -18,7 +19,66 @@ import mahjong.graphics.text;
 
 class TransferScreen
 {
+	this(Transaction[] transactions)
+	{
+		composeTransfers(transactions);
+	}
 
+	private void composeTransfers(Transaction[] transactions)
+	{
+		Transfer[] payingTransfers;
+		Transfer[] receivingTransfers;
+		foreach(transaction; transactions)
+		{
+			auto transfer = new Transfer(transaction);
+			if(transaction.isPayment)
+			{
+				moveTransferToTheLeft(transfer);
+				payingTransfers ~= transfer;
+			}
+			else
+			{
+				moveTransferToTheRight(transfer);
+				receivingTransfers ~= transfer;
+			}
+		}
+		setVerticalPositions(payingTransfers);
+		setVerticalPositions(receivingTransfers);
+		_transfers = payingTransfers ~ receivingTransfers;
+	}
+
+	private void moveTransferToTheLeft(Transfer payingTransfer)
+	{
+		payingTransfer.move(Vector2f(innerMargin.x,0));
+	}
+
+	private void moveTransferToTheRight(Transfer receivingTransfer)
+	{
+		moveTransferToTheLeft(receivingTransfer);
+		receivingTransfer.move(Vector2f(2*(box.width + marginBetweenTransferElements), 0));
+	}
+
+	private void setVerticalPositions(Transfer[] transfers)
+	{
+		auto totalHeight = transfers.length * box.height + (transfers.length - 1f) * marginBetweenTransferElements;
+		auto remainingSpace = styleOpts.gameScreenSize.y - totalHeight;
+		auto offset = remainingSpace/2f;
+		foreach(transfer; transfers)
+		{
+			transfer.move(Vector2f(0, offset));
+			offset += box.height + marginBetweenTransferElements;
+		}
+	}
+
+	private Transfer[] _transfers;
+
+	void draw(RenderTarget target)
+	{
+		foreach(transfer; _transfers)
+		{
+			transfer.draw(target);
+		}
+	}
 }
 
 private enum marginBetweenTransferElements = 30f;
@@ -29,7 +89,7 @@ private FloatRect box()
 	return FloatRect(0, 0, boxSize, boxSize);
 }
 
-class PayingTransfer
+private class Transfer
 {
 	this(Transaction transaction)
 	{
@@ -90,7 +150,7 @@ class PayingTransfer
 
 	private void placeTextAndIcon(Sprite icon, RenderSprite text, Transaction transaction)
 	{
-		auto right = Vector2f(box.width, 0);
+		auto right = Vector2f(box.width + marginBetweenTransferElements, 0);
 		if(transaction.isPayment)
 		{
 			text.position = right;
@@ -108,8 +168,10 @@ class PayingTransfer
 		finalCoords.move(Vector2f(0, -50));
 		Animation movementAnimation = new MovementAnimation(_transaction, finalCoords, 90);
 		Animation appearMoveTextAnimation = new ParallelAnimation([appearAnimation, movementAnimation]);
-
-		_animation = appearMoveTextAnimation;
+		Animation countTransferAnimation = new CountAnimation(_transaction, transaction.amount, 0);
+		auto initialScore = transaction.player.score;
+		Animation countScoreAnimation = new CountAnimation(_remainingPoints, initialScore, initialScore + transaction.amount);
+		_animation = new Chain!ParallelAnimation(appearMoveTextAnimation, [countTransferAnimation, countScoreAnimation]);
 	}
 
 	private Text _transaction;
@@ -122,9 +184,9 @@ class PayingTransfer
 		return _animation;
 	}
 
-	Vector2f position(Vector2f newPosition) @property
+	void move(Vector2f movement)
 	{
-		return _renderSprite.position = newPosition;
+		_renderSprite.move(movement);
 	}
 
 	void draw(RenderTarget target)
