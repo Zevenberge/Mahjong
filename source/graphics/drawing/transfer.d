@@ -103,6 +103,30 @@ class TransferScreen
 	}
 }
 
+unittest
+{
+	// Hit all the code so that we at least know that there is no null-pointer dereference.
+	import fluent.asserts;
+	import mahjong.domain.player;
+	import mahjong.engine.flow;
+	import mahjong.graphics.opts;
+	import mahjong.test.window;
+	styleOpts = new DefaultStyleOpts;
+	drawingOpts = new DefaultDrawingOpts;
+	auto testWindow = new TestWindow;
+	auto player1 = new Player(new TestEventHandler);
+	player1.drawPlayer(testWindow, 0);
+	auto player2 = new Player(new TestEventHandler);
+	player2.drawPlayer(testWindow, 0);
+	auto transaction1 = new Transaction(player1, -1500);
+	auto transaction2 = new Transaction(player2, 1500);
+	auto transferScreen = new TransferScreen([transaction1, transaction2]);
+	transferScreen.draw(testWindow);
+	transferScreen.done.should.equal(false).because("right after initialising, the screen should not be done");
+	transferScreen.forceFinish;
+	transferScreen.done.should.equal(true).because("after short-circuiting the screen should be done");
+}
+
 private enum marginBetweenTransferElements = 30f;
 private FloatRect box()
 {
