@@ -108,7 +108,7 @@ void alignTopLeft(T) (T sprite, const FloatRect box)
   sprite.position = Vector2f(box.left, box.top);
 }
 
-void center(CenterDirection direction, T)(T sprite, const FloatRect rect) 
+void center(CenterDirection direction, T)(T transformable, const FloatRect rect) 
 	if(hasGlobalBounds!T && hasFloatPosition!T)
 {
 	auto x0 = rect.left;
@@ -116,8 +116,8 @@ void center(CenterDirection direction, T)(T sprite, const FloatRect rect)
 	auto w = rect.width;
 	auto h = rect.height;
 	
-	auto size = sprite.getGlobalBounds;
-	auto pos = sprite.position;
+	auto size = transformable.getGlobalBounds;
+	auto pos = transformable.position;
 	static if(direction != CenterDirection.Vertical)
 	{
 		pos.x = x0 + (w - size.width)/2.;
@@ -126,7 +126,7 @@ void center(CenterDirection direction, T)(T sprite, const FloatRect rect)
 	{
 		pos.y = h0 + (h - size.height)/2.;
 	}
-	sprite.position = pos;
+	transformable.position = pos;
 }
 
 void alignBottom(Sprite sprite, FloatRect box)

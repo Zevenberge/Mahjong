@@ -26,6 +26,12 @@ class Ingame
 	const UUID id;
 	// Ingame variables.
 	const PlayerWinds wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+
+	bool isEast() @property pure const
+	{
+		return wind == PlayerWinds.east;
+	}
+
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
 	OpenHand openHand; // The open pons/chis/kans 
 

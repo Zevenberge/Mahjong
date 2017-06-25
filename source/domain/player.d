@@ -9,6 +9,7 @@ import mahjong.domain;
 import mahjong.engine.chi;
 import mahjong.engine.flow;
 import mahjong.engine.opts;
+import mahjong.engine.scoring;
 
 class Player
 { // General variables.
@@ -16,7 +17,11 @@ class Player
 	dstring name = "Cal"d;
 
 	int playLoc = -10;
-	int score; 
+	private int _score;
+	int score() @property pure const
+	{
+		return _score;
+	}
 
 	Ingame game; // Resets after every round.
 	alias game this;
@@ -25,7 +30,7 @@ class Player
 	this(GameEventHandler eventHandler)
 	{
 		id = randomUUID;
-		score = gameOpts.initialScore;
+		_score = gameOpts.initialScore;
 		this.eventHandler = eventHandler;
 	}
 	this(GameEventHandler eventHandler, dstring name)
@@ -53,6 +58,7 @@ class Player
 		if(game is null) return -1;
 		return game.wind;
 	}
+
 	bool isChiable(const Tile discard, const Metagame metagame) pure const
 	{
 		if(metagame.nextPlayer.id != this.id) return false;
@@ -62,6 +68,16 @@ class Player
 	void drawTile(Wall wall)
 	{
 		this.game.drawTile(wall);
+	}
+
+	void applyTransaction(const Transaction transaction)
+	in
+	{
+		assert(transaction.player == this, "The transaction was applied to the wrong player.");
+	}
+	body
+	{
+		_score += transaction.amount;
 	}
 
 	override bool opEquals(Object o)
@@ -220,4 +236,33 @@ unittest
 	assert(player.game.openHand.amountOfKans == 1, "The open hand should have one kan.");
 	assert(player.game.openHand.sets.length == 1, "The open hand should have one set.");
 	assertThrown!IllegalClaimException(player.kan(kannableTile, wall), "With no tiles in hand, an exception should be thrown.");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	auto transaction = new Transaction(player, 5000);
+	player.applyTransaction(transaction);
+	assert(player.score == 35000, "The amount should have been added to the player's score.");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto player = new Player(new TestEventHandler);
+	auto transaction = new Transaction(player, -5000);
+	player.applyTransaction(transaction);
+	assert(player.score == 25000, "The amount should have been subtracted from the player's score.");
+}
+
+unittest
+{
+	import core.exception;
+	import std.exception;
+	gameOpts = new DefaultGameOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto transaction = new Transaction(player2, 5000);
+	assertThrown!AssertError(player1.applyTransaction(transaction), "Applying someone else's transaction should not be allowed.");
 }

@@ -42,6 +42,6 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(MahjongEvent event)
 	{
-		controller = new MahjongController(controller.getWindow, event.metagame, event);
+		controller = new ResultController(controller.getWindow, event.metagame, event);
 	}
 }

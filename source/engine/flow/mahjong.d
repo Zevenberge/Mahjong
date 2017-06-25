@@ -16,16 +16,8 @@ class MahjongFlow : Flow
 	{
 		trace("Constructing mahjong flow");
 		super(game);
-		auto data = constructMahjongData;
+		auto data = game.constructMahjongData;
 		notifyPlayers(data);
-	}
-
-	private const(MahjongData)[] constructMahjongData()
-	{
-		return metagame.players.map!((player){
-				auto mahjongResult = scanHandForMahjong(player);
-				return MahjongData(player, mahjongResult);
-			}).filter!(data => data.result.isMahjong).array;
 	}
 
 	private void notifyPlayers(const(MahjongData)[] data)
@@ -43,6 +35,7 @@ class MahjongFlow : Flow
 	override void advanceIfDone()
 	{
 		if(!_events.all!(e => e.isHandled)) return;
+		metagame.finishRound;
 		flow = new RoundStartFlow(metagame);
 	}
 }
@@ -150,7 +143,7 @@ struct MahjongData
 	const(MahjongResult) result;
 	bool isWinningPlayerEast() @property pure const
 	{
-		return player.wind == PlayerWinds.east;
+		return player.isEast;
 	}
 	size_t calculateMiniPoints(PlayerWinds leadingWind) pure const
 	{
@@ -160,7 +153,7 @@ struct MahjongData
 		return miniPointsFromSets + miniPointsFromWinning;
 	}
 
-	private bool isTsumo() @property pure const
+	bool isTsumo() @property pure const
 	{
 		return player.lastTile.isOwn;
 	}

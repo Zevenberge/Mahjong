@@ -27,11 +27,11 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 	private Vector2f _scale;
 	private FloatRect _size;
 	
-	this(FloatRect initRect)
+	this(FloatRect initialRect)
 	{
-		_size = initRect;
-		_transform.x = initRect.left;
-		_transform.y = initRect.top;
+		_size = initialRect;
+		_transform.x = initialRect.left;
+		_transform.y = initialRect.top;
 	}
 	
 	void draw(RenderTarget target, RenderStates states)
@@ -155,20 +155,21 @@ private struct TransformingDrawable
 		obj = subject;
 		states = rstates;
 		auto tf = cast(Transformable)obj;
-		if(tf !is null)
+		if(tf is null)
 		{
-			origCoords = FloatCoords(tf.position, tf.rotation);
+			warning("Trying to transform a drawable that can't be transformed.");
 		}
 	}
 	
 	Drawable obj;
 	RenderStates states;
-	const(FloatCoords) origCoords;
+	FloatCoords origCoords;
 	
 	void transformCoords(FloatCoords transform)
 	{
 		auto tf = cast(Transformable)obj;
 		if(tf is null) return;
+		origCoords = FloatCoords(tf.position, tf.rotation);
 		tf.position = origCoords.position + transform.position;
 		tf.rotation = origCoords.rotation + transform.rotation;
 	}
@@ -182,4 +183,33 @@ private struct TransformingDrawable
 	}
 	
 	alias obj this;
+}
+
+unittest
+{
+	import dsfml.graphics.rectangleshape;
+	import fluent.asserts;
+	auto drawable = new RectangleShape;
+	drawable.position = Vector2f(100, 150);
+	auto transformable = new TransformingDrawable(drawable, RenderStates.Default);
+	transformable.transformCoords(FloatCoords(42, 92));
+	drawable.position.should.equal(Vector2f(142,242)).because("the coordinates should be transformed");
+	transformable.untransformCoord;
+	drawable.position.should.equal(Vector2f(100, 150)).because("the original coordinates should be restored");
+}
+
+unittest
+{
+	import dsfml.graphics.rectangleshape;
+	import fluent.asserts;
+	auto drawable = new RectangleShape;
+	drawable.position = Vector2f(100, 150);
+	auto transformable = new TransformingDrawable(drawable, RenderStates.Default);
+	drawable.move(Vector2f(50, -50));
+	transformable.transformCoords(FloatCoords(42, 92));
+	drawable.position.should.equal(Vector2f(192,192))
+		.because("the coordinates should be transformed, taking into account the movement");
+	transformable.untransformCoord;
+	drawable.position.should.equal(Vector2f(150, 100))
+		.because("the coordinates after the movement should be restored");
 }

@@ -88,7 +88,7 @@ private class TileVisuals
 		loadTilesTexture;
 		_sprite = new Sprite(tilesTexture);
 		_sprite.textureRect = getTextureRect(stone);
-		_sprite.pix2scale(tile.displayWidth);
+		_sprite.setSize(tile.displayWidth);
 		_backSprite = initialiseNewBackSprite;
 		trace("Initialised tile visual for tile ", stone.id);
 	}
@@ -198,7 +198,7 @@ private Sprite initialiseNewBackSprite()
 	auto backSprite = new Sprite(tilesTexture);
 	backSprite.textureRect = getBackSpriteBounds;
 	backSprite.color = Color.Red;
-	backSprite.pix2scale(tile.displayWidth);
+	backSprite.setSize(tile.displayWidth);
 	return backSprite;
 }
 private IntRect getBackSpriteBounds()

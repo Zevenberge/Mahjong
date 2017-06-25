@@ -5,6 +5,7 @@
 	"authors": ["marco"],
 	"lflags" : ["-L/usr/local/lib/dsfml"],
 	"dependencies": {
-		"dsfml": "~master"
+		"dsfml": "~master",
+		"fluent-asserts": "~>0.5.0"
 	}
 }

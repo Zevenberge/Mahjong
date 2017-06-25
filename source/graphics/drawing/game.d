@@ -134,7 +134,7 @@ private class GameInfo
 			auto texture = new Texture;
 			texture.loadFromFile(infoBgFile);
 			_background = new Sprite(texture);
-			_background.pix2scale(so.screenSize.x -2*so.gameInfoMargin,
+			_background.setSize(so.screenSize.x -2*so.gameInfoMargin,
 				so.screenSize.y - so.gameScreenSize.y - 2*so.gameInfoMargin);
 			_background.position = Vector2f(so.gameInfoMargin,so.gameInfoMargin);
 			_background.color = Color(255,255,255,126);

@@ -7,6 +7,7 @@ import std.math;
 import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
+import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.engine.flow.mahjong;
@@ -29,7 +30,7 @@ class Scoring
 		size_t amountOfDoras, bool isClosedHand)
 	{
 		this.yakus = yakus;
-		this.miniPoints = miniPoints;
+		this.miniPoints = miniPoints.roundMiniPoints;
 		this.amountOfDoras = amountOfDoras;
 		_isClosedHand = isClosedHand;
 	}
@@ -42,7 +43,12 @@ class Scoring
 	Payment calculatePayment(bool isWinningPlayerEast)
 	{
 		auto fan = yakus.sum!(yaku => yaku.convertToFan(_isClosedHand));
-		return new Payment(0, 0, true);
+		fan += amountOfDoras;
+		if(fan >= 5)
+		{
+			return calculatePaymentForLimitHands(fan, isWinningPlayerEast);
+		}
+		return calculatePaymentForNonLimitHands(fan, isWinningPlayerEast);
 	}
 
 	private Payment calculatePaymentForLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
@@ -53,23 +59,60 @@ class Scoring
 
 	private Payment calculatePaymentForNonLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
 	{
-		auto rawPayment = prelimitScores[miniPoints][amountOfFan];
+		auto rawPayment = prelimitScores[amountOfFan][miniPoints];
 		return new Payment(rawPayment.east, rawPayment.nonEast, isWinningPlayerEast);
 	}
 }
 
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, false);
+	auto payment = scoring.calculatePayment(false);
+	assert(payment.east == 4000, "Payment should be issued for a mangan");
+	assert(payment.nonEast == 2000, "Payment should be issued for a mangan");
+	assert(payment.ron == 8000, "Payment should be issued for a mangan");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou], 46, 0, false);
+	auto payment = scoring.calculatePayment(false);
+	assert(payment.east == 3200, "3 fan 50 is 3200 for east");
+	assert(payment.nonEast == 1600, "3 fan 50 is 1600 for non-east");
+	assert(payment.ron == 6400, "3 fan 50 is 6400 for all");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.chiiToitsu], 25, 0, false);
+	auto payment = scoring.calculatePayment(false);
+	// Tsumo is not possible.
+	assert(payment.ron == 1600, "2 fan 25 mp equals 2000 in a non-east ron");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.riichi], 30, 4, false);
+	auto payment = scoring.calculatePayment(false);
+	assert(payment.ron == 8000, "1 yaku + 4 dora is a mangan");
+}
+
 class Payment
 {
-	this(size_t east, size_t nonEast, bool isWinningPlayerEast)
+	this(int east, int nonEast, bool isWinningPlayerEast)
 	{
 		this.east = east;
 		// If the winning player is east, all non-easy players pay the east level.
 		this.nonEast = isWinningPlayerEast ? east : nonEast;
 	}
 
-	const size_t east;
-	const size_t nonEast;
-	size_t ron() @property
+	const int east;
+	const int nonEast;
+	int ron() @property
 	{
 		// Sum the payments of every player.
 		return east + (gameOpts.amountOfPlayers - 2) * nonEast;
@@ -112,13 +155,179 @@ unittest
 	assert(payment.ron == 2000, "The ron payment should be simply east, because there are no other players and is invariant of who won.");
 }
 
+Transaction[] toTransactions(const(MahjongData)[] data, const Metagame metagame)
+{
+	auto transactions = data.flatMap!(d => extractTransactions(d, metagame));
+	return transactions.mergeTransactions.array;
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	gameOpts = new BambooOpts;
+	auto wall = new MockWall(new Tile(Types.dragon, Dragons.red));
+	auto player1 = new Player(new TestEventHandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.drawTile(wall);
+	auto player2 = new Player(new TestEventHandler);
+	player2.game = new Ingame(PlayerWinds.south);
+	auto metagame = new Metagame([player1, player2]);
+	metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
+	auto mahjongData = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
+	auto transactions = [mahjongData].toTransactions(metagame);
+	assert(transactions.length == 2, "Expected a plus and a minus transaction");
+	// TODO assert that the scoring is ok.
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto player2 = new Player(new TestEventHandler);
+	player2.game = new Ingame(PlayerWinds.south);
+	auto player3 = new Player(new TestEventHandler);
+	player3.game = new Ingame(PlayerWinds.west);
+	auto tile = new Tile(Types.dragon, Dragons.red);
+	tile.origin = player2;
+	player1.ron(tile);
+	auto metagame = new Metagame([player1, player2, player3]);
+	metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
+	auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
+	auto transactions = [mahjongData1].toTransactions(metagame);
+	assert(transactions.length == 2, "Only the player who discarded and the winning player should be paid");
+	// TODO assert that the scoring is ok.
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto player2 = new Player(new TestEventHandler);
+	player2.game = new Ingame(PlayerWinds.south);
+	auto player3 = new Player(new TestEventHandler);
+	player3.game = new Ingame(PlayerWinds.west);
+	player3.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
+	auto tile = new Tile(Types.dragon, Dragons.red);
+	tile.origin = player2;
+	player1.ron(tile);
+	player3.ron(tile);
+	auto metagame = new Metagame([player1, player2, player3]);
+	metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
+	auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
+	auto mahjongData2 = MahjongData(player3, MahjongResult(true, [new SevenPairsSet(null)]));
+	auto transactions = [mahjongData1, mahjongData2].toTransactions(metagame);
+	assert(transactions.length == 3, "Expected two plus and a minus transaction because of a possible double ron");
+	// TODO assert that the scoring is ok.
+}
+
+private Transaction[] extractTransactions(const MahjongData data, const Metagame metagame)
+{
+	auto scoring = data.calculateScoring(metagame);
+	auto payment = scoring.calculatePayment(data.player.isEast);
+	Transaction[] transactions;
+	if(data.isTsumo)
+	{
+		foreach(player; metagame.otherPlayers(data.player))
+		{
+			auto amount = player.isEast ? -payment.east : -payment.nonEast;
+			transactions ~= new Transaction(player, amount);
+		}
+	}
+	else
+	{
+		auto payingPlayer = metagame.players.first!(p => p.game == data.player.lastTile.origin);
+		transactions ~= new Transaction(payingPlayer, -payment.ron);
+	}
+	transactions ~= new Transaction(data.player, payment.ron);
+	return transactions;
+}
+
+private Transaction[] mergeTransactions(Transaction[] transactions)
+{
+	Transaction[const Player] mergedTransactions;
+	foreach(transaction; transactions)
+	{
+		if(transaction.player in mergedTransactions)
+		{
+			mergedTransactions[transaction.player] = mergedTransactions[transaction.player] + transaction;
+		}
+		else
+		{
+			mergedTransactions[transaction.player] = transaction;
+		}
+	}
+	return mergedTransactions.values;
+}
+
+class Transaction
+{
+	this(const Player player, const int amount)
+	{
+		this.player = player;
+		this.amount = amount;
+	}
+
+	const Player player;
+	const int amount;
+
+	Transaction opBinary(string op)(Transaction rhs)
+	in
+	{
+		assert(player == rhs.player, "Cannot sum the transactions of two players");
+	}
+	body
+	{
+		static if(op == "+") return new Transaction(player, amount + rhs.amount);
+		else static if(op == "-") return new Transaction(player, amount - rhs.amount);
+		else static assert(false, "Operator " ~ op ~ " not supported");
+	}
+
+	bool isPayment() pure const @property
+	{
+		return amount < 0;
+	}
+}
+
+unittest
+{
+	import mahjong.engine.flow;
+	auto player = new Player(new TestEventHandler);
+	auto transactionA = new Transaction(player, 1234);
+	auto transactionB = new Transaction(player, 5678);
+	auto sumOfTransactions = transactionA + transactionB;
+	assert(sumOfTransactions.amount == 6912, "The transactions are summed together.");
+	auto differenceOfTransactions = transactionB - transactionA;
+	assert(differenceOfTransactions.amount == 4444, "The transactions should be subtracted.");
+}
+
+unittest
+{
+	import std.exception;
+	import core.exception;
+	import mahjong.engine.flow;
+	auto player = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto transactionA = new Transaction(player, 123);
+	auto transactionB = new Transaction(player2, 456);
+	assertThrown!AssertError(transactionA + transactionB, "Summing transactions of two different player is not allowed.");
+}
+
 private enum prelimitScores = initializePreLimitPayments();
 private enum limitScores = initializeLimitPayments();
 
 private struct RawPayment
 {
-	const size_t east;
-	const size_t nonEast;
+	const int east;
+	const int nonEast;
 }
 
 private RawPayment[size_t][size_t] initializePreLimitPayments()
@@ -133,6 +342,7 @@ private RawPayment[size_t][size_t] initializePreLimitPayments()
 	];
 	prelimitPayments[2] = [
 		20: RawPayment( 700, 400),
+		25: RawPayment( 800, 400),
 		30: RawPayment(1000, 500),
 		40: RawPayment(1300, 700),
 		50: RawPayment(1600, 800),

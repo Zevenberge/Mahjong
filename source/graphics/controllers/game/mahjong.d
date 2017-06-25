@@ -6,6 +6,7 @@ import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.metagame;
 import mahjong.engine.flow.mahjong;
+import mahjong.engine.scoring;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.controllers.controller;
@@ -13,31 +14,18 @@ import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.result;
+import mahjong.graphics.drawing.transfer;
 import mahjong.graphics.opts;
 
-class MahjongController: GameController
+class MahjongController : GameController
 {
-	this(RenderWindow window, Metagame metagame, MahjongEvent event)
+	this(RenderWindow window, Metagame metagame, RenderTexture background)
 	{
 		super(window, metagame);
-		_event = event;
-		freezeGameGraphics;
-		setHaze;
-		createResultScreens;
-	}
-
-	private void freezeGameGraphics()
-	{
-		auto screen = styleOpts.screenSize;
-		auto texture = new RenderTexture;
-		texture.create(screen.x, screen.y, true);
-		_metagame.drawGame(texture);
-		texture.display;
+		_renderTexture = background;
 		_game = new Sprite;
-		_game.setTexture = texture.getTexture;
-		auto animation = new FadeSpriteAnimation(_game, 60);
-		animation.objectId = randomUUID;
-		addUniqueAnimation(animation);
+		_game.setTexture = background.getTexture;
+		setHaze;
 	}
 
 	private void setHaze()
@@ -49,27 +37,16 @@ class MahjongController: GameController
 		_haze.fillColor = styleOpts.mahjongResultsHazeColor;
 	}
 
-	private void createResultScreens()
-	{
-		_resultScreens = _event.data.map!(mahjongData => new ResultScreen(mahjongData, _metagame)).array;
-		currentScreen.initialize;
-	}
-
+	protected RenderTexture _renderTexture;
 	private MahjongEvent _event;
 	private Sprite _game;
 	private RectangleShape _haze;
-	private ResultScreen[] _resultScreens;
-	private ResultScreen currentScreen() @property
-	{
-		return _resultScreens.front;
-	}
 
 	override void draw()
 	{
 		drawGameBg(_window);
 		_window.draw(_game);
 		_window.draw(_haze);
-		_resultScreens.front.draw(_window);
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) 
@@ -85,7 +62,50 @@ class MahjongController: GameController
 		}
 	}
 
-	private void advanceScreen()
+	protected abstract void advanceScreen();
+}
+
+class ResultController : MahjongController
+{
+	this(RenderWindow window, Metagame metagame, MahjongEvent event)
+	{
+		auto texture = freezeGameGraphicsOnATexture(metagame);
+		_event = event;
+		super(window, metagame, texture);
+		createResultScreens;
+	}
+
+	private void createResultScreens()
+	{
+		_resultScreens = _event.data.map!(mahjongData => new ResultScreen(mahjongData, _metagame)).array;
+		currentScreen.initialize;
+	}
+
+	private RenderTexture freezeGameGraphicsOnATexture(Metagame metagame)
+	{
+		auto screen = styleOpts.screenSize;
+		auto texture = new RenderTexture;
+		texture.create(screen.x, screen.y, true);
+		metagame.drawGame(texture);
+		texture.display;
+		return texture;
+	}
+
+	private ResultScreen[] _resultScreens;
+	private ResultScreen currentScreen() @property
+	{
+		return _resultScreens.front;
+	}
+
+	private MahjongEvent _event;
+
+	override void draw()
+	{
+		super.draw();
+		_resultScreens.front.draw(_window);
+	}
+
+	protected override void advanceScreen()
 	{
 		if(!currentScreen.done)
 		{
@@ -115,6 +135,53 @@ class MahjongController: GameController
 	{
 		_resultScreens = _resultScreens[1.. $];
 		currentScreen.initialize;
+	}
+
+	private void finishRound()
+	{
+		controller = new TransferController(_window, _metagame, _renderTexture, _event);
+	}
+}
+
+class TransferController : MahjongController
+{
+	this(RenderWindow window, Metagame metagame, RenderTexture background, MahjongEvent event)
+	{
+		super(window, metagame, background);
+		_event = event;
+		composeTransferScreen;
+	}
+
+	private void composeTransferScreen()
+	{
+		auto transactions = _event.data.toTransactions(_metagame);
+		_transferScreen = new TransferScreen(transactions);
+	}
+
+	private TransferScreen _transferScreen;
+	private MahjongEvent _event;
+
+	override void draw()
+	{
+		super.draw();
+		_transferScreen.draw(_window);
+	}
+
+	protected override void advanceScreen()
+	{
+		if(!_transferScreen.done)
+		{
+			finishTransfer;
+		}
+		else
+		{
+			finishRound;
+		}
+	}
+
+	private void finishTransfer()
+	{
+		_transferScreen.forceFinish;
 	}
 
 	private void finishRound()

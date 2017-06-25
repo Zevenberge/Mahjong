@@ -122,6 +122,7 @@ template flatMap(alias fun) //if(isInputRange!(ReturnType!fun))
 {
 	auto flatMap(Range)(Range range) if(isInputRange!Range)
 	{
+		if(range.empty) return null;
 		return .fold!((a,b) => a ~ b)(range.map!(fun));
 	}
 }
@@ -134,4 +135,15 @@ unittest
 	}
 	auto flattened = [Bubble([1,2]), Bubble([3,4])].flatMap!(x => x.ints).array;
 	assert([1, 2, 3, 4].equal(flattened), "The two arrays should be joined");
+}
+
+unittest
+{
+	struct Bubble
+	{
+		int[] ints;
+	}
+	Bubble[] bubbles; // Empty range;
+	auto flattened = bubbles.flatMap!(x => x.ints).array;
+	assert(flattened.length == 0, "Flat-mapping an empty range should return an empty range of the result type");
 }
