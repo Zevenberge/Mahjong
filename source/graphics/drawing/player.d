@@ -207,6 +207,7 @@ private void initialiseScoreLabel()
 		info("Initialising score label.");
 		auto texture = stickTexture;
 		_scoreLabel = new Sprite(texture);
+		_scoreLabel.textureRect = stick;
 		_scoreLabel.setSize(drawingOpts.iconSize);
 		_scoreLabel.scale = Vector2f(_scoreLabel.scale.x, 2*_scoreLabel.scale.y); // TODO unhack
 		_scoreLabel.alignBottom(iconBounds);

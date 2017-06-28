@@ -15,5 +15,5 @@ static this()
 	infoTexture = new Texture;
 	load(infoTexture, infoBgFile);
 	stickTexture = new Texture;
-	stickTexture.loadFromFile(sticksFile, stick);
+	stickTexture.loadFromFile(sticksFile);
 }
