@@ -72,15 +72,34 @@ float toRadians(float rotation)
 
 string toKanji(uint number)
 {
-	char[] builder;
-	do
-	{
-		auto digit = number - floor(number/10.)*10;
-		builder = digit.to!Numbers.to!string  ~ builder;
-		number /= 10;
-	}
-	while(number > 0);
-	return builder.to!string;
+	if(number >= 99) return "九十九";
+	auto lastDigit = number - floor(number/10.).to!uint*10;
+	return convertMultipleOfTenToKanji(number) ~ convertDigitToKanji(lastDigit);
+}
+
+private string convertMultipleOfTenToKanji(uint number)
+{
+	if(number < 10) return null;
+	auto digit = number/10;
+	auto prefix = digit == 1 ? "" : convertDigitToKanji(digit);
+	return prefix ~ Numbers.十.to!string;
+}
+
+private string convertDigitToKanji(uint digit)
+{
+	if(digit == 0) return null;
+	return digit.to!Numbers.to!string;
+}
+
+unittest
+{
+	import fluent.asserts;
+	2.toKanji.should.equal("二");
+	10.toKanji.should.equal("十");
+	15.toKanji.should.equal("十五");
+	20.toKanji.should.equal("二十");
+	25.toKanji.should.equal("二十五");
+	100.toKanji.should.equal("九十九").because("there is no reason to");
 }
 
 IntRect toRect(const Vector2i v) pure
