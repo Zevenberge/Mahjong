@@ -5,9 +5,10 @@ import std.experimental.logger;
 
 import dsfml.graphics;
 import mahjong.graphics.manipulation;
+import mahjong.graphics.menu;
 import mahjong.graphics.menu.creation.mainmenu;
-import mahjong.graphics.menu.menuitem;
 import mahjong.graphics.selections.selectable;
+import mahjong.graphics.text;
 
 class MainMenu : Selectable!MainMenuItem
 {

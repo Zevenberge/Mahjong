@@ -11,7 +11,6 @@ import mahjong.graphics.drawing.player;
 import mahjong.graphics.drawing.wall;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.kanji;
-import mahjong.graphics.enums.resources;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 import mahjong.graphics.rendersprite;
@@ -22,6 +21,7 @@ void draw(Metagame game, RenderTarget target)
 	drawPlayers(game, target);
 	drawWal(game, target);
 	drawGameInfo(game, target);
+	drawCounter(game, target);
 }
 
 void clearCache()
@@ -57,6 +57,12 @@ private void drawGameInfo(Metagame game, RenderTarget target)
 	auto gameInfo = getGameInfo;
 	gameInfo.draw(renderSprite, game);
 	target.draw(renderSprite);
+}
+
+private void drawCounter(Metagame game, RenderTarget target)
+{
+	if(game.counters == 0) return;
+	auto sprite = new Sprite();
 }
 
 private Sprite _playerSprite;
@@ -131,9 +137,7 @@ private class GameInfo
 		void initBg()
 		{
 			auto so = styleOpts;
-			auto texture = new Texture;
-			texture.loadFromFile(infoBgFile);
-			_background = new Sprite(texture);
+			_background = new Sprite(infoTexture);
 			_background.setSize(so.screenSize.x -2*so.gameInfoMargin,
 				so.screenSize.y - so.gameScreenSize.y - 2*so.gameInfoMargin);
 			_background.position = Vector2f(so.gameInfoMargin,so.gameInfoMargin);
@@ -151,16 +155,6 @@ private class GameInfo
 			else _turnPlayerInfo.setString("");
 		}
 }
-
-private Texture getInfoBg()
-{
-	if(infoTexture is null)
-	{
-		infoTexture = new Texture;
-		load(infoTexture, infoBgFile);
-	}
-	return infoTexture;
-} 
 
 
 

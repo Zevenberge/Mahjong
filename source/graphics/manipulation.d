@@ -18,12 +18,10 @@ import mahjong.engine.ai;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.engine.yaku;
-import mahjong.graphics.cache.font;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
-import mahjong.graphics.menu;
 import mahjong.graphics.opts;
 import mahjong.graphics.traits;
 
@@ -138,24 +136,6 @@ void alignBottom(Sprite sprite, FloatRect box)
   	FloatRect(box.left, box.top, box.width, box.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
-
-void setTitle(Text title, string text)
-{
-  /*
-    Have a function that takes care of a uniform style for all title fields.
-  */
-  with(title)
-  {
-  	setFont(titleFont);
-  	setString(text);
-  	setCharacterSize(48);
-  	setColor(Color.Black);
-  	position = Vector2f(200,20);
-  }
-  auto size = styleOpts.gameScreenSize;
-  title.center!(CenterDirection.Horizontal)(FloatRect(0, 0, size.x, size.y));
-}
-
 
 void changeOpacity(ref ubyte[] opacities, const size_t position)
 {
@@ -300,25 +280,6 @@ Vector2f getSize(Sprite sprite)
 	auto scale = sprite.scale;
 	return Vector2f(local.width * scale.x, local.height * scale.y);
 }
-
-void spaceMenuItems(T : MenuItem)(T[] menuItems)
-{
-	trace("Arranging the menu items");
-	if(menuItems.empty) return;
-	auto size = menuItems.front.name.getGlobalBounds;
-	auto screenSize = styleOpts.screenSize;
-	foreach(i, item; menuItems)
-	{
-		auto ypos = styleOpts.menuTop + (size.height + styleOpts.menuSpacing) * i;
-		trace("Y position of ", item.description, " is ", ypos);
-		item.name.position = Vector2f(0, ypos);
-		item.name.center!(CenterDirection.Horizontal)
-				(FloatRect(0, 0, screenSize.x, screenSize.y));
-		++i;
-	}
-	trace("Arranged the manu items");
-}
-
 
 
 
