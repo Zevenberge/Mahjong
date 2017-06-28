@@ -57,13 +57,13 @@ class Scoring
 	private Payment calculatePaymentForLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
 	{
 		auto rawPayment = findRawPaymentForLimitHands(amountOfFan);
-		return new Payment(rawPayment.east, rawPayment.nonEast, isWinningPlayerEast);
+		return new Payment(rawPayment.east, rawPayment.nonEast, amountOfCounters, isWinningPlayerEast);
 	}
 
 	private Payment calculatePaymentForNonLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
 	{
 		auto rawPayment = prelimitScores[amountOfFan][miniPoints];
-		return new Payment(rawPayment.east, rawPayment.nonEast, isWinningPlayerEast);
+		return new Payment(rawPayment.east, rawPayment.nonEast, amountOfCounters, isWinningPlayerEast);
 	}
 }
 
@@ -75,6 +75,16 @@ unittest
 	assert(payment.east == 4000, "Payment should be issued for a mangan");
 	assert(payment.nonEast == 2000, "Payment should be issued for a mangan");
 	assert(payment.ron == 8000, "Payment should be issued for a mangan");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 1, false);
+	auto payment = scoring.calculatePayment(false);
+	assert(payment.east == 4100, "Every player should pay 100 extra for every counter");
+	assert(payment.nonEast == 2100, "Every player should pay 100 extra for every counter");
+	assert(payment.ron == 8300, "A grand total of 300 extra is paid.");
 }
 
 unittest
@@ -106,11 +116,12 @@ unittest
 
 class Payment
 {
-	this(int east, int nonEast, bool isWinningPlayerEast)
+	this(int east, int nonEast, size_t counters, bool isWinningPlayerEast)
 	{
-		this.east = east;
+		auto extraPaymentForCounters = 100 * counters.to!int;
+		this.east = east + extraPaymentForCounters;
 		// If the winning player is east, all non-easy players pay the east level.
-		this.nonEast = isWinningPlayerEast ? east : nonEast;
+		this.nonEast = (isWinningPlayerEast ? east : nonEast) + extraPaymentForCounters;
 	}
 
 	const int east;
@@ -125,7 +136,7 @@ class Payment
 unittest
 {
 	gameOpts = new DefaultGameOpts;
-	auto payment = new Payment(2000, 1000, false);
+	auto payment = new Payment(2000, 1000, 0, false);
 	assert(payment.east == 2000, "The east value should have been initialized at 2000");
 	assert(payment.nonEast == 1000, "The non-east value should have been initialized at the base value of 1000");
 	assert(payment.ron == 4000, "The ron payment should be east + 2*non-east");
@@ -134,7 +145,16 @@ unittest
 unittest
 {
 	gameOpts = new DefaultGameOpts;
-	auto payment = new Payment(2000, 1000, true);
+	auto payment = new Payment(2000, 1000, 4, false);
+	assert(payment.east == 2400, "Each player pays 400 extra");
+	assert(payment.nonEast == 1400, "Each player pays 400 extra");
+	assert(payment.ron == 5200, "Each players pays 400 extra, totalling 1200 extra");
+}
+
+unittest
+{
+	gameOpts = new DefaultGameOpts;
+	auto payment = new Payment(2000, 1000, 0, true);
 	assert(payment.east == 2000, "The east value should again have been initialized at 2000");
 	assert(payment.nonEast == 2000, "Because east won, the non-east players also pay 2000");
 	assert(payment.ron == 6000, "The ron payment should be 3*east");
@@ -143,7 +163,7 @@ unittest
 unittest
 {
 	gameOpts = new BambooOpts;
-	auto payment = new Payment(2000, 1000, false);
+	auto payment = new Payment(2000, 1000, 0, false);
 	assert(payment.east == 2000, "The east value should have been initialized at 2000");
 	// Non east is not actually relevant.
 	assert(payment.ron == 2000, "The ron payment should be simply east, because there are no other players.");
@@ -152,10 +172,19 @@ unittest
 unittest
 {
 	gameOpts = new BambooOpts;
-	auto payment = new Payment(2000, 1000, true);
+	auto payment = new Payment(2000, 1000, 0, true);
 	assert(payment.east == 2000, "The east value should have been initialized at 2000 and is invariant of who won.");
 	// Non east is not actually relevant.
 	assert(payment.ron == 2000, "The ron payment should be simply east, because there are no other players and is invariant of who won.");
+}
+
+unittest
+{
+	gameOpts = new BambooOpts;
+	auto payment = new Payment(2000, 1000, 3, true);
+	assert(payment.east == 2300, "The payment should be upped by 100 for each counter.");
+	// Non east is not actually relevant.
+	assert(payment.ron == 2300, "As there is only one other player, the total payment is also upped with only 100 per counter..");
 }
 
 Transaction[] toTransactions(const(MahjongData)[] data, const Metagame metagame)
