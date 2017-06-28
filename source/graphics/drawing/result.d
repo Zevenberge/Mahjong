@@ -122,9 +122,14 @@ public class ResultScreen
 
 	private void createMiscTexts(Scoring scoring, bool isClosedHand)
 	{
-		auto minipoints = new DoubleText("Minipoints", scoring.miniPoints.to!string);
+		auto minipoints = new DoubleText("Minipoints".translate, scoring.miniPoints.to!string);
 		addTextAndAnimation(minipoints);
-		auto score = new DoubleText("Score", 
+		if(scoring.amountOfCounters > 0)
+		{
+			auto counterText = new DoubleText("Counters".translate, scoring.amountOfCounters.to!string);
+			addTextAndAnimation(counterText);
+		}
+		auto score = new DoubleText("Score".translate, 
 			scoring.calculatePayment(_mahjongData.isWinningPlayerEast).ron.to!string);
 		addTextAndAnimation(score);
 	}
