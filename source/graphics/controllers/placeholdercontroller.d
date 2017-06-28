@@ -7,6 +7,7 @@ import mahjong.graphics.controllers.menu.mainmenucontroller;
 import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
+import mahjong.graphics.text;
 
 class PlaceholderController : Controller
 {

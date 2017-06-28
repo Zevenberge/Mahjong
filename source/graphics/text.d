@@ -4,6 +4,8 @@ import std.conv;
 import dsfml.graphics;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.enums.font;
+import mahjong.graphics.enums.geometry;
+import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 
 class TextFactory
@@ -37,4 +39,21 @@ void changeScoreHighlighting(Text text, Color defaultColor = pointsColor)
 	{
 		text.setColor(defaultColor);
 	}
+}
+
+void setTitle(Text title, string text)
+{
+	/*
+	 Have a function that takes care of a uniform style for all title fields.
+	 */
+	with(title)
+	{
+		setFont(titleFont);
+		setString(text);
+		setCharacterSize(48);
+		setColor(Color.Black);
+		position = Vector2f(200,20);
+	}
+	auto size = styleOpts.gameScreenSize;
+	title.center!(CenterDirection.Horizontal)(FloatRect(0, 0, size.x, size.y));
 }

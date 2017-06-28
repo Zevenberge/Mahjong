@@ -64,6 +64,12 @@ class Metagame
 		return _round;
 	}
 
+	private size_t _counters = 0;
+	size_t counters() @property pure const
+	{
+		return _counters;
+	}
+
 	this(Player[] players)
 	{
 		this.players = players;
@@ -74,6 +80,7 @@ class Metagame
 		_leadingWind = PlayerWinds.east;
 		info("Initialised metagame");
 	}
+
 	private Player getEastPlayer()
 	{
 		return players[($-_initialWind)%$];
@@ -168,7 +175,12 @@ class Metagame
 
 	private void moveWinds()
 	{
-		if(!needToMoveWinds) return;
+		if(!needToMoveWinds) 
+		{
+			++_counters;
+			return;
+		}
+		_counters = 0;
 		_initialWind = ((_initialWind - 1 + players.length) % players.length).to!int;
 		if(_initialEastPlayer == getEastPlayer)
 		{
@@ -334,6 +346,7 @@ unittest
 	metagame.initializeRound;
 	metagame.beginRound;
 	assert(eastPlayer.isEast, "the east player was mahjong, the turns should not have advanced");
+	assert(1 == metagame.counters, "A counter should have been placed");
 }
 
 unittest
@@ -357,6 +370,7 @@ unittest
 	assert(nonEastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
 	assert(!eastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
 	assert(metagame.round == 2, "The round counter should have been upped.");
+	assert(metagame.counters == 0, "As the turn advanced, there are no more counters");
 }
 
 unittest
@@ -430,6 +444,28 @@ unittest
 	}
 	assert(metagame.leadingWind == PlayerWinds.east, "With three east losses, the leading wind should not have changed");
 	assert(metagame.round == 4, "we are going to the fourth east round.");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto players = [player1, player2];
+	auto metagame = new Metagame(players);
+	metagame.initializeRound;
+	metagame.beginRound;
+	auto eastPlayer = players[metagame._initialWind];
+	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+	metagame.finishRound;
+	metagame.initializeRound;
+	metagame.beginRound;
+	// East does not win.
+	metagame.finishRound;
+	assert(metagame.counters == 0, "The amount of counters should have been reset");
 }
 
 class BambooMetagame : Metagame
