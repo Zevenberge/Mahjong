@@ -21,23 +21,26 @@ Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
 	auto yaku = mahjong.result.determineYaku(mahjong.player, metagame);
 	auto miniPoints = mahjong.calculateMiniPoints(metagame.leadingWind);
 	auto amountOfDoras = mahjong.result.countAmountOfDoras(metagame.wall);
-	return new Scoring(yaku, miniPoints, amountOfDoras, mahjong.player.isClosedHand);
+	return new Scoring(yaku, miniPoints, amountOfDoras, metagame.counters, mahjong.player.isClosedHand);
 }
 
 class Scoring
 {
 	private this(const(Yaku)[] yakus, size_t miniPoints, 
-		size_t amountOfDoras, bool isClosedHand)
+		size_t amountOfDoras, size_t amountOfCounters,
+		bool isClosedHand)
 	{
 		this.yakus = yakus;
 		this.miniPoints = miniPoints.roundMiniPoints;
 		this.amountOfDoras = amountOfDoras;
+		this.amountOfCounters = amountOfCounters;
 		_isClosedHand = isClosedHand;
 	}
 
 	const(Yaku)[] yakus;
 	const size_t miniPoints;
 	const size_t amountOfDoras;
+	const size_t amountOfCounters;
 	private bool _isClosedHand;
 
 	Payment calculatePayment(bool isWinningPlayerEast)
@@ -67,7 +70,7 @@ class Scoring
 unittest
 {
 	gameOpts = new DefaultGameOpts;
-	auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, false);
+	auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 0, false);
 	auto payment = scoring.calculatePayment(false);
 	assert(payment.east == 4000, "Payment should be issued for a mangan");
 	assert(payment.nonEast == 2000, "Payment should be issued for a mangan");
@@ -77,7 +80,7 @@ unittest
 unittest
 {
 	gameOpts = new DefaultGameOpts;
-	auto scoring = new Scoring([Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou], 46, 0, false);
+	auto scoring = new Scoring([Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou], 46, 0, 0, false);
 	auto payment = scoring.calculatePayment(false);
 	assert(payment.east == 3200, "3 fan 50 is 3200 for east");
 	assert(payment.nonEast == 1600, "3 fan 50 is 1600 for non-east");
@@ -87,7 +90,7 @@ unittest
 unittest
 {
 	gameOpts = new DefaultGameOpts;
-	auto scoring = new Scoring([Yaku.chiiToitsu], 25, 0, false);
+	auto scoring = new Scoring([Yaku.chiiToitsu], 25, 0, 0, false);
 	auto payment = scoring.calculatePayment(false);
 	// Tsumo is not possible.
 	assert(payment.ron == 1600, "2 fan 25 mp equals 2000 in a non-east ron");
@@ -96,7 +99,7 @@ unittest
 unittest
 {
 	gameOpts = new DefaultGameOpts;
-	auto scoring = new Scoring([Yaku.riichi], 30, 4, false);
+	auto scoring = new Scoring([Yaku.riichi], 30, 4, 0, false);
 	auto payment = scoring.calculatePayment(false);
 	assert(payment.ron == 8000, "1 yaku + 4 dora is a mangan");
 }
