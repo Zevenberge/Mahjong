@@ -7,7 +7,7 @@ enum selectionMargin = 5;
 enum openMargin {edge = 15, avatar = 5};
 
 // discard constants
-enum discardUndershoot = 1.3;
+enum discardUndershoot = 1.0;
 
 //enum stick {width = 399, height = 72};
 enum stick = IntRect(0,1,300,20);

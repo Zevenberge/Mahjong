@@ -64,14 +64,16 @@ private void drawCounter(Metagame game, RenderTarget target)
 	if(game.counters == 0) return;
 	auto sprite = new Sprite(stickTexture);
 	sprite.textureRect = hundredYenStick;
+	sprite.scale = Vector2f(0.5, 0.5);
 	drawingOpts.placeCounter(sprite);
 	target.draw(sprite);
 	if(game.counters > 1)
 	{
 		auto text = new Text;
+		text.setColor = Color.Black;
 		text.setString = "x" ~ game.counters.to!string;
 		text.setFont = infoFont;
-		text.setCharacterSize = 15;
+		text.setCharacterSize = 10;
 		text.alignRight(sprite.getGlobalBounds);
 		target.draw(text);
 	}
