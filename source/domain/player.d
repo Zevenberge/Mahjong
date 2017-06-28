@@ -39,14 +39,6 @@ class Player
 		this(eventHandler);
 	}
 
-	void nextRound(bool passWinds)
-	{
-		// TODO
-		import std.conv;
-		int wind = (game.wind + passWinds ? 1 : 0) % gameOpts.amountOfPlayers;
-		startGame(wind.to!PlayerWinds);
-	}
-
 	void startGame(PlayerWinds wind)
 	{
 		trace("Starting game for ", wind);

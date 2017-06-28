@@ -4,6 +4,7 @@ import std.algorithm;
 import std.array;
 import std.experimental.logger;
 import std.random;
+import std.range;
 import std.conv;
 import std.uuid;
 
@@ -56,18 +57,26 @@ class Metagame
 	}
 	private const Player _initialEastPlayer;
 	private int _initialWind;
-	uint round;
+
+	private uint _round = 1;
+	uint round() @property pure const
+	{
+		return _round;
+	}
 
 	this(Player[] players)
 	{
 		this.players = players;
 		info("Initialising metagame");
 		placePlayers;
-		round = 1;
 		_initialWind = uniform(0, players.length).to!int; 
-		_initialEastPlayer = players[uniform(0, players.length)];
+		_initialEastPlayer = getEastPlayer;
 		_leadingWind = PlayerWinds.east;
 		info("Initialised metagame");
+	}
+	private Player getEastPlayer()
+	{
+		return players[($-_initialWind)%$];
 	}
 
 	private void placePlayers()
@@ -89,9 +98,9 @@ class Metagame
 
 	private void startPlayersGame()
 	{
-		foreach(int i, player; players) // Re-initialise the players' game.
+		foreach(int i, player; players)
 		{ 
-			auto wind = ((_initialWind + i) % gameOpts.amountOfPlayers).to!PlayerWinds;
+			auto wind = ((_initialWind + i) % players.length).to!PlayerWinds;
 			player.startGame(wind);
 		}
 	}
@@ -141,8 +150,10 @@ class Metagame
 
 	void finishRound()
 	{
+		++_round;
 		auto data = constructMahjongData;
 		applyTransactions(data);
+		moveWinds;
 	}
 
 	private void applyTransactions(const(MahjongData)[] data)
@@ -154,6 +165,22 @@ class Metagame
 			player.applyTransaction(transaction);
 		}
 	}
+
+	private void moveWinds()
+	{
+		if(!needToMoveWinds) return;
+		_initialWind = ((_initialWind - 1 + players.length) % players.length).to!int;
+		if(_initialEastPlayer == getEastPlayer)
+		{
+			_leadingWind = (_leadingWind + 1).to!PlayerWinds;
+			_round = 1;
+		}
+	}
+
+	private bool needToMoveWinds()
+	{
+		return !players.first!(p => p.isEast).isMahjong;
+	}
 	/*
 	 The game itself.
 	 */
@@ -164,7 +191,7 @@ class Metagame
 	{
 		foreach(i, player; players)
 		{
-			if(player.wind == Winds.east)
+			if(player.isEast)
 			{
 				_turn = i.to!int;
 				break;
@@ -200,7 +227,7 @@ class Metagame
 		else
 		{
 			trace("Advancing turn.");
-			_turn = (_turn + 1) % gameOpts.amountOfPlayers;
+			_turn = (_turn + 1) % players.length;
 		}
 	}
 
@@ -248,11 +275,6 @@ class Metagame
 		}
 	}
 
-	bool isTurn(UUID playerId)
-	{
-		return currentPlayer.id == playerId;
-	}
-
 	const(MahjongData)[] constructMahjongData()
 	{
 		return players.map!((player){
@@ -292,6 +314,122 @@ unittest
 	assert(metagame.nextPlayer == player2, "If it is player 1's turn, player 2 should be next.");
 	metagame.currentPlayer = player3;
 	assert(metagame.nextPlayer == player, "If it is player 3's turn, the next player should loop back to 1");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto players = [player1, player2];
+	auto metagame = new Metagame(players);
+	metagame.initializeRound;
+	metagame.beginRound;
+	auto eastPlayer = players[metagame._initialWind];
+	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+	metagame.finishRound;
+	metagame.initializeRound;
+	metagame.beginRound;
+	assert(eastPlayer.isEast, "the east player was mahjong, the turns should not have advanced");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto players = [player1, player2];
+	auto metagame = new Metagame(players);
+	metagame.initializeRound;
+	metagame.beginRound;
+	auto eastPlayer = players[metagame._initialWind];
+	auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+	metagame.finishRound;
+	metagame.initializeRound;
+	metagame.beginRound;
+	assert(nonEastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
+	assert(!eastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
+	assert(metagame.round == 2, "The round counter should have been upped.");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto players = [player1, player2];
+	auto metagame = new Metagame(players);
+	metagame.initializeRound;
+	metagame.beginRound;
+	foreach(i; 0..2)
+	{
+		auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+		metagame.finishRound;
+		metagame.initializeRound;
+		metagame.beginRound;
+	}
+	assert(metagame.leadingWind == PlayerWinds.south, "After the first east player becomes east again, the leading wind should swap.");
+	assert(metagame.round == 1, "The round should have been reset");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto player3 = new Player(new TestEventHandler);
+	auto player4 = new Player(new TestEventHandler);
+	auto players = [player1, player2, player3, player4];
+	auto metagame = new Metagame(players);
+	metagame.initializeRound;
+	metagame.beginRound;
+	auto eastPlayer = metagame.currentPlayer;
+	auto southPlayer = metagame.nextPlayer;
+	assert(southPlayer.wind == PlayerWinds.south, "Sanity check");
+	metagame.finishRound;
+	metagame.initializeRound;
+	metagame.beginRound;
+	assert(southPlayer.isEast, "the south player was mahjong, the turns should have advanced such that the south player is now east");
+	assert(!eastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
+	assert(eastPlayer.wind == PlayerWinds.north, "east is degraded to north");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	import mahjong.engine.opts;
+	gameOpts = new BambooOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto player3 = new Player(new TestEventHandler);
+	auto player4 = new Player(new TestEventHandler);
+	auto players = [player1, player2, player3, player4];
+	auto metagame = new Metagame(players);
+	metagame.initializeRound;
+	metagame.beginRound;
+	foreach(i; 0..3)
+	{
+		metagame.finishRound;
+		metagame.initializeRound;
+		metagame.beginRound;
+	}
+	assert(metagame.leadingWind == PlayerWinds.east, "With three east losses, the leading wind should not have changed");
+	assert(metagame.round == 4, "we are going to the fourth east round.");
 }
 
 class BambooMetagame : Metagame
