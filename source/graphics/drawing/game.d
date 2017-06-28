@@ -62,7 +62,19 @@ private void drawGameInfo(Metagame game, RenderTarget target)
 private void drawCounter(Metagame game, RenderTarget target)
 {
 	if(game.counters == 0) return;
-	auto sprite = new Sprite();
+	auto sprite = new Sprite(stickTexture);
+	sprite.textureRect = hundredYenStick;
+	drawingOpts.placeCounter(sprite);
+	target.draw(sprite);
+	if(game.counters > 1)
+	{
+		auto text = new Text;
+		text.setString = "x" ~ game.counters.to!string;
+		text.setFont = infoFont;
+		text.setCharacterSize = 15;
+		text.alignRight(sprite.getGlobalBounds);
+		target.draw(text);
+	}
 }
 
 private Sprite _playerSprite;

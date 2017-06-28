@@ -2,7 +2,10 @@ module mahjong.graphics.opts.defaultopts;
 
 import dsfml.graphics;
 import mahjong.domain.wall;
+import mahjong.graphics.conv;
 import mahjong.graphics.drawing.wall;
+import mahjong.graphics.enums.geometry;
+import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 
 class DefaultDrawingOpts : Opts
@@ -45,6 +48,11 @@ class DefaultDrawingOpts : Opts
 	body
 	{
 		initialiseTiles(wall);
+	}
+
+	void placeCounter(Sprite counter)
+	{
+		counter.center!(CenterDirection.Both)(styleOpts.gameScreenSize.toVector2f.toRect);
 	}
 }
 

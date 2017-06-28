@@ -25,6 +25,7 @@ interface Opts
 	int amountOfDiscardLines();
 	int amountOfDiscardsPerLine();
 	void initialiseWall(Wall wall);
+	void placeCounter(Sprite counter);
 }
 
 StyleOpts styleOpts;
