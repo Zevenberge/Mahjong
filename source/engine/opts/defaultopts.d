@@ -41,4 +41,8 @@ class DefaultGameOpts : Opts
 	{
 		return eventHandlers.map!(d => d.createPlayer).array;
 	}
+	PlayerWinds finalLeadingWind()
+	{
+		return PlayerWinds.north;
+	}
 }

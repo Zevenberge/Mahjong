@@ -44,4 +44,10 @@ class UiEventHandler : GameEventHandler
 	{
 		controller = new ResultController(controller.getWindow, event.metagame, event);
 	}
+
+	override void handle(GameEndEvent event) 
+	{
+		// TODO
+	}
+
 }

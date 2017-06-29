@@ -19,4 +19,5 @@ interface Opts
 	int initialScore();
 	GameMode gameMode();
 	Metagame createMetagame(GameEventHandler[] eventHandlers);
+	PlayerWinds finalLeadingWind();
 }

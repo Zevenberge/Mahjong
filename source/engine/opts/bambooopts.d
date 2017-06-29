@@ -23,5 +23,4 @@ class BambooOpts : DefaultGameOpts
 	{
 		return new BambooMetagame(createPlayers(eventHandlers));
 	}
-
 }

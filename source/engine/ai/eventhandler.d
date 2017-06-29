@@ -32,4 +32,8 @@ class AiEventHandler : GameEventHandler
 	{
 		event.handle;
 	}
+	override void handle(GameEndEvent event) 
+	{
+		event.handle;
+	}
 }
