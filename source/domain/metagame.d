@@ -96,6 +96,11 @@ class Metagame
 	}
 
 	void initializeRound()
+	in
+	{
+		assert(!isGameOver, "Cannot start a new round when the game is over.");
+	}
+	body
 	{
 		info("Initializing the next round");
 		startPlayersGame;
@@ -192,6 +197,11 @@ class Metagame
 	private bool needToMoveWinds()
 	{
 		return !players.first!(p => p.isEast).isMahjong;
+	}
+
+	bool isGameOver()
+	{
+		return _leadingWind > gameOpts.finalLeadingWind;
 	}
 	/*
 	 The game itself.
@@ -466,6 +476,38 @@ unittest
 	// East does not win.
 	metagame.finishRound;
 	assert(metagame.counters == 0, "The amount of counters should have been reset");
+}
+
+unittest
+{
+	import core.exception;
+	import std.exception;
+	import mahjong.engine.creation;
+	import mahjong.engine.flow;
+	gameOpts = new DefaultGameOpts;
+	auto player1 = new Player(new TestEventHandler);
+	auto player2 = new Player(new TestEventHandler);
+	auto player3 = new Player(new TestEventHandler);
+	auto player4 = new Player(new TestEventHandler);
+	auto players = [player1, player2, player3, player4];
+	auto metagame = new Metagame(players);
+	metagame.initializeRound;
+	metagame.beginRound;
+	foreach(i; 0..7)
+	{
+		auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+		metagame.finishRound;
+		assert(!metagame.isGameOver, "There are still turns left to play!");
+		metagame.initializeRound;
+		metagame.beginRound;
+	}
+	auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+	metagame.finishRound;
+	assert(metagame.isGameOver, "The game should have been finished after 2x 4 rounds of non-east wins.");
+	assertThrown!AssertError(metagame.initializeRound, "Attempting to start a new round should be blocked");
+
 }
 
 class BambooMetagame : Metagame

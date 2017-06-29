@@ -43,6 +43,6 @@ class DefaultGameOpts : Opts
 	}
 	PlayerWinds finalLeadingWind()
 	{
-		return PlayerWinds.north;
+		return PlayerWinds.south;
 	}
 }

@@ -23,4 +23,8 @@ class BambooOpts : DefaultGameOpts
 	{
 		return new BambooMetagame(createPlayers(eventHandlers));
 	}
+	override PlayerWinds finalLeadingWind()
+	{
+		return PlayerWinds.north;
+	}
 }
