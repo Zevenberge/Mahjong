@@ -22,76 +22,57 @@ import dsfml.graphics.text;
 
 class RenderSprite : Drawable, Transformable, RenderTarget
 {
-	private TransformingDrawable[] _drawables;
-	private FloatCoords _transform;
+	private Drawable[] _drawables;
 	private Vector2f _scale;
 	private FloatRect _size;
 	
 	this(FloatRect initialRect)
 	{
 		_size = initialRect;
-		_transform.x = initialRect.left;
-		_transform.y = initialRect.top;
+		this.position = initialRect.position;
+
 	}
+
+	void draw(Drawable drawable, RenderStates states = RenderStates.Default)
+	{
+		_drawables ~= drawable;
+	}
+
+	mixin NormalTransformable;
 	
 	void draw(RenderTarget target, RenderStates states)
 	{
+		states.transform *= getTransform;
 		foreach(i, drawable; _drawables)
 		{
-			drawable.transformCoords(_transform);
 			target.draw(drawable, states);
-			drawable.untransformCoord;
 		}
 	}
-	Vector2f position(Vector2f newPosition) @property
+
+	void clear(Color color = Color.Black)
 	{
-		_transform.position = newPosition;
-		return newPosition;
+		_drawables.destroy;
 	}
-	Vector2f position() const @property
+
+	mixin NotImplementedRenderTarget;
+}
+
+private mixin template NotImplementedRenderTarget()
+{
+	void draw(Drawable drawable, RenderStates states = RenderStates.Default)
 	{
-		return _transform.position;
+		assert(false);
 	}
-	Vector2f origin() const @property
+
+	void clear(Color color = Color.Black)
 	{
-		return Vector2f(0,0);
+		assert(false);
 	}
-	Vector2f origin(Vector2f newOrigin) @property
+
+	void draw(const(Vertex)[] vertices, PrimitiveType type, 
+		RenderStates states = RenderStates.Default)
 	{
-		return Vector2f(0,0);
-	}
-	float rotation() const @property
-	{
-		return _transform.rotation;
-	}
-	float rotation(float newRotation) @property
-	{
-		return _transform.rotation = newRotation;
-	}
-	Vector2f scale() const @property
-	{
-		return _scale;
-	}
-	Vector2f scale(Vector2f newScale) @property
-	{
-		return _scale = newScale;
-	}
-	const(Transform) getTransform() const
-	{
-		auto tf = unity;
-		auto pos = _transform.position;
-		tf.translate(pos.x, pos.y);
-		tf.rotate(_transform.rotation);
-		tf.scale(_scale.x, _scale.y);
-		return tf;
-	}
-	const(Transform) getInverseTransform() const
-	{
-		return getTransform.getInverse;
-	}
-	void move(Vector2f offSet)
-	{
-		_transform.move(offSet);
+		assert(false);
 	}
 	const(View) view(const(View) newView) @property
 	{
@@ -107,29 +88,15 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 	}
 	Vector2!uint getSize() const
 	{
-		auto transformed  = getTransform.transformRect(_size);
-		return Vector2!uint(transformed.width.to!uint, transformed.height.to!uint);
+		assert(false);
 	}
 	IntRect getViewport(const(View) view) const
 	{
 		assert(false);
 	}
-	void clear(Color color = Color.Black)
-	{
-		_drawables.destroy;
-	}
-	void draw(Drawable drawable, RenderStates states = RenderStates.Default)
-	{
-		_drawables ~= TransformingDrawable(drawable, states);
-	}
-	void draw(const(Vertex)[] vertices, PrimitiveType type, 
-		RenderStates states = RenderStates.Default)
-	{
-		assert(false);
-	}
 	Vector2f mapPixelToCoords(Vector2i point) const
 	{
-		return getTransform.transformPoint(point.toVector2f);
+		assert(false);
 	}
 	Vector2f mapPixelToCoords(Vector2i point, const(View) view) const
 	{
@@ -137,7 +104,7 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 	}
 	Vector2i mapCoordsToPixel(Vector2f point) const
 	{
-		return getInverseTransform.transformPoint(point).toVector2i;
+		assert(false);
 	}
 	Vector2i mapCoordsToPixel(Vector2f point, const(View) view) const
 	{
@@ -146,70 +113,4 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 	void popGLStates() {}
 	void pushGLStates() {}
 	void resetGLStates() {}
-}
-
-private struct TransformingDrawable
-{
-	this(Drawable subject, RenderStates rstates) 
-	{
-		obj = subject;
-		states = rstates;
-		auto tf = cast(Transformable)obj;
-		if(tf is null)
-		{
-			warning("Trying to transform a drawable that can't be transformed.");
-		}
-	}
-	
-	Drawable obj;
-	RenderStates states;
-	FloatCoords origCoords;
-	
-	void transformCoords(FloatCoords transform)
-	{
-		auto tf = cast(Transformable)obj;
-		if(tf is null) return;
-		origCoords = FloatCoords(tf.position, tf.rotation);
-		tf.position = origCoords.position + transform.position;
-		tf.rotation = origCoords.rotation + transform.rotation;
-	}
-	
-	void untransformCoord()
-	{
-		auto tf = cast(Transformable)obj;
-		if(tf is null) return;
-		tf.position = origCoords.position;
-		tf.rotation = origCoords.rotation;
-	}
-	
-	alias obj this;
-}
-
-unittest
-{
-	import dsfml.graphics.rectangleshape;
-	import fluent.asserts;
-	auto drawable = new RectangleShape;
-	drawable.position = Vector2f(100, 150);
-	auto transformable = new TransformingDrawable(drawable, RenderStates.Default);
-	transformable.transformCoords(FloatCoords(42, 92));
-	drawable.position.should.equal(Vector2f(142,242)).because("the coordinates should be transformed");
-	transformable.untransformCoord;
-	drawable.position.should.equal(Vector2f(100, 150)).because("the original coordinates should be restored");
-}
-
-unittest
-{
-	import dsfml.graphics.rectangleshape;
-	import fluent.asserts;
-	auto drawable = new RectangleShape;
-	drawable.position = Vector2f(100, 150);
-	auto transformable = new TransformingDrawable(drawable, RenderStates.Default);
-	drawable.move(Vector2f(50, -50));
-	transformable.transformCoords(FloatCoords(42, 92));
-	drawable.position.should.equal(Vector2f(192,192))
-		.because("the coordinates should be transformed, taking into account the movement");
-	transformable.untransformCoord;
-	drawable.position.should.equal(Vector2f(150, 100))
-		.because("the coordinates after the movement should be restored");
 }
