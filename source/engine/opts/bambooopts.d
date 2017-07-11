@@ -25,6 +25,7 @@ class BambooOpts : DefaultGameOpts
 	}
 	override PlayerWinds finalLeadingWind()
 	{
+		//return PlayerWinds.east;
 		return PlayerWinds.north;
 	}
 }

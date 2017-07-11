@@ -24,13 +24,17 @@ class List : Transformable, Drawable
 		static if(op == "~")
 		{
 			auto newItem = TransformingDrawable(drawable);
-			newItem.position = Vector2f(0, _size.y + margin);
 			auto boundsOfNewItem = drawable.getGlobalBounds;
 			auto xSize = max(_size.x, boundsOfNewItem.width);
 			auto ySize = _size.y + boundsOfNewItem.height;
 			if(_items.length > 0)
 			{
+				newItem.position = Vector2f(0, _size.y + margin);
 				ySize += margin;
+			}
+			else
+			{
+				newItem.position = Vector2f(0, _size.y);
 			}
 			_size = Vector2f(xSize, ySize);
 			_items ~= newItem;
@@ -82,6 +86,34 @@ unittest
 	list.getGlobalBounds.should.equal(FloatRect(0, 0, 100, 500))
 		.because("The max width of the items should be combined with the total height");
 }
+
+unittest
+{
+	import fluent.asserts;
+	auto list = new List(Vector2f(0,0), 100);
+	auto shape1 = new RectangleShape(Vector2f(100, 150));
+	auto shape2 = new RectangleShape(Vector2f(90, 250));
+	list ~= shape1;
+	list ~= shape2;
+	list._items[0].position.should.equal(Vector2f(0,0))
+		.because("the first item should not have a margin added to its position");
+	list._items[1].position.should.equal(Vector2f(0,250))
+		.because("the second item should have the margin added to its position");
+}
+unittest
+{
+	import fluent.asserts;
+	auto list = new List(Vector2f(0,0), 100);
+	auto shape1 = new RectangleShape(Vector2f(100, 150));
+	auto shape2 = new RectangleShape(Vector2f(90, 250));
+	auto shape3 = new RectangleShape(Vector2f(40, 100));
+	list ~= shape1;
+	list ~= shape2;
+	list ~= shape3;
+	list.getGlobalBounds.should.equal(FloatRect(0, 0, 100, 700))
+		.because("every item should have an added margin");
+}
+
 
 private struct TransformingDrawable
 {
