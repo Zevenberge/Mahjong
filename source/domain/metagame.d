@@ -49,6 +49,11 @@ class Metagame
 		return players.filter!(p => p != player);
 	}
 
+	size_t amountOfPlayers() @property pure const
+	{
+		return players.length;
+	}
+
 	Wall wall;
 	private PlayerWinds _leadingWind;
 	PlayerWinds leadingWind() @property pure const

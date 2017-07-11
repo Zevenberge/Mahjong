@@ -88,8 +88,7 @@ unittest
 void alignRight(T)(T transformable, const FloatRect box) 
 	if(hasGlobalBounds!T && hasFloatPosition!T)
 {
-	auto size = transformable.getGlobalBounds;
-	transformable.position = Vector2f(box.left + box.width - size.width, box.top);
+	alignTopRight(transformable, box);
 	center!(CenterDirection.Vertical)(transformable, box);
 }
 
@@ -104,6 +103,13 @@ unittest
 void alignTopLeft(T) (T sprite, const FloatRect box)
 {
   sprite.position = Vector2f(box.left, box.top);
+}
+
+void alignTopRight(T) (T transformable, const FloatRect box)
+	if(hasGlobalBounds!T && hasFloatPosition!T)
+{
+	auto size = transformable.getGlobalBounds;
+	transformable.position = Vector2f(box.left + box.width - size.width, box.top);
 }
 
 void center(CenterDirection direction, T)(T transformable, const FloatRect rect) 

@@ -24,11 +24,11 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 {
 	private Drawable[] _drawables;
 	private Vector2f _scale;
-	private FloatRect _size;
+	private Vector2f _size;
 	
 	this(FloatRect initialRect)
 	{
-		_size = initialRect;
+		_size = initialRect.size;
 		this.position = initialRect.position;
 
 	}
@@ -55,6 +55,11 @@ class RenderSprite : Drawable, Transformable, RenderTarget
 	}
 
 	mixin NotImplementedRenderTarget;
+
+	FloatRect getGlobalBounds() @property
+	{
+		return FloatRect(position, _size);
+	}
 }
 
 private mixin template NotImplementedRenderTarget()

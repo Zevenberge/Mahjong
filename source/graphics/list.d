@@ -5,7 +5,7 @@ import dsfml.graphics;
 import mahjong.graphics.rendersprite;
 import mahjong.graphics.traits;
 
-class List : Transformable
+class List : Transformable, Drawable
 {
 	this(Vector2f position, float margin)
 	{
