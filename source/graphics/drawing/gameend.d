@@ -63,7 +63,7 @@ private RenderSprite createPlayerResultSprite(const Player player, FloatRect siz
 private Sprite initialiseIcon(FloatRect box, const Player player)
 {
 	auto icon = player.getIcon.dup;
-	icon.setSize(box.size);
+	icon.setSize(Vector2f(box.size.x/2, box.size.y));
 	icon.position = Vector2f(0,0);
 	return icon;
 }

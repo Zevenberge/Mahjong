@@ -36,12 +36,12 @@ class GameEndFlow : Flow
 
 class GameEndEvent
 {
-	this(const Metagame metagame)
+	this(Metagame metagame)
 	{
 		this.metagame = metagame;
 	}
 
-	const Metagame metagame;
+	Metagame metagame;
 
 	private bool _isHandled;
 	bool isHandled() @property
