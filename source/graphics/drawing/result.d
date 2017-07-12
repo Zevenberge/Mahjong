@@ -24,11 +24,18 @@ import mahjong.share.range;
 
 enum margin = Vector2f(50,50);
 enum innerMargin = margin*1.4;
+FloatRect innerScreenBounds()
+{
+	return FloatRect(innerMargin.x, innerMargin.y,
+		styleOpts.gameScreenSize.x - 2*innerMargin.x,
+		styleOpts.gameScreenSize.y - 2*innerMargin.y);
+}
+
 private enum resultScreenTileSpacing = Vector2f(20,25);
 private enum iconScale = 1.5;
 private enum amountOfFramesPerLineOfText = 90;
 
-public class ResultScreen
+class ResultScreen
 {
 	this(const MahjongData mahjongData, const Metagame metagame)
 	{

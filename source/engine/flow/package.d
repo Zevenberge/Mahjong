@@ -7,6 +7,7 @@ public
 	import mahjong.engine.flow.eventhandler;
 	import mahjong.engine.flow.draw;
 	import mahjong.engine.flow.exhaustive;
+	import mahjong.engine.flow.gameend;
 	import mahjong.engine.flow.gamestart;
 	import mahjong.engine.flow.mahjong;
 	import mahjong.engine.flow.roundstart;

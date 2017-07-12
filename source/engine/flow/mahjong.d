@@ -36,9 +36,19 @@ class MahjongFlow : Flow
 	{
 		if(!_events.all!(e => e.isHandled)) return;
 		metagame.finishRound;
+		mixin(gameOverSwitch);
 		flow = new RoundStartFlow(metagame);
 	}
 }
+
+enum gameOverSwitch =
+q{
+	if(metagame.isGameOver)
+	{
+		flow = new GameEndFlow(metagame);
+		return;
+	}
+};
 
 class MahjongEvent
 {
@@ -137,6 +147,54 @@ unittest
 	assert(eventhandler.mahjongEvent.data.length == 2, "As two out of three players have a mahjong");
 }
 
+unittest
+{
+	import mahjong.domain.closedhand;
+	import mahjong.domain.enums;
+	import mahjong.domain.ingame;
+	import mahjong.engine.creation;
+	import mahjong.test.utils;
+	auto eventhandler = new TestEventHandler;
+	auto player1 = new Player(eventhandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
+	auto metagame = new Metagame([player1]);
+	flow = new MahjongFlow(metagame);
+	eventhandler.mahjongEvent.handle;
+	flow.advanceIfDone;
+	assert(flow.isOfType!RoundStartFlow, "After a mahjong, a new round should start");
+}
+
+unittest
+{
+	import mahjong.domain.closedhand;
+	import mahjong.domain.enums;
+	import mahjong.domain.ingame;
+	import mahjong.engine.creation;
+	import mahjong.test.utils;
+	class NoMoreGame : Metagame
+	{
+		this(Player[] players)
+		{
+			super(players);
+		}
+
+		override bool isGameOver() 
+		{
+			return true;
+		}
+	}
+
+	auto eventhandler = new TestEventHandler;
+	auto player1 = new Player(eventhandler);
+	player1.game = new Ingame(PlayerWinds.east);
+	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
+	auto metagame = new NoMoreGame([player1]);
+	flow = new MahjongFlow(metagame);
+	eventhandler.mahjongEvent.handle;
+	flow.advanceIfDone;
+	assert(flow.isOfType!GameEndFlow, "After a mahjong, a new round should start");
+}
 struct MahjongData
 {
 	const(Player) player;
@@ -211,3 +269,4 @@ unittest
 	assert(data.isTsumo, "Being mahjong after kan is a tsumo"); 
 	assert(data.calculateMiniPoints(PlayerWinds.south) == 48, "Open kan of honours + pair of dragons + tsumo = 48");
 }
+
