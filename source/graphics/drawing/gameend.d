@@ -1,6 +1,6 @@
 ﻿module mahjong.graphics.drawing.gameend;
 
-import std.algorithm : map, each;
+import std.algorithm : map, each, min;
 import std.conv;
 import dsfml.graphics : Sprite, Text, FloatRect, RenderTarget;
 import dsfml.system : Vector2f;
@@ -19,7 +19,8 @@ class GameEndScreen
 	{
 		auto itemSize = (box.height - marginBetweenPlayers * (metagame.amountOfPlayers -1)) 
 							/ metagame.amountOfPlayers;
-		auto itemBox = FloatRect(0,0, box.width, itemSize);
+		itemSize = min(itemSize, box.height/3);
+		auto itemBox = FloatRect(0,0, 2*itemSize, itemSize);
 		_list = new List(Vector2f(0,0), marginBetweenPlayers);
 		metagame.players.map!(p => createPlayerResultSprite(p, itemBox)).each!(it => _list ~= it);
 		_list.center!(CenterDirection.Both)(box);
