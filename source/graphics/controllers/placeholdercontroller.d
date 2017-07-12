@@ -7,6 +7,7 @@ import mahjong.graphics.controllers.menu.mainmenucontroller;
 import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
+import mahjong.graphics.text;
 
 class PlaceholderController : Controller
 {
@@ -46,7 +47,7 @@ class PlaceholderController : Controller
 		texture.loadFromFile(filename, area);
 		_background = new Sprite(texture);
 		auto size = styleOpts.screenSize;
-		_background.pix2scale(size.x, size.y);
+		_background.setSize(size.x, size.y);
 		
 	}
 	private Sprite _background;

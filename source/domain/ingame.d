@@ -3,19 +3,19 @@ module mahjong.domain.ingame;
 import std.algorithm;
 import std.array;
 import std.experimental.logger;
+import std.traits;
 import std.uuid;
 import mahjong.domain;
-import mahjong.domain.enums.tile;
+import mahjong.domain.enums;
 import mahjong.domain.exceptions;
 import mahjong.engine.chi;
-import mahjong.engine.enums.game;
 import mahjong.engine.mahjong;
 import mahjong.engine.sort;
 import mahjong.share.range;
 
 class Ingame
 { 
-	this(int wind)
+	this(PlayerWinds wind)
 	{
 		this.wind = wind;
 		closedHand = new ClosedHand;
@@ -25,7 +25,13 @@ class Ingame
 
 	const UUID id;
 	// Ingame variables.
-	const int wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+	const PlayerWinds wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+
+	bool isEast() @property pure const
+	{
+		return wind == PlayerWinds.east;
+	}
+
 	ClosedHand closedHand; // The closed hand that can be changed. The discards are from here.
 	OpenHand openHand; // The open pons/chis/kans 
 
@@ -63,6 +69,12 @@ class Ingame
 	{
 		return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
 	}
+
+	bool isClosedHand() @property pure const
+	{
+		return openHand.isClosedHand;
+	}
+
 	/*
 	 Normal functions related to claiming tiles.
 	 */
@@ -121,8 +133,18 @@ class Ingame
 
 	bool isRonnable(const Tile discard) pure
 	{
-		return scanHandForMahjong(closedHand, openHand, discard).isMahjong
+		return scanHandForMahjong(this, discard).isMahjong
 			&& !isFuriten ;
+	}
+
+	void ron(Tile discard)
+	{
+		if(!isRonnable(discard)) 
+		{
+			throw new IllegalClaimException(discard, "The tile could not have been ronned.");
+		}
+		_lastTile = discard;
+		closedHand.tiles ~= discard;
 	}
 	
 	bool canDeclareClosedKan(const Tile tile)
@@ -160,15 +182,13 @@ class Ingame
 	 */
 
 	bool isTenpai()
-	{ /*
-		   Check whether a player sits tempai. Add one of each tile to the hand to see whether it will be a mahjong hand.
-		   */
-		for(int type = Types.min; type <= Types.max; ++type)
+	{
+		foreach(type; EnumMembers!Types)
 		{
 			for(int value = Numbers.min; value <= Numbers.max; ++value)
 			{
 				auto tile = new Tile(type, value);
-				if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
+				if(.scanHandForMahjong(this, tile).isMahjong)
 				{
 					return true;
 				}
@@ -182,7 +202,7 @@ class Ingame
 	{
 		foreach(tile; allDiscards)
 		{
-			if(.scanHandForMahjong(closedHand, openHand, tile).isMahjong)
+			if(.scanHandForMahjong(this, tile).isMahjong)
 			{
 				return true;
 			}
@@ -197,7 +217,7 @@ class Ingame
 
 	bool isMahjong()
 	{
-		return scanHandForMahjong(closedHand, openHand).isMahjong;
+		return scanHandForMahjong(this).isMahjong;
 	}
 
 	private void discard(size_t discardedNr)
@@ -224,7 +244,7 @@ class Ingame
 	}
 
 	private Tile _lastTile; 
-	Tile lastTile() @property
+	const(Tile) lastTile() @property pure const
 	{
 		return _lastTile;
 	}
@@ -251,7 +271,7 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
 	auto tile = ingame.closedHand.tiles.back;
 	auto initialLength = ingame.closedHand.tiles.length;
@@ -267,10 +287,10 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
 	auto tile = ingame.closedHand.tiles.back;
-	tile.origin = new Ingame(2);
+	tile.origin = new Ingame(PlayerWinds.south);
 	ingame.pon(tile);
 	auto initialLength = ingame.closedHand.tiles.length;
 	auto wall = new Wall;
@@ -285,10 +305,10 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
 	auto ponTile = "🀟"d.convertToTiles[0];
-	ponTile.origin = new Ingame(2);
+	ponTile.origin = new Ingame(PlayerWinds.south);
 	ingame.pon(ponTile);
 	assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
 }
@@ -297,10 +317,24 @@ unittest
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	gameOpts = new DefaultGameOpts;
-	auto ingame = new Ingame(1);
+	auto ingame = new Ingame(PlayerWinds.east);
 	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
 	auto chiTile = "🀡"d.convertToTiles[0];
-	chiTile.origin = new Ingame(2);
+	chiTile.origin = new Ingame(PlayerWinds.south);
 	ingame.chi(chiTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
 	assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
+}
+
+unittest
+{
+	import mahjong.engine.creation;
+	import mahjong.engine.opts;
+	gameOpts = new DefaultGameOpts;
+	auto ingame = new Ingame(PlayerWinds.east);
+	ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+	auto ronTile = "🀡"d.convertToTiles[0];
+	ronTile.origin = new Ingame(PlayerWinds.south);
+	ingame.ron(ronTile);
+	assert(ingame.isMahjong, "After ronning, the player should have mahjong");
+	assert(ingame.lastTile == ronTile, "The player should confess they claimed the last tile");
 }

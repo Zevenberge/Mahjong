@@ -1,14 +1,13 @@
 module mahjong.domain.wall;
 
 import std.algorithm;
+import std.array;
 import std.conv;
 import std.experimental.logger;
 import std.random;
 import std.uuid;
 
-import mahjong.domain.enums.game;
-import mahjong.domain.enums.tile;
-import mahjong.domain.enums.wall;
+import mahjong.domain.enums;
 import mahjong.domain.tile;
 import mahjong.engine.creation;
 import mahjong.engine.opts;
@@ -21,8 +20,6 @@ class Wall
 	{
 		return _tiles;
 	}
-
-	private int amountOfKans = 0;
 
 	this()
 	{
@@ -47,7 +44,6 @@ class Wall
 	void setUp()
 	{
 		trace("Resetting the wall");
-		this.amountOfKans = 0;
 		initialise();
 		trace("Initialized the wall");
 		shuffle();
@@ -117,6 +113,11 @@ class Wall
 		_tiles[indexOfLastOpenedDoraIndicator-2].open;
 	}
 
+	const(Tile)[] doraIndicators() @property pure const
+	{
+		return _tiles.filter!(t => t.isOpen).array;
+	}
+
 	Tile drawTile()
 	{ 
 		Tile drawnTile = _tiles[0];
@@ -124,7 +125,7 @@ class Wall
 		return drawnTile;
 	}
 
-	public Tile drawKanTile()
+	Tile drawKanTile()
 	{ 
 		flipDoraIndicator;
 		return getKanTile;      
@@ -146,7 +147,15 @@ class Wall
 
 unittest
 {
-	import std.array;
+	gameOpts = new DefaultGameOpts;
+	auto wall = new Wall;
+	wall.setUp;
+	wall.dice;
+	assert(wall.doraIndicators.length == 1, "The wall should be initialised with one flipped dora indicator");
+}
+
+unittest
+{
 	import std.exception;
 	import mahjong.domain.exceptions;
 	import mahjong.domain.ingame;
@@ -160,13 +169,14 @@ unittest
 	auto initialWallLength = wall.length;
 	auto lastTile = wall.tiles.back;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
-	kannableTile.origin = new Ingame(1);
+	kannableTile.origin = new Ingame(PlayerWinds.south);
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.tiles.front == lastTile, "The last tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
+	assert(wall.doraIndicators.length == 2, "An additional dora indicator should be flipped.");
 }
 
 class BambooWall : Wall
@@ -208,7 +218,6 @@ class BambooWall : Wall
 
 unittest
 {
-	import std.array;
 	import std.exception;
 	import mahjong.domain.exceptions;
 	import mahjong.domain.ingame;
@@ -222,10 +231,10 @@ unittest
 	auto initialWallLength = wall.length;
 	auto firstTile = wall.tiles.front;
 	auto player = new Player(new TestEventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
-	kannableTile.origin = new Ingame(1);
+	kannableTile.origin = new Ingame(PlayerWinds.south);
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.tiles.front == firstTile, "The first tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
@@ -235,6 +244,28 @@ class EightPlayerWall : Wall
 	
 }
 
+version(unittest)
+{
+	class MockWall : Wall
+	{
+		this(Tile tileToDraw)
+		{
+			_tileToDraw = tileToDraw;
+		}
+
+		private Tile _tileToDraw;
+
+		override Tile drawTile() 
+		{
+			return _tileToDraw;
+		}
+
+		override Tile drawKanTile() 
+		{
+			return  _tileToDraw;
+		}
+	}
+}
 
 
 

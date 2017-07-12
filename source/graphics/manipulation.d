@@ -10,7 +10,7 @@ import std.format;
 import std.math;
 import std.range;
 
-import mahjong.domain.enums.game;
+import mahjong.domain.enums;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
@@ -18,13 +18,12 @@ import mahjong.engine.ai;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.engine.yaku;
-import mahjong.graphics.cache.font;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.resources;
-import mahjong.graphics.menu;
 import mahjong.graphics.opts;
+import mahjong.graphics.traits;
 
 void load(ref Texture texture, ref Sprite sprite, string texturefile,
          uint x0 = 0, uint y0 = 0, uint size_x = 0, uint size_y = 0)
@@ -71,10 +70,34 @@ void load(ref Texture texture)
    load(texture, defaultTexture);
 }
 
-void alignLeft(T) (T sprite, const FloatRect box)
+void alignLeft(T) (T transformable, const FloatRect box)
+	if(hasGlobalBounds!T && hasFloatPosition!T)
 {
-  sprite.position = Vector2f(box.left, box.top);
-  center(sprite, "vertical", box.left, box.top, box.width, box.height);
+	transformable.position = Vector2f(box.left, box.top);
+	center!(CenterDirection.Vertical)(transformable, box);
+}
+
+unittest
+{
+	auto rect = new RectangleShape(Vector2f(100, 50));
+	auto bounds = FloatRect(200, 300, 500, 500);
+	rect.alignLeft(bounds);
+	assert(rect.position == Vector2f(200, 525), "The rectangle is not left-aligned properly");
+}
+
+void alignRight(T)(T transformable, const FloatRect box) 
+	if(hasGlobalBounds!T && hasFloatPosition!T)
+{
+	alignTopRight(transformable, box);
+	center!(CenterDirection.Vertical)(transformable, box);
+}
+
+unittest
+{
+	auto rect = new RectangleShape(Vector2f(100, 50));
+	auto bounds = FloatRect(200, 300, 500, 500);
+	rect.alignRight(bounds);
+	assert(rect.position == Vector2f(600, 525), "The rectangle is not right-aligned properly");
 }
 
 void alignTopLeft(T) (T sprite, const FloatRect box)
@@ -82,15 +105,23 @@ void alignTopLeft(T) (T sprite, const FloatRect box)
   sprite.position = Vector2f(box.left, box.top);
 }
 
-void center(CenterDirection direction, T)(T sprite, const FloatRect rect)
+void alignTopRight(T) (T transformable, const FloatRect box)
+	if(hasGlobalBounds!T && hasFloatPosition!T)
+{
+	auto size = transformable.getGlobalBounds;
+	transformable.position = Vector2f(box.left + box.width - size.width, box.top);
+}
+
+void center(CenterDirection direction, T)(T transformable, const FloatRect rect) 
+	if(hasGlobalBounds!T && hasFloatPosition!T)
 {
 	auto x0 = rect.left;
 	auto h0 = rect.top;
 	auto w = rect.width;
 	auto h = rect.height;
 	
-	auto size = sprite.getGlobalBounds;
-	auto pos = sprite.position;
+	auto size = transformable.getGlobalBounds;
+	auto pos = transformable.position;
 	static if(direction != CenterDirection.Vertical)
 	{
 		pos.x = x0 + (w - size.width)/2.;
@@ -99,7 +130,7 @@ void center(CenterDirection direction, T)(T sprite, const FloatRect rect)
 	{
 		pos.y = h0 + (h - size.height)/2.;
 	}
-	sprite.position = pos;
+	transformable.position = pos;
 }
 
 void alignBottom(Sprite sprite, FloatRect box)
@@ -111,24 +142,6 @@ void alignBottom(Sprite sprite, FloatRect box)
   	FloatRect(box.left, box.top, box.width, box.height));
   trace("The top left corner is (", sprite.position.x, ",", sprite.position.y, ").");
 }
-
-void setTitle(Text title, string text)
-{
-  /*
-    Have a function that takes care of a uniform style for all title fields.
-  */
-  with(title)
-  {
-  	setFont(titleFont);
-  	setString(text);
-  	setCharacterSize(48);
-  	setColor(Color.Black);
-  	position = Vector2f(200,20);
-  }
-  auto size = styleOpts.gameScreenSize;
-  title.center!(CenterDirection.Horizontal)(FloatRect(0, 0, size.x, size.y));
-}
-
 
 void changeOpacity(ref ubyte[] opacities, const size_t position)
 {
@@ -273,25 +286,6 @@ Vector2f getSize(Sprite sprite)
 	auto scale = sprite.scale;
 	return Vector2f(local.width * scale.x, local.height * scale.y);
 }
-
-void spaceMenuItems(T : MenuItem)(T[] menuItems)
-{
-	trace("Arranging the menu items");
-	if(menuItems.empty) return;
-	auto size = menuItems.front.name.getGlobalBounds;
-	auto screenSize = styleOpts.screenSize;
-	foreach(i, item; menuItems)
-	{
-		auto ypos = styleOpts.menuTop + (size.height + styleOpts.menuSpacing) * i;
-		trace("Y position of ", item.description, " is ", ypos);
-		item.name.position = Vector2f(0, ypos);
-		item.name.center!(CenterDirection.Horizontal)
-				(FloatRect(0, 0, screenSize.x, screenSize.y));
-		++i;
-	}
-	trace("Arranged the manu items");
-}
-
 
 
 

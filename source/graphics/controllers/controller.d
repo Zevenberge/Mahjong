@@ -40,10 +40,7 @@ class Controller
 	
 	void animate()
 	{
-		foreach(animation; animations)
-		{
-			animation.animate;
-		}
+		animateAllAnimations;
 	}
 }
 

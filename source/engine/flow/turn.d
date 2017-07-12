@@ -64,7 +64,7 @@ class TurnFlow : Flow
 
 class TurnEvent
 {
-	this(TurnFlow flow, Metagame metagame, Player player, Tile drawnTile)
+	this(TurnFlow flow, Metagame metagame, Player player, const Tile drawnTile)
 	{
 		_flow = flow;
 		this.player = player;
@@ -77,7 +77,7 @@ class TurnEvent
 	
 	Player player;
 	Metagame metagame;
-	Tile drawnTile;
+	const Tile drawnTile;
 	
 	void discard(Tile tile)
 	in
@@ -126,14 +126,15 @@ class TurnEvent
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	auto tile = new Tile(0,0);
+	auto tile = new Tile(Types.dragon, Dragons.green);
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
@@ -143,10 +144,11 @@ unittest
 
 unittest
 {
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
+	import mahjong.domain.enums;
 	import mahjong.domain.tile;
 	import mahjong.domain.wall;
+	import mahjong.engine.opts;
+	import mahjong.test.utils;
 
 	class MockWall : Wall
 	{
@@ -165,9 +167,9 @@ unittest
 
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	auto tile = new Tile(0,0);
+	auto tile = new Tile(Types.dragon, Dragons.green);
 	auto wall = new MockWall(tile);
 	player.drawTile(wall);
 	auto flow = new TurnFlow(player, metagame);
@@ -179,6 +181,7 @@ unittest
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.mahjong;
 	import mahjong.engine.opts;
@@ -186,9 +189,9 @@ unittest
 
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	auto tile = new Tile(0, 0);
+	auto tile = new Tile(Types.dragon, Dragons.green);
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
 	player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
@@ -199,15 +202,16 @@ unittest
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 	gameOpts = new DefaultGameOpts;
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);
@@ -222,15 +226,16 @@ unittest
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.opts;
 	import mahjong.test.utils;
 	gameOpts = new DefaultGameOpts;
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
-	player.startGame(0);
+	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
-	metagame.nextRound;
+	metagame.initializeRound;
 	metagame.beginRound;
 	auto flow = new TurnFlow(player, metagame);
 	switchFlow(flow);

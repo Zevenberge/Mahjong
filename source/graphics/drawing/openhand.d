@@ -201,12 +201,13 @@ class SetVisual
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	gameOpts = new DefaultGameOpts;
-	auto firstIngame = new Ingame(1);
-	auto secondIngame = new Ingame(2);
+	auto firstIngame = new Ingame(PlayerWinds.south);
+	auto secondIngame = new Ingame(PlayerWinds.west);
 	auto tiles = "🀡🀡🀡"d.convertToTiles;
 	tiles[0].origin = secondIngame;
 	firstIngame.openHand.addPon(tiles);
@@ -219,12 +220,13 @@ unittest
 }
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	gameOpts = new DefaultGameOpts;
-	auto firstIngame = new Ingame(1);
-	auto secondIngame = new Ingame(2);
+	auto firstIngame = new Ingame(PlayerWinds.south);
+	auto secondIngame = new Ingame(PlayerWinds.west);
 	auto tiles = "🀡🀡🀡"d.convertToTiles;
 	tiles[0].origin = secondIngame;
 	firstIngame.openHand.addPon(tiles);
@@ -239,12 +241,13 @@ unittest
 }
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	gameOpts = new DefaultGameOpts;
-	auto firstIngame = new Ingame(1);
-	auto secondIngame = new Ingame(2);
+	auto firstIngame = new Ingame(PlayerWinds.south);
+	auto secondIngame = new Ingame(PlayerWinds.west);
 	auto tiles = "🀡🀡🀡"d.convertToTiles;
 	auto kanTile = "🀡"d.convertToTiles[0];
 	tiles[0].origin = secondIngame;
@@ -262,11 +265,12 @@ unittest
 
 unittest
 {
+	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	gameOpts = new DefaultGameOpts;
-	auto firstIngame = new Ingame(1);
+	auto firstIngame = new Ingame(PlayerWinds.south);
 	auto tiles = "🀡🀡🀡🀡"d.convertToTiles;
 	firstIngame.openHand.addKan(tiles);
 	draw(firstIngame.openHand, firstIngame, new RenderTexture);

@@ -4,7 +4,6 @@ import std.conv;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain.metagame;
-import mahjong.engine.enums.game;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
 import mahjong.graphics.conv;
@@ -12,7 +11,6 @@ import mahjong.graphics.drawing.player;
 import mahjong.graphics.drawing.wall;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.kanji;
-import mahjong.graphics.enums.resources;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 import mahjong.graphics.rendersprite;
@@ -23,6 +21,7 @@ void draw(Metagame game, RenderTarget target)
 	drawPlayers(game, target);
 	drawWal(game, target);
 	drawGameInfo(game, target);
+	drawCounter(game, target);
 }
 
 void clearCache()
@@ -58,6 +57,26 @@ private void drawGameInfo(Metagame game, RenderTarget target)
 	auto gameInfo = getGameInfo;
 	gameInfo.draw(renderSprite, game);
 	target.draw(renderSprite);
+}
+
+private void drawCounter(Metagame game, RenderTarget target)
+{
+	if(game.counters == 0) return;
+	auto sprite = new Sprite(stickTexture);
+	sprite.textureRect = hundredYenStick;
+	sprite.scale = Vector2f(0.5, 0.5);
+	drawingOpts.placeCounter(sprite);
+	target.draw(sprite);
+	if(game.counters > 1)
+	{
+		auto text = new Text;
+		text.setColor = Color.Black;
+		text.setString = "x" ~ game.counters.to!string;
+		text.setFont = infoFont;
+		text.setCharacterSize = 10;
+		text.alignRight(sprite.getGlobalBounds);
+		target.draw(text);
+	}
 }
 
 private Sprite _playerSprite;
@@ -96,13 +115,11 @@ private class GameInfo
 		update(game);
 		target.draw(_background);
 		target.draw(_roundInfo);
-		target.draw(_turnInfo);
 		target.draw(_turnPlayerInfo);
 	}
 	
 	private:
 		Text _roundInfo;
-		Text _turnInfo;
 		Text _turnPlayerInfo;
 		Sprite _background;
 		
@@ -113,8 +130,6 @@ private class GameInfo
 			_roundInfo = new Text;
 			initText(_roundInfo, Vector2f(30, 10), infoFont, fs);
 			_roundInfo.setStyle(Text.Style.Bold);
-			_turnInfo = new Text;
-			initText(_turnInfo, Vector2f(600,49-fs/2), fontReg, fs/2);
 			_turnPlayerInfo = new Text;
 			initText(_turnPlayerInfo, Vector2f(600,51), fontReg, fs/2);
 			initBg;
@@ -136,10 +151,8 @@ private class GameInfo
 		void initBg()
 		{
 			auto so = styleOpts;
-			auto texture = new Texture;
-			texture.loadFromFile(infoBgFile);
-			_background = new Sprite(texture);
-			_background.pix2scale(so.screenSize.x -2*so.gameInfoMargin,
+			_background = new Sprite(infoTexture);
+			_background.setSize(so.screenSize.x -2*so.gameInfoMargin,
 				so.screenSize.y - so.gameScreenSize.y - 2*so.gameInfoMargin);
 			_background.position = Vector2f(so.gameInfoMargin,so.gameInfoMargin);
 			_background.color = Color(255,255,255,126);
@@ -154,19 +167,8 @@ private class GameInfo
 			auto currentPlayer = game.currentPlayer;
 			if(currentPlayer !is null) _turnPlayerInfo.setString(game.currentPlayer.name.to!string);
 			else _turnPlayerInfo.setString("");
-			_turnInfo.setString(game.phase.to!string);
 		}
 }
-
-private Texture getInfoBg()
-{
-	if(infoTexture is null)
-	{
-		infoTexture = new Texture;
-		load(infoTexture, infoBgFile);
-	}
-	return infoTexture;
-} 
 
 
 

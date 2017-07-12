@@ -20,7 +20,12 @@ class OpenHand
 
 	const(Tile)[] tiles() @property
 	{
-		return _sets.map!(set => set.tiles).fold!((a, b) => a ~ b);
+		return _sets.flatMap!(set => set.tiles);
+	}
+
+	bool isClosedHand() @property pure const
+	{
+		return _sets.all!(s => !s.isOpen);
 	}
 
 	private Set[] _sets;

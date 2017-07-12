@@ -13,7 +13,7 @@
 
 # Executables
 *.exe
-mahjong*
+mahjong-test-library
 __test__library__
 
 # DUB

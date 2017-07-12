@@ -28,5 +28,12 @@ class AiEventHandler : GameEventHandler
 	{
 		_ai.claim(event);
 	}
-
+	override void handle(MahjongEvent event)
+	{
+		event.handle;
+	}
+	override void handle(GameEndEvent event) 
+	{
+		event.handle;
+	}
 }

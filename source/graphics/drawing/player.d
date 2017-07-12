@@ -6,17 +6,19 @@ import std.uuid;
 
 import dsfml.graphics;
 import mahjong.domain.player;
-import mahjong.graphics.enums.geometry;
 import mahjong.graphics.cache.font;
+import mahjong.graphics.cache.texture;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.openhand;
 import mahjong.graphics.enums.font;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.kanji;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
+import mahjong.graphics.text;
 
 alias drawPlayer = draw;
 void draw(Player player, RenderTarget view, float rotation)
@@ -43,6 +45,11 @@ void clearPlayerCache()
 	trace("Cleared player cache");
 }
 
+const(Sprite) getIcon(const Player player)
+{
+	return _players[player.id]._icon;
+}
+
 private PlayerVisuals[UUID] _players;
 
 private class PlayerVisuals
@@ -50,7 +57,7 @@ private class PlayerVisuals
 	private
 	{
 		RenderTexture _renderTexture;
-		Sprite _sprite;
+		Sprite _completeSprite;
 		Texture _iconTexture;
 		Sprite _icon;
 		Text _score;
@@ -73,7 +80,7 @@ private class PlayerVisuals
 			_iconTexture = new Texture;
 			_iconTexture.loadFromFile(iconFile);
 			_icon = new Sprite(_iconTexture);
-			_icon.pix2scale(drawingOpts.iconSize);
+			_icon.setSize(drawingOpts.iconSize);
 			info("Initialised player icon");
 		}
 		
@@ -92,16 +99,7 @@ private class PlayerVisuals
 			trace("Updating score");
 			_numberedScore = _player.score;
 			_score.setString(_numberedScore.to!string);
-			if(_numberedScore < drawingOpts.criticalScore)
-			{
-				trace("Setting the critical color");
-				_score.setColor(pointsCriticalColor);
-			}
-			else
-			{
-				trace("Setting the normal color");
-				_score.setColor(pointsColor);
-			}
+			_score.changeScoreHighlighting;
 			_score.center!(CenterDirection.Both)(_scoreLabel.getGlobalBounds);
 			trace("Updated the score");
 		}
@@ -120,8 +118,8 @@ private class PlayerVisuals
 		{
 			info("Initialising player sprite");
 			redrawTexture;
-			_sprite = new Sprite(_renderTexture.getTexture);
-			_sprite.pix2scale(styleOpts.gameScreenSize.x);
+			_completeSprite = new Sprite(_renderTexture.getTexture);
+			_completeSprite.setSize(styleOpts.gameScreenSize.x);
 			placeSprite(rotation);
 			info("Initialized player sprite");
 		}
@@ -130,12 +128,12 @@ private class PlayerVisuals
 		{
 			trace("Placing sprite");
 			auto screen = styleOpts.gameScreenSize;
-			_sprite.pix2scale(drawingOpts.iconSize);
-			_sprite.position = Vector2f(
+			_completeSprite.setSize(drawingOpts.iconSize);
+			_completeSprite.position = Vector2f(
 				screen.x - (drawingOpts.iconSize + drawingOpts.iconSpacing),
 				screen.y - drawingOpts.iconSize
 			);
-			_sprite.setRotationAroundCenter(-rotation);
+			_completeSprite.setRotationAroundCenter(-rotation);
 			trace("Placed the sprite");
 		}
 
@@ -185,7 +183,7 @@ private class PlayerVisuals
 		void draw(RenderTarget view)
 		{
 			updateIfRequired;
-			view.draw(_sprite);
+			view.draw(_completeSprite);
 		}
 		
 		this(string iconFile, Player player, float rotation)
@@ -207,10 +205,10 @@ private void initialiseScoreLabel()
 	if(_scoreLabel is null)
 	{
 		info("Initialising score label.");
-		auto texture = new Texture;
-		texture.loadFromFile(sticksFile, stick);
+		auto texture = stickTexture;
 		_scoreLabel = new Sprite(texture);
-		_scoreLabel.pix2scale(drawingOpts.iconSize);
+		_scoreLabel.textureRect = stick;
+		_scoreLabel.setSize(drawingOpts.iconSize);
 		_scoreLabel.scale = Vector2f(_scoreLabel.scale.x, 2*_scoreLabel.scale.y); // TODO unhack
 		_scoreLabel.alignBottom(iconBounds);
 		info("Initialised the score label");

@@ -3,7 +3,7 @@ module mahjong.engine.opts.defaultopts;
 import std.algorithm.iteration;
 import std.array;
 import mahjong.domain;
-import mahjong.domain.enums.game;
+import mahjong.domain.enums;
 import mahjong.engine.flow;
 import mahjong.engine.opts;
 
@@ -40,5 +40,9 @@ class DefaultGameOpts : Opts
 	protected Player[] createPlayers(GameEventHandler[] eventHandlers)
 	{
 		return eventHandlers.map!(d => d.createPlayer).array;
+	}
+	PlayerWinds finalLeadingWind()
+	{
+		return PlayerWinds.south;
 	}
 }

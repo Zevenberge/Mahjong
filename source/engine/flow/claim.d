@@ -96,14 +96,16 @@ class ClaimFlow : Flow
 
 version(unittest)
 {
+	import mahjong.domain.enums;
 	Metagame setup(size_t amountOfPlayers)
 	{
+		import std.conv;
 		dstring[] names = ["Jan"d, "Piet"d, "Klaas"d, "David"d, "Henk"d, "Ingrid"d];
 		Player[] players;
 		for(int i = 0; i < amountOfPlayers; ++i)
 		{
 			auto player = new Player(new TestEventHandler, names[i]);
-			player.startGame(i);
+			player.startGame(i.to!PlayerWinds);
 			players ~= player;
 		}
 		auto metagame = new Metagame(players);
@@ -118,7 +120,7 @@ unittest
 	import mahjong.test.utils;
 	auto game = setup(2);
 	auto player2 = game.players[1];
-	player2.startGame(0);
+	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	auto claimFlow = new ClaimFlow(ponnableTile, game);
@@ -138,9 +140,9 @@ unittest
 	import mahjong.test.utils;
 	auto game = setup(2);
 	auto player1 = game.players[0];
-	player1.startGame(3);
+	player1.startGame(PlayerWinds.north);
 	auto player2 = game.players[1];
-	player2.startGame(0);
+	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	ponnableTile.origin = player1.game;
@@ -160,13 +162,13 @@ unittest
 	import mahjong.test.utils;
 	auto game = setup(3);
 	auto player2 = game.players[1];
-	player2.startGame(0);
+	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto player3 = game.players[2];
-	player3.startGame(0);
+	player3.startGame(PlayerWinds.east);
 	player3.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(1);
+	ponnableTile.origin = new Ingame(PlayerWinds.south);
 	auto claimFlow = new ClaimFlow(ponnableTile, game);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
@@ -191,13 +193,13 @@ unittest
 	import mahjong.test.utils;
 	auto game = setup(3);
 	auto player2 = game.players[1];
-	player2.startGame(0);
+	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto player3 = game.players[2];
-	player3.startGame(0);
+	player3.startGame(PlayerWinds.east);
 	player3.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(1);
+	ponnableTile.origin = new Ingame(PlayerWinds.south);
 	auto claimFlow = new ClaimFlow(ponnableTile, game);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest); 
@@ -372,7 +374,7 @@ class RonRequest : ClaimRequest
 
 	void apply()
 	{
-		// Do nothing
+		_player.ron(_discard);
 	}
 
 	bool isAllowed() pure

@@ -25,6 +25,7 @@ interface Opts
 	int amountOfDiscardLines();
 	int amountOfDiscardsPerLine();
 	void initialiseWall(Wall wall);
+	void placeCounter(Sprite counter);
 }
 
 StyleOpts styleOpts;
@@ -45,10 +46,14 @@ interface StyleOpts
 	Color memoFontColor();
 	int menuFontSize();
 	Color menuFontColor();
+	Color menuHazeColor();
+	Color ingameMenuHazeColor();
+	Color mahjongResultsHazeColor();
 	int menuTop();
 	int menuSpacing();
-	int claimMenuMargin();
+	int ingameMenuMargin();
 	int popupFontSize();
+
 }
 
 
