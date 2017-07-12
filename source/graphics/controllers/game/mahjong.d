@@ -16,6 +16,7 @@ import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.result;
 import mahjong.graphics.drawing.transfer;
 import mahjong.graphics.opts;
+import mahjong.graphics.utils : freeze;
 
 class MahjongController : GameController
 {
@@ -84,11 +85,7 @@ class ResultController : MahjongController
 	private RenderTexture freezeGameGraphicsOnATexture(Metagame metagame)
 	{
 		auto screen = styleOpts.screenSize;
-		auto texture = new RenderTexture;
-		texture.create(screen.x, screen.y, true);
-		metagame.drawGame(texture);
-		texture.display;
-		return texture;
+		return freeze!(target => metagame.drawGame(target))(Vector2u(screen.x, screen.y));
 	}
 
 	private ResultScreen[] _resultScreens;

@@ -4,10 +4,10 @@ import dsfml.graphics;
 import mahjong.domain.metagame;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers.game;
-import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.gameend;
 import mahjong.graphics.drawing.result;
-import mahjong.graphics.opts;
+import mahjong.graphics.opts : styleOpts;
+import mahjong.graphics.utils : freeze;
 
 class GameEndController : MahjongController
 {
@@ -19,13 +19,8 @@ class GameEndController : MahjongController
 
 	private RenderTexture freezeGameGraphicsOnATexture(Metagame metagame)
 	{
-		// TODO
 		auto screen = styleOpts.screenSize;
-		auto texture = new RenderTexture;
-		texture.create(screen.x, screen.y, true);
-		metagame.drawGame(texture);
-		texture.display;
-		return texture;
+		return freeze!((target) {})(Vector2u(screen.x, screen.y));
 	}
 
 	private GameEndEvent _event;
