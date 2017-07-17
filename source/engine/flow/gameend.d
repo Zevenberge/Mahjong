@@ -16,9 +16,9 @@ class GameEndFlow : Flow
 
 	private void notifyPlayers()
 	{
-		foreach(player; metagame.players)
+		foreach(player; _metagame.players)
 		{
-			auto event = new GameEndEvent(metagame);
+			auto event = new GameEndEvent(_metagame);
 			_events ~= event;
 			player.eventHandler.handle(event);
 		}

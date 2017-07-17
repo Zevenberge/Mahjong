@@ -27,9 +27,9 @@ class RoundStartFlow : Flow
 		if(isDone)
 		{
 			info("All players are ready. Initialising game");
-			metagame.beginRound;
+			_metagame.beginRound;
 			info("Started round. Switching to draw flow");
-			switchFlow(new DrawFlow(metagame.currentPlayer, metagame, metagame.wall));
+			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, _metagame.wall));
 		}
 	}
 
@@ -41,12 +41,12 @@ class RoundStartFlow : Flow
 
 class RoundStartEvent
 {
-	this(Metagame metagame)
+	this(const Metagame metagame)
 	{
 		this.metagame = metagame;
 	}
 
-	Metagame metagame;
+	const Metagame metagame;
 	bool isReady;
 }
 

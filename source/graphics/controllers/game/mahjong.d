@@ -20,7 +20,7 @@ import mahjong.graphics.utils : freeze;
 
 class MahjongController : GameController
 {
-	this(RenderWindow window, Metagame metagame, RenderTexture background)
+	this(RenderWindow window, const Metagame metagame, RenderTexture background)
 	{
 		super(window, metagame);
 		_renderTexture = background;
@@ -68,7 +68,7 @@ class MahjongController : GameController
 
 class ResultController : MahjongController
 {
-	this(RenderWindow window, Metagame metagame, MahjongEvent event)
+	this(RenderWindow window, const Metagame metagame, MahjongEvent event)
 	{
 		auto texture = freezeGameGraphicsOnATexture(metagame);
 		_event = event;
@@ -82,7 +82,7 @@ class ResultController : MahjongController
 		currentScreen.initialize;
 	}
 
-	private RenderTexture freezeGameGraphicsOnATexture(Metagame metagame)
+	private RenderTexture freezeGameGraphicsOnATexture(const Metagame metagame)
 	{
 		auto screen = styleOpts.screenSize;
 		return freeze!(target => metagame.drawGame(target))(Vector2u(screen.x, screen.y));
@@ -142,7 +142,7 @@ class ResultController : MahjongController
 
 class TransferController : MahjongController
 {
-	this(RenderWindow window, Metagame metagame, RenderTexture background, MahjongEvent event)
+	this(RenderWindow window, const Metagame metagame, RenderTexture background, MahjongEvent event)
 	{
 		super(window, metagame, background);
 		_event = event;

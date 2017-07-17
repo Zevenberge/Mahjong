@@ -17,14 +17,14 @@ import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 
 alias drawWall = draw;
-void draw(Wall wall, RenderTarget view)
+void draw(const Wall wall, RenderTarget view)
 {
 	initialiseWall(wall);
 	wall.tiles.filter!(t => !t.isOpen).each!(t => t.drawTile(view));
 	wall.tiles.filter!(t => t.isOpen).each!(t => t.drawTile(view));
 }
 
-private void initialiseWall(Wall wall)
+private void initialiseWall(const Wall wall)
 {
 	if(_initialisedWall != wall.id)
 	{
@@ -35,7 +35,7 @@ private void initialiseWall(Wall wall)
 
 private UUID _initialisedWall;
 
-void initialiseTiles(Wall wall)
+void initialiseTiles(const Wall wall)
 {
 	info("Placing up the default wall tiles.");
 
@@ -60,7 +60,7 @@ void initialiseTiles(Wall wall)
 	info("Built the wall");
 }
 
-void initialiseTiles(BambooWall wall)
+void initialiseTiles(const BambooWall wall)
 {
 	info("Placing up the bamboo wall tiles.");
 	// Place the wall in the middle

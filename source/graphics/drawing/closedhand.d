@@ -15,7 +15,7 @@ import mahjong.graphics.enums.geometry;
 import mahjong.graphics.opts;
 
 alias drawClosedHand = draw;
-void draw(ClosedHand hand, RenderTarget view)
+void draw(const ClosedHand hand, RenderTarget view)
 {	
 	auto cnt = hand.tiles.length;
 	foreach(i, tile; hand.tiles)
@@ -25,7 +25,7 @@ void draw(ClosedHand hand, RenderTarget view)
 	}
 }
 
-void placeHand(ClosedHand hand)
+void placeHand(const ClosedHand hand)
 {
 	auto cnt = hand.tiles.length;
 	foreach(i, tile; hand.tiles)
@@ -34,7 +34,7 @@ void placeHand(ClosedHand hand)
 	}
 }
 
-void moveTile(Tile tile, size_t i, size_t total)
+void moveTile(const Tile tile, size_t i, size_t total)
 {
 	auto coords = tile.getCoords;
 	auto newCoords = FloatCoords(calculatePosition(total, i.to!int));

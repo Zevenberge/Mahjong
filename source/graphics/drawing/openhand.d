@@ -17,7 +17,7 @@ import mahjong.graphics.opts;
 import mahjong.share.range;
 
 alias drawOpenHand = draw;
-void draw(OpenHand hand, Ingame ingame, RenderTarget view)
+void draw(const OpenHand hand, const Ingame ingame, RenderTarget view)
 {
 	hand.getOpenHandVisuals(ingame).draw(view);
 }
@@ -32,7 +32,7 @@ private:
 
 OpenHandVisuals[UUID] _hands;
 
-OpenHandVisuals getOpenHandVisuals(OpenHand hand, Ingame ingame)
+OpenHandVisuals getOpenHandVisuals(const OpenHand hand, const Ingame ingame)
 {
 	if(hand.id !in _hands)
 	{
@@ -46,7 +46,7 @@ OpenHandVisuals getOpenHandVisuals(OpenHand hand, Ingame ingame)
 
 class OpenHandVisuals
 {
-	this(OpenHand hand, Ingame ingame)
+	this(const OpenHand hand, const Ingame ingame)
 	{
 		_hand = hand;
 		_ingame = ingame;
@@ -58,8 +58,8 @@ class OpenHandVisuals
 		_sets.each!(s => s.draw(view));
 	}
 
-	private OpenHand _hand;
-	private Ingame _ingame;
+	private const OpenHand _hand;
+	private const Ingame _ingame;
 	private SetVisual[] _sets;
 
 	private void updateIfNecessary()
@@ -88,7 +88,7 @@ class OpenHandVisuals
 
 class SetVisual
 {
-	this(const(Tile)[] set, SetVisual previous, Ingame ingame)
+	this(const(Tile)[] set, SetVisual previous, const Ingame ingame)
 	{
 		_set = set;
 		placeSet(previous, ingame);
@@ -107,7 +107,7 @@ class SetVisual
 
 	private const(Tile)[] _set;
 
-	private void placeSet(SetVisual previous, Ingame ingame)
+	private void placeSet(SetVisual previous, const Ingame ingame)
 	{
 		orderSet(ingame);
 		auto rightBound = calculateInitialRightBounds(previous);
@@ -119,7 +119,7 @@ class SetVisual
 		flipTilesfaceDownIfTheSetIsAClosedKan;
 	}
 
-	private void orderSet(Ingame ingame)
+	private void orderSet(const Ingame ingame)
 	{
 		if(isClosedKan) return;
 		auto isKan = _set.length == 4;

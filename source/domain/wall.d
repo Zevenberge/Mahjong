@@ -16,7 +16,7 @@ class Wall
 {
 	const UUID id;
 	private Tile[] _tiles;
-	const(Tile)[] tiles() @property
+	const(Tile)[] tiles() @property pure const
 	{
 		return _tiles;
 	}

@@ -17,9 +17,9 @@ class ClosedHand
 		return tiles.length;
 	}
 
-	void removeTile(Tile tile)
+	Tile removeTile(const Tile tile)
 	{
-		tiles.remove!((a,b) => a == b)(tile);
+		return tiles.remove!((a,b) => a == b)(tile);
 	}
 	
 	void sortHand()
@@ -91,7 +91,7 @@ class ClosedHand
 		return removeTilesWithIdenticalValue!3(discard);
 	}
 
-	bool canDeclareClosedKan(const Tile tile)
+	bool canDeclareClosedKan(const Tile tile) pure const
 	{
 		return tiles.count!(t => tile.hasEqualValue(t)) >= 4;
 	}

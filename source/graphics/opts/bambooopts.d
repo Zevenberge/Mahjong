@@ -13,7 +13,7 @@ class BambooDrawingOpts : DefaultDrawingOpts
 		return 180;
 	}
 	
-	override void initialiseWall(Wall wall)
+	override void initialiseWall(const Wall wall)
 	in
 	{
 		assert(cast(BambooWall)wall !is null);

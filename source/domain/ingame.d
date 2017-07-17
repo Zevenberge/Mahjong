@@ -36,7 +36,7 @@ class Ingame
 	OpenHand openHand; // The open pons/chis/kans 
 
 	private Tile[] _discards;
-	Tile[] discards() @property pure
+	const(Tile)[] discards() @property pure const
 	{
 		return _discards;
 	}
@@ -54,7 +54,7 @@ class Ingame
 	}
 
 	private Tile[] _claimedDiscards;
-	private Tile[] allDiscards() @property pure
+	private const(Tile)[] allDiscards() @property pure
 	{
 		return discards ~_claimedDiscards;
 	}
@@ -147,7 +147,7 @@ class Ingame
 		closedHand.tiles ~= discard;
 	}
 	
-	bool canDeclareClosedKan(const Tile tile)
+	bool canDeclareClosedKan(const Tile tile) pure const
 	{
 		return closedHand.canDeclareClosedKan(tile);
 	}
@@ -159,14 +159,14 @@ class Ingame
 		drawKanTile(wall);
 	}
 
-	bool canPromoteToKan(Tile tile)
+	bool canPromoteToKan(const Tile tile) pure const
 	{
 		return openHand.canPromoteToKan(tile);
 	}
 
-	void promoteToKan(Tile tile, Wall wall)
+	void promoteToKan(const Tile selectedTile, Wall wall)
 	{
-		closedHand.removeTile(tile);
+		auto tile = closedHand.removeTile(selectedTile);
 		openHand.promoteToKan(tile);
 		drawKanTile(wall);
 	}
@@ -210,37 +210,23 @@ class Ingame
 		return false;
 	}
 
-	bool canTsumo()
+	bool canTsumo() pure const
 	{
 		return  isOwn(_lastTile) && isMahjong;
 	}
 
-	bool isMahjong()
+	bool isMahjong() pure const
 	{
 		return scanHandForMahjong(this).isMahjong;
 	}
 
-	private void discard(size_t discardedNr)
-	{    
-		takeOutTile(closedHand.tiles, _discards, discardedNr);
-		auto discard = discards[$-1];
-		discard.origin = this; // Sets the tile to be from the player who discarded it.
-		discard.open;
-	}
-
-	void discard(Tile discardedTile)
+	Tile discard(const Tile discardedTile)
 	{
-		ulong i = 0;
-		foreach(tile; closedHand.tiles)
-		{
-			if(tile.isIdentical(discardedTile))
-			{
-				discard(i);
-				return;
-			}
-			++i;
-		}
-		throw new TileNotFoundException(discardedTile);
+		auto tile = closedHand.removeTile(discardedTile);
+		_discards ~= tile;
+		tile.origin = this;
+		tile.open;
+		return tile;
 	}
 
 	private Tile _lastTile; 
