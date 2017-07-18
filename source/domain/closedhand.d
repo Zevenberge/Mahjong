@@ -40,6 +40,7 @@ class ClosedHand
 	void drawTile(Wall wall)
 	{
 		addTile(wall.drawTile);
+		tiles.sortHand;
 	}
 
 	void drawKanTile(Wall wall)
