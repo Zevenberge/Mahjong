@@ -25,15 +25,6 @@ void draw(const ClosedHand hand, RenderTarget view)
 	}
 }
 
-void placeHand(const ClosedHand hand)
-{
-	auto cnt = hand.tiles.length;
-	foreach(i, tile; hand.tiles)
-	{
-		moveTile(tile, i, cnt);
-	}
-}
-
 void moveTile(const Tile tile, size_t i, size_t total)
 {
 	auto coords = tile.getCoords;
