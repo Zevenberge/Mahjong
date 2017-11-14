@@ -4,6 +4,7 @@ import std.experimental.logger;
 import dsfml.graphics : Text, Sprite, Texture, RenderTarget, RenderStates, Drawable;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
+import mahjong.graphics.anime.idle;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
 import mahjong.graphics.enums.resources;
@@ -58,12 +59,21 @@ private void loadSplashTexture()
 } 
 
 
-private class PopupAnimation : Animation
+private class PopupAnimation : Chain!ParallelAnimation 
 {
 	this(Popup popup, IPopupService service)
 	{
 		_popup = popup;
 		_service = service;
+		super(
+			new Chain!Idle(
+				new ParallelAnimation(
+					[new AppearSpriteAnimation(_popup._splash, 10),
+						new AppearTextAnimation(_popup._text, 10)]), 
+				30),
+			[new FadeSpriteAnimation(_popup._splash, 30), 
+				new FadeTextAnimation(_popup._text, 30)]);
+
 	}
 
 	private Popup _popup;
