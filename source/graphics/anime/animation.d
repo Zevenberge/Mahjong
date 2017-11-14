@@ -31,7 +31,7 @@ class Animation
 		onDone;
 	}
 
-	private void onDone()
+	protected void onDone()
 	{
 		trace("Animation (", objectId, ") finished.");
 		_animations.remove!((a,b) => a == b)(this);
