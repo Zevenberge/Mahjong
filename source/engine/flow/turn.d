@@ -36,35 +36,35 @@ class TurnFlow : Flow
 			switchFlow(_flow);
 		}
 		
-		void discard(Tile tile)
+		void discard(const Tile tile)
 		{
-			_player.discard(tile);
-			_flow = new ClaimFlow(tile, metagame);
+			auto discard = _player.discard(tile);
+			_flow = new ClaimFlow(discard, _metagame);
 		}
 
-		void promoteToKan(Tile tile)
+		void promoteToKan(const Tile tile)
 		{
-			_player.promoteToKan(tile, metagame.wall);
-			_flow = new TurnFlow(_player, metagame);
+			_player.promoteToKan(tile, _metagame.wall);
+			_flow = new TurnFlow(_player, _metagame);
 		}
 
-		void declareClosedKan(Tile tile)
+		void declareClosedKan(const Tile tile)
 		{
-			_player.declareClosedKan(tile, metagame.wall);
-			_flow = new TurnFlow(_player, metagame);
+			_player.declareClosedKan(tile, _metagame.wall);
+			_flow = new TurnFlow(_player, _metagame);
 		}
 
 		void claimTsumo()
 		{
 			info("Tsumo claimed by ", _player.name);
-			metagame.tsumo(_player);
-			_flow = new MahjongFlow(metagame);
+			_metagame.tsumo(_player);
+			_flow = new MahjongFlow(_metagame);
 		}
 }
 
 class TurnEvent
 {
-	this(TurnFlow flow, Metagame metagame, Player player, const Tile drawnTile)
+	this(TurnFlow flow, const Metagame metagame, const Player player, const Tile drawnTile)
 	{
 		_flow = flow;
 		this.player = player;
@@ -75,11 +75,11 @@ class TurnEvent
 	
 	private bool isHandled = false;
 	
-	Player player;
-	Metagame metagame;
+	const Player player;
+	const Metagame metagame;
 	const Tile drawnTile;
 	
-	void discard(Tile tile)
+	void discard(const Tile tile)
 	in
 	{
 		assert(!isHandled, "The event should not be handled twice.");
@@ -90,7 +90,7 @@ class TurnEvent
 		_flow.discard(tile);
 	}
 
-	void promoteToKan(Tile tile)
+	void promoteToKan(const Tile tile)
 	in
 	{
 		assert(!isHandled, "The event should not be handled twice.");
@@ -101,7 +101,7 @@ class TurnEvent
 		_flow.promoteToKan(tile);
 	}
 
-	void declareClosedKan(Tile tile)
+	void declareClosedKan(const Tile tile)
 	in
 	{
 		assert(!isHandled, "The event should not be handled twice.");

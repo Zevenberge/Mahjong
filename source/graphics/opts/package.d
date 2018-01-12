@@ -24,7 +24,7 @@ interface Opts
 	int criticalScore();
 	int amountOfDiscardLines();
 	int amountOfDiscardsPerLine();
-	void initialiseWall(Wall wall);
+	void initialiseWall(const Wall wall);
 	void placeCounter(Sprite counter);
 }
 

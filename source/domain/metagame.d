@@ -22,8 +22,13 @@ class Metagame
 {
 	Player[] players; 
 
-	Player currentPlayer() @property 
+	const(Player) currentPlayer() @property pure const
 	{ 
+		return _turn == -1 ? null : players[_turn]; 
+	}
+
+	Player getCurrentPlayer() pure
+	{
 		return _turn == -1 ? null : players[_turn]; 
 	}
 

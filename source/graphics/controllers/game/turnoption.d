@@ -12,7 +12,7 @@ alias TurnOptionController = IngameOptionsController!(TurnOptionFactory, "");
 
 class TurnOptionFactory
 {
-	this(Player player, Tile selectedTile, Metagame metagame, TurnEvent turnEvent)
+	this(const Player player, const Tile selectedTile, const Metagame metagame, TurnEvent turnEvent)
 	{
 		addTsumoOption(metagame, player, turnEvent);
 		addPromoteToKanOption(metagame, player, selectedTile, turnEvent);
@@ -22,7 +22,7 @@ class TurnOptionFactory
 		addCancelOption;
 	}
 
-	private void addTsumoOption(Metagame metagame, Player player, TurnEvent turnEvent)
+	private void addTsumoOption(const Metagame metagame, const Player player, TurnEvent turnEvent)
 	{
 		if(!player.canTsumo) return;
 		auto tsumoOption = new TsumoOption(metagame, player, turnEvent);
@@ -30,19 +30,21 @@ class TurnOptionFactory
 		_defaultOption = tsumoOption;
 	}
 
-	private void addPromoteToKanOption(Metagame metagame, Player player, Tile selectedTile, TurnEvent turnEvent)
+	private void addPromoteToKanOption(const Metagame metagame, const Player player, 
+		const Tile selectedTile, TurnEvent turnEvent)
 	{
 		if(!player.canPromoteToKan(selectedTile)) return;
 		_options ~= new PromoteToKanOption(metagame, player, selectedTile, turnEvent);
 	}
 
-	private void addDeclareClosedKanOption(Metagame metagame, Player player, Tile selectedTile, TurnEvent turnEvent)
+	private void addDeclareClosedKanOption(const Metagame metagame, const Player player, 
+		const Tile selectedTile, TurnEvent turnEvent)
 	{
 		if(!player.canDeclareClosedKan(selectedTile)) return;
 		_options ~= new DeclareClosedKanOption(metagame, player, selectedTile, turnEvent);
 	}
 
-	private void addDiscardOption(Metagame metagame, Tile selectedTile, TurnEvent turnEvent)
+	private void addDiscardOption(const Metagame metagame, const Tile selectedTile, TurnEvent turnEvent)
 	{
 		auto discardOption = new DiscardOption(metagame, selectedTile, turnEvent);
 		_options = discardOption ~ _options;
@@ -106,7 +108,7 @@ class CancelOption : TurnOption
 
 class PromoteToKanOption : TurnOption
 {
-	this(Metagame metagame, Player player, Tile selectedTile, TurnEvent event)
+	this(const Metagame metagame, const Player player, const Tile selectedTile, TurnEvent event)
 	{
 		super("Kan");
 		_metagame = metagame;
@@ -115,9 +117,9 @@ class PromoteToKanOption : TurnOption
 		_event = event;
 	}
 
-	private Metagame _metagame;
-	private Player _player;
-	private Tile _selectedTile;
+	private const Metagame _metagame;
+	private const Player _player;
+	private const Tile _selectedTile;
 	private TurnEvent _event;
 
 	override void select() 
@@ -134,7 +136,7 @@ class PromoteToKanOption : TurnOption
 
 class DeclareClosedKanOption : TurnOption
 {
-	this(Metagame metagame, Player player, Tile selectedTile, TurnEvent event)
+	this(const Metagame metagame, const Player player, const Tile selectedTile, TurnEvent event)
 	{
 		super("Kan");
 		_metagame = metagame;
@@ -143,9 +145,9 @@ class DeclareClosedKanOption : TurnOption
 		_event = event;
 	}
 
-	private Metagame _metagame;
-	private Player _player;
-	private Tile _selectedTile;
+	private const Metagame _metagame;
+	private const Player _player;
+	private const Tile _selectedTile;
 	private TurnEvent _event;
 
 	override void select() 
@@ -162,7 +164,7 @@ class DeclareClosedKanOption : TurnOption
 
 class TsumoOption : TurnOption
 {
-	this(Metagame metagame, Player player, TurnEvent event)
+	this(const Metagame metagame, const Player player, TurnEvent event)
 	{
 		super("Tsumo");
 		_metagame = metagame;
@@ -170,8 +172,8 @@ class TsumoOption : TurnOption
 		_event = event;
 	}
 
-	private Metagame _metagame;
-	private Player _player;
+	private const Metagame _metagame;
+	private const Player _player;
 	private TurnEvent _event;
 
 	override void select() 
@@ -188,7 +190,7 @@ class TsumoOption : TurnOption
 
 class DiscardOption : TurnOption
 {
-	this(Metagame metagame, Tile selectedTile, TurnEvent event)
+	this(const Metagame metagame, const Tile selectedTile, TurnEvent event)
 	{
 		super("Discard");
 		_metagame = metagame;
@@ -196,8 +198,8 @@ class DiscardOption : TurnOption
 		_event = event;
 	}
 
-	private Metagame _metagame;
-	private Tile _selectedTile;
+	private const Metagame _metagame;
+	private const Tile _selectedTile;
 	private TurnEvent _event;
 
 	override void select() 

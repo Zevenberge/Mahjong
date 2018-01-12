@@ -22,13 +22,13 @@ import mahjong.graphics.menu;
 
 class GameController : Controller
 {
-	protected this(RenderWindow window, Metagame metagame)
+	protected this(RenderWindow window, const Metagame metagame)
 	{
 		super(window);
 		_metagame = metagame;
 	}
 
-	protected Metagame _metagame;
+	protected const Metagame _metagame;
 
 	override void draw()
 	{

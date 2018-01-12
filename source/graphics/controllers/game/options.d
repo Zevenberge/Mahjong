@@ -20,7 +20,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 	if(isIngameOptionsFactory!Factory)
 {
 	this(RenderWindow window, 
-		Metagame metagame,
+		const Metagame metagame,
 		Controller innerController,
 		Factory factory)
 	{
@@ -47,7 +47,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		}
 	}
 
-	private Metagame _metagame;
+	private const Metagame _metagame;
 
 	void swapIdleController()
 	{

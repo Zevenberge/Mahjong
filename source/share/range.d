@@ -39,16 +39,21 @@ unittest
 	assert([0f,3f,2f,float.nan,1f,5f].max!(s => s % 5, float) == 3, "The max function is independent on order");
 }
 
-void remove(alias pred, T)(ref T[] array, T element)
+T remove(alias pred, T)(ref T[] array, const T element)
 {
     foreach(i, e; array)
     {
         if(pred(e, element))
         {
             array = array[0 .. i] ~ array [i+1..$];
-            return;
+            return e;
         }
     }
+	return T.init;
+}
+unittest
+{
+
 }
 
 template without(alias equality)
@@ -69,9 +74,15 @@ template first(alias pred)
 	}
 }
 
-size_t indexOf(Range, E)(Range range, E element) if(isInputRange!Range)
+size_t indexOf(Range, E)(Range range, E element)
+	if(isInputRange!Range)
 {
 	return range.countUntil!(e => e == element);
+}
+
+unittest
+{
+
 }
 
 T[] insertAt(T)(T[] collection, T element, size_t index)
@@ -147,3 +158,47 @@ unittest
 	auto flattened = bubbles.flatMap!(x => x.ints).array;
 	assert(flattened.length == 0, "Flat-mapping an empty range should return an empty range of the result type");
 }
+/+
+auto range(T)(T[] array)
+{
+	return Range(array);
+}
+
+private struct Range(T)
+{
+	this(T[] array)
+	{
+		_array;
+		_forwardIndex = 0;
+		_backwardIndex = _array.length - 1;
+	}
+	private T[] _array;
+
+	private size_t _forwardIndex;
+	void popFront()
+	{
+		++_forwardIndex;
+	}
+
+	T front()
+	{
+		return _array[_forwardIndex];
+	}
+
+	private size_t _backwardIndex;
+
+	void popBack()
+	{
+		--_backwardIndex;
+	}
+
+	T back()
+	{
+		return _array[_backwardIndex];
+	}
+
+	bool empty()
+	{
+		return _forwardIndex >= _array.length || _backwardIndex < 0;
+	}
+}+/

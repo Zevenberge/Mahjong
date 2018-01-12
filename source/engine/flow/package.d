@@ -21,10 +21,15 @@ class Flow
 {
 	this(Metagame game)
 	{
-		metagame = game;
+		_metagame = game;
 	}
 
-	Metagame metagame;
+	protected Metagame _metagame;
+	final const(Metagame) metagame() @property pure const
+	{
+		return _metagame;
+	}
+
 	abstract void advanceIfDone();
 }
 

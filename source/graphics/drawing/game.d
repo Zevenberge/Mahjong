@@ -16,7 +16,7 @@ import mahjong.graphics.opts;
 import mahjong.graphics.rendersprite;
 
 alias drawGame = draw;
-void draw(Metagame game, RenderTarget target)
+void draw(const Metagame game, RenderTarget target)
 {
 	drawPlayers(game, target);
 	drawWal(game, target);
@@ -30,7 +30,7 @@ void clearCache()
 	clearPlayerCache;
 }
 
-private void drawPlayers(Metagame game, RenderTarget target)
+private void drawPlayers(const Metagame game, RenderTarget target)
 {
 	auto renderTexture = getPlayerTexture; 
 	foreach(i, player; game.players)
@@ -44,13 +44,13 @@ private void drawPlayers(Metagame game, RenderTarget target)
 	}
 } 
 
-private void drawWal(Metagame game, RenderTarget target)
+private void drawWal(const Metagame game, RenderTarget target)
 {
 	if(game.wall is null) return;
 	game.wall.drawWall(target);
 }
 
-private void drawGameInfo(Metagame game, RenderTarget target)
+private void drawGameInfo(const Metagame game, RenderTarget target)
 {
 	auto bounds = FloatRect(0, 900, 100, 900);
 	auto renderSprite = new RenderSprite(bounds);
@@ -59,7 +59,7 @@ private void drawGameInfo(Metagame game, RenderTarget target)
 	target.draw(renderSprite);
 }
 
-private void drawCounter(Metagame game, RenderTarget target)
+private void drawCounter(const Metagame game, RenderTarget target)
 {
 	if(game.counters == 0) return;
 	auto sprite = new Sprite(stickTexture);
@@ -110,7 +110,7 @@ private class GameInfo
 		initialise;
 	}
 	
-	void draw(RenderTarget target, Metagame game)
+	void draw(RenderTarget target, const Metagame game)
 	{
 		update(game);
 		target.draw(_background);
@@ -158,14 +158,14 @@ private class GameInfo
 			_background.color = Color(255,255,255,126);
 		}
 		
-		void update(Metagame game)
+		void update(const Metagame game)
 		{
 			auto roundInfo = game.leadingWind.to!int.to!Kanji.to!string;
 			if(game.round > 0) roundInfo ~= game.round.toKanji;
 			_roundInfo.setString(roundInfo);
 			_roundInfo.center!(CenterDirection.Vertical)(_background.getGlobalBounds);
 			auto currentPlayer = game.currentPlayer;
-			if(currentPlayer !is null) _turnPlayerInfo.setString(game.currentPlayer.name.to!string);
+			if(currentPlayer !is null) _turnPlayerInfo.setString(currentPlayer.name.to!string);
 			else _turnPlayerInfo.setString("");
 		}
 }
