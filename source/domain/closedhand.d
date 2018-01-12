@@ -40,7 +40,6 @@ class ClosedHand
 	void drawTile(Wall wall)
 	{
 		addTile(wall.drawTile);
-		tiles.sortHand;
 	}
 
 	void drawKanTile(Wall wall)
@@ -51,11 +50,14 @@ class ClosedHand
 	private void addTile(Tile tile)
 	{
 		tiles ~= tile;
+		tiles.sortHand;
+		_lastTile = tile;
 	}
 
+	private Tile _lastTile;
 	Tile lastTile() @property
 	{
-		return tiles[$-1];
+		return _lastTile;
 	}
 
 	bool isChiable(const Tile discard) pure const

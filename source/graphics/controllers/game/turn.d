@@ -27,10 +27,9 @@ class TurnController : GameController
 	private void initialise()
 	{
 		trace("Initialising selection of turn controller");
-		_event.player.game.closedHand.displayHand;
-		_event.player.game.closedHand.tiles.sortHand;
+		_event.player.closedHand.displayHand;
 		opts = _event.player.game.closedHand.tiles;
-		initSelection;
+		initSelection();
 		auto index = opts.indexOf(_event.drawnTile);
 		changeOpt(index);
 	}
