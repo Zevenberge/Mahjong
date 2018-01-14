@@ -22,7 +22,7 @@ class MahjongFlow : Flow
 
 	private void notifyPlayers(const(MahjongData)[] data)
 	{
-		foreach(player; metagame.players)
+		foreach(player; _metagame.players)
 		{
 			auto event = new MahjongEvent(metagame, data);
 			_events ~= event;
@@ -35,31 +35,31 @@ class MahjongFlow : Flow
 	override void advanceIfDone()
 	{
 		if(!_events.all!(e => e.isHandled)) return;
-		metagame.finishRound;
+		_metagame.finishRound;
 		mixin(gameOverSwitch);
-		flow = new RoundStartFlow(metagame);
+		flow = new RoundStartFlow(_metagame);
 	}
 }
 
 enum gameOverSwitch =
 q{
-	if(metagame.isGameOver)
+	if(_metagame.isGameOver)
 	{
-		flow = new GameEndFlow(metagame);
+		flow = new GameEndFlow(_metagame);
 		return;
 	}
 };
 
 class MahjongEvent
 {
-	this(Metagame metagame,
+	this(const Metagame metagame,
 		const(MahjongData)[] data)
 	{
 		_data = data;
 		this.metagame = metagame;
 	}
 
-	Metagame metagame;
+	const Metagame metagame;
 
 	private const(MahjongData)[] _data;
 	const(MahjongData)[] data() @property

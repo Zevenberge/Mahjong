@@ -35,7 +35,7 @@ class GameStartFlow : Flow
 		if(isDone)
 		{
 			info("Started game. Switching to round start flow.");
-			switchFlow(new RoundStartFlow(metagame));
+			switchFlow(new RoundStartFlow(_metagame));
 		}
 	}
 
@@ -47,12 +47,12 @@ class GameStartFlow : Flow
 
 class GameStartEvent
 {
-	this(Metagame metagame)
+	this(const Metagame metagame)
 	{
 		this.metagame = metagame;
 	}
 
-	Metagame metagame;
+	const Metagame metagame;
 	bool isReady;
 }
 

@@ -162,7 +162,8 @@ unittest
 	assertIn!ChiClaimOption(claimFactory);
 	assertIn!RonClaimOption(claimFactory);
 
-	player2.game.setDiscards("🀐"d.convertToTiles);
+	auto discards = "🀐"d.convertToTiles;
+	player2.game.setDiscards(discards);
 	claimFactory = constructFactory("🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d, "🀐"d, player2, player);
 	assertIn!PonClaimOption(claimFactory);
 	assertIn!NoClaimOption(claimFactory);
@@ -170,7 +171,7 @@ unittest
 	assertIn!ChiClaimOption(claimFactory);
 	assertNotIn!RonClaimOption(claimFactory);
 
-	player2.game.discards[0].claim; // Claim the discard such that it is no longer in the discard pile.
+	discards[0].claim; // Claim the discard such that it is no longer in the discard pile.
 	claimFactory = constructFactory("🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d, "🀐"d, player2, player);
 	assertIn!PonClaimOption(claimFactory);
 	assertIn!NoClaimOption(claimFactory);

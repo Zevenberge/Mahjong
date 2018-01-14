@@ -16,7 +16,7 @@ import mahjong.share.range;
 
 class TurnController : GameController
 {
-	this(RenderWindow window, Metagame metagame, TurnEvent event)
+	this(RenderWindow window, const Metagame metagame, TurnEvent event)
 	{
 		trace("Instantiating turn controller");
 		_event = event;
@@ -27,10 +27,9 @@ class TurnController : GameController
 	private void initialise()
 	{
 		trace("Initialising selection of turn controller");
-		_event.player.game.closedHand.displayHand;
-		_event.player.game.closedHand.tiles.sortHand;
+		_event.player.closedHand.displayHand;
 		opts = _event.player.game.closedHand.tiles;
-		initSelection;
+		initSelection();
 		auto index = opts.indexOf(_event.drawnTile);
 		changeOpt(index);
 	}
@@ -90,5 +89,5 @@ class TurnController : GameController
 		controller = new TurnOptionController(_window, _metagame, this, factory);
 	}
 
-	mixin Select!Tile;
+	mixin Select!(const Tile);
 }

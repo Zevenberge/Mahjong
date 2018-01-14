@@ -13,21 +13,21 @@ class TurnEndFlow : Flow
 	
 	override void advanceIfDone()
 	{
-		if(metagame.isAbortiveDraw)
+		if(_metagame.isAbortiveDraw)
 		{
 			info("Abortive draw reached.");
-			switchFlow(new AbortiveDrawFlow(metagame));
+			switchFlow(new AbortiveDrawFlow(_metagame));
 		}
-		else if(metagame.isExhaustiveDraw)
+		else if(_metagame.isExhaustiveDraw)
 		{
 			info("Exhaustive draw reached.");
-			switchFlow(new ExhaustiveDrawFlow(metagame));
+			switchFlow(new ExhaustiveDrawFlow(_metagame));
 		}
 		else
 		{
 			trace("Advancing to the next turn.");
-			metagame.advanceTurn;
-			switchFlow(new DrawFlow(metagame.currentPlayer, metagame, metagame.wall));
+			_metagame.advanceTurn;
+			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, _metagame.wall));
 		}
 	}
 }

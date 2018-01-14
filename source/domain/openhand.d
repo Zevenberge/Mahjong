@@ -18,7 +18,7 @@ class OpenHand
 
 	const UUID id;
 
-	const(Tile)[] tiles() @property
+	const(Tile)[] tiles() @property const
 	{
 		return _sets.flatMap!(set => set.tiles);
 	}
@@ -81,7 +81,7 @@ class OpenHand
 		_sets ~= new ChiSet(tiles);
 	}
 
-	bool canPromoteToKan(Tile tile)
+	bool canPromoteToKan(const Tile tile) pure const
 	{
 		return _sets.any!(s => s.canPromoteSetToKan(tile));
 	}
@@ -99,7 +99,7 @@ class OpenHand
 		throw new SetNotFoundException(kanTile);
 	}
 
-	const(Set) findCorrespondingPon(const(Tile) tile)
+	const(Set) findCorrespondingPon(const(Tile) tile) const
 	{
 		foreach(set; _sets)
 		{
@@ -142,7 +142,7 @@ unittest
 	assert(openHand.amountOfKans == 1, "Hand should have one kan");
 }
 
-private bool canPromoteSetToKan(const Set set, const Tile kanTile)
+private bool canPromoteSetToKan(const Set set, const Tile kanTile) pure
 {
 	return set.tiles.length == 3 &&
 			kanTile.hasEqualValue(set.tiles[0]) &&

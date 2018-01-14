@@ -21,7 +21,7 @@ import mahjong.graphics.opts;
 import mahjong.graphics.text;
 
 alias drawPlayer = draw;
-void draw(Player player, RenderTarget view, float rotation)
+void draw(const Player player, RenderTarget view, float rotation)
 {
 	PlayerVisuals visual;
 	if(player.id !in _players)
@@ -64,7 +64,7 @@ private class PlayerVisuals
 		int _numberedScore = -1;
 		int _numberedWind = -1;
 		Text _wind;
-		Player _player;
+		const Player _player;
 		
 		void initialiseNewTexture()
 		{
@@ -186,7 +186,7 @@ private class PlayerVisuals
 			view.draw(_completeSprite);
 		}
 		
-		this(string iconFile, Player player, float rotation)
+		this(string iconFile, const Player player, float rotation)
 		{
 			info("Initialising player visuals");
 			_player = player;
