@@ -43,7 +43,7 @@ class DefaultDrawingOpts : Opts
 	{
 		return 6;
 	}
-	void initialiseWall(Wall wall)
+	void initialiseWall(const Wall wall)
 	in{}
 	body
 	{

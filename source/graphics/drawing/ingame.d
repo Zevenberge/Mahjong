@@ -17,7 +17,7 @@ import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 
 alias drawIngame = draw;
-void draw(Ingame ingame, RenderTarget view)
+void draw(const Ingame ingame, RenderTarget view)
 {
 	auto drawable = getDrawable(ingame);
 	drawable.draw(view);
@@ -32,7 +32,7 @@ void clearIngameCache()
 }
 
 private IngameDrawable[UUID] _ingameDrawables;
-private IngameDrawable getDrawable(Ingame ingame)
+private IngameDrawable getDrawable(const Ingame ingame)
 {
 	if(ingame.id !in _ingameDrawables)
 	{
@@ -48,23 +48,23 @@ private class IngameDrawable
 {
 	size_t previousAmountOfDiscards;
 	
-	this(Ingame game)
+	this(const Ingame game)
 	{
 		_game = game;
 	}
 	
-	private Ingame _game;
+	private const Ingame _game;
 	
 	void draw(RenderTarget target)
 	{
 		_game.closedHand.drawClosedHand(target);
 		_game.openHand.drawOpenHand(_game, target);
-		drawDiscards(_game, target);
+		drawDiscards(target);
 	}
 
-	private void drawDiscards(Ingame ingame, RenderTarget view)
+	private void drawDiscards(RenderTarget view)
 	{
-		auto amountOfDiscards = ingame.discards.length;
+		auto amountOfDiscards = _game.discards.length;
 		if(amountOfDiscards == previousAmountOfDiscards + 1)
 		{
 			// One additional tile was discarded.
@@ -75,7 +75,7 @@ private class IngameDrawable
 		{
 			previousAmountOfDiscards = amountOfDiscards;
 		}
-		ingame.discards.each!(t => t.drawTile(view));
+		_game.discards.each!(t => t.drawTile(view));
 	}
 
 	private void animateLastDiscard()
@@ -99,7 +99,7 @@ private class IngameDrawable
 	}
 }
 
-private void placeDiscards(Ingame ingame)
+private void placeDiscards(const Ingame ingame)
 {
 	foreach(number, tile; ingame.discards)
 	{

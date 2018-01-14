@@ -28,14 +28,14 @@ class ClaimFlow : Flow
 
 		void initialiseClaimEvents()
 		{
-			_claimEvents = metagame.otherPlayers
+			_claimEvents = _metagame.otherPlayers
 						.map!(p => createEventAndNotifyHandler(p))
 						.array;
 		}
 
 		ClaimEvent createEventAndNotifyHandler(Player player)
 		{
-			auto event = new ClaimEvent(_tile, player, metagame);
+			auto event = new ClaimEvent(_tile, player, _metagame);
 			player.eventHandler.handle(event);
 			return event;
 		}
@@ -55,7 +55,7 @@ class ClaimFlow : Flow
 			if(applyRons) return;
 			if(applyPon) return;
 			if(applyChi) return;
-			switchFlow(new TurnEndFlow(metagame));
+			switchFlow(new TurnEndFlow(_metagame));
 		}
 
 		bool applyRons()
@@ -64,7 +64,7 @@ class ClaimFlow : Flow
 			if(rons.empty) return false;
 			info("There was a ron!");
 			foreach(ron; rons) ron.apply;
-			switchFlow(new MahjongFlow(metagame));
+			switchFlow(new MahjongFlow(_metagame));
 			return true;
 		}
 
@@ -89,8 +89,8 @@ class ClaimFlow : Flow
 
 		void switchTurn(Player newTurnPlayer)
 		{
-			metagame.currentPlayer = newTurnPlayer;
-			switchFlow(new TurnFlow(newTurnPlayer, metagame));
+			_metagame.currentPlayer = newTurnPlayer;
+			switchFlow(new TurnFlow(newTurnPlayer, _metagame));
 		}
 }
 

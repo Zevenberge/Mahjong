@@ -8,7 +8,7 @@ import mahjong.graphics.controllers.game;
 
 class IdleController : GameController
 {
-	this(RenderWindow window, Metagame metagme)
+	this(RenderWindow window, const Metagame metagme)
 	{
 		trace("Intantiating idle controller");
 		super(window, metagme);
