@@ -14,6 +14,7 @@ import mahjong.graphics.enums.resources;
 import mahjong.graphics.eventhandler;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
+import mahjong.graphics.popup.service;
 
 private MainMenu _mainMenu;
 MainMenu composeMainMenu()
@@ -99,7 +100,7 @@ unittest
 
 private void startGame(GameEventHandler[] eventHandlers...)
 {
-	switchFlow(new GameStartFlow(eventHandlers));
+	switchFlow(new GameStartFlow(eventHandlers, new PopupService));
 	trace("Initiated Game Start Flow");
 }
 

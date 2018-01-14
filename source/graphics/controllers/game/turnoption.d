@@ -220,6 +220,7 @@ version(unittest)
 	import std.string;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
+	import mahjong.engine.notifications;
 	import mahjong.test.utils;
 	void assertIn(T)(TurnOptionFactory factory)
 	{
@@ -237,7 +238,7 @@ version(unittest)
 		player.closedHand.tiles = tilesOfTurnPlayer.convertToTiles;
 		auto discardedTile = player.closedHand.tiles[indexOfDiscard];
 		return new TurnOptionFactory(player, discardedTile, metagame, 
-			new TurnEvent(new TurnFlow(player, metagame),
+			new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService),
 				metagame, player, discardedTile));
 	}
 }

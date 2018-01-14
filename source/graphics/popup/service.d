@@ -1,7 +1,9 @@
 ﻿module mahjong.graphics.popup.service;
 
 import dsfml.graphics : RenderTarget;
+import mahjong.engine.notifications;
 import mahjong.graphics.popup.popup;
+import mahjong.graphics.i18n;
 import mahjong.share.range : remove;
 
 interface IPopupService
@@ -11,25 +13,31 @@ interface IPopupService
 	void remove(Popup popup);
 }
 
-class PopupService : IPopupService
+class PopupService : IPopupService, INotificationService
 {
+	void notify(Notification notification)
+	{
+		showPopup(notification.translate);
+	}
+
 	void showPopup(string msg)
 	{
-		_popups ~= new Popup(msg, this);
+		_popup = new Popup(msg, this);
 	}
 
 	void draw(RenderTarget target)
 	{
-		foreach(popup; _popups)
-		{
-			target.draw(popup);
+		if(_popup){
+			target.draw(_popup);
 		}
 	}
 
 	void remove(Popup popup)
 	{
-		.remove!((x, y) => x == y)(_popups, popup);
+		if(popup is _popup){
+			_popup = null;
+		}
 	}
 
-	private Popup[] _popups;
+	private Popup _popup;
 }

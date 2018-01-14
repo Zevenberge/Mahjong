@@ -4,13 +4,14 @@ import std.algorithm.searching : all;
 import std.experimental.logger;
 import mahjong.domain.metagame;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class GameEndFlow : Flow
 {
-	this(Metagame metagame)
+	this(Metagame metagame, INotificationService notificationService)
 	{
 		trace("Constructing game end flow");
-		super(metagame);
+		super(metagame, notificationService);
 		notifyPlayers;
 	}
 
@@ -59,7 +60,7 @@ unittest
 {
 	auto eventHandler = new TestEventHandler;
 	auto metagame = new Metagame([eventHandler.createPlayer]);
-	auto gameEndFlow = new GameEndFlow(metagame);
+	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
 	flow = gameEndFlow;
 	flow.advanceIfDone;
 	assert(flow !is null, "as no-one confirmed, the flow should not be null");
@@ -70,7 +71,7 @@ unittest
 {
 	auto eventHandler = new TestEventHandler;
 	auto metagame = new Metagame([eventHandler.createPlayer]);
-	auto gameEndFlow = new GameEndFlow(metagame);
+	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
 	assert(eventHandler.gameEndEvent !is null, "A game end event shouldbe distributed to each player");
 }
 
@@ -78,7 +79,7 @@ unittest
 {
 	auto eventHandler = new TestEventHandler;
 	auto metagame = new Metagame([eventHandler.createPlayer]);
-	auto gameEndFlow = new GameEndFlow(metagame);
+	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
 	flow = gameEndFlow;
 	eventHandler.gameEndEvent.handle;
 	flow.advanceIfDone;

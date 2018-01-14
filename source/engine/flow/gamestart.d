@@ -5,11 +5,12 @@ import std.experimental.logger;
 import std.array;
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 import mahjong.engine.opts;
 
 class GameStartFlow : Flow
 {
-	this(GameEventHandler[] eventHandlers)
+	this(GameEventHandler[] eventHandlers, INotificationService notificationService)
 	in
 	{
 		assert(!eventHandlers.empty, "Expected at least a single event handler");
@@ -18,7 +19,7 @@ class GameStartFlow : Flow
 	{
 		info("Starting game.");
 		auto game = gameOpts.createMetagame(eventHandlers);
-		super(game);
+		super(game, notificationService);
 		_events = eventHandlers.map!((handler) 
 			{
 				auto event = new GameStartEvent(metagame);
@@ -35,7 +36,7 @@ class GameStartFlow : Flow
 		if(isDone)
 		{
 			info("Started game. Switching to round start flow.");
-			switchFlow(new RoundStartFlow(_metagame));
+			switchFlow(new RoundStartFlow(_metagame, _notificationService));
 		}
 	}
 
@@ -67,7 +68,7 @@ unittest
 
 
 	auto eventHandler = new TestEventHandler;
-	auto flow = new GameStartFlow([eventHandler]);
+	auto flow = new GameStartFlow([eventHandler], new NullNotificationService);
 	assert(flow.metagame.players.length == 1, "One player should have been created");
 	switchFlow(flow);
 	assert(.flow.isOfType!GameStartFlow, "GameStartFlow should be set as flow");

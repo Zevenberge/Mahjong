@@ -6,13 +6,14 @@ import std.experimental.logger;
 import mahjong.domain;
 import mahjong.engine.chi;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class ClaimFlow : Flow
 {
-	this(Tile tile, Metagame game)
+	this(Tile tile, Metagame game, INotificationService notificationService)
 	{
 		trace("Constructing claim flow");
-		super(game);
+		super(game, notificationService);
 		_tile = tile;
 		initialiseClaimEvents;
 	}
@@ -55,7 +56,7 @@ class ClaimFlow : Flow
 			if(applyRons) return;
 			if(applyPon) return;
 			if(applyChi) return;
-			switchFlow(new TurnEndFlow(_metagame));
+			switchFlow(new TurnEndFlow(_metagame, _notificationService));
 		}
 
 		bool applyRons()
@@ -64,7 +65,7 @@ class ClaimFlow : Flow
 			if(rons.empty) return false;
 			info("There was a ron!");
 			foreach(ron; rons) ron.apply;
-			switchFlow(new MahjongFlow(_metagame));
+			switchFlow(new MahjongFlow(_metagame, _notificationService));
 			return true;
 		}
 
@@ -90,7 +91,7 @@ class ClaimFlow : Flow
 		void switchTurn(Player newTurnPlayer)
 		{
 			_metagame.currentPlayer = newTurnPlayer;
-			switchFlow(new TurnFlow(newTurnPlayer, _metagame));
+			switchFlow(new TurnFlow(newTurnPlayer, _metagame, _notificationService));
 		}
 }
 
@@ -123,7 +124,7 @@ unittest
 	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest);
 	assert(claimFlow.done, "Flow should be done.");
@@ -146,7 +147,7 @@ unittest
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	ponnableTile.origin = player1.game;
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new PonRequest(player2, ponnableTile));
 	claimFlow.advanceIfDone;
@@ -169,7 +170,7 @@ unittest
 	player3.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	ponnableTile.origin = new Ingame(PlayerWinds.south);
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
 			ChiCandidate(player2.game.closedHand.tiles[0], player2.game.closedHand.tiles[1]),
@@ -200,7 +201,7 @@ unittest
 	player3.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	ponnableTile.origin = new Ingame(PlayerWinds.south);
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest); 
 	claimFlow._claimEvents[1].handle(new ChiRequest(player3, ponnableTile,
