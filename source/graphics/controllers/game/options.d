@@ -56,7 +56,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		{
 			idleController = new IdleController(_window, _metagame);
 		}
-		controller = idleController;
+		switchController(idleController);
 	}
 
 	override void draw() 
@@ -85,7 +85,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 
 	protected override bool menuClosed() 
 	{
-		controller = new MenuController(_window, this, getPauseMenu);
+		switchController(new MenuController(_window, this, getPauseMenu));
 		return false;
 	}
 

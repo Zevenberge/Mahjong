@@ -8,7 +8,7 @@ import mahjong.graphics.conv;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
 
-class MenuController : MenuControllerBase!Menu
+class MenuController : MenuControllerBase!Menu, ISubstrituteInnerController
 {
 	this(RenderWindow window, Controller pausedController, Menu menu)
 	{
@@ -39,7 +39,12 @@ class MenuController : MenuControllerBase!Menu
 	
 	void closeMenu()
 	{
-		controller = _innerController;
+		switchController(_innerController);
+	}
+
+	void substitute(Controller newController)
+	{
+		_innerController = newController;
 	}
 
 	protected RectangleShape constructHaze()

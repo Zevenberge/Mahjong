@@ -8,14 +8,14 @@ import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.popup.service;
 
-class PopupController : GameController
+class PopupController : GameController, ISubstrituteInnerController
 {
-	this(RenderWindow window, const Metagame metagame, GameController underlying, 
+	this(GameController underlying, 
 		IPopupService popupService)
 	{
 		_underlying = underlying;
 		_popupService = popupService;
-		super(window, metagame);
+		super(underlying.getWindow(), underlying.metagame);
 	}
 
 	private IPopupService _popupService;
@@ -29,8 +29,13 @@ class PopupController : GameController
 
 	override void yield() {
 		if(!_popupService.hasPopup) {
-			controller = _underlying;
+			switchController(_underlying);
 		}
+	}
+
+	void substitute(Controller newController)
+	{
+		_underlying = cast(GameController)newController;
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) {

@@ -41,7 +41,7 @@ class GameEndController : MahjongController
 	{
 		info("Rounding up game.");
 		_event.handle;
-		controller = new MainMenuController(_window, composeMainMenu);
+		switchController(new MainMenuController(_window, composeMainMenu));
 	}
 }
 
@@ -55,14 +55,14 @@ unittest
 	import mahjong.graphics.rendersprite;
 	import mahjong.test.utils;
 	import mahjong.test.window;
-	scope(exit) controller = null;
+	scope(exit) setDefaultTestController;
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
 	player.draw(new RenderSprite(FloatRect()), 0);
 	auto metagame = new Metagame([player, player, player, player]);
 	auto window = new TestWindow;
 	auto event = new GameEndEvent(metagame);
-	controller = new GameEndController(window, metagame, event);
+	switchController(new GameEndController(window, metagame, event));
 	controller.draw;
 	Event keyEvent = Event(Event.EventType.KeyReleased);
 	keyEvent.key = Event.KeyEvent(Keyboard.Key.Return, false, false, false, false);

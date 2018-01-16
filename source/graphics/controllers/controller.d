@@ -1,5 +1,6 @@
 module mahjong.graphics.controllers.controller;
 
+import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.anime.animation;
 
@@ -44,7 +45,30 @@ class Controller
 	}
 }
 
-Controller controller;
+interface ISubstrituteInnerController
+{
+	void substitute(Controller newController);
+}
+
+public Controller controller() {return _controller;} @property pure
+private Controller _controller;
+
+void trySwitchController(Controller newController)
+{
+	auto switchableController = cast(ISubstrituteInnerController)_controller;
+	if(switchableController) {
+		switchableController.substitute(newController);
+	}
+	else {
+		switchController(newController);
+	}
+}
+
+void switchController(Controller newController)
+{
+	info("Switchint to new controller of type ", typeid(newController));
+	_controller = newController;
+}
 
 version(unittest)
 {
@@ -77,6 +101,6 @@ version(unittest)
 
 	void setDefaultTestController()
 	{
-		.controller = new TestController;
+		._controller = new TestController;
 	}
 }

@@ -124,7 +124,7 @@ class PromoteToKanOption : TurnOption
 
 	override void select() 
 	{
-		controller = new IdleController(controller.getWindow, _metagame);
+		trySwitchController(new IdleController(controller.getWindow, _metagame));
 		_event.promoteToKan(_selectedTile);
 	}
 
@@ -152,7 +152,7 @@ class DeclareClosedKanOption : TurnOption
 
 	override void select() 
 	{
-		controller = new IdleController(controller.getWindow, _metagame);
+		trySwitchController(new IdleController(controller.getWindow, _metagame));
 		_event.declareClosedKan(_selectedTile);
 	}
 
@@ -178,7 +178,7 @@ class TsumoOption : TurnOption
 
 	override void select() 
 	{
-		controller = new IdleController(controller.getWindow, _metagame);
+		trySwitchController(new IdleController(controller.getWindow, _metagame));
 		_event.claimTsumo;
 	}
 
@@ -204,7 +204,7 @@ class DiscardOption : TurnOption
 
 	override void select() 
 	{
-		controller = new IdleController(controller.getWindow, _metagame);
+		trySwitchController(new IdleController(controller.getWindow, _metagame));
 		_event.discard(_selectedTile);
 	}
 

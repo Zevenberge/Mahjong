@@ -39,7 +39,7 @@ private void quitGame()
 	trace("Quitting game");
 	controller.roundUp;
 	auto mainMenuController = getMainMenuController(controller.getWindow);
-	controller = mainMenuController;
+	switchController(mainMenuController);
 	trace("Returned to the main menu");
 }
 

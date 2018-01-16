@@ -64,7 +64,7 @@ class ClaimFlow : Flow
 			auto rons = _claimEvents.filter!(ce => ce.request == Request.Ron);
 			if(rons.empty) return false;
 			info("There was a ron!");
-			foreach(ron; rons) ron.apply;
+			foreach(ron; rons) ron.apply(_notificationService);
 			switchFlow(new MahjongFlow(_metagame, _notificationService));
 			return true;
 		}
@@ -83,7 +83,7 @@ class ClaimFlow : Flow
 		{
 			auto claimingEvent = _claimEvents.filter!pred;
 			if(claimingEvent.empty) return false;
-			claimingEvent.front.apply;
+			claimingEvent.front.apply(_notificationService);
 			switchTurn(claimingEvent.front.player);
 			return true;
 		}
@@ -246,14 +246,14 @@ enum Request {None, Chi, Pon, Kan, Ron}
 
 interface ClaimRequest
 {
-	void apply();
+	void apply(INotificationService notificationService);
 	bool isAllowed() pure;
 	@property Request request() pure;
 }
 
 class NoRequest : ClaimRequest
 {
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		// Do nothing.
 	}
@@ -286,9 +286,10 @@ class PonRequest : ClaimRequest
 	private Player _player;
 	private Tile _discard;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.pon(_discard);
+		notificationService.notify(Notification.Pon);
 	}
 
 	bool isAllowed() pure
@@ -315,9 +316,10 @@ class KanRequest : ClaimRequest
 	private Tile _discard;
 	private Wall _wall;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.kan(_discard, _wall);
+		notificationService.notify(Notification.Kan);
 	}
 
 	bool isAllowed() pure
@@ -346,9 +348,10 @@ class ChiRequest : ClaimRequest
 	private ChiCandidate _chiCandidate;
 	private Metagame _metagame;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.chi(_discard, _chiCandidate);
+		notificationService.notify(Notification.Chi);
 	}
 
 	bool isAllowed() pure
@@ -373,9 +376,10 @@ class RonRequest : ClaimRequest
 	private Player _player;
 	private Tile _discard;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.ron(_discard);
+		notificationService.notify(Notification.Ron);
 	}
 
 	bool isAllowed() pure

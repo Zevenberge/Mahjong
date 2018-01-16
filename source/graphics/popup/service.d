@@ -3,6 +3,8 @@
 import std.experimental.logger;
 import dsfml.graphics : RenderTarget;
 import mahjong.engine.notifications;
+import mahjong.graphics.controllers.controller;
+import mahjong.graphics.controllers.game;
 import mahjong.graphics.popup.popup;
 import mahjong.graphics.i18n;
 import mahjong.share.range : remove;
@@ -27,6 +29,10 @@ class PopupService : IPopupService, INotificationService
 	void showPopup(string msg)
 	{
 		_popup = new Popup(msg, this);
+		auto gameController = cast(GameController)controller;
+		if(gameController){
+			switchController(new PopupController(gameController, this));
+		}
 	}
 
 	void draw(RenderTarget target)

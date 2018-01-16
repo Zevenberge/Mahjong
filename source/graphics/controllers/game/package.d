@@ -4,6 +4,7 @@ public import mahjong.graphics.controllers.game.claim;
 public import mahjong.graphics.controllers.game.gameend;
 public import mahjong.graphics.controllers.game.idle;
 public import mahjong.graphics.controllers.game.mahjong;
+public import mahjong.graphics.controllers.game.popup;
 public import mahjong.graphics.controllers.game.options;
 public import mahjong.graphics.controllers.game.turn;
 public import mahjong.graphics.controllers.game.turnoption;
@@ -28,6 +29,7 @@ class GameController : Controller
 		_metagame = metagame;
 	}
 
+	const(Metagame) metagame() { return _metagame;} @property pure
 	protected const Metagame _metagame;
 
 	override void draw()
@@ -55,7 +57,7 @@ class GameController : Controller
 	{
 		auto pauseMenu = getPauseMenu;
 		auto pauseController = new MenuController(_window, this, pauseMenu);
-		controller = pauseController;
+		switchController(pauseController);
 	}
 
 	protected abstract void handleGameKey(Event.KeyEvent key);
