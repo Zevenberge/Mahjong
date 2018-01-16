@@ -14,8 +14,6 @@ import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.engine.scoring;
-import mahjong.graphics.enums.game;
-import mahjong.graphics.enums.kanji;
 import mahjong.share.range;
 
 class Metagame
@@ -241,11 +239,11 @@ class Metagame
 		flipOverWinningTiles();
 		if(player.isMahjong)
 		{
-			info("Player ", cast(Kanji)currentPlayer.wind, " won");
+			info("Player ", currentPlayer.wind, " won");
 		}
 		else
 		{
-			info("Player ", cast(Kanji)currentPlayer.wind, " chombo'd");
+			info("Player ", currentPlayer.wind, " chombo'd");
 		}
 	}
 
@@ -298,7 +296,7 @@ class Metagame
 			if(player.isTenpai)
 			{
 				player.showHand;
-				info(cast(Kanji)player.wind, " is tenpai!");
+				info(player.wind, " is tenpai!");
 			}
 			else
 			{
