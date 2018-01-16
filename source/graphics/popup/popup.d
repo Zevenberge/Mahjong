@@ -33,7 +33,7 @@ class Popup : Drawable
 
 	private void constructAnimation(IPopupService service)
 	{
-		//_animation = new PopupAnimation(this, service);
+		_animation = new PopupAnimation(this, service);
 	}
 
 	private Animation _animation;

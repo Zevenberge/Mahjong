@@ -1,5 +1,6 @@
 ﻿module mahjong.graphics.popup.service;
 
+import std.experimental.logger;
 import dsfml.graphics : RenderTarget;
 import mahjong.engine.notifications;
 import mahjong.graphics.popup.popup;
@@ -11,12 +12,15 @@ interface IPopupService
 	void showPopup(string msg);
 	void draw(RenderTarget target);
 	void remove(Popup popup);
+	void forceFinish();
+	bool hasPopup() @property pure const;
 }
 
 class PopupService : IPopupService, INotificationService
 {
 	void notify(Notification notification)
 	{
+		info("Notifying about ", notification);
 		showPopup(notification.translate);
 	}
 
@@ -37,6 +41,17 @@ class PopupService : IPopupService, INotificationService
 		if(popup is _popup){
 			_popup = null;
 		}
+	}
+
+	void forceFinish() {
+		if(_popup !is null) {
+			_popup.animation.forceFinish;
+		}
+	}
+
+	bool hasPopup() @property pure const
+	{
+		return _popup is null;
 	}
 
 	private Popup _popup;
