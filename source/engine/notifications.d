@@ -1,5 +1,7 @@
 ﻿module mahjong.engine.notifications;
 
+import mahjong.domain.player;
+
 enum Notification
 {
 	Chi,
@@ -14,13 +16,13 @@ enum Notification
 
 interface INotificationService
 {
-	void notify(Notification notification);
+	void notify(Notification notification, const Player notifyingPlayer);
 }
 
 /// Default implementation of the INotificationService which acts like a black hole.
 class NullNotificationService : INotificationService
 {
-	void notify(Notification notification)
+	void notify(Notification notification, const Player notifyingPlayer)
 	{
 		// Do nothing.
 	}

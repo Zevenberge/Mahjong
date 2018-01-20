@@ -46,14 +46,14 @@ class TurnFlow : Flow
 		void promoteToKan(const Tile tile)
 		{
 			_player.promoteToKan(tile, _metagame.wall);
-			_notificationService.notify(Notification.Kan);
+			_notificationService.notify(Notification.Kan, _player);
 			_flow = new TurnFlow(_player, _metagame, _notificationService);
 		}
 
 		void declareClosedKan(const Tile tile)
 		{
 			_player.declareClosedKan(tile, _metagame.wall);
-			_notificationService.notify(Notification.Kan);
+			_notificationService.notify(Notification.Kan, _player);
 			_flow = new TurnFlow(_player, _metagame, _notificationService);
 		}
 
@@ -61,7 +61,7 @@ class TurnFlow : Flow
 		{
 			info("Tsumo claimed by ", _player.name);
 			_metagame.tsumo(_player);
-			_notificationService.notify(Notification.Tsumo);
+			_notificationService.notify(Notification.Tsumo, _player);
 			_flow = new MahjongFlow(_metagame, _notificationService);
 		}
 }

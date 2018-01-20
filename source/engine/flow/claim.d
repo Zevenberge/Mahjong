@@ -289,7 +289,7 @@ class PonRequest : ClaimRequest
 	void apply(INotificationService notificationService)
 	{
 		_player.pon(_discard);
-		notificationService.notify(Notification.Pon);
+		notificationService.notify(Notification.Pon, _player);
 	}
 
 	bool isAllowed() pure
@@ -319,7 +319,7 @@ class KanRequest : ClaimRequest
 	void apply(INotificationService notificationService)
 	{
 		_player.kan(_discard, _wall);
-		notificationService.notify(Notification.Kan);
+		notificationService.notify(Notification.Kan, _player);
 	}
 
 	bool isAllowed() pure
@@ -351,7 +351,7 @@ class ChiRequest : ClaimRequest
 	void apply(INotificationService notificationService)
 	{
 		_player.chi(_discard, _chiCandidate);
-		notificationService.notify(Notification.Chi);
+		notificationService.notify(Notification.Chi, _player);
 	}
 
 	bool isAllowed() pure
@@ -379,7 +379,7 @@ class RonRequest : ClaimRequest
 	void apply(INotificationService notificationService)
 	{
 		_player.ron(_discard);
-		notificationService.notify(Notification.Ron);
+		notificationService.notify(Notification.Ron, _player);
 	}
 
 	bool isAllowed() pure

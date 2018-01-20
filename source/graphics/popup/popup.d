@@ -2,6 +2,7 @@
 
 import std.experimental.logger;
 import dsfml.graphics : Text, Sprite, Texture, RenderTarget, RenderStates, Drawable;
+import mahjong.domain.player;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.anime.idle;
@@ -14,9 +15,10 @@ import mahjong.graphics.popup.service;
 
 class Popup : Drawable
 {
-	this(string message, IPopupService service)
+	this(string message, IPopupService service, const Player player)
 	{
 		constructDrawables(message);
+		placeDrawables(player);
 		constructAnimation(service);
 	}
 
@@ -30,6 +32,11 @@ class Popup : Drawable
 
 	private Text _text;
 	private Sprite _splash;
+
+	private void placeDrawables(const Player player) 
+	{
+
+	}
 
 	private void constructAnimation(IPopupService service)
 	{
