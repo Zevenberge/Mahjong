@@ -8,6 +8,7 @@ import mahjong.graphics.anime.fade;
 import mahjong.graphics.anime.idle;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
+import mahjong.graphics.drawing.player;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.opts;
 import mahjong.graphics.i18n;
@@ -35,7 +36,8 @@ class Popup : Drawable
 
 	private void placeDrawables(const Player player) 
 	{
-
+		_text.centerOnIcon(player);
+		_splash.centerOnIcon(player);
 	}
 
 	private void constructAnimation(IPopupService service)

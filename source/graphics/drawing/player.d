@@ -19,6 +19,8 @@ import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 import mahjong.graphics.text;
+import mahjong.graphics.traits;
+import mahjong.graphics.utils;
 
 alias drawPlayer = draw;
 void draw(const Player player, RenderTarget view, float rotation)
@@ -50,6 +52,13 @@ const(Sprite) getIcon(const Player player)
 	return _players[player.id]._icon;
 }
 
+void centerOnIcon(T)(T transformable, const Player player)
+	if(hasGlobalBounds!T && hasFloatPosition!T)
+{
+	auto iconBounds = player.globalIconBounds;
+	transformable.center!(CenterDirection.Both)(iconBounds);
+}
+
 private PlayerVisuals[UUID] _players;
 
 private class PlayerVisuals
@@ -65,6 +74,7 @@ private class PlayerVisuals
 		int _numberedWind = -1;
 		Text _wind;
 		const Player _player;
+		float _rotation;
 		
 		void initialiseNewTexture()
 		{
@@ -127,12 +137,8 @@ private class PlayerVisuals
 		void placeSprite(float rotation)
 		{
 			trace("Placing sprite");
-			auto screen = styleOpts.gameScreenSize;
 			_completeSprite.setSize(drawingOpts.iconSize);
-			_completeSprite.position = Vector2f(
-				screen.x - (drawingOpts.iconSize + drawingOpts.iconSpacing),
-				screen.y - drawingOpts.iconSize
-			);
+			_completeSprite.position = iconPosition;
 			_completeSprite.setRotationAroundCenter(-rotation);
 			trace("Placed the sprite");
 		}
@@ -190,6 +196,7 @@ private class PlayerVisuals
 		{
 			info("Initialising player visuals");
 			_player = player;
+			_rotation = rotation;
 			initialiseNewTexture;
 			initialiseIcon(iconFile);
 			initialiseScoreLabel;
@@ -215,9 +222,29 @@ private void initialiseScoreLabel()
 	}
 }
 
+private Vector2f iconPosition() @property
+{
+	auto screen = styleOpts.gameScreenSize;
+	return Vector2f(
+		screen.x - (drawingOpts.iconSize + drawingOpts.iconSpacing),
+		screen.y - drawingOpts.iconSize
+	);
+}
+
 private FloatRect iconBounds()
 {
-	return FloatRect(0,0,drawingOpts.iconSize, drawingOpts.iconSize);
+	return FloatRect(0, 0, drawingOpts.iconSize, drawingOpts.iconSize);
+}
+
+private FloatRect globalIconBounds(const Player player)
+{
+	auto iconPosition = .iconPosition;
+	auto transform = unity;
+	auto screenCenter = styleOpts.gameScreenSize.toVector2f/2;
+	auto rotation = _players[player.id]._rotation;
+	transform.rotate(rotation, screenCenter.x, screenCenter.y);
+	return FloatRect(transform.transformPoint(iconPosition), 
+		Vector2f(drawingOpts.iconSize, drawingOpts.iconSize));
 }
 
 private Sprite _scoreLabel;
