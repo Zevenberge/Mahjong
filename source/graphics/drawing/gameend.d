@@ -9,8 +9,9 @@ import mahjong.domain.player;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.conv : setSize, size;
 import mahjong.graphics.drawing.player : getIcon;
+import mahjong.graphics.enums.geometry : CenterDirection;
 import mahjong.graphics.list;
-import mahjong.graphics.manipulation : center, CenterDirection, alignTopRight;
+import mahjong.graphics.manipulation : center, alignTopRight;
 import mahjong.graphics.rendersprite;
 
 class GameEndScreen

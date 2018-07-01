@@ -123,6 +123,10 @@ class DefaultStyleOpts : StyleOpts
 	{
 		return 30;
 	}
+	Vector2f popupSplashSize()
+	{
+		return Vector2f(100, 50);
+	}
 	int popupFontSize()
 	{
 		return 48;

@@ -13,6 +13,7 @@ import mahjong.engine.scoring;
 import mahjong.engine.yaku;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
+import mahjong.graphics.anime.story;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.player;
 import mahjong.graphics.drawing.tile;
@@ -308,11 +309,13 @@ private class DoubleText
 		Animation fanAnimation = new AppearTextAnimation(_rightText, amountOfFramesPerLineOfText);
 		if(previousAnimation is null)
 		{
-			return new ParallelAnimation([yakuAnimation, fanAnimation]);
+			return [yakuAnimation, fanAnimation].parallel;
 		}
 		else
 		{
-			return new Chain!ParallelAnimation(previousAnimation, [yakuAnimation, fanAnimation]);
+			return new Storyboard([
+					previousAnimation, [yakuAnimation, fanAnimation].parallel
+				]);
 		}
 	}
 }

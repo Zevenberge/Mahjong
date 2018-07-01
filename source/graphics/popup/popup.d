@@ -6,8 +6,10 @@ import mahjong.domain.player;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.anime.idle;
+import mahjong.graphics.anime.story;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
+import mahjong.graphics.conv;
 import mahjong.graphics.drawing.player;
 import mahjong.graphics.enums.resources;
 import mahjong.graphics.opts;
@@ -29,6 +31,7 @@ class Popup : Drawable
         _text.setCharacterSize(styleOpts.popupFontSize); 
 		loadSplashTexture;
 		_splash = new Sprite(splashTexture);
+		_splash.setSize(styleOpts.popupSplashSize);
 	}
 
 	private Text _text;
@@ -67,22 +70,19 @@ private void loadSplashTexture()
 	splashTexture.loadFromFile(splashFile); 
 } 
 
-
-private class PopupAnimation : Chain!ParallelAnimation 
+private class PopupAnimation : Storyboard
 {
 	this(Popup popup, IPopupService service)
 	{
 		_popup = popup;
 		_service = service;
-		super(
-			new Chain!Idle(
-				new ParallelAnimation(
-					[new AppearSpriteAnimation(_popup._splash, 10),
-						new AppearTextAnimation(_popup._text, 10)]), 
-				30),
-			[new FadeSpriteAnimation(_popup._splash, 30), 
-				new FadeTextAnimation(_popup._text, 30)]);
-
+		super([
+				[new AppearSpriteAnimation(_popup._splash, 30),
+						new AppearTextAnimation(_popup._text, 30)].parallel,
+				new Idle(60),
+				[new FadeSpriteAnimation(_popup._splash, 30), 
+					new FadeTextAnimation(_popup._text, 30)].parallel
+			]);
 	}
 
 	private Popup _popup;

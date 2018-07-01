@@ -52,6 +52,7 @@ interface StyleOpts
 	int menuTop();
 	int menuSpacing();
 	int ingameMenuMargin();
+	Vector2f popupSplashSize();
 	int popupFontSize();
 
 }

@@ -175,88 +175,11 @@ version(unittest)
 			amountOfFrames = 0;
 		}
 
-		override protected bool done() 
+		override bool done() 
 		{
 			return amountOfFrames == 0;
 		}
 	}
-}
-
-template Chain(TAnimation : Animation)
-{
-	class Chain : TAnimation
-	{
-		this(Args...)(Animation inner, Args args)
-		in
-		{
-			assert(inner !is null, "The root of the chain should not be a chain animation");
-		}
-		body
-		{
-			super(args);
-			_inner = inner;
-		}
-
-		private Animation _inner;
-
-		override void animate()
-		{
-			if(_inner.done)
-			{
-				super.animate;
-			}
-			else
-			{
-				_inner.animate;
-			}
-		}
-
-		override protected void finishNow() 
-		{
-			_inner.finishNow;
-			super.finishNow;
-		}
-
-		override protected bool done() @property
-		{
-			return _inner.done && super.done;
-		}
-	}
-}
-
-unittest
-{
-	auto innerAnimation = new DummyAnimation(1);
-	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 1);
-	chainAnimation.animate;
-	assert(innerAnimation.done, "The inner animation should be handled first");
-	assert(!chainAnimation.done, "The outer animation should not be done yet.");
-}
-
-unittest
-{
-	auto innerAnimation = new DummyAnimation(0);
-	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 1);
-	chainAnimation.animate;
-	assert(chainAnimation.done, "The chain animation should be done.");
-}
-
-unittest
-{
-	auto innerAnimation = new DummyAnimation(1);
-	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 1);
-	_animations = [chainAnimation];
-	chainAnimation.animate;
-	assert(_animations == [chainAnimation], "Even though the inner animation finished, the outher should not have been removed");
-	_animations = null;
-}
-
-unittest
-{
-	auto innerAnimation = new DummyAnimation(200);
-	auto chainAnimation = new Chain!DummyAnimation(innerAnimation, 400);
-	chainAnimation.forceFinish;
-	// Implicit assert check in the out-contract
 }
 
 class ParallelAnimation : Animation
@@ -311,18 +234,4 @@ unittest
 	auto parallelAnimation = new ParallelAnimation([animationA, animationB]);
 	parallelAnimation.forceFinish;
 	// Implicit assert check in the out-contract
-}
-
-unittest
-{
-	auto chainedAnimation = new DummyAnimation(1);
-	Animation animationA = new DummyAnimation(1);
-	Animation animationB = new DummyAnimation(1);
-	auto parallelChainedAnimation = new Chain!ParallelAnimation(chainedAnimation, [animationA, animationB]);
-	assert(parallelChainedAnimation._animations.length == 2, "There should be two parallel animations");
-	parallelChainedAnimation.animate;
-	assert(chainedAnimation.done, "The inner animation should be done");
-	assert(!parallelChainedAnimation.done, "The outer animation should not be done");
-	parallelChainedAnimation.animate;
-	assert(parallelChainedAnimation.done, "The whole chain should be done now");
 }

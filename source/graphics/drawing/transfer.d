@@ -11,6 +11,7 @@ import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.count;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.anime.movement;
+import mahjong.graphics.anime.story;
 import mahjong.graphics.coords;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.player;
@@ -208,11 +209,13 @@ private class Transfer
 		Animation appearAnimation = new AppearTextAnimation(_transaction, 90);
 		auto finalCoords = FloatCoords(_transaction.position - Vector2f(0, 40), 0);
 		Animation movementAnimation = new MovementAnimation(_transaction, finalCoords, 90);
-		Animation appearMoveTextAnimation = new ParallelAnimation([appearAnimation, movementAnimation]);
 		Animation countTransferAnimation = new CountAnimation(_transaction, transaction.amount, 0);
 		auto initialScore = transaction.player.score;
 		Animation countScoreAnimation = new CountAnimation(_remainingPoints, initialScore, initialScore + transaction.amount);
-		_animation = new Chain!ParallelAnimation(appearMoveTextAnimation, [countTransferAnimation, countScoreAnimation]);
+		_animation = new Storyboard([
+				[appearAnimation, movementAnimation].parallel, 
+				[countTransferAnimation, countScoreAnimation].parallel
+			]);
 	}
 
 	private Text _transaction;
