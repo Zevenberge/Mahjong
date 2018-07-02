@@ -29,16 +29,19 @@ class PopupService : IPopupService, INotificationService
 
 	void showPopup(string msg, const Player player)
 	{
+		info("Showing popup about ", msg);
 		_popup = new Popup(msg, this, player);
 		auto gameController = cast(GameController)controller;
 		if(gameController){
-			switchController(new PopupController(gameController, this));
+			trySwitchController(new PopupController(gameController, this));
 		}
 	}
 
 	void draw(RenderTarget target)
 	{
+		trace("Trying to draw popup.");
 		if(_popup){
+			trace("Drawing popup.");
 			target.draw(_popup);
 		}
 	}
@@ -46,6 +49,7 @@ class PopupService : IPopupService, INotificationService
 	void remove(Popup popup)
 	{
 		if(popup is _popup){
+			info("Removing popup");
 			_popup = null;
 		}
 	}
@@ -58,7 +62,7 @@ class PopupService : IPopupService, INotificationService
 
 	bool hasPopup() @property pure const
 	{
-		return _popup is null;
+		return _popup !is null;
 	}
 
 	private Popup _popup;

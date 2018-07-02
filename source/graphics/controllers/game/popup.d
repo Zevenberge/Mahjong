@@ -1,14 +1,16 @@
 ﻿module mahjong.graphics.controllers.game.popup;
 
+import std.experimental.logger;
 import dsfml.graphics.renderwindow;
 import dsfml.window.event;
 import dsfml.window.keyboard;
 import mahjong.domain.metagame;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
+import mahjong.graphics.controllers.menu;
 import mahjong.graphics.popup.service;
 
-class PopupController : GameController, ISubstrituteInnerController
+class PopupController : GameController, ISubstituteInnerController
 {
 	this(GameController underlying, 
 		IPopupService popupService)
@@ -29,13 +31,24 @@ class PopupController : GameController, ISubstrituteInnerController
 
 	override void yield() {
 		if(!_popupService.hasPopup) {
-			switchController(_underlying);
+			info("Popup finished displaying. Switching to inner controller ", _underlying);
+			forceSwitchController(_underlying);
 		}
 	}
 
 	void substitute(Controller newController)
 	{
-		_underlying = cast(GameController)newController;
+		if(auto menu = cast(MenuController)newController)
+		{
+			trace("Switching the inner controller to the menu's inner controller ", 
+				menu.innerController);
+			_underlying = cast(GameController)menu.innerController;
+		}
+		else
+		{
+			trace("Switching the inner controller to the supplied controller ", newController);
+			_underlying = cast(GameController)newController;
+		}
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) {

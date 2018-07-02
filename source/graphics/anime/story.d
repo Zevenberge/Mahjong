@@ -1,6 +1,7 @@
 ﻿module mahjong.graphics.anime.story;
 
 import std.array;
+import std.experimental.logger;
 import mahjong.graphics.anime.animation;
 
 class Storyboard : Animation
@@ -22,6 +23,7 @@ class Storyboard : Animation
 		_animations.front.animate;
 		if(_animations.front.done)
 		{
+			info("Finished animating ", _animations.front);
 			_animations = _animations[1..$];
 		}
 	}

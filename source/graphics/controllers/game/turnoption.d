@@ -85,6 +85,11 @@ class TurnOption : MenuItem, IRelevantTiles
 		super(displayName);
 	}
 
+	override void select() 
+	{
+		(cast(TurnOptionController)controller).swapIdleController;
+	}
+
 	abstract const(Tile)[] relevantTiles() @property;
 }
 
@@ -124,7 +129,7 @@ class PromoteToKanOption : TurnOption
 
 	override void select() 
 	{
-		trySwitchController(new IdleController(controller.getWindow, _metagame));
+		super.select();
 		_event.promoteToKan(_selectedTile);
 	}
 
@@ -152,7 +157,7 @@ class DeclareClosedKanOption : TurnOption
 
 	override void select() 
 	{
-		trySwitchController(new IdleController(controller.getWindow, _metagame));
+		super.select();
 		_event.declareClosedKan(_selectedTile);
 	}
 
@@ -178,7 +183,7 @@ class TsumoOption : TurnOption
 
 	override void select() 
 	{
-		trySwitchController(new IdleController(controller.getWindow, _metagame));
+		super.select();
 		_event.claimTsumo;
 	}
 
@@ -204,7 +209,7 @@ class DiscardOption : TurnOption
 
 	override void select() 
 	{
-		trySwitchController(new IdleController(controller.getWindow, _metagame));
+		super.select();
 		_event.discard(_selectedTile);
 	}
 

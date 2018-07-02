@@ -45,7 +45,7 @@ class Controller
 	}
 }
 
-interface ISubstrituteInnerController
+interface ISubstituteInnerController
 {
 	void substitute(Controller newController);
 }
@@ -55,8 +55,10 @@ private Controller _controller;
 
 void trySwitchController(Controller newController)
 {
-	auto switchableController = cast(ISubstrituteInnerController)_controller;
+	info("Trying to switch to controller ", typeid(newController));
+	auto switchableController = cast(ISubstituteInnerController)_controller;
 	if(switchableController) {
+		info("Substituting inner controller.");
 		switchableController.substitute(newController);
 	}
 	else {
@@ -64,9 +66,20 @@ void trySwitchController(Controller newController)
 	}
 }
 
-void switchController(Controller newController)
+bool isLeadingController(Controller this_)
 {
-	info("Switchint to new controller of type ", typeid(newController));
+	return _controller is this_;
+}
+
+void forceSwitchController(Controller newController)
+{
+	info("Forcing the switch of controllers");
+	switchController(newController);
+}
+
+private void switchController(Controller newController)
+{
+	info("Switching to new controller of type ", newController);
 	_controller = newController;
 }
 

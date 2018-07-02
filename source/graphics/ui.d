@@ -16,7 +16,7 @@ void run()
 	window.setFramerateLimit(60);
 	
 	trace("Creating initial controller");
-	switchController(getMainMenuController(window));
+    forceSwitchController(getMainMenuController(window));
 	trace("Starting application loop");
 	try
 	{

@@ -51,12 +51,22 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 
 	void swapIdleController()
 	{
+		info("Swapping out idle controller.");
 		auto idleController = cast(IdleController)_innerController;
 		if(!idleController)
 		{
 			idleController = new IdleController(_window, _metagame);
 		}
-		switchController(idleController);
+		if(this.isLeadingController)
+		{
+			info("The options controller is the leading controller. Therefore forcably switching out.");
+			forceSwitchController(idleController);
+		}
+		else
+		{
+			info("The options controller is an inner controller. Therefore trying to switch out.");
+			trySwitchController(idleController);
+		}
 	}
 
 	override void draw() 
@@ -85,7 +95,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 
 	protected override bool menuClosed() 
 	{
-		switchController(new MenuController(_window, this, getPauseMenu));
+		forceSwitchController(new MenuController(_window, this, getPauseMenu));
 		return false;
 	}
 

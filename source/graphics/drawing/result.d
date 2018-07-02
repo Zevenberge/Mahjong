@@ -314,7 +314,8 @@ private class DoubleText
 		else
 		{
 			return new Storyboard([
-					previousAnimation, [yakuAnimation, fanAnimation].parallel
+					previousAnimation, 
+					[yakuAnimation, fanAnimation].parallel
 				]);
 		}
 	}

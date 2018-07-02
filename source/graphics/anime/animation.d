@@ -2,6 +2,7 @@ module mahjong.graphics.anime.animation;
 
 import std.algorithm;
 import std.experimental.logger;
+import std.format;
 import std.range;
 import std.uuid;
 import mahjong.share.range;
@@ -67,6 +68,20 @@ unittest
 	assert(_animations.length == 0, "The dummy animation should have removed itself from the array after being forced to finish");
 }
 
+void addAnimation(Animation anime)
+{
+	_animations ~= anime;
+}
+
+unittest
+{
+	import fluent.asserts;
+	auto anime = new DummyAnimation(1);
+	addAnimation(anime);
+	_animations.should.equal([anime]);
+	_animations = null;
+}
+
 void addUniqueAnimation(Animation anime)
 {
 	_animations.remove!((a,b) => a.objectId == b.objectId)(anime);
@@ -75,11 +90,12 @@ void addUniqueAnimation(Animation anime)
 
 unittest
 {
+	import fluent.asserts;
 	auto objectId = randomUUID;
 	auto dummyAnimation1 = new DummyAnimation(1);
 	dummyAnimation1.objectId = objectId;
 	addUniqueAnimation(dummyAnimation1);
-	assert(_animations == [dummyAnimation1], "The animation should have been added");
+	_animations.should.equal([dummyAnimation1]).because("The animation should have been added");
 	_animations = null;
 }
 
@@ -205,6 +221,11 @@ class ParallelAnimation : Animation
 	protected override bool done() @property
 	{
 		return _animations.all!(a => a.done);
+	}
+
+	override string toString() 
+	{
+		return "%s: %s".format(super.toString(), _animations);
 	}
 }
 

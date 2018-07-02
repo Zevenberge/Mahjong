@@ -109,7 +109,7 @@ private void startThunderThrill()
 	info("Thunder thrill selected");
 	controller.roundUp();
 	info("Opening placeholder screen");
-	switchController(new PlaceholderController(controller.getWindow, 
+	forceSwitchController(new PlaceholderController(controller.getWindow, 
 		"Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650)));
 	trace("Swapped controller");
 }
@@ -119,7 +119,7 @@ private void startSimpleMahjong()
 	info("Simple mahjong selected");
 	controller.roundUp();
 	info("Opening placeholder screen");
-	switchController(new PlaceholderController(controller.getWindow, 
+	forceSwitchController(new PlaceholderController(controller.getWindow, 
 		"Coming soon.", chineseBg, IntRect(0, 0, 900, 1000)));
 	trace("Swapped controller");
 }
