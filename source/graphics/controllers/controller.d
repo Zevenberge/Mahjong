@@ -39,7 +39,7 @@ class Controller
 	
 	abstract void yield();
 	
-	void animate()
+	final void animate()
 	{
 		animateAllAnimations;
 	}
@@ -59,6 +59,7 @@ void trySwitchController(Controller newController)
 	auto switchableController = cast(ISubstituteInnerController)_controller;
 	if(switchableController) {
 		info("Substituting inner controller.");
+		info("Inner controller is ", switchableController);
 		switchableController.substitute(newController);
 	}
 	else {

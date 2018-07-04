@@ -5,11 +5,10 @@ import dsfml.graphics : Text, Sprite, Texture, RenderTarget, RenderStates, Drawa
 import dsfml.system : Vector2f;
 import mahjong.domain.player;
 import mahjong.graphics.anime.animation;
-import mahjong.graphics.anime.fade;
-import mahjong.graphics.anime.idle;
 import mahjong.graphics.anime.story;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
+import mahjong.graphics.coords;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.player;
 import mahjong.graphics.enums.geometry;
@@ -18,6 +17,7 @@ import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 import mahjong.graphics.i18n;
 import mahjong.graphics.popup.service;
+import mahjong.graphics.utils;
 
 class Popup : Drawable
 {
@@ -68,7 +68,9 @@ class Popup : Drawable
 		trace("Coordinates of the text: ", _text.getGlobalBounds);
 		trace("Color of the text: ", _text.getColor);
 		_splash.draw(target, states);
+		trace("Drawn sprite");
 		_text.draw(target, states);
+		trace("Drawn text");
 	}
 }
 
@@ -87,12 +89,16 @@ private class PopupAnimation : Storyboard
 		info("Starting pop up animation");
 		_popup = popup;
 		_service = service;
+		auto newSplashCoords = FloatCoords(_popup._splash.position.transitionTowardCenter(100), 0);
+		auto newTextCoords = FloatCoords(_popup._text.position.transitionTowardCenter(100), 0);
 		super([
-				[new AppearSpriteAnimation(_popup._splash, 30),
-						new AppearTextAnimation(_popup._text, 30)].parallel,
-				new Idle(60),
-				[new FadeSpriteAnimation(_popup._splash, 30), 
-					new FadeTextAnimation(_popup._text, 30)].parallel
+				[_popup._splash.appear(30),
+				    _popup._text.appear(30),
+				    _popup._splash.moveTo(newSplashCoords, 60),
+				    _popup._text.moveTo(newTextCoords, 60)].parallel,
+				wait(20),
+				[_popup._splash.fade(10), 
+					_popup._text.fade(10)].parallel
 			]);
 	}
 
@@ -105,4 +111,15 @@ private class PopupAnimation : Storyboard
 		super.onDone;
 		_service.remove(_popup);
 	}
+}
+
+private Vector2f transitionTowardCenter(const Vector2f origin, float diagonalDistance)
+{
+	auto distance = styleOpts.center - origin;
+	trace("Distance: ", distance);
+	auto direction = distance.normalized;
+	trace("Direction: ", direction);
+	auto movement = direction * diagonalDistance;
+	trace("Movement: ", movement);
+	return origin + movement;
 }

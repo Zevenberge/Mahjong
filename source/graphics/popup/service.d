@@ -43,6 +43,7 @@ class PopupService : IPopupService, INotificationService
 		if(_popup){
 			trace("Drawing popup.");
 			target.draw(_popup);
+			trace("Drawn popup.");
 		}
 	}
 

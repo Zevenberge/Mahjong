@@ -150,8 +150,10 @@ unittest
 
 void animateAllAnimations()
 {
+	trace("Animating animations");
 	foreach(animation; _animations)
 	{
+		trace("Animating ", animation);
 		animation.animate;
 	}
 }
@@ -210,7 +212,7 @@ class ParallelAnimation : Animation
 
 	protected override void nextFrame()
 	{
-		_animations.each!(a => a.animate);
+		_animations.filter!(a => !a.done).each!(a => a.animate);
 	}
 
 	protected override void finishNow() 
@@ -255,4 +257,16 @@ unittest
 	auto parallelAnimation = new ParallelAnimation([animationA, animationB]);
 	parallelAnimation.forceFinish;
 	// Implicit assert check in the out-contract
+}
+
+unittest
+{
+	import fluent.asserts;
+	Animation shortAnimation = new DummyAnimation(1);
+	Animation longAnimation = new DummyAnimation(2);
+	auto parallelAnimation = new ParallelAnimation([shortAnimation, longAnimation]);
+	parallelAnimation.animate;
+	// Animate the parallel animation a second time. It should only animate the second animation, which is not yet done.
+	parallelAnimation.animate;
+	parallelAnimation.done.should.equal(true);
 }

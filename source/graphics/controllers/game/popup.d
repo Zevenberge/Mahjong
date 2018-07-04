@@ -27,6 +27,7 @@ class PopupController : GameController, ISubstituteInnerController
 	{
 		_underlying.draw;
 		_popupService.draw(_window);
+		trace("Finished drawing the pop-up controller");
 	}
 
 	override void yield() {

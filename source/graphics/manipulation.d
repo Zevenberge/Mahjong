@@ -288,4 +288,3 @@ Vector2f getSize(Sprite sprite)
 }
 
 
-

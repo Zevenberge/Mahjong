@@ -2,7 +2,9 @@
 
 import std.array;
 import std.experimental.logger;
+import dsfml.graphics.transformable;
 import mahjong.graphics.anime.animation;
+import mahjong.graphics.coords;
 
 class Storyboard : Animation
 {
@@ -20,6 +22,8 @@ class Storyboard : Animation
 
 	protected override void nextFrame()
 	{
+		trace("Animating storyboard");
+		trace("Animating ", _animations.front);
 		_animations.front.animate;
 		if(_animations.front.done)
 		{
@@ -95,4 +99,42 @@ unittest
 	storyboard.animate;
 	chainedAnimation.done.should.equal(true);
 	storyboard.done.should.equal(true);
+}
+
+Animation moveTo(Transformable transformable, FloatCoords target, int amountOfFrames)
+{
+	import mahjong.graphics.anime.movement;
+	return new MovementAnimation(transformable, target, amountOfFrames);
+}
+
+Animation wait(int amountOfFrames)
+{
+	import mahjong.graphics.anime.idle;
+	return new Idle(amountOfFrames);
+}
+
+Animation fade(T)(T item, int amountOfFrames)
+{
+	import mahjong.graphics.anime.fade;
+	return new FadeAnimation!T(item, amountOfFrames);
+}
+
+Animation appear(T)(T item, int amountOfFrames)
+{
+	import mahjong.graphics.anime.fade;
+	return new AppearAnimation!T(item, amountOfFrames);
+}
+
+unittest
+{
+	import dsfml.graphics;
+	import fluent.asserts;
+	import mahjong.graphics.cache.font;
+	auto text = new Text("Hello world", kanjiFont);
+	text.setColor(Color(255,255,255,0));
+	auto animation = [text.appear(1), text.moveTo(FloatCoords(1,1,1), 2)].parallel;
+	animation.animate;
+	// Animate the parallel animation a second time. It should only animate the second animation, which is not yet done.
+	animation.animate;
+	animation.done.should.equal(true);
 }

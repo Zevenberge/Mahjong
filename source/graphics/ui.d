@@ -32,10 +32,18 @@ void run()
 					break windowLoop;
 				}
 			}
+			trace("MAIN LOOP DRAWING START");
 			controller.draw;
+			trace("MAIN LOOP DRAWING END");
+			trace("MAIN LOOP DISPLAY START");
 			window.display;
+			trace("MAIN LOOP DISPLAY END");
+			trace("MAIN LOOP ANIMATE START");
 			controller.animate;
+			trace("MAIN LOOP ANIMATE END");
+			trace("MAIN LOOP YIELD START");
 			controller.yield;
+			trace("MAIN LOOP YIELD END");
 		}
 	}
 	catch(Exception e)
