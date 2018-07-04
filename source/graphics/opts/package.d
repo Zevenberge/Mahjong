@@ -20,7 +20,6 @@ interface Opts
 	}
 	float iconSpacing();
 	uint iconSize();
-	int initialScore();
 	int criticalScore();
 	int amountOfDiscardLines();
 	int amountOfDiscardsPerLine();
@@ -52,7 +51,6 @@ interface StyleOpts
 	int menuTop();
 	int menuSpacing();
 	int ingameMenuMargin();
-	Vector2f popupSplashSize();
 	int popupFontSize();
 
 }

@@ -36,7 +36,7 @@ class Popup : Drawable
 		_text.setColor(Color.Black);
 		loadSplashTexture;
 		_splash = new Sprite(splashTexture);
-		_splash.setSize(styleOpts.popupSplashSize);
+		_splash.setSize(_text.getGlobalBounds.size * 1.5f);
 	}
 
 	private Text _text;

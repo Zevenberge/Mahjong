@@ -26,10 +26,6 @@ class DefaultDrawingOpts : Opts
 	{
 		return 150;
 	}
-	int initialScore()
-	{
-		return 30_000;
-	}
 	int criticalScore()
 	{
 		return 10_000;
@@ -122,10 +118,6 @@ class DefaultStyleOpts : StyleOpts
 	int ingameMenuMargin()
 	{
 		return 30;
-	}
-	Vector2f popupSplashSize()
-	{
-		return Vector2f(100, 50);
 	}
 	int popupFontSize()
 	{
