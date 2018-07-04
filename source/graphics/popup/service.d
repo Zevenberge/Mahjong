@@ -10,61 +10,16 @@ import mahjong.graphics.popup.popup;
 import mahjong.graphics.i18n;
 import mahjong.share.range : remove;
 
-interface IPopupService
-{
-	void showPopup(string msg, const Player player);
-	void draw(RenderTarget target);
-	void remove(Popup popup);
-	void forceFinish();
-	bool hasPopup() @property pure const;
-}
-
-class PopupService : IPopupService, INotificationService
+class PopupService : INotificationService
 {
 	void notify(Notification notification, const Player player)
 	{
 		info("Notifying about ", notification);
-		showPopup(notification.translate, player);
-	}
-
-	void showPopup(string msg, const Player player)
-	{
-		info("Showing popup about ", msg);
-		_popup = new Popup(msg, this, player);
+		auto msg = notification.translate;
+		auto popup = new Popup(msg, player);
 		auto gameController = cast(GameController)controller;
 		if(gameController){
-			trySwitchController(new PopupController(gameController, this));
+			trySwitchController(new PopupController(gameController, popup));
 		}
 	}
-
-	void draw(RenderTarget target)
-	{
-		trace("Trying to draw popup.");
-		if(_popup){
-			trace("Drawing popup.");
-			target.draw(_popup);
-			trace("Drawn popup.");
-		}
-	}
-
-	void remove(Popup popup)
-	{
-		if(popup is _popup){
-			info("Removing popup");
-			_popup = null;
-		}
-	}
-
-	void forceFinish() {
-		if(_popup !is null) {
-			_popup.animation.forceFinish;
-		}
-	}
-
-	bool hasPopup() @property pure const
-	{
-		return _popup !is null;
-	}
-
-	private Popup _popup;
 }

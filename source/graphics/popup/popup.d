@@ -21,11 +21,11 @@ import mahjong.graphics.utils;
 
 class Popup : Drawable
 {
-	this(string message, IPopupService service, const Player player)
+	this(string message, const Player player)
 	{
 		constructDrawables(message);
 		placeDrawables(player);
-		constructAnimation(service);
+		constructAnimation();
 		addAnimation(_animation);
 	}
 
@@ -49,9 +49,9 @@ class Popup : Drawable
 		_text.move(Vector2f(0,-20));
 	}
 
-	private void constructAnimation(IPopupService service)
+	private void constructAnimation()
 	{
-		_animation = new PopupAnimation(this, service);
+		_animation = new PopupAnimation(this);
 	}
 
 	private Animation _animation;
@@ -60,6 +60,8 @@ class Popup : Drawable
 	{
 		return _animation;
 	}
+
+	alias animation this;
 
 	void draw(RenderTarget target, RenderStates states)
 	{
@@ -84,32 +86,20 @@ private void loadSplashTexture()
 
 private class PopupAnimation : Storyboard
 {
-	this(Popup popup, IPopupService service)
+	this(Popup popup)
 	{
 		info("Starting pop up animation");
-		_popup = popup;
-		_service = service;
-		auto newSplashCoords = FloatCoords(_popup._splash.position.transitionTowardCenter(100), 0);
-		auto newTextCoords = FloatCoords(_popup._text.position.transitionTowardCenter(100), 0);
+		auto newSplashCoords = FloatCoords(popup._splash.position.transitionTowardCenter(100), 0);
+		auto newTextCoords = FloatCoords(popup._text.position.transitionTowardCenter(100), 0);
 		super([
-				[_popup._splash.appear(30),
-				    _popup._text.appear(30),
-				    _popup._splash.moveTo(newSplashCoords, 60),
-				    _popup._text.moveTo(newTextCoords, 60)].parallel,
+				[popup._splash.appear(30),
+				    popup._text.appear(30),
+				    popup._splash.moveTo(newSplashCoords, 60),
+				    popup._text.moveTo(newTextCoords, 60)].parallel,
 				wait(20),
-				[_popup._splash.fade(10), 
-					_popup._text.fade(10)].parallel
+				[popup._splash.fade(10), 
+					popup._text.fade(10)].parallel
 			]);
-	}
-
-	private Popup _popup;
-	private IPopupService _service;
-
-	protected override void onDone()
-	{
-		info("Finished pop up animation");
-		super.onDone;
-		_service.remove(_popup);
 	}
 }
 

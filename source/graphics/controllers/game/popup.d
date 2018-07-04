@@ -8,30 +8,30 @@ import mahjong.domain.metagame;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
-import mahjong.graphics.popup.service;
+import mahjong.graphics.popup.popup;
 
 class PopupController : GameController, ISubstituteInnerController
 {
 	this(GameController underlying, 
-		IPopupService popupService)
+		Popup popup)
 	{
 		_underlying = underlying;
-		_popupService = popupService;
+		_popup = popup;
 		super(underlying.getWindow(), underlying.metagame);
 	}
 
-	private IPopupService _popupService;
+	private Popup _popup;
 	private GameController _underlying;
 
 	override void draw() 
 	{
 		_underlying.draw;
-		_popupService.draw(_window);
+		_window.draw(_popup);
 		trace("Finished drawing the pop-up controller");
 	}
 
 	override void yield() {
-		if(!_popupService.hasPopup) {
+		if(!_popup.done) {
 			info("Popup finished displaying. Switching to inner controller ", _underlying);
 			forceSwitchController(_underlying);
 		}
@@ -56,7 +56,7 @@ class PopupController : GameController, ISubstituteInnerController
 	{
 		if(key.code == Keyboard.Key.Return) 
 		{
-			_popupService.forceFinish;
+			_popup.forceFinish;
 		}
 		else
 		{
