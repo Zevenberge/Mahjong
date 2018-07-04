@@ -243,8 +243,8 @@ private FloatRect globalIconBounds(const Player player)
 	auto screenCenter = styleOpts.gameScreenSize.toVector2f/2;
 	auto rotation = _players[player.id]._rotation;
 	transform.rotate(rotation, screenCenter.x, screenCenter.y);
-	return FloatRect(transform.transformPoint(iconPosition), 
-		Vector2f(drawingOpts.iconSize, drawingOpts.iconSize));
+	return transform.transformRect(FloatRect(iconPosition, 
+		Vector2f(drawingOpts.iconSize, drawingOpts.iconSize)));
 }
 
 private Sprite _scoreLabel;
