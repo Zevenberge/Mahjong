@@ -52,9 +52,15 @@ class PopupController : GameController, ISubstituteInnerController
 		}
 	}
 
-	protected override void handleGameKey(Event.KeyEvent key) {
-		if(key.code == Keyboard.Key.Return) {
+	protected override void handleGameKey(Event.KeyEvent key) 
+	{
+		if(key.code == Keyboard.Key.Return) 
+		{
 			_popupService.forceFinish;
+		}
+		else
+		{
+			_underlying.handleKeyEvent(key);
 		}
 	}
 }
