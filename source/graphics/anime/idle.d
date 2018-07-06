@@ -13,8 +13,12 @@ class Idle : Animation
 	{
 		_amountOfFrames = amountOfFrames;
 	}
-	
-	
+
+	protected override void finishNow() 
+	{
+		_amountOfFrames = 0;
+	}
+
 	protected override void nextFrame()
 	{
 		_amountOfFrames--;
@@ -26,4 +30,14 @@ class Idle : Animation
 	}
 	
 	private int _amountOfFrames;
+}
+
+unittest
+{
+	auto idle = new Idle(100);
+	assert(!idle.done);
+	idle.nextFrame;
+	assert(!idle.done);
+	idle.finishNow;
+	assert(idle.done);
 }

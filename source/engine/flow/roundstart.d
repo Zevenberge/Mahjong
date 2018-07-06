@@ -4,13 +4,14 @@ import std.algorithm;
 import std.experimental.logger;
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class RoundStartFlow : Flow
 {
-	this(Metagame metagame)
+	this(Metagame metagame, INotificationService notificationService)
 	{
 		info("Starting round.");
-		super(metagame);
+		super(metagame, notificationService);
 		metagame.initializeRound;
 		foreach(player; metagame.players)
 		{
@@ -29,7 +30,8 @@ class RoundStartFlow : Flow
 			info("All players are ready. Initialising game");
 			_metagame.beginRound;
 			info("Started round. Switching to draw flow");
-			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, _metagame.wall));
+			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, 
+					_metagame.wall, _notificationService));
 		}
 	}
 
@@ -62,7 +64,7 @@ unittest
 	auto eventHandler = new TestEventHandler;
 	auto player = new Player(eventHandler);
 	auto metagame = new Metagame([player]);
-	auto flow = new RoundStartFlow(metagame);
+	auto flow = new RoundStartFlow(metagame, new NullNotificationService);
 	switchFlow(flow);
 	assert(.flow.isOfType!RoundStartFlow, "RoundStartFlow should be set as flow");
 	assert(metagame.currentPlayer is null, "As the game is not started, there should be no turn player");

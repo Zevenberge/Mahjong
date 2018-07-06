@@ -192,9 +192,8 @@ class ClaimOption : MenuItem, IRelevantTiles
 
 	override void select()
 	{
-		trace("Claim option ", typeid(this), " selected. Swapping out ", typeid(controller));
-		(cast(ClaimController)controller).swapIdleController;
-		trace("Idle controller swapped");
+		(cast(ClaimController)Controller.instance).finishedSelecting;
+		info("Idle controller swapped");
 		_event.handle(constructRequest);
 	}
 

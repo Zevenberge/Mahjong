@@ -2,12 +2,13 @@ module mahjong.engine.flow.draw;
 
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class DrawFlow : Flow
 {
-	this(Player player, Metagame metagame, Wall wall)
+	this(Player player, Metagame metagame, Wall wall, INotificationService notificationService)
 	{
-		super(metagame);
+		super(metagame, notificationService);
 		_player = player;
 		_wall = wall;
 	}
@@ -18,7 +19,7 @@ class DrawFlow : Flow
 	override void advanceIfDone()
 	{
 		_player.drawTile(_wall);
-		switchFlow(new TurnFlow(_player, _metagame));
+		switchFlow(new TurnFlow(_player, _metagame, _notificationService));
 	}
 }
 ///
@@ -40,7 +41,7 @@ unittest
 	writeln("Setup finished.");
 	auto wallLength = wall.length;
 	// The flow of the game determines that it is time to draw.
-	auto drawFlow = new DrawFlow(player, metagame, wall);
+	auto drawFlow = new DrawFlow(player, metagame, wall, new NullNotificationService);
 	switchFlow(drawFlow);
 	flow.advanceIfDone;
 	assert(wallLength - 1 == wall.length, "A tile should be taken from the wall.");

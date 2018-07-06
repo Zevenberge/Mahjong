@@ -16,14 +16,17 @@ public
 }
 
 import mahjong.domain.metagame;
+import mahjong.engine.notifications;
 
 class Flow
 {
-	this(Metagame game)
+	this(Metagame game, INotificationService notificationService)
 	{
 		_metagame = game;
+		_notificationService = notificationService;
 	}
 
+	protected INotificationService _notificationService;
 	protected Metagame _metagame;
 	final const(Metagame) metagame() @property pure const
 	{

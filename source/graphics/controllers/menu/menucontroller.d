@@ -36,10 +36,21 @@ class MenuController : MenuControllerBase!Menu
 		closeMenu;
 		return false;
 	}
+
+    void openMenu()
+    {
+        instance = this;
+    }
 	
 	void closeMenu()
 	{
-		controller = _innerController;
+        instance = _innerController;
+	}
+
+	override void substitute(Controller newController)
+	{
+		info("Substituting inner controller to ", newController);
+		_innerController = newController;
 	}
 
 	protected RectangleShape constructHaze()
@@ -50,5 +61,9 @@ class MenuController : MenuControllerBase!Menu
 	}
 
 	protected Controller _innerController;
+	public Controller innerController()
+	{
+		return _innerController;
+	}
 	private RectangleShape _haze;
 }

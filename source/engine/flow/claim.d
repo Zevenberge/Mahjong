@@ -6,13 +6,14 @@ import std.experimental.logger;
 import mahjong.domain;
 import mahjong.engine.chi;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class ClaimFlow : Flow
 {
-	this(Tile tile, Metagame game)
+	this(Tile tile, Metagame game, INotificationService notificationService)
 	{
 		trace("Constructing claim flow");
-		super(game);
+		super(game, notificationService);
 		_tile = tile;
 		initialiseClaimEvents;
 	}
@@ -55,7 +56,7 @@ class ClaimFlow : Flow
 			if(applyRons) return;
 			if(applyPon) return;
 			if(applyChi) return;
-			switchFlow(new TurnEndFlow(_metagame));
+			switchFlow(new TurnEndFlow(_metagame, _notificationService));
 		}
 
 		bool applyRons()
@@ -63,8 +64,8 @@ class ClaimFlow : Flow
 			auto rons = _claimEvents.filter!(ce => ce.request == Request.Ron);
 			if(rons.empty) return false;
 			info("There was a ron!");
-			foreach(ron; rons) ron.apply;
-			switchFlow(new MahjongFlow(_metagame));
+			foreach(ron; rons) ron.apply(_notificationService);
+			switchFlow(new MahjongFlow(_metagame, _notificationService));
 			return true;
 		}
 
@@ -82,7 +83,7 @@ class ClaimFlow : Flow
 		{
 			auto claimingEvent = _claimEvents.filter!pred;
 			if(claimingEvent.empty) return false;
-			claimingEvent.front.apply;
+			claimingEvent.front.apply(_notificationService);
 			switchTurn(claimingEvent.front.player);
 			return true;
 		}
@@ -90,7 +91,7 @@ class ClaimFlow : Flow
 		void switchTurn(Player newTurnPlayer)
 		{
 			_metagame.currentPlayer = newTurnPlayer;
-			switchFlow(new TurnFlow(newTurnPlayer, _metagame));
+			switchFlow(new TurnFlow(newTurnPlayer, _metagame, _notificationService));
 		}
 }
 
@@ -123,7 +124,7 @@ unittest
 	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest);
 	assert(claimFlow.done, "Flow should be done.");
@@ -146,7 +147,7 @@ unittest
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	ponnableTile.origin = player1.game;
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new PonRequest(player2, ponnableTile));
 	claimFlow.advanceIfDone;
@@ -169,7 +170,7 @@ unittest
 	player3.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	ponnableTile.origin = new Ingame(PlayerWinds.south);
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
 			ChiCandidate(player2.game.closedHand.tiles[0], player2.game.closedHand.tiles[1]),
@@ -200,7 +201,7 @@ unittest
 	player3.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
 	ponnableTile.origin = new Ingame(PlayerWinds.south);
-	auto claimFlow = new ClaimFlow(ponnableTile, game);
+	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest); 
 	claimFlow._claimEvents[1].handle(new ChiRequest(player3, ponnableTile,
@@ -245,14 +246,14 @@ enum Request {None, Chi, Pon, Kan, Ron}
 
 interface ClaimRequest
 {
-	void apply();
+	void apply(INotificationService notificationService);
 	bool isAllowed() pure;
 	@property Request request() pure;
 }
 
 class NoRequest : ClaimRequest
 {
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		// Do nothing.
 	}
@@ -285,9 +286,10 @@ class PonRequest : ClaimRequest
 	private Player _player;
 	private Tile _discard;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.pon(_discard);
+		notificationService.notify(Notification.Pon, _player);
 	}
 
 	bool isAllowed() pure
@@ -314,9 +316,10 @@ class KanRequest : ClaimRequest
 	private Tile _discard;
 	private Wall _wall;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.kan(_discard, _wall);
+		notificationService.notify(Notification.Kan, _player);
 	}
 
 	bool isAllowed() pure
@@ -345,9 +348,10 @@ class ChiRequest : ClaimRequest
 	private ChiCandidate _chiCandidate;
 	private Metagame _metagame;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.chi(_discard, _chiCandidate);
+		notificationService.notify(Notification.Chi, _player);
 	}
 
 	bool isAllowed() pure
@@ -372,9 +376,10 @@ class RonRequest : ClaimRequest
 	private Player _player;
 	private Tile _discard;
 
-	void apply()
+	void apply(INotificationService notificationService)
 	{
 		_player.ron(_discard);
+		notificationService.notify(Notification.Ron, _player);
 	}
 
 	bool isAllowed() pure

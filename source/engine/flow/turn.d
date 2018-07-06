@@ -6,13 +6,14 @@ import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class TurnFlow : Flow
 {
-	this(Player player, Metagame meta)
+	this(Player player, Metagame meta, INotificationService notificationService)
 	{
 		_player = player;
-		super(meta);
+		super(meta, notificationService);
 		_event = new TurnEvent(this, meta, player, player.lastTile);
 		_player.eventHandler.handle(_event);
 	}
@@ -39,26 +40,29 @@ class TurnFlow : Flow
 		void discard(const Tile tile)
 		{
 			auto discard = _player.discard(tile);
-			_flow = new ClaimFlow(discard, _metagame);
+			_flow = new ClaimFlow(discard, _metagame, _notificationService);
 		}
 
 		void promoteToKan(const Tile tile)
 		{
 			_player.promoteToKan(tile, _metagame.wall);
-			_flow = new TurnFlow(_player, _metagame);
+			_notificationService.notify(Notification.Kan, _player);
+			_flow = new TurnFlow(_player, _metagame, _notificationService);
 		}
 
 		void declareClosedKan(const Tile tile)
 		{
 			_player.declareClosedKan(tile, _metagame.wall);
-			_flow = new TurnFlow(_player, _metagame);
+			_notificationService.notify(Notification.Kan, _player);
+			_flow = new TurnFlow(_player, _metagame, _notificationService);
 		}
 
 		void claimTsumo()
 		{
 			info("Tsumo claimed by ", _player.name);
 			_metagame.tsumo(_player);
-			_flow = new MahjongFlow(_metagame);
+			_notificationService.notify(Notification.Tsumo, _player);
+			_flow = new MahjongFlow(_metagame, _notificationService);
 		}
 }
 
@@ -135,7 +139,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(Types.dragon, Dragons.green);
-	auto flow = new TurnFlow(player, metagame);
+	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
 	switchFlow(flow);
 	assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
 	flow.advanceIfDone;
@@ -172,7 +176,7 @@ unittest
 	auto tile = new Tile(Types.dragon, Dragons.green);
 	auto wall = new MockWall(tile);
 	player.drawTile(wall);
-	auto flow = new TurnFlow(player, metagame);
+	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
 	switchFlow(flow);
 	flow._event.discard(tile);
 	flow.advanceIfDone;
@@ -192,7 +196,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	auto tile = new Tile(Types.dragon, Dragons.green);
-	auto flow = new TurnFlow(player, metagame);
+	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
 	switchFlow(flow);
 	player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
 	flow._event.claimTsumo;
@@ -213,7 +217,7 @@ unittest
 	auto metagame = new Metagame([player]);
 	metagame.initializeRound;
 	metagame.beginRound;
-	auto flow = new TurnFlow(player, metagame);
+	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
 	switchFlow(flow);
 	player.closedHand.tiles = "🀐🀐🀐🀐🀘🀘"d.convertToTiles;
 	auto kanTile = player.closedHand.tiles[0];
@@ -237,7 +241,7 @@ unittest
 	auto metagame = new Metagame([player]);
 	metagame.initializeRound;
 	metagame.beginRound;
-	auto flow = new TurnFlow(player, metagame);
+	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
 	switchFlow(flow);
 	player.closedHand.tiles = "🀐🀘🀘"d.convertToTiles;
 	player.openHand.addPon("🀐🀐🀐"d.convertToTiles);

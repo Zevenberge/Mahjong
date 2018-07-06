@@ -10,13 +10,13 @@ class UiEventHandler : GameEventHandler
 	override void handle(TurnEvent event) 
 	{
 		info("UI: Handling turn event by switching controller");
-		controller = new TurnController(controller.getWindow, event.metagame, event);
+		Controller.instance.substitute(new TurnController(Controller.instance.getWindow, event.metagame, event));
 	}
 	
 	override void handle(GameStartEvent event)
 	{
 		info("UI: Handling game start event by creating an idle controller");
-		controller = new IdleController(controller.getWindow, event.metagame);
+		Controller.instance.substitute(new IdleController(Controller.instance.getWindow, event.metagame));
 		event.isReady = true;
 	}
 
@@ -32,7 +32,7 @@ class UiEventHandler : GameEventHandler
 		if(factory.areThereClaimOptions)
 		{
 			info("UI: Handling turn event by switching to the claim controller");
-			controller = new ClaimController(controller.getWindow, event.metagame, controller, factory);
+			Controller.instance.substitute(new ClaimController(Controller.instance.getWindow, event.metagame, Controller.instance, factory));
 		}
 		else
 		{
@@ -42,12 +42,12 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(MahjongEvent event)
 	{
-		controller = new ResultController(controller.getWindow, event.metagame, event);
+		Controller.instance.substitute(new ResultController(Controller.instance.getWindow, event.metagame, event));
 	}
 
 	override void handle(GameEndEvent event) 
 	{
-		controller = new GameEndController(controller.getWindow, event.metagame, event);
+		Controller.instance.substitute(new GameEndController(Controller.instance.getWindow, event.metagame, event));
 	}
 
 }
