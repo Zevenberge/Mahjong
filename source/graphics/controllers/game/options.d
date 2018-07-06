@@ -49,9 +49,9 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 
 	private const Metagame _metagame;
 
-	void swapIdleController()
+	void finishedSelecting()
 	{
-		info("Swapping out idle controller.");
+		info("Finished selecting an option. Swapping out idle controller.");
 		auto idleController = cast(IdleController)_innerController;
 		if(!idleController)
 		{

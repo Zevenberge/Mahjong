@@ -115,7 +115,7 @@ class AssertiveTurnOption : TurnOption
 
     final override void select() 
     {
-        (cast(TurnOptionController)Controller.instance).swapIdleController;
+        (cast(TurnOptionController)Controller.instance).finishedSelecting;
         apply;
     }
 

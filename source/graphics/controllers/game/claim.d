@@ -192,7 +192,7 @@ class ClaimOption : MenuItem, IRelevantTiles
 
 	override void select()
 	{
-		(cast(ClaimController)Controller.instance).swapIdleController;
+		(cast(ClaimController)Controller.instance).finishedSelecting;
 		info("Idle controller swapped");
 		_event.handle(constructRequest);
 	}
