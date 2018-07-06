@@ -60,6 +60,20 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
         instance = idleController;
 	}
 
+    override void substitute(Controller newController)
+    {
+        if(auto menuController = cast(MenuController)newController)
+        {
+            // A new menu is opened. Close this one and open the new one.
+            closeMenu;
+            instance.substitute(newController);
+        }
+        else
+        {
+            _innerController = newController;
+        }
+    }
+
 	override void draw() 
 	{
 		if(isLeadingController) 
