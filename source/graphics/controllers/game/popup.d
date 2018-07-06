@@ -31,7 +31,7 @@ class PopupController : GameController, ISubstituteInnerController
 	}
 
 	override void yield() {
-		if(!_popup.done) {
+		if(_popup.done) {
 			info("Popup finished displaying. Switching to inner controller ", _underlying);
 			forceSwitchController(_underlying);
 		}
