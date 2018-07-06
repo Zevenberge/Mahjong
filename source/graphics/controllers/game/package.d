@@ -57,7 +57,7 @@ class GameController : Controller
 	{
 		auto pauseMenu = getPauseMenu;
 		auto pauseController = new MenuController(_window, this, pauseMenu);
-		forceSwitchController(pauseController);
+        pauseController.openMenu;
 	}
 
 	protected abstract void handleGameKey(Event.KeyEvent key);

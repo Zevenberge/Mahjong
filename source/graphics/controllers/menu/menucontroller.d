@@ -8,7 +8,7 @@ import mahjong.graphics.conv;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
 
-class MenuController : MenuControllerBase!Menu, ISubstituteInnerController
+class MenuController : MenuControllerBase!Menu
 {
 	this(RenderWindow window, Controller pausedController, Menu menu)
 	{
@@ -36,13 +36,18 @@ class MenuController : MenuControllerBase!Menu, ISubstituteInnerController
 		closeMenu;
 		return false;
 	}
+
+    void openMenu()
+    {
+        instance = this;
+    }
 	
 	void closeMenu()
 	{
-		forceSwitchController(_innerController);
+        instance = _innerController;
 	}
 
-	void substitute(Controller newController)
+	override void substitute(Controller newController)
 	{
 		info("Substituting inner controller to ", newController);
 		_innerController = newController;

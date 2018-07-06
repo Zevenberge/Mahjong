@@ -4,7 +4,7 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.anime.animation;
 
-class Controller
+abstract class Controller
 {
 	protected RenderWindow _window;
 	
@@ -43,46 +43,57 @@ class Controller
 	{
 		animateAllAnimations;
 	}
+
+    void substitute(Controller newController)
+    {
+        instance = newController;
+    }
+
+    static Controller instance() @property
+    {
+        if(_instance) return _instance;
+        trace("No controller set, therefore creating a new null controller");
+        return new NullController;
+    }
+
+    protected final bool isLeadingController() @property const
+    {
+        return _instance is this;
+    }
+
+    protected final void instance(Controller controller) @property
+    {
+        trace("Swapping controller to ", controller);
+        _instance = controller;
+    }
+    private static Controller _instance;
 }
 
-interface ISubstituteInnerController
+class NullController : Controller
 {
-	void substitute(Controller newController);
-}
+    this()
+    {
+        info("Creating new NullController");
+        super(null);
+    }
 
-public Controller controller() {return _controller;} @property pure
-private Controller _controller;
+    override void draw() 
+    {
+    }
 
-void trySwitchController(Controller newController)
-{
-	info("Trying to switch to controller ", typeid(newController));
-	auto switchableController = cast(ISubstituteInnerController)_controller;
-	if(switchableController) {
-		info("Substituting inner controller.");
-		info("Inner controller is ", switchableController);
-		switchableController.substitute(newController);
-	}
-	else {
-		switchController(newController);
-	}
-}
+    override void roundUp() 
+    {
+    }
 
-bool isLeadingController(Controller this_)
-{
-	return _controller is this_;
-}
+    override protected bool handleKeyEvent(Event.KeyEvent key) 
+    {
+        return false;
+    }
 
-void forceSwitchController(Controller newController)
-{
-	info("Forcing the switch of controllers");
-	switchController(newController);
-}
-
-private void switchController(Controller newController)
-{
-	info("Switching to new controller of type ", newController);
-	_controller = newController;
-}
+    override void yield() 
+    {
+    }
+} 
 
 version(unittest)
 {
@@ -115,6 +126,6 @@ version(unittest)
 
 	void setDefaultTestController()
 	{
-		._controller = new TestController;
+		Controller._instance = new TestController;
 	}
 }

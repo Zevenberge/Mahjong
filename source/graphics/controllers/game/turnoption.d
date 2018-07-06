@@ -87,7 +87,7 @@ class TurnOption : MenuItem, IRelevantTiles
 
 	override void select() 
 	{
-		(cast(TurnOptionController)controller).swapIdleController;
+		(cast(TurnOptionController)Controller.instance).swapIdleController;
 	}
 
 	abstract const(Tile)[] relevantTiles() @property;
@@ -102,7 +102,7 @@ class CancelOption : TurnOption
 
 	override void select() 
 	{
-		(cast(TurnOptionController)controller).closeMenu;
+		(cast(TurnOptionController)Controller.instance).closeMenu;
 	}
 
 	override const(Tile)[] relevantTiles() @property

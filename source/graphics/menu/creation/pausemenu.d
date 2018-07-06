@@ -26,7 +26,7 @@ Menu composePauseMenu()
 private void continueGame()
 {
 	trace("Continuing game");
-	auto menuController = cast(MenuController)controller;
+	auto menuController = cast(MenuController)Controller.instance;
 	if(menuController !is null)
 	{
 		menuController.closeMenu;
@@ -37,9 +37,9 @@ private void continueGame()
 private void quitGame()
 {
 	trace("Quitting game");
-	controller.roundUp;
-	auto mainMenuController = getMainMenuController(controller.getWindow);
-	forceSwitchController(mainMenuController);
+	Controller.instance.roundUp;
+	auto mainMenuController = getMainMenuController(Controller.instance.getWindow);
+	mainMenuController.showMenu;
 	trace("Returned to the main menu");
 }
 

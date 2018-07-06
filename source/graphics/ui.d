@@ -16,7 +16,8 @@ void run()
 	window.setFramerateLimit(60);
 	
 	trace("Creating initial controller");
-    forceSwitchController(getMainMenuController(window));
+    auto mainMenuController = getMainMenuController(window);
+    mainMenuController.showMenu;
 	trace("Starting application loop");
 	try
 	{
@@ -25,24 +26,24 @@ void run()
 			Event event;
 			while(window.pollEvent(event))
 			{
-				if(controller.handleEvent(event))
+				if(Controller.instance.handleEvent(event))
 				{
-					info("Exiting ", controller.classinfo);
+					info("Exiting ", Controller.instance);
 					window.close;
 					break windowLoop;
 				}
 			}
 			trace("MAIN LOOP DRAWING START");
-			controller.draw;
+			Controller.instance.draw;
 			trace("MAIN LOOP DRAWING END");
 			trace("MAIN LOOP DISPLAY START");
 			window.display;
 			trace("MAIN LOOP DISPLAY END");
 			trace("MAIN LOOP ANIMATE START");
-			controller.animate;
+			Controller.instance.animate;
 			trace("MAIN LOOP ANIMATE END");
 			trace("MAIN LOOP YIELD START");
-			controller.yield;
+			Controller.instance.yield;
 			trace("MAIN LOOP YIELD END");
 		}
 	}
@@ -72,8 +73,8 @@ private void writeThrowable(Throwable t)
 
 static ~this()
 {
-	if(controller !is null)
+	if(Controller.instance !is null)
 	{
-		controller.roundUp;
+		Controller.instance.roundUp;
 	}
 }

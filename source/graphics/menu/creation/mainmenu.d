@@ -62,7 +62,7 @@ unittest
 	writeln("Testing the start of the normal mahjong.");
 	setDefaultTestController;
 	startRiichiMahjong;
-	assert(controller.isOfType!IdleController, 
+	assert(Controller.instance.isOfType!IdleController, 
 		"The controller should be instantiated");
 	assert(drawingOpts.isOfType!DefaultDrawingOpts, 
 		"For simple riichi mahjong, the drawing options should be the default");
@@ -89,7 +89,7 @@ unittest
 	writeln("Testing the start of the bamboo mahjong.");
 	setDefaultTestController;
 	startBambooBattle;
-	assert(controller.isOfType!IdleController, 
+	assert(Controller.instance.isOfType!IdleController, 
 		"The controller should be instantiated");
 	assert(drawingOpts.isOfType!BambooDrawingOpts, 
 		"For bamboo riichi mahjong, the drawing options should be specific");
@@ -107,9 +107,9 @@ private void startGame(GameEventHandler[] eventHandlers...)
 private void startThunderThrill()
 {
 	info("Thunder thrill selected");
-	controller.roundUp();
+	Controller.instance.roundUp();
 	info("Opening placeholder screen");
-	forceSwitchController(new PlaceholderController(controller.getWindow, 
+	Controller.instance.substitute(new PlaceholderController(Controller.instance.getWindow, 
 		"Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650)));
 	trace("Swapped controller");
 }
@@ -117,9 +117,9 @@ private void startThunderThrill()
 private void startSimpleMahjong()
 {
 	info("Simple mahjong selected");
-	controller.roundUp();
+	Controller.instance.roundUp();
 	info("Opening placeholder screen");
-	forceSwitchController(new PlaceholderController(controller.getWindow, 
+	Controller.instance.substitute(new PlaceholderController(Controller.instance.getWindow, 
 		"Coming soon.", chineseBg, IntRect(0, 0, 900, 1000)));
 	trace("Swapped controller");
 }
@@ -127,7 +127,7 @@ private void startSimpleMahjong()
 private void quit()
 {
 	info("Quit selected");
-	controller.getWindow.close;
+	Controller.instance.getWindow.close;
 }
 
 

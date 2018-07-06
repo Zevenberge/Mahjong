@@ -80,13 +80,13 @@ class TurnController : GameController
 	private void discardSelectedTile()
 	{
 		info("Discarding tile");
-		trySwitchController(new IdleController(_window, _metagame));
+		Controller.instance.substitute(new IdleController(_window, _metagame));
 		_event.discard(selectedItem);
 	}
 
 	private void showTurnOptionMenu(TurnOptionFactory factory)
 	{
-		trySwitchController(new TurnOptionController(_window, _metagame, this, factory));
+		Controller.instance.substitute(new TurnOptionController(_window, _metagame, this, factory));
 	}
 
 	mixin Select!(const Tile);

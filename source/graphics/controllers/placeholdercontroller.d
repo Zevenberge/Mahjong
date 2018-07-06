@@ -31,7 +31,7 @@ class PlaceholderController : Controller
 	
 	protected override bool handleKeyEvent(Event.KeyEvent key)
 	{
-		forceSwitchController(getMainMenuController(_window));
+		instance = getMainMenuController(_window);
 		return false;
 	}
 	

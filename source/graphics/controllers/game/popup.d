@@ -10,7 +10,7 @@ import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
 import mahjong.graphics.popup.popup;
 
-class PopupController : GameController, ISubstituteInnerController
+class PopupController : GameController//, ISubstituteInnerController
 {
 	this(GameController underlying, 
 		Popup popup)
@@ -33,15 +33,15 @@ class PopupController : GameController, ISubstituteInnerController
 	override void yield() {
 		if(_popup.done) {
 			info("Popup finished displaying. Switching to inner controller ", _underlying);
-			forceSwitchController(_underlying);
+            instance = _underlying;
 		}
 	}
 
-	void substitute(Controller newController)
+	override void substitute(Controller newController)
 	{
 		if(auto menu = cast(MenuController)newController)
 		{
-			trace("Switching the inner controller to the menu's inner controller ", 
+			warning("Switching the inner controller to the menu's inner controller ", 
 				menu.innerController);
 			_underlying = cast(GameController)menu.innerController;
 		}

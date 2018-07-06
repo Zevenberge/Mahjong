@@ -17,9 +17,9 @@ class PopupService : INotificationService
 		info("Notifying about ", notification);
 		auto msg = notification.translate;
 		auto popup = new Popup(msg, player);
-		auto gameController = cast(GameController)controller;
+		auto gameController = cast(GameController)Controller.instance;
 		if(gameController){
-			trySwitchController(new PopupController(gameController, popup));
+			Controller.instance.substitute(new PopupController(gameController, popup));
 		}
 	}
 }
