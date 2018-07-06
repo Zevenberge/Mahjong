@@ -19,11 +19,5 @@ interface INotificationService
 	void notify(Notification notification, const Player notifyingPlayer);
 }
 
-/// Default implementation of the INotificationService which acts like a black hole.
-class NullNotificationService : INotificationService
-{
-	void notify(Notification notification, const Player notifyingPlayer)
-	{
-		// Do nothing.
-	}
-}
+import std.typecons;
+alias NullNotificationService = BlackHole!INotificationService;
