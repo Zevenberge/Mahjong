@@ -6,13 +6,13 @@ import mahjong.graphics.ui;
 
 void main(string[] args)
 {
-	static if (is(typeof(registerMemoryErrorHandler)))
-		registerMemoryErrorHandler(); 
+    static if (is(typeof(registerMemoryErrorHandler)))
+        registerMemoryErrorHandler(); 
+    
+    sharedLog.logLevel = LogLevel.info;
 
-	sharedLog.logLevel = LogLevel.info;
-
-	info("Starting mahjong application.");
-	
-	run;
-	info("Mahjong exited normally.");
+    info("Starting mahjong application.");
+    
+    run;
+    info("Mahjong exited normally.");
 }
