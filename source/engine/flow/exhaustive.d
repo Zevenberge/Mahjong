@@ -7,15 +7,15 @@ import mahjong.engine.notifications;
 
 class ExhaustiveDrawFlow : Flow
 {
-	this(Metagame game, INotificationService notificationService)
-	{
-		trace("Initialising exhaustive draw flow");
+    this(Metagame game, INotificationService notificationService)
+    {
+        trace("Initialising exhaustive draw flow");
         notificationService.notify(Notification.ExhaustiveDraw);
-		super(game, notificationService);
-	}
+        super(game, notificationService);
+    }
 
-	override void advanceIfDone()
-	{
-		
-	}
+    override void advanceIfDone()
+    {
+        
+    }
 }
