@@ -77,7 +77,7 @@ class Tile
 
 	void claim()
 	{
-		origin.claim(this);
+		origin.discardIsClaimed(this);
 	}
  }
 

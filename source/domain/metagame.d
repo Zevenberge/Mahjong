@@ -544,5 +544,10 @@ class EightPlayerMetagame : Metagame
 	}
 }
 
-
-
+void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
+{
+    foreach(player; metagame.players)
+    {
+        player.couldHaveClaimed(tile);
+    }
+}
