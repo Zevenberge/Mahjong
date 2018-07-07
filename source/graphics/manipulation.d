@@ -112,6 +112,12 @@ void alignTopRight(T) (T transformable, const FloatRect box)
 	transformable.position = Vector2f(box.left + box.width - size.width, box.top);
 }
 
+void centerOnGameScreen(CenterDirection direction, T)(T transformable)
+    if(hasGlobalBounds!T && hasFloatPosition!T)
+{
+    center!(direction, T)(transformable, FloatRect(Vector2f(0,0), styleOpts.gameScreenSize.toVector2f));
+}
+
 void center(CenterDirection direction, T)(T transformable, const FloatRect rect) 
 	if(hasGlobalBounds!T && hasFloatPosition!T)
 {

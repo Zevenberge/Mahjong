@@ -7,14 +7,15 @@ import mahjong.engine.notifications;
 
 class AbortiveDrawFlow : Flow
 {
-	this(Metagame game, INotificationService notificationService)
-	{
-		trace("Instantiating aborting draw flow");
-		super(game, notificationService);
-	}
+    this(Metagame game, INotificationService notificationService)
+    {
+        trace("Instantiating aborting draw flow");
+        notificationService.notify(Notification.AbortiveDraw);
+        super(game, notificationService);
+    }
 
-	override void advanceIfDone()
-	{
-		
-	}
+    override void advanceIfDone()
+    {
+        
+    }
 }

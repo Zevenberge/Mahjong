@@ -1,6 +1,7 @@
 ﻿module mahjong.graphics.popup.popup;
 
 import std.experimental.logger;
+import std.typecons;
 import dsfml.graphics : Text, Sprite, Texture, RenderTarget, RenderStates, Drawable, Color;
 import dsfml.system : Vector2f;
 import mahjong.domain.player;
@@ -19,51 +20,98 @@ import mahjong.graphics.i18n;
 import mahjong.graphics.popup.service;
 import mahjong.graphics.utils;
 
-class Popup : Drawable
+class PlayerPopup : Popup
 {
-	this(string message, const Player player)
-	{
-		constructDrawables(message);
-		placeDrawables(player);
-		constructAnimation();
-		addAnimation(_animation);
-	}
+    this(string message, const Player player)
+    {
+        auto drawables = constructDrawables(message);
+        placeDrawables(drawables[0], drawables[1], player);
+        super(drawables[0], drawables[1]);
+    }
 
-	private void constructDrawables(string message)
+    private auto constructDrawables(string message)
+    {
+        auto text = new Text(message.translate, kanjiFont);
+        text.setCharacterSize(styleOpts.popupFontSize); 
+        text.setColor(Color.Black);
+        loadSplashTexture;
+        auto splash = new Sprite(splashTexture);
+        splash.setSize(text.getGlobalBounds.size * 1.5f);
+        return tuple(text, splash);
+    }
+
+    private void placeDrawables(Text text, Sprite splash, const Player player) 
+    {
+        splash.centerOnIcon(player);
+        text.center!(CenterDirection.Both)(splash.getGlobalBounds);
+        text.move(Vector2f(0,-20));
+    }
+
+    protected override Animation constructAnimation()
+    {
+        return new PlayerPopupAnimation(this);
+    }
+}
+
+class GamePopup : Popup
+{
+    this(string message)
+    {
+        auto drawables = constructDrawables(message);
+        placeDrawables(drawables[0], drawables[1]);
+        super(drawables[0], drawables[1]);
+    }
+
+    private auto constructDrawables(string message)
+    {
+        auto text = new Text(message.translate, kanjiFont);
+        text.setCharacterSize(styleOpts.popupFontSize); 
+        text.setColor(Color.Black);
+        loadSplashTexture;
+        auto splash = new Sprite(splashTexture);
+        splash.setSize(text.getGlobalBounds.size * 1.5f);
+        return tuple(text, splash);
+    }
+
+    private void placeDrawables(Text text, Sprite splash) 
+    {
+        splash.centerOnGameScreen!(CenterDirection.Both);
+        splash.move(Vector2f(40, 0));
+        text.center!(CenterDirection.Both)(splash.getGlobalBounds);
+        text.move(Vector2f(0,-20));
+    }
+
+    protected override Animation constructAnimation()
+    {
+        return new GamePopupAnimation(this);
+    }
+}
+
+abstract class Popup : Drawable
+{
+	this(Text text, Sprite splash)
 	{
-		_text = new Text(message.translate, kanjiFont);
-        _text.setCharacterSize(styleOpts.popupFontSize); 
-		_text.setColor(Color.Black);
-		loadSplashTexture;
-		_splash = new Sprite(splashTexture);
-		_splash.setSize(_text.getGlobalBounds.size * 1.5f);
+        _text = text;
+        _splash = splash;
+		_animation = constructAnimation();
+		addAnimation(_animation);
 	}
 
 	private Text _text;
 	private Sprite _splash;
-
-	private void placeDrawables(const Player player) 
-	{
-		_splash.centerOnIcon(player);
-		_text.center!(CenterDirection.Both)(_splash.getGlobalBounds);
-		_text.move(Vector2f(0,-20));
-	}
-
-	private void constructAnimation()
-	{
-		_animation = new PopupAnimation(this);
-	}
+	
+    protected abstract Animation constructAnimation();
 
 	private Animation _animation;
 
-	Animation animation() @property pure
+	final Animation animation() @property pure
 	{
 		return _animation;
 	}
 
 	alias animation this;
 
-	void draw(RenderTarget target, RenderStates states)
+	final void draw(RenderTarget target, RenderStates states)
 	{
 		trace("Coordinates of the splash: ", _splash.getGlobalBounds);
 		trace("Color of the splash: ", _splash.color);
@@ -84,11 +132,11 @@ private void loadSplashTexture()
 	splashTexture.loadFromFile(splashFile); 
 } 
 
-private class PopupAnimation : Storyboard
+private class PlayerPopupAnimation : Storyboard
 {
 	this(Popup popup)
 	{
-		info("Starting pop up animation");
+		info("Starting player-induced pop up animation");
 		auto newSplashCoords = FloatCoords(popup._splash.position.transitionTowardCenter(100), 0);
 		auto newTextCoords = FloatCoords(popup._text.position.transitionTowardCenter(100), 0);
 		super([
@@ -112,4 +160,23 @@ private Vector2f transitionTowardCenter(const Vector2f origin, float diagonalDis
 	auto movement = direction * diagonalDistance;
 	trace("Movement: ", movement);
 	return origin + movement;
+}
+
+private class GamePopupAnimation : Storyboard
+{
+    this(Popup popup)
+    {
+        info("Starting game-induced pop up animation");
+        auto newSplashCoords = FloatCoords(popup._splash.position + Vector2f(-50, 0), 0);
+        auto newTextCoords = FloatCoords(popup._text.position + Vector2f(-50, 0), 0);
+        super([
+                [popup._splash.appear(25),
+                    popup._text.appear(25),
+                    popup._splash.moveTo(newSplashCoords, 50),
+                    popup._text.moveTo(newTextCoords, 50)].parallel,
+                wait(40),
+                [popup._splash.fade(10), 
+                    popup._text.fade(10)].parallel
+            ]);
+    }
 }
