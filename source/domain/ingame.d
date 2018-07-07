@@ -59,7 +59,7 @@ class Ingame
 		return discards ~_claimedDiscards;
 	}
 
-	void claim(Tile tile)
+	void discardIsClaimed(Tile tile)
 	{
 		_discards.remove!((a, b) => a == b)(tile);
 		_claimedDiscards ~= tile;
