@@ -10,6 +10,7 @@ class ExhaustiveDrawFlow : Flow
 	this(Metagame game, INotificationService notificationService)
 	{
 		trace("Initialising exhaustive draw flow");
+        notificationService.notify(Notification.ExhaustiveDraw);
 		super(game, notificationService);
 	}
 

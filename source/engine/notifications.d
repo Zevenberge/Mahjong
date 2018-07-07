@@ -16,7 +16,10 @@ enum Notification
 
 interface INotificationService
 {
+    /// Notify that a single player shouts something.
 	void notify(Notification notification, const Player notifyingPlayer);
+    /// Notify about a game-wide notification
+    void notify(Notification notification);
 }
 
 import std.typecons;
