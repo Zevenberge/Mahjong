@@ -355,6 +355,7 @@ unittest
     ingame.couldHaveClaimed(ronTile);
     ingame.isFuriten.should.equal(true);
 }
+
 unittest
 {
     import fluent.asserts;
@@ -367,6 +368,7 @@ unittest
     ingame.couldHaveClaimed(randomTile);
     ingame.isFuriten.should.equal(false);
 }
+
 unittest
 {
     import fluent.asserts;
@@ -381,4 +383,22 @@ unittest
     auto randomTile = "🀀"d.convertToTiles[0];
     ingame.couldHaveClaimed(randomTile);
     ingame.isFuriten.should.equal(true);
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    import mahjong.engine.opts;
+    gameOpts = new DefaultGameOpts;
+    auto ingame = new Ingame(PlayerWinds.east);
+    ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+    auto ronTile = "🀡"d.convertToTiles[0];
+    ingame.couldHaveClaimed(ronTile);
+    auto wall = new Wall;
+    wall.setUp;
+    wall.dice;
+    ingame.drawTile(wall);
+    ingame.isFuriten.should.equal(false)
+        .because("after drawing a tile, the temporary furiten should resolve");
 }
