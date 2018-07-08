@@ -146,6 +146,7 @@ class Metagame
 		wall.dice;
 		distributeTiles;
 		setTurnPlayerToEast;
+        _isFirstTurn = true;
 	}
 
 	private void distributeTiles()
@@ -258,8 +259,47 @@ class Metagame
 		{
 			trace("Advancing turn.");
 			_turn = (_turn + 1) % players.length;
+            if(currentPlayer is _initialEastPlayer)
+            {
+                _isFirstTurn = false;
+            }
 		}
 	}
+
+    private bool _isFirstTurn;
+
+    bool isFirstTurn() @property pure const
+    {
+        return _isFirstTurn;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.isFirstTurn.should.equal(true);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.advanceTurn;
+        metagame.isFirstTurn.should.equal(false)
+            .because("all players already had a turn");
+    }
 
 	bool isAbortiveDraw() @property
 	{
