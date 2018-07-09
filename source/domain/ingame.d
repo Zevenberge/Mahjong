@@ -3,7 +3,6 @@ module mahjong.domain.ingame;
 import std.algorithm;
 import std.array;
 import std.experimental.logger;
-import std.traits;
 import std.uuid;
 import mahjong.domain;
 import mahjong.domain.enums;
@@ -221,19 +220,7 @@ class Ingame
 
     bool isTenpai()
     {
-        foreach(type; EnumMembers!Types)
-        {
-            for(int value = Numbers.min; value <= Numbers.max; ++value)
-            {
-                auto tile = new Tile(type, value);
-                if(.scanHandForMahjong(this, tile).isMahjong)
-                {
-                    return true;
-                }
-
-            }
-        }
-        return false;
+        return .isPlayerTenpai(closedHand.tiles, openHand);
     }
 
     bool isFuriten() @property pure
