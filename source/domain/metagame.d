@@ -323,7 +323,8 @@ class Metagame
 
 	bool isAbortiveDraw() @property
 	{
-		return didAllPlayersDiscardTheSameWindInTheFirstTurn;
+		return didAllPlayersDiscardTheSameWindInTheFirstTurn
+            || areAllKansDeclaredAndNotByOnePlayer;
 	}
 
     private bool didAllPlayersDiscardTheSameWindInTheFirstTurn()
@@ -355,6 +356,48 @@ class Metagame
         metagame.aTileHasBeenClaimed;
         metagame.isAbortiveDraw.should.equal(false)
             .because("the first round has been interrupted");
+    }
+
+    private bool areAllKansDeclaredAndNotByOnePlayer()
+    {
+        if(!wall.isMaxAmountOfKansReached) return false;
+        return !players.any!(player => player.hasAllTheKans);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player1 = new Player(new TestEventHandler);
+        auto player2 = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player1, player2]);
+        void kan(Player player)
+        {
+            player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
+            auto kannableTile = "🀕"d.convertToTiles[0];
+            kannableTile.origin = new Ingame(PlayerWinds.north);
+            player.kan(kannableTile, metagame.wall);
+        }
+        metagame.initializeRound;
+        metagame.beginRound;
+        kan(player1);
+        kan(player1);
+        kan(player2);
+        kan(player2);
+        metagame.isAbortiveDraw.should.equal(true)
+            .because("two players shares all available kans");
+
+        metagame.initializeRound;
+        metagame.beginRound;
+        kan(player1);
+        kan(player1);
+        kan(player1);
+        kan(player1);
+        metagame.isAbortiveDraw.should.equal(false)
+            .because("one player claimed all available kans");
     }
 
 	bool isExhaustiveDraw() @property

@@ -118,15 +118,43 @@ class Ingame
         startTurn;
     }
 
-    bool isKannable(const Tile discard) pure
+    bool isKannable(const Tile discard, const Wall wall)
     {
-        if(isOwn(discard)) return false;
+        if(isOwn(discard) || wall.isMaxAmountOfKansReached) return false;
         return closedHand.isKannable(discard);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+        class MaybeKanWall : Wall
+        {
+            this(bool isMaxAmountOfKansReached)
+            {
+                _isMaxAmountOfKansReached = isMaxAmountOfKansReached;
+            }
+            private const bool _isMaxAmountOfKansReached;
+            override bool isMaxAmountOfKansReached() const 
+            {
+                return _isMaxAmountOfKansReached;
+            }
+        }
+        auto ingame = new Ingame(PlayerWinds.east);
+        auto tile = new Tile(Types.ball, Numbers.eight);
+        tile.origin = new Ingame(PlayerWinds.north);
+        ingame.closedHand.tiles = [tile, tile, tile];
+        auto wall = new MaybeKanWall(false);
+        ingame.isKannable(tile, wall).should.equal(true)
+            .because("the wall still has kan tiles left");
+        wall = new MaybeKanWall(true);
+        ingame.isKannable(tile, wall).should.equal(false)
+            .because("the wall has no more kan tiles left");
     }
 
     void kan(Tile discard, Wall wall)
     {
-        if(!isKannable(discard)) throw new IllegalClaimException(discard, "Kan not allowed");
+        if(!isKannable(discard, wall)) throw new IllegalClaimException(discard, "Kan not allowed");
         discard.claim;
         auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
         openHand.addKan(kanTiles);
@@ -425,4 +453,9 @@ unittest
     ingame.setDiscards([new Tile(Types.wind, Winds.east), new Tile(Types.wind, Winds.east)]);
     ingame.doesDiscardsOnlyContain(discard).should.equal(false)
         .because("there are multiple discards");
+}
+
+bool hasAllTheKans(const Ingame game) @property
+{
+    return game.openHand.hasAllKans;
 }

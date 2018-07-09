@@ -39,7 +39,7 @@ class ClaimOptionFactory
 
 	private void addKanOption(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
 	{
-		if(player.isKannable(discard)) _options~= new KanClaimOption(player, discard, wall, claimEvent);
+		if(player.isKannable(discard, wall)) _options~= new KanClaimOption(player, discard, wall, claimEvent);
 	}
 
 	private void addPonOption(Player player, Tile discard, ClaimEvent claimEvent)
@@ -103,6 +103,7 @@ unittest
 	auto player3 = new Player(new TestEventHandler);
 	player3.startGame(PlayerWinds.south);
 	auto metagame = new Metagame([player, player2, player3]);
+    metagame.initializeRound;
 	metagame.currentPlayer = player;
 	ClaimOptionFactory constructFactory(dstring tilesOfClaimingPlayer, dstring discard, 
 		Player claimingPlayer, Player discardingPlayer)

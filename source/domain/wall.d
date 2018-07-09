@@ -125,6 +125,7 @@ class Wall
 		return drawnTile;
 	}
 
+    private ubyte _amountOfKans;
 	Tile drawKanTile()
 	{ 
 		flipDoraIndicator;
@@ -133,6 +134,7 @@ class Wall
 	
 	protected Tile getKanTile()
 	{
+        _amountOfKans++;
 		Tile kanTile = _tiles[$-1];
 		_tiles = _tiles[0 .. $-1];
 		return kanTile;
@@ -143,6 +145,10 @@ class Wall
 		return _tiles.length <= gameOpts.deadWallLength;
 	}
 
+    bool isMaxAmountOfKansReached() const
+    {
+        return _amountOfKans == gameOpts.maxAmountOfKans;
+    }
 }
 
 unittest
@@ -177,6 +183,27 @@ unittest
 	assert(player.game.closedHand.tiles.front == lastTile, "The last tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
 	assert(wall.doraIndicators.length == 2, "An additional dora indicator should be flipped.");
+}
+
+unittest
+{
+    import fluent.asserts;
+    scope(exit) gameOpts = null;
+    class TwoKanOps : DefaultGameOpts
+    {
+        override int maxAmountOfKans() 
+        {
+            return 2;
+        }
+    }
+    gameOpts = new TwoKanOps;
+    auto wall = new Wall;
+    wall.setUp;
+    wall.dice;
+    wall.drawKanTile;
+    wall.isMaxAmountOfKansReached.should.equal(false);
+    wall.drawKanTile;
+    wall.isMaxAmountOfKansReached.should.equal(true);
 }
 
 class BambooWall : Wall

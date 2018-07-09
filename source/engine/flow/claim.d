@@ -326,7 +326,7 @@ enum Request {None, Chi, Pon, Kan, Ron}
 interface ClaimRequest
 {
 	void apply(INotificationService notificationService);
-	bool isAllowed() pure;
+	bool isAllowed();
 	@property Request request() pure;
 }
 
@@ -401,9 +401,9 @@ class KanRequest : ClaimRequest
 		notificationService.notify(Notification.Kan, _player);
 	}
 
-	bool isAllowed() pure
+	bool isAllowed()
 	{
-		return _player.isKannable(_discard);
+		return _player.isKannable(_discard, _wall);
 	}
 
 	Request request() @property pure const
