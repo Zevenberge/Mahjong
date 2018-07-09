@@ -426,3 +426,8 @@ unittest
     ingame.doesDiscardsOnlyContain(discard).should.equal(false)
         .because("there are multiple discards");
 }
+
+bool hasAllTheKans(const Ingame game) @property
+{
+    return game.openHand.hasAllKans;
+}

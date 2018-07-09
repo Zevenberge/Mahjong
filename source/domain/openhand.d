@@ -7,6 +7,7 @@ import std.uuid;
 import mahjong.domain;
 import mahjong.domain.exceptions;
 import mahjong.engine.mahjong;
+import mahjong.engine.opts;
 import mahjong.share.range;
 
 class OpenHand
@@ -176,4 +177,22 @@ unittest
 	auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
 	auto kanTile = "🀟"d.convertToTiles[0];
 	assert(!chi.canPromoteSetToKan(kanTile), "A different chi should not be promotable to kan.");
+}
+
+bool hasAllKans(const OpenHand hand) @property
+{
+    return hand.amountOfKans == gameOpts.maxAmountOfKans;
+}
+
+unittest
+{
+    import fluent.asserts;
+    scope(exit) gameOpts = null;
+    gameOpts = new DefaultGameOpts;
+    auto hand = new OpenHand;
+    hand.hasAllKans.should.equal(false);
+    hand._amountOfKans = 3;
+    hand.hasAllKans.should.equal(false);
+    hand._amountOfKans = 4;
+    hand.hasAllKans.should.equal(true);
 }
