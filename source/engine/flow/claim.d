@@ -53,10 +53,13 @@ class ClaimFlow : Flow
 		}
 		body
 		{
-            notifyPlayersAboutMissedTile();
 			if(applyRons) return;
-			if(applyPon) return;
-			if(applyChi) return;
+            notifyPlayersAboutMissedTile();
+			if(applyPon || applyChi)
+            {
+                notifyGameAboutClaimedTile;
+                return;
+            }
 			switchFlow(new TurnEndFlow(_metagame, _notificationService));
 		}
 
@@ -98,6 +101,11 @@ class ClaimFlow : Flow
         void notifyPlayersAboutMissedTile()
         {
             _metagame.notifyPlayersAboutMissedTile(_tile);
+        }
+
+        void notifyGameAboutClaimedTile()
+        {
+            _metagame.aTileHasBeenClaimed;
         }
 }
 
@@ -236,6 +244,50 @@ unittest
     claimFlow._claimEvents[0].handle(new NoRequest());
     claimFlow.advanceIfDone;
     player2.isFuriten.should.equal(true).because("player 2 did not claim a ron tile");
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    import mahjong.test.utils;
+    scope(exit) switchFlow(null);
+    auto game = setup(2);
+    auto player1 = game.players[0];
+    player1.startGame(PlayerWinds.north);
+    player1.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+    auto player2 = game.players[1];
+    player2.startGame(PlayerWinds.east);
+    player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+    auto ronTile = "🀡"d.convertToTiles[0];
+    ronTile.origin = player1.game;
+    auto claimFlow = new ClaimFlow(ronTile, game, new NullNotificationService);
+    switchFlow(claimFlow);
+    claimFlow._claimEvents[0].handle(new RonRequest(player2, ronTile));
+    claimFlow.advanceIfDone;
+    player2.isFuriten.should.equal(false)
+        .because("player 2 claimed a ron tile and should not become furiten");
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    scope(exit) switchFlow(null);
+    auto game = setup(2);
+    game.initializeRound;
+    game.beginRound;
+    auto player1 = game.players[0];
+    player1.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+    auto player2 = game.players[1];
+    player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+    auto ponTile = "🀡"d.convertToTiles[0];
+    ponTile.origin = player1.game;
+    auto claimFlow = new ClaimFlow(ponTile, game, new NullNotificationService);
+    switchFlow(claimFlow);
+    claimFlow._claimEvents[0].handle(new PonRequest(player2, ponTile));
+    claimFlow.advanceIfDone;
+    game.isFirstTurn.should.equal(false).because("a tile has been claimed");
 }
 
 class ClaimEvent

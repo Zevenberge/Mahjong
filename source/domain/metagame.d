@@ -146,6 +146,7 @@ class Metagame
 		wall.dice;
 		distributeTiles;
 		setTurnPlayerToEast;
+        _isFirstTurn = true;
 	}
 
 	private void distributeTiles()
@@ -258,13 +259,103 @@ class Metagame
 		{
 			trace("Advancing turn.");
 			_turn = (_turn + 1) % players.length;
+            if(currentPlayer is _initialEastPlayer)
+            {
+                _isFirstTurn = false;
+            }
 		}
 	}
 
+    private bool _isFirstTurn;
+
+    bool isFirstTurn() @property pure const
+    {
+        return _isFirstTurn;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.isFirstTurn.should.equal(true);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.advanceTurn;
+        metagame.isFirstTurn.should.equal(false)
+            .because("all players already had a turn");
+    }
+
+    void aTileHasBeenClaimed()
+    {
+        _isFirstTurn = false;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.aTileHasBeenClaimed;
+        metagame.isFirstTurn.should.equal(false)
+            .because("all players already had a turn");
+    }
+
 	bool isAbortiveDraw() @property
 	{
-		return false;
+		return didAllPlayersDiscardTheSameWindInTheFirstTurn;
 	}
+
+    private bool didAllPlayersDiscardTheSameWindInTheFirstTurn()
+    {
+        if(!_isFirstTurn) return false;
+        auto firstPlayer = players[0];
+        if(firstPlayer.discards.length != 1) return false;
+        auto firstPlayersDiscard = firstPlayer.discards[0];
+        if(!firstPlayersDiscard.isWind) return false;
+        return players[1..$].all!(player => player.doesDiscardsOnlyContain(firstPlayersDiscard));
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        import mahjong.domain.enums;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player1 = new Player(new TestEventHandler);
+        auto player2 = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player1, player2]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.setDiscards([new Tile(Types.wind, Winds.east)]);
+        player2.setDiscards([new Tile(Types.wind, Winds.east)]);
+        metagame.isAbortiveDraw.should.equal(true)
+            .because("all players discarded the same wind in the first round");
+        metagame.aTileHasBeenClaimed;
+        metagame.isAbortiveDraw.should.equal(false)
+            .because("the first round has been interrupted");
+    }
 
 	bool isExhaustiveDraw() @property
 	{
