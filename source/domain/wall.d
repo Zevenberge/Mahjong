@@ -145,7 +145,7 @@ class Wall
 		return _tiles.length <= gameOpts.deadWallLength;
 	}
 
-    bool isMaxAmountOfKansReached()
+    bool isMaxAmountOfKansReached() const
     {
         return _amountOfKans == gameOpts.maxAmountOfKans;
     }
