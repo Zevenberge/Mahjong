@@ -53,11 +53,6 @@ class Tile
         return id == other.id;
     }
 
-    bool hasEqualValue(const Tile other) pure const
-    {
-        return _ == other._;
-    }
-
     void claim()
     {
         origin.discardIsClaimed(this);
@@ -135,9 +130,6 @@ unittest
     assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
 }
 
-
-
-
 bool isConstructive(const ComparativeTile first, const ComparativeTile other) pure
 {
     return !first.isHonour && first.type == other.type &&
@@ -157,6 +149,20 @@ unittest
     auto otherTwo = new Tile(Types.ball, 2);
     assert(!one.isConstructive(otherTwo));
     writeln(" The isConstructive function is correct.");
+}
+
+bool isWind(const ComparativeTile tile) @property pure
+{
+    return tile.type == Types.wind;
+}
+
+unittest
+{
+    import fluent.asserts;
+    auto wind = ComparativeTile(Types.wind, Winds.west);
+    wind.isWind.should.equal(true);
+    auto dragon = ComparativeTile(Types.dragon, Dragons.white);
+    dragon.isWind.should.equal(false);
 }
 
 struct ComparativeTile
