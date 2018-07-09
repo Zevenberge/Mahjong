@@ -402,3 +402,27 @@ unittest
     ingame.isFuriten.should.equal(false)
         .because("after drawing a tile, the temporary furiten should resolve");
 }
+
+bool doesDiscardsOnlyContain(Ingame game, const ComparativeTile discard)
+{
+    return game.discards.length == 1 &&
+        game.discards[0].hasEqualValue(discard);
+}
+
+unittest
+{
+    import fluent.asserts;
+    auto ingame = new Ingame(PlayerWinds.east);
+    auto discard = ComparativeTile(Types.wind, Winds.east);
+    ingame.doesDiscardsOnlyContain(discard).should.equal(false)
+        .because("there are no discards");
+    ingame.setDiscards([new Tile(Types.wind, Winds.east)]);
+    ingame.doesDiscardsOnlyContain(discard).should.equal(true)
+        .because("the only discard matches");
+    auto otherDiscard = ComparativeTile(Types.wind, Winds.west);
+    ingame.doesDiscardsOnlyContain(otherDiscard).should.equal(false)
+        .because("the discard does not match");
+    ingame.setDiscards([new Tile(Types.wind, Winds.east), new Tile(Types.wind, Winds.east)]);
+    ingame.doesDiscardsOnlyContain(discard).should.equal(false)
+        .because("there are multiple discards");
+}

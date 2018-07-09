@@ -323,8 +323,36 @@ class Metagame
 
 	bool isAbortiveDraw() @property
 	{
-		return false;
+		return didAllPlayersDiscardTheSameWindInTheFirstTurn;
 	}
+
+    private bool didAllPlayersDiscardTheSameWindInTheFirstTurn()
+    {
+        if(!_isFirstTurn) return false;
+        auto firstPlayer = players[0];
+        if(firstPlayer.discards.length != 1) return false;
+        auto firstPlayersDiscard = firstPlayer.discards[0];
+        if(!firstPlayersDiscard.isWind) return false;
+        return players[1..$].all!(player => player.doesDiscardsOnlyContain(firstPlayersDiscard));
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        import mahjong.domain.enums;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player1 = new Player(new TestEventHandler);
+        auto player2 = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player1, player2]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.setDiscards([new Tile(Types.wind, Winds.east)]);
+        player2.setDiscards([new Tile(Types.wind, Winds.east)]);
+        metagame.isAbortiveDraw.should.equal(true)
+            .because("all players discarded the same wind in the first round");
+    }
 
 	bool isExhaustiveDraw() @property
 	{

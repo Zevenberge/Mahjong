@@ -169,11 +169,11 @@ struct ComparativeTile
 {
     Types type;
     int value;
+}
 
-    bool hasEqualValue(const ComparativeTile other) pure const
-    {
-        return other.type == type && other.value == value;
-    }
+bool hasEqualValue(const ComparativeTile one, const ComparativeTile other) pure
+{
+    return one == other;
 }
 
 unittest
