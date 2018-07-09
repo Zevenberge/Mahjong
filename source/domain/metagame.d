@@ -301,6 +301,26 @@ class Metagame
             .because("all players already had a turn");
     }
 
+    void aTileHasBeenClaimed()
+    {
+        _isFirstTurn = false;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.aTileHasBeenClaimed;
+        metagame.isFirstTurn.should.equal(false)
+            .because("all players already had a turn");
+    }
+
 	bool isAbortiveDraw() @property
 	{
 		return false;

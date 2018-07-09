@@ -55,8 +55,11 @@ class ClaimFlow : Flow
 		{
 			if(applyRons) return;
             notifyPlayersAboutMissedTile();
-			if(applyPon) return;
-			if(applyChi) return;
+			if(applyPon || applyChi)
+            {
+                notifyGameAboutClaimedTile;
+                return;
+            }
 			switchFlow(new TurnEndFlow(_metagame, _notificationService));
 		}
 
@@ -98,6 +101,11 @@ class ClaimFlow : Flow
         void notifyPlayersAboutMissedTile()
         {
             _metagame.notifyPlayersAboutMissedTile(_tile);
+        }
+
+        void notifyGameAboutClaimedTile()
+        {
+            _metagame.aTileHasBeenClaimed;
         }
 }
 
@@ -259,6 +267,27 @@ unittest
     claimFlow.advanceIfDone;
     player2.isFuriten.should.equal(false)
         .because("player 2 claimed a ron tile and should not become furiten");
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    scope(exit) switchFlow(null);
+    auto game = setup(2);
+    game.initializeRound;
+    game.beginRound;
+    auto player1 = game.players[0];
+    player1.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+    auto player2 = game.players[1];
+    player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+    auto ponTile = "🀡"d.convertToTiles[0];
+    ponTile.origin = player1.game;
+    auto claimFlow = new ClaimFlow(ponTile, game, new NullNotificationService);
+    switchFlow(claimFlow);
+    claimFlow._claimEvents[0].handle(new PonRequest(player2, ponTile));
+    claimFlow.advanceIfDone;
+    game.isFirstTurn.should.equal(false).because("a tile has been claimed");
 }
 
 class ClaimEvent
