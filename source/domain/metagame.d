@@ -352,6 +352,9 @@ class Metagame
         player2.setDiscards([new Tile(Types.wind, Winds.east)]);
         metagame.isAbortiveDraw.should.equal(true)
             .because("all players discarded the same wind in the first round");
+        metagame.aTileHasBeenClaimed;
+        metagame.isAbortiveDraw.should.equal(false)
+            .because("the first round has been interrupted");
     }
 
 	bool isExhaustiveDraw() @property
