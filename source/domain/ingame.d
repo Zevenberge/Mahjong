@@ -394,6 +394,55 @@ class Ingame
         ingame.canDeclareRiichi(toNotBeDiscardedTile).should.equal(false);
     }
 
+    void declareRiichi(const Tile discard, bool isFirstRound)
+    {
+        this.discard(discard);
+        _isRiichi = true;
+        _isDoubleRiichi = isFirstRound;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.isRiichi.should.equal(false);
+        ingame.declareRiichi(toBeDiscardedTile, false);
+        ingame.isRiichi.should.equal(true);
+        ingame.isDoubleRiichi.should.equal(false);
+        ingame.closedHand.tiles.length.should.equal(13);
+        ingame.discards.should.equal([toBeDiscardedTile]);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.declareRiichi(toBeDiscardedTile, true);
+        ingame.isRiichi.should.equal(true);
+        ingame.isDoubleRiichi.should.equal(true);
+    }
+
+    private bool _isRiichi;
+    private bool _isDoubleRiichi;
+
+    bool isRiichi() @property pure const
+    {
+        return _isRiichi;
+    }
+
+    bool isDoubleRiichi() @property pure const
+    {
+        return _isDoubleRiichi;
+    }
+
     bool isMahjong() pure const
     {
         return scanHandForMahjong(this).isMahjong;
