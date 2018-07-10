@@ -324,7 +324,8 @@ class Metagame
 	bool isAbortiveDraw() @property
 	{
 		return didAllPlayersDiscardTheSameWindInTheFirstTurn
-            || areAllKansDeclaredAndNotByOnePlayer;
+            || areAllKansDeclaredAndNotByOnePlayer
+            || isEveryPlayerRiichi;
 	}
 
     private bool didAllPlayersDiscardTheSameWindInTheFirstTurn()
@@ -398,6 +399,31 @@ class Metagame
         kan(player1);
         metagame.isAbortiveDraw.should.equal(false)
             .because("one player claimed all available kans");
+    }
+
+    private bool isEveryPlayerRiichi()
+    {
+        return players.all!(player => player.isRiichi);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player1 = new Player(new TestEventHandler);
+        auto player2 = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player1, player2]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        player2.game = new Ingame(PlayerWinds.south, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        player1.declareRiichi(player1.closedHand.tiles[3], metagame);
+        metagame.isAbortiveDraw.should.equal(false);
+        player2.declareRiichi(player2.closedHand.tiles[3], metagame);
+        metagame.isAbortiveDraw.should.equal(true);
     }
 
 	bool isExhaustiveDraw() @property
