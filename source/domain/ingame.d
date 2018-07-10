@@ -394,11 +394,16 @@ class Ingame
         ingame.canDeclareRiichi(toNotBeDiscardedTile).should.equal(false);
     }
 
-    void declareRiichi(const Tile discard, bool isFirstRound)
+    void declareRiichi(const Tile discard, const Metagame metagame)
+    {
+        declareRiichi(discard, metagame.isFirstTurn);
+    }
+
+    private void declareRiichi(const Tile discard, bool isFirstTurn)
     {
         this.discard(discard);
         _isRiichi = true;
-        _isDoubleRiichi = isFirstRound;
+        _isDoubleRiichi = isFirstTurn;
     }
 
     unittest
