@@ -173,8 +173,8 @@ class Ingame
 
     bool isRonnable(const Tile discard) pure
     {
-        return scanHandForMahjong(this, discard).isMahjong
-            && !isFuriten ;
+        return !isFuriten &&
+            scanHandForMahjong(this, discard).isMahjong;
     }
 
     void ron(Tile discard)
@@ -503,9 +503,32 @@ class Ingame
             .because("after drawing a tile, the temporary furiten should resolve");
     }
 
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        import mahjong.engine.opts;
+        gameOpts = new DefaultGameOpts;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        auto ronTile = "🀡"d.convertToTiles[0];
+        ingame.couldHaveClaimed(ronTile);
+        auto wall = new Wall;
+        wall.setUp;
+        wall.dice;
+        ingame.drawTile(wall);
+        ingame.isFuriten.should.equal(true)
+            .because("when sitting riichi, a furiten does no longer resolve"); 
+    }
+
     private void startTurn()
     {
-        _isTemporaryFuriten = false;
+        if(!_isRiichi)
+        {
+            _isTemporaryFuriten = false;
+        }
     }
 }
 
