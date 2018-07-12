@@ -7,6 +7,7 @@ import std.random;
 import std.conv; 
 import std.file;
 import std.string;
+import std.traits;
 
 import mahjong.domain.closedhand;
 import mahjong.domain.enums;
@@ -174,6 +175,7 @@ unittest
 	honourKan[0].origin = new Ingame(PlayerWinds.east);
 	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 16, "An open honour pon is 16");
 }
+
 class ChiSet : Set
 {
 	this(const Tile[] tiles) pure
@@ -635,3 +637,29 @@ version(unittest)
 	}
 }
 
+bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
+{
+    foreach(type; EnumMembers!Types)
+    {
+        for(int value = Numbers.min; value <= Numbers.max; ++value)
+        {
+            auto tile = new Tile(type, value);
+            if(.scanHandForMahjong(closedHand ~ tile, openHand.sets).isMahjong)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto tenpaiHand = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    auto emptyOpenHand = new OpenHand;
+    isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
+    auto noTenpaiHand = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
+    isPlayerTenpai(noTenpaiHand, emptyOpenHand).should.equal(false);
+}
