@@ -87,6 +87,11 @@ class Ingame
     /*
      Normal functions related to claiming tiles.
      */
+    private bool canClaim(const Tile tile) pure const
+    {
+        return !isOwn(tile) && !_isRiichi;
+    }
+
     private bool isOwn(const Tile tile) pure const
     {
         return tile.origin is null;
@@ -94,8 +99,23 @@ class Ingame
 
     bool isChiable(const Tile discard) pure const
     {
-        if(isOwn(discard)) return false;
+        if(!canClaim(discard)) return false;
         return closedHand.isChiable(discard);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        import mahjong.engine.opts;
+        gameOpts = new DefaultGameOpts;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        auto tile = "🀡"d.convertToTiles[0];
+        tile.origin = new Ingame(PlayerWinds.north);
+        ingame.isChiable(tile).should.equal(false);
     }
 
     void chi(Tile discard, ChiCandidate otherTiles)
@@ -113,8 +133,23 @@ class Ingame
 
     bool isPonnable(const Tile discard) pure
     {
-        if(isOwn(discard)) return false;
+        if(!canClaim(discard)) return false;
         return closedHand.isPonnable(discard);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        import mahjong.engine.opts;
+        gameOpts = new DefaultGameOpts;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        auto tile = "🀡"d.convertToTiles[0];
+        tile.origin = new Ingame(PlayerWinds.north);
+        ingame.isPonnable(tile).should.equal(false);
     }
 
     void pon(Tile discard)
@@ -129,7 +164,7 @@ class Ingame
 
     bool isKannable(const Tile discard, const Wall wall)
     {
-        if(isOwn(discard) || wall.isMaxAmountOfKansReached) return false;
+        if(!canClaim(discard) || wall.isMaxAmountOfKansReached) return false;
         return closedHand.isKannable(discard);
     }
 
@@ -159,6 +194,21 @@ class Ingame
         wall = new MaybeKanWall(true);
         ingame.isKannable(tile, wall).should.equal(false)
             .because("the wall has no more kan tiles left");
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        import mahjong.engine.opts;
+        gameOpts = new DefaultGameOpts;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        auto tile = "🀡"d.convertToTiles[0];
+        tile.origin = new Ingame(PlayerWinds.north);
+        ingame.isKannable(tile, new Wall).should.equal(false);
     }
 
     void kan(Tile discard, Wall wall)
