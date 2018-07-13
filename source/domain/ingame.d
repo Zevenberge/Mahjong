@@ -107,6 +107,43 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+        auto game = new Ingame(PlayerWinds.east);
+        game.closedHand.tiles = "🀓🀔"d.convertToTiles;
+        auto chiableTile = "🀕"d.convertToTiles[0];
+        chiableTile.origin = new Ingame(PlayerWinds.south);
+        game.isChiable(chiableTile).should.equal(true);
+        game.closedHand.tiles = "🀓🀕"d.convertToTiles;
+        chiableTile = "🀔"d.convertToTiles[0];
+        chiableTile.origin = new Ingame(PlayerWinds.south);
+        game.isChiable(chiableTile).should.equal(true);
+        game.closedHand.tiles = "🀔🀕"d.convertToTiles;
+        chiableTile = "🀓"d.convertToTiles[0];
+        chiableTile.origin = new Ingame(PlayerWinds.south);
+        game.isChiable(chiableTile).should.equal(true);
+        game.closedHand.tiles = "🀓🀔"d.convertToTiles;
+        auto nonChiableTile = "🀔"d.convertToTiles[0];
+        nonChiableTile.origin = new Ingame(PlayerWinds.south);
+        game.isChiable(nonChiableTile).should.equal(false);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        auto game = new Ingame(PlayerWinds.east, "🀀🀁"d);
+        auto nonChiableTile = "🀂"d.convertToTiles[0];
+        nonChiableTile.origin = new Ingame(PlayerWinds.south);
+        game.isChiable(nonChiableTile).should.equal(false);
+        game = new Ingame(PlayerWinds.east, "🀄🀅"d);
+        nonChiableTile = "🀆"d.convertToTiles[0];
+        nonChiableTile.origin = new Ingame(PlayerWinds.south);
+        game.isChiable(nonChiableTile).should.equal(false);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
         gameOpts = new DefaultGameOpts;
@@ -131,10 +168,42 @@ class Ingame
         startTurn;
     }
 
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.exceptions;
+        import mahjong.engine.creation;
+        auto game = new Ingame(PlayerWinds.east, "🀓🀔"d);
+        auto tiles = game.closedHand.tiles;
+        auto candidate = ChiCandidate(tiles[0], tiles[1]);
+        auto chiableTile = "🀕"d.convertToTiles[0];
+        chiableTile.origin = new Ingame(PlayerWinds.south);
+        game.chi(chiableTile, candidate);
+        game.closedHand.length.should.equal(0)
+            .because("the tiles should have been removed from the hand");
+        game.openHand.amountOfChis.should.equal(1);
+        game.openHand.sets.length.should.equal(1);
+        (() => game.chi(chiableTile, candidate)).should.throwException!IllegalClaimException;
+    }
+
     bool isPonnable(const Tile discard) pure
     {
         if(!canClaim(discard)) return false;
         return closedHand.isPonnable(discard);
+    }
+
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        auto game = new Ingame(PlayerWinds.east);
+        game.closedHand.tiles = "🀕🀕"d.convertToTiles;
+        auto ponnableTile = "🀕"d.convertToTiles[0];
+        ponnableTile.origin = new Ingame(PlayerWinds.south);
+        game.isPonnable(ponnableTile).should.equal(true);
+        auto nonPonnableTile = "🀃"d.convertToTiles[0];
+        game.isPonnable(nonPonnableTile).should.equal(false);
     }
 
     unittest
@@ -221,10 +290,53 @@ class Ingame
         startTurn;
     }
 
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.exceptions;
+        import mahjong.engine.creation;
+        auto wall = new Wall;
+        wall.setUp;
+        wall.dice;
+        auto game = new Ingame(PlayerWinds.east, "🀕🀕🀕"d);
+        auto kannableTile = "🀕"d.convertToTiles[0];
+        kannableTile.origin = new Ingame(PlayerWinds.south);
+        game.kan(kannableTile, wall);
+        game.closedHand.length.should.equal(1)
+            .because("all of the tiles should have been moved and a new one drawn");
+        game.openHand.amountOfPons.should.equal(1)
+            .because("the kan counts as a pon");
+        game.openHand.amountOfKans.should.equal(1);
+        game.openHand.sets.length.should.equal(1);
+        (() => game.kan(kannableTile, wall)).should.throwException!IllegalClaimException;
+    }
+
     bool isRonnable(const Tile discard) pure
     {
         return !isFuriten &&
             scanHandForMahjong(this, discard).isMahjong;
+    }
+
+    unittest
+    {
+        void addTileToDiscard(Ingame game, Tile tile)
+        {
+            game.closedHand.tiles ~= tile;
+            game.discard(tile);
+        }
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        auto game = new Ingame(PlayerWinds.east, "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
+        auto ronnableTile = "🀐"d.convertToTiles[0];
+        ronnableTile.origin = new Ingame(PlayerWinds.south);
+        game.isRonnable(ronnableTile).should.equal(true);
+        addTileToDiscard(game, "🀐"d.convertToTiles[0]);
+        game.isRonnable(ronnableTile).should.equal(false)
+            .because("the player is furiten on the same tile");
+        game = new Ingame(PlayerWinds.east, "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
+        addTileToDiscard(game, "🀖"d.convertToTiles[0]);
+        game.isRonnable(ronnableTile).should.equal(false)
+            .because("the player is furiten on another out");
     }
 
     void ron(Tile discard)
@@ -235,6 +347,22 @@ class Ingame
         }
         _lastTile = discard;
         closedHand.tiles ~= discard;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.exceptions;
+        import mahjong.engine.creation;
+        auto game = new Ingame(PlayerWinds.east, "🀕🀕"d);
+        auto ponnableTile = "🀕"d.convertToTiles[0];
+        ponnableTile.origin = new Ingame(PlayerWinds.south);
+        game.pon(ponnableTile);
+        game.closedHand.length.should.equal(0)
+            .because("the tiles should have been removed from the hand");
+        game.openHand.amountOfPons.should.equal(1);
+        game.openHand.sets.length.should.equal(1);
+        (() => game.pon(ponnableTile)).should.throwException!IllegalClaimException;
     }
 
     unittest
