@@ -33,6 +33,10 @@ class DefaultGameOpts : Opts
 	{
 		return 30_000;
 	}
+    int riichiFare()
+    {
+        return 1_000;
+    }
 	Metagame createMetagame(GameEventHandler[] delegators)
 	{
 		return new Metagame(createPlayers(delegators));

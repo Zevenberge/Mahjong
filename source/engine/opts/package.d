@@ -17,6 +17,7 @@ interface Opts
 	int maxAmountOfKans();
 	int amountOfPlayers();
 	int initialScore();
+    int riichiFare();
 	GameMode gameMode();
 	Metagame createMetagame(GameEventHandler[] eventHandlers);
 	PlayerWinds finalLeadingWind();

@@ -82,7 +82,25 @@ class Player
 
     void declareRiichi(const Tile discard, const Metagame metagame)
     {
+        _score -= gameOpts.riichiFare;
         game.declareRiichi(discard, metagame);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+        scope(exit) gameOpts = null;
+        gameOpts = new DefaultGameOpts;
+        auto player = new Player(new TestEventHandler);
+        auto metagame = new Metagame([player]);
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        player.game = ingame;
+        player.isRiichi.should.equal(false);
+        player.declareRiichi(toBeDiscardedTile, metagame);
+        player.isRiichi.should.equal(true);
+        player.score.should.equal(29_000);
     }
 
 	void drawTile(Wall wall)
