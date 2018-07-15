@@ -60,7 +60,7 @@ class TurnFlow : Flow
 		void claimTsumo()
 		{
 			info("Tsumo claimed by ", _player.name);
-			_metagame.tsumo(_player);
+			_metagame.tsumo;
 			_notificationService.notify(Notification.Tsumo, _player);
 			_flow = new MahjongFlow(_metagame, _notificationService);
 		}

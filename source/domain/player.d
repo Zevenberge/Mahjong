@@ -80,9 +80,10 @@ class Player
             .because("a player cannot chi a tile when they are not the next player");
     }
 
-    void declareRiichi(const Tile discard, const Metagame metagame)
+    void declareRiichi(const Tile discard, Metagame metagame)
     {
         _score -= gameOpts.riichiFare;
+        metagame.riichiIsDeclared;
         game.declareRiichi(discard, metagame);
     }
 
@@ -101,12 +102,8 @@ class Player
         player.declareRiichi(toBeDiscardedTile, metagame);
         player.isRiichi.should.equal(true);
         player.score.should.equal(29_000);
+        metagame.amountOfRiichiSticks.should.equal(1);
     }
-
-	void drawTile(Wall wall)
-	{
-		this.game.drawTile(wall);
-	}
 
 	void applyTransaction(const Transaction transaction)
 	in

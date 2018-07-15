@@ -230,22 +230,21 @@ class Metagame
 		}
 	}
 
-	void tsumo(Player player)
-	in
+    void riichiIsDeclared()
+    {
+        _amountOfRiichiSticks++;
+    }
+
+    int amountOfRiichiSticks() @property pure const
+    {
+        return _amountOfRiichiSticks;
+    }
+
+    private int _amountOfRiichiSticks;
+
+	void tsumo()	
 	{
-		assert(player == currentPlayer);
-	}
-	body
-	{
-		flipOverWinningTiles();
-		if(player.isMahjong)
-		{
-			info("Player ", currentPlayer.wind, " won");
-		}
-		else
-		{
-			info("Player ", currentPlayer.wind, " chombo'd");
-		}
+		flipOverWinningTiles();	
 	}
 
 	void advanceTurn()
