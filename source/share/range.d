@@ -158,47 +158,24 @@ unittest
 	auto flattened = bubbles.flatMap!(x => x.ints).array;
 	assert(flattened.length == 0, "Flat-mapping an empty range should return an empty range of the result type");
 }
-/+
-auto range(T)(T[] array)
+
+template atLeastOneUntil()
 {
-	return Range(array);
+    auto atLeastOneUntil(Range, Needle)(Range range, Needle needle)
+    {
+        static assert(isInputRange!Range, 
+            "An input range should be supplied instead of " ~ Range.stringof);
+        bool isOnePassed = false;
+        return range.until!((x, y) {
+                if(isOnePassed) return x == y;
+                isOnePassed = true;
+                return false;
+            })(needle);
+    }
 }
 
-private struct Range(T)
+unittest
 {
-	this(T[] array)
-	{
-		_array;
-		_forwardIndex = 0;
-		_backwardIndex = _array.length - 1;
-	}
-	private T[] _array;
-
-	private size_t _forwardIndex;
-	void popFront()
-	{
-		++_forwardIndex;
-	}
-
-	T front()
-	{
-		return _array[_forwardIndex];
-	}
-
-	private size_t _backwardIndex;
-
-	void popBack()
-	{
-		--_backwardIndex;
-	}
-
-	T back()
-	{
-		return _array[_backwardIndex];
-	}
-
-	bool empty()
-	{
-		return _forwardIndex >= _array.length || _backwardIndex < 0;
-	}
-}+/
+    import fluent.asserts;
+    [4, 5, 4].atLeastOneUntil(4).should.equal([4, 5]);
+}
