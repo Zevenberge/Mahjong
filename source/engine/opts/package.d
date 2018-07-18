@@ -13,6 +13,7 @@ Opts gameOpts;
 interface Opts
 {
 	int deadWallLength();
+    int riichiBuffer();
 	int kanBuffer();
 	int maxAmountOfKans();
 	int amountOfPlayers();

@@ -17,6 +17,10 @@ class DefaultGameOpts : Opts
 	{
 		return 14;
 	}
+    int riichiBuffer()
+    {
+        return 4;
+    }
 	int kanBuffer()
 	{
 		return 0;

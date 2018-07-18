@@ -51,7 +51,7 @@ unittest
 		{
 			return _isAbortiveDraw;
 		}
-		override bool isExhaustiveDraw() @property 
+		override bool isExhaustiveDraw() @property const
 		{
 			return _isExhaustiveDraw;
 		}

@@ -172,7 +172,7 @@ class Metagame
 	void finishRound()
 	{
 		++_round;
-		auto data = constructMahjongData;
+		auto data = this.constructMahjongData;
 		applyTransactions(data);
 		moveWinds;
 	}
@@ -425,9 +425,14 @@ class Metagame
         metagame.isAbortiveDraw.should.equal(true);
     }
 
-	bool isExhaustiveDraw() @property
+    bool canRiichiBeDeclared() @property const
+    {
+        return wall.canRiichiBeDeclared;
+    }
+
+	bool isExhaustiveDraw() @property const
 	{
-		return wall.length <= gameOpts.deadWallLength;
+        return wall.isExhaustiveDraw;
 	}
 
 	deprecated("Move to exhaustive draw flow.")
@@ -464,20 +469,7 @@ class Metagame
 		}
 	}
 
-	const(MahjongData)[] constructMahjongData()
-	{
-		return players.map!((player){
-				auto mahjongResult = scanHandForMahjong(player);
-				return MahjongData(player, mahjongResult);
-			}).filter!(data => data.result.isMahjong).array;
-	}
-
-	/*
-	 Random useful functions.
-	 */
-
-	
-	private void flipOverWinningTiles()
+    private void flipOverWinningTiles()
 	{
 		foreach(player; players)
 		{
@@ -709,4 +701,54 @@ void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
     {
         player.couldHaveClaimed(tile);
     }
+}
+
+auto playersByTurnOrder(Metagame metagame) @property
+{
+    return metagame.players.cycle
+        .find(metagame.getCurrentPlayer)
+        .atLeastOneUntil(metagame.getCurrentPlayer);
+}
+
+unittest
+{
+    import fluent.asserts;
+    auto player1 = new Player;
+    auto player2 = new Player;
+    auto player3 = new Player;
+    auto player4 = new Player;
+    auto metagame = new Metagame([player1, player2, player3, player4]);
+    metagame.currentPlayer = player3;
+    metagame.playersByTurnOrder.should.equal(
+        [player3, player4, player1, player2]
+        );
+}
+
+const(MahjongData)[] constructMahjongData(Metagame metagame)
+{
+    return metagame.playersByTurnOrder.map!((player){
+            auto mahjongResult = scanHandForMahjong(player);
+            return MahjongData(player, mahjongResult);
+        }).filter!(data => data.result.isMahjong).array;
+}
+
+unittest
+{
+    import fluent.asserts;
+    auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+    auto player1 = new Player;
+    player1.game = winningGame;
+    auto player2 = new Player;
+    player2.game = losingGame;
+    auto player3 = new Player;
+    player3.game = winningGame;
+    auto player4 = new Player;
+    player4.game = losingGame;
+    auto metagame = new Metagame([player1, player2, player3, player4]);
+    metagame.currentPlayer = player2;
+    auto mahjongData = metagame.constructMahjongData;
+    mahjongData.length.should.equal(2);
+    mahjongData[0].player.should.equal(player3);
+    mahjongData[1].player.should.equal(player1);
 }

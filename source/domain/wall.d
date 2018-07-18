@@ -28,7 +28,7 @@ class Wall
 	}
 
 	
-	@property public size_t length()
+	size_t length() @property pure const
 	{
 		return _tiles.length;
 	}
@@ -140,7 +140,12 @@ class Wall
 		return kanTile;
 	}
 
-	bool isExhaustiveDraw()
+    bool canRiichiBeDeclared() @property const
+    {
+        return (_tiles.length - gameOpts.deadWallLength) > gameOpts.riichiBuffer;
+    }
+
+	bool isExhaustiveDraw() @property const
 	{
 		return _tiles.length <= gameOpts.deadWallLength;
 	}

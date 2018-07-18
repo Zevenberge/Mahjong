@@ -27,6 +27,14 @@ class Player
 	alias game this;
 	GameEventHandler eventHandler; // Allows for distribution of the flow logic
 
+    version(unittest)
+    {
+        this()
+        {
+            this(new TestEventHandler);
+        }
+    }
+
 	this(GameEventHandler eventHandler)
 	{
 		id = randomUUID;
@@ -78,6 +86,11 @@ class Player
         chiableTile.origin = player2;
         player.isChiable(chiableTile, metagame).should.equal(false)
             .because("a player cannot chi a tile when they are not the next player");
+    }
+
+    bool canDeclareRiichi(const Tile potentialDiscard, const Metagame metagame)
+    {
+        return metagame.canRiichiBeDeclared && game.canDeclareRiichi(potentialDiscard);
     }
 
     void declareRiichi(const Tile discard, Metagame metagame)
@@ -153,7 +166,7 @@ class Player
 
 	override string toString() const
 	{
-		return(format("%s-san",name));
+		return(format("%s (%s)", id, name));
 	}
 }
 
