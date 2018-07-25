@@ -190,8 +190,10 @@ unittest
 
 Transaction[] toTransactions(const(MahjongData)[] data, const Metagame metagame)
 {
-    auto transactions = data.flatMap!(d => extractTransactions(d, metagame));
-    return transactions.mergeTransactions.array;
+    auto mahjongTransactions = data.flatMap!(d => extractTransactions(d, metagame));
+    auto riichiTransactions = getRiichiTransactions(metagame, data);
+    auto allTransactions = chain(mahjongTransactions, riichiTransactions);
+    return allTransactions.mergeTransactions;
 }
 
 unittest
@@ -398,7 +400,8 @@ unittest
     transactions[1].amount.should.equal(20_000);
 }
 
-private Transaction[] mergeTransactions(Transaction[] transactions)
+private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
+    if(isInputRange!Transactions && is(ElementType!Transactions : Transaction))
 {
     Transaction[const Player] mergedTransactions;
     foreach(transaction; transactions)
