@@ -738,3 +738,37 @@ bool hasAllTheKans(const Ingame game) @property
 {
     return game.openHand.hasAllKans;
 }
+
+bool canDiscard(const Ingame game, const Tile potentialDiscard) pure
+{
+    if(game.isRiichi)
+    {
+        return game.lastTile is potentialDiscard;
+    }
+    return true;
+}
+
+@("Can discard every tile when not riichi")
+unittest
+{
+    import fluent.asserts;
+    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d);
+    foreach(tile; ingame.closedHand.tiles)
+    {
+        ingame.canDiscard(tile).should.equal(true);
+    }
+}
+
+@("Can only discard the most recently drawn tile when riichi")
+unittest
+{
+    import fluent.asserts;
+    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d);
+    ingame._isRiichi = true;
+    ingame._lastTile = ingame.closedHand.tiles[$-1];
+    ingame.canDiscard(ingame.lastTile).should.equal(true);
+    foreach(tile; ingame.closedHand.tiles[0..$-1])
+    {
+        ingame.canDiscard(tile).should.equal(false);
+    }
+}
