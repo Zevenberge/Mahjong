@@ -274,6 +274,30 @@ class TurnEvent
         _flow.declareRiichi(tile);
     }
 
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.engine.creation;
+        import mahjong.engine.mahjong;
+        import mahjong.engine.opts;
+
+        auto eventHandler = new TestEventHandler;
+        auto player = new Player(eventHandler);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        player.startGame(PlayerWinds.east);
+        player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
+        player.hasDrawnTheirLastTile;
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
+        switchFlow(flow);
+        flow._event.declareRiichi(player.closedHand.tiles[0]);
+        flow.advanceIfDone;
+        .flow.should.be.instanceOf!ClaimFlow
+            .because("a riichi results in a regular discard");
+        player.isRiichi.should.equal(true);
+    }
+
     private void handle()
     in
     {
