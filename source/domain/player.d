@@ -88,16 +88,16 @@ class Player
             .because("a player cannot chi a tile when they are not the next player");
     }
 
-    bool canDeclareRiichi(const Tile potentialDiscard, const Metagame metagame)
+    bool canDeclareRiichi(const Tile potentialDiscard, const Metagame metagame) const
     {
         return metagame.canRiichiBeDeclared && game.canDeclareRiichi(potentialDiscard);
     }
 
-    void declareRiichi(const Tile discard, Metagame metagame)
+    Tile declareRiichi(const Tile discard, Metagame metagame)
     {
         _score -= gameOpts.riichiFare;
         metagame.riichiIsDeclared;
-        game.declareRiichi(discard, metagame);
+        return game.declareRiichi(discard, metagame);
     }
 
     unittest

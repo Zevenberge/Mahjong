@@ -2,6 +2,7 @@ module mahjong.engine.flow.turn;
 
 import std.experimental.logger;
 import std.uuid;
+import mahjong.domain.ingame;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
@@ -27,6 +28,24 @@ class TurnFlow : Flow
 		}
 	}
 
+    unittest
+    {
+        import mahjong.domain.enums;
+        import mahjong.engine.opts;
+        import mahjong.test.utils;
+
+        auto eventHandler = new TestEventHandler;
+        auto player = new Player(eventHandler);
+        player.startGame(PlayerWinds.east);
+        auto metagame = new Metagame([player]);
+        auto tile = new Tile(Types.dragon, Dragons.green);
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
+        switchFlow(flow);
+        assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
+        flow.advanceIfDone;
+        assert(.flow.isOfType!TurnFlow, "As the player is not ready, the flow should not have advanced");
+    }
+
 	private: 
 		TurnEvent _event;
 		Player _player;
@@ -38,12 +57,22 @@ class TurnFlow : Flow
 		}
 		
 		void discard(const Tile tile)
+        in
+        {
+            assert(_player.canDiscard(tile), "The move should be legal.");
+        }
+        do
 		{
 			auto discard = _player.discard(tile);
 			_flow = new ClaimFlow(discard, _metagame, _notificationService);
 		}
 
 		void promoteToKan(const Tile tile)
+        in
+        {
+            assert(_player.canPromoteToKan(tile), "The move should be legal.");
+        }
+        do
 		{
 			_player.promoteToKan(tile, _metagame.wall);
 			_notificationService.notify(Notification.Kan, _player);
@@ -51,6 +80,11 @@ class TurnFlow : Flow
 		}
 
 		void declareClosedKan(const Tile tile)
+        in
+        {
+            assert(_player.canDeclareClosedKan(tile), "The move should be legal.");
+        }
+        do
 		{
 			_player.declareClosedKan(tile, _metagame.wall);
 			_notificationService.notify(Notification.Kan, _player);
@@ -58,12 +92,30 @@ class TurnFlow : Flow
 		}
 
 		void claimTsumo()
+        in
+        {
+            assert(_player.canTsumo(), "The move should be legal.");
+        }
+        do
 		{
 			info("Tsumo claimed by ", _player.name);
 			_metagame.tsumo;
 			_notificationService.notify(Notification.Tsumo, _player);
 			_flow = new MahjongFlow(_metagame, _notificationService);
 		}
+
+        void declareRiichi(const Tile tile)
+        in
+        {
+            assert(_player.canDeclareRiichi(tile, _metagame), "The move should be legal.");
+        }
+        do
+        {
+            info("Riichi declared by ", _player);
+            auto discard = _player.declareRiichi(tile, _metagame);
+            _notificationService.notify(Notification.Riichi, _player);
+            _flow = new ClaimFlow(discard, _metagame, _notificationService);
+        }
 }
 
 class TurnEvent
@@ -84,171 +136,151 @@ class TurnEvent
 	const Tile drawnTile;
 	
 	void discard(const Tile tile)
-	in
 	{
-		assert(!isHandled, "The event should not be handled twice.");
-	}
-	body
-	{
-		isHandled = true;
+        handle;
 		_flow.discard(tile);
 	}
 
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.tile;
+        import mahjong.domain.wall;
+        import mahjong.engine.opts;
+
+        class MockWall : Wall
+        {
+            this(Tile tileToDraw)
+            {
+                _tileToDraw = tileToDraw;
+            }
+            private Tile _tileToDraw;
+            override Tile drawTile()
+            {
+                return _tileToDraw;
+            }
+        }
+
+        gameOpts = new DefaultGameOpts;
+
+        auto eventHandler = new TestEventHandler;
+        auto player = new Player(eventHandler);
+        player.startGame(PlayerWinds.east);
+        auto metagame = new Metagame([player]);
+        auto tile = new Tile(Types.dragon, Dragons.green);
+        auto wall = new MockWall(tile);
+        player.drawTile(wall);
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
+        switchFlow(flow);
+        flow._event.discard(tile);
+        flow.advanceIfDone;
+        .flow.should.be.instanceOf!ClaimFlow.because("a tile is discarded");
+    }
+
 	void promoteToKan(const Tile tile)
-	in
 	{
-		assert(!isHandled, "The event should not be handled twice.");
-	}
-	body
-	{
-		isHandled = true;
+        handle;
 		_flow.promoteToKan(tile);
 	}
 
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.engine.creation;
+        import mahjong.engine.opts;
+        gameOpts = new DefaultGameOpts;
+        auto eventHandler = new TestEventHandler;
+        auto player = new Player(eventHandler);
+        player.startGame(PlayerWinds.east);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
+        switchFlow(flow);
+        player.closedHand.tiles = "🀐🀘🀘"d.convertToTiles;
+        player.openHand.addPon("🀐🀐🀐"d.convertToTiles);
+        auto kanTile = player.closedHand.tiles[0];
+        flow._event.promoteToKan(kanTile);
+        flow.advanceIfDone;
+        .flow.should.be.instanceOf!TurnFlow.because("the turn restarts");
+        .flow.should.not.equal(flow).because("it is a new turn");
+        player.openHand.amountOfKans.should.equal(1);
+    }
+
 	void declareClosedKan(const Tile tile)
-	in
 	{
-		assert(!isHandled, "The event should not be handled twice.");
-	}
-	body
-	{
-		isHandled = true;
+        handle;
 		_flow.declareClosedKan(tile);
 	}
 
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.engine.creation;
+        import mahjong.engine.opts;
+        gameOpts = new DefaultGameOpts;
+        auto eventHandler = new TestEventHandler;
+        auto player = new Player(eventHandler);
+        player.startGame(PlayerWinds.east);
+        auto metagame = new Metagame([player]);
+        metagame.initializeRound;
+        metagame.beginRound;
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
+        switchFlow(flow);
+        player.closedHand.tiles = "🀐🀐🀐🀐🀘🀘"d.convertToTiles;
+        auto kanTile = player.closedHand.tiles[0];
+        flow._event.declareClosedKan(kanTile);
+        flow.advanceIfDone;
+        .flow.should.be.instanceOf!TurnFlow
+            .because("the turn starts again if a closed kan is declared");
+        .flow.should.not.equal(flow).because("it is a new turn");
+        player.openHand.amountOfKans.should.equal(1);
+    }
+
 	void claimTsumo()
-	in
 	{
-		assert(!isHandled, "The event should not be handled twice.");
-	}
-	body
-	{
-		isHandled = true;
+        handle;
 		_flow.claimTsumo;
 	}
-}
 
-unittest
-{
-	import mahjong.domain.enums;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.engine.creation;
+        import mahjong.engine.mahjong;
+        import mahjong.engine.opts;
 
-	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	player.startGame(PlayerWinds.east);
-	auto metagame = new Metagame([player]);
-	auto tile = new Tile(Types.dragon, Dragons.green);
-	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
-	switchFlow(flow);
-	assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
-	flow.advanceIfDone;
-	assert(.flow.isOfType!TurnFlow, "As the player is not ready, the flow should not have advanced");
-}
+        auto eventHandler = new TestEventHandler;
+        auto player = new Player(eventHandler);
+        player.startGame(PlayerWinds.east);
+        player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
+        player.hasDrawnTheirLastTile;
+        auto metagame = new Metagame([player]);
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
+        switchFlow(flow);
+        flow._event.claimTsumo;
+        flow.advanceIfDone;
+        .flow.should.be.instanceOf!MahjongFlow
+            .because("a tsumo is claimed");
+    }
 
-unittest
-{
-	import mahjong.domain.enums;
-	import mahjong.domain.tile;
-	import mahjong.domain.wall;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
+    void declareRiichi(const Tile tile)
+    {
+        handle;
+        _flow.declareRiichi(tile);
+    }
 
-	class MockWall : Wall
-	{
-		this(Tile tileToDraw)
-		{
-			_tileToDraw = tileToDraw;
-		}
-		private Tile _tileToDraw;
-		override Tile drawTile()
-		{
-			return _tileToDraw;
-		}
-	}
-
-	gameOpts = new DefaultGameOpts;
-
-	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	player.startGame(PlayerWinds.east);
-	auto metagame = new Metagame([player]);
-	auto tile = new Tile(Types.dragon, Dragons.green);
-	auto wall = new MockWall(tile);
-	player.drawTile(wall);
-	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
-	switchFlow(flow);
-	flow._event.discard(tile);
-	flow.advanceIfDone;
-	assert(.flow.isOfType!ClaimFlow, "A tile is discarded, therefore the flow should move over to a ron.");
-}
-
-unittest
-{
-	import mahjong.domain.enums;
-	import mahjong.engine.creation;
-	import mahjong.engine.mahjong;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-
-	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	player.startGame(PlayerWinds.east);
-	auto metagame = new Metagame([player]);
-	auto tile = new Tile(Types.dragon, Dragons.green);
-	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
-	switchFlow(flow);
-	player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
-	flow._event.claimTsumo;
-	flow.advanceIfDone;
-	assert(.flow.isOfType!MahjongFlow, "A tsumo is claimed, therefore the flow should move over to the defeault mahjong flow.");
-}
-
-unittest
-{
-	import mahjong.domain.enums;
-	import mahjong.engine.creation;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	gameOpts = new DefaultGameOpts;
-	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	player.startGame(PlayerWinds.east);
-	auto metagame = new Metagame([player]);
-	metagame.initializeRound;
-	metagame.beginRound;
-	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
-	switchFlow(flow);
-	player.closedHand.tiles = "🀐🀐🀐🀐🀘🀘"d.convertToTiles;
-	auto kanTile = player.closedHand.tiles[0];
-	flow._event.declareClosedKan(kanTile);
-	flow.advanceIfDone;
-	assert(.flow.isOfType!TurnFlow, "After declaring a closed kan, the flow should be at the turn again");
-	assert(.flow !is flow, "The flow should be another instance");
-	assert(player.openHand.amountOfKans == 1, "The player should have one kan");
-}
-
-unittest
-{
-	import mahjong.domain.enums;
-	import mahjong.engine.creation;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	gameOpts = new DefaultGameOpts;
-	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	player.startGame(PlayerWinds.east);
-	auto metagame = new Metagame([player]);
-	metagame.initializeRound;
-	metagame.beginRound;
-	auto flow = new TurnFlow(player, metagame, new NullNotificationService);
-	switchFlow(flow);
-	player.closedHand.tiles = "🀐🀘🀘"d.convertToTiles;
-	player.openHand.addPon("🀐🀐🀐"d.convertToTiles);
-	auto kanTile = player.closedHand.tiles[0];
-	flow._event.promoteToKan(kanTile);
-	flow.advanceIfDone;
-	assert(.flow.isOfType!TurnFlow, "After declaring a closed kan, the flow should be at the turn again");
-	assert(.flow !is flow, "The flow should be another instance");
-	assert(player.openHand.amountOfKans == 1, "The player should have one kan");
+    private void handle()
+    in
+    {
+        assert(!isHandled, "The event cannot be handled twice");
+    }
+    do
+    {
+        isHandled = true;
+    }
 }

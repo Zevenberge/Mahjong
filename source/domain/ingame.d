@@ -553,7 +553,7 @@ class Ingame
         assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
     }
 
-    bool canDeclareRiichi(const Tile potentialDiscard)
+    bool canDeclareRiichi(const Tile potentialDiscard) const
     {
         auto remainingTiles = closedHand.tiles.without!((a,b) => a is b)([potentialDiscard]);
         return isPlayerTenpai(remainingTiles, openHand);
@@ -572,16 +572,16 @@ class Ingame
         ingame.canDeclareRiichi(toNotBeDiscardedTile).should.equal(false);
     }
 
-    void declareRiichi(const Tile discard, const Metagame metagame)
+    Tile declareRiichi(const Tile discard, const Metagame metagame)
     {
-        declareRiichi(discard, metagame.isFirstTurn);
+        return declareRiichi(discard, metagame.isFirstTurn);
     }
 
-    private void declareRiichi(const Tile discard, bool isFirstTurn)
+    private Tile declareRiichi(const Tile discard, bool isFirstTurn)
     {
-        this.discard(discard);
         _isRiichi = true;
         _isDoubleRiichi = isFirstTurn;
+        return this.discard(discard);
     }
 
     unittest
@@ -638,6 +638,14 @@ class Ingame
         tile.origin = this;
         tile.open;
         return tile;
+    }
+
+    version(unittest)
+    {
+        void hasDrawnTheirLastTile() pure
+        {
+            _lastTile = closedHand.tiles[0];
+        }
     }
 
     private Tile _lastTile; 
