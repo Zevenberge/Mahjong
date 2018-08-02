@@ -131,8 +131,8 @@ version(unittest)
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.engine.creation;
-	import mahjong.test.utils;
 	auto game = setup(2);
 	auto player2 = game.players[1];
 	player2.startGame(PlayerWinds.east);
@@ -143,16 +143,15 @@ unittest
 	claimFlow._claimEvents[0].handle(new NoRequest);
 	assert(claimFlow.done, "Flow should be done.");
 	claimFlow.advanceIfDone;
-	assert(flow.isOfType!TurnEndFlow, 
-		"When there is no request, the turn should end.");
-	assert(game.currentPlayer == game.players[0], "Player 1 should still be the turn player");
-	assert(player2.game.closedHand.tiles.length == 2, "The player's tiles should be untouched.");
+    flow.should.be.instanceOf!TurnEndFlow.because("there is no request");
+    game.currentPlayer.should.equal(game.players[0]);
+    player2.closedHand.tiles.length.should.equal(2);
 }
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.engine.creation;
-	import mahjong.test.utils;
 	auto game = setup(2);
 	auto player1 = game.players[0];
 	player1.startGame(PlayerWinds.north);
@@ -165,16 +164,15 @@ unittest
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new PonRequest(player2, ponnableTile));
 	claimFlow.advanceIfDone;
-	assert(flow.isOfType!TurnFlow, 
-		"After claiming a pon, the flow should be in the turn flow again");
-	assert(game.currentPlayer == player2, "Player 2 claimed a tile and should be the turn player");
-	assert(player2.game.closedHand.tiles.empty, "The player should not have any tiles left.");
+    flow.should.be.instanceOf!TurnFlow.because("a new turn started after claiming a tile");
+    game.currentPlayer.should.equal(player2);
+    player2.closedHand.tiles.length.should.equal(0);
 }
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.engine.creation;
-	import mahjong.test.utils;
 	auto game = setup(3);
 	auto player2 = game.players[1];
 	player2.startGame(PlayerWinds.east);
@@ -191,21 +189,17 @@ unittest
 			game));
 	claimFlow._claimEvents[1].handle(new PonRequest(player3, ponnableTile));
 	claimFlow.advanceIfDone;
-	assert(flow.isOfType!TurnFlow, 
-		"After claiming a pon, the flow should be in the turn flow again");
-	assert(game.currentPlayer == player3, "Player 3 claimed a tile and should be the turn player");
-	assert(player2.game.closedHand.tiles.length == 2, 
-		"Player 2 should not have claimed left.");
-	assert(player3.game.closedHand.tiles.empty, 
-		"Player 3 should not have any tiles left as he ponned.");
+    flow.should.be.instanceOf!TurnFlow.because("a new turn started after claiming a tile");
+    game.currentPlayer.should.equal(player3);
+    player2.closedHand.tiles.length.should.equal(2);
+    player3.closedHand.tiles.length.should.equal(0);
 }
 
 unittest
 {
 	import core.exception;
-	import std.exception;
+    import fluent.asserts;
 	import mahjong.engine.creation;
-	import mahjong.test.utils;
 	auto game = setup(3);
 	auto player2 = game.players[1];
 	player2.startGame(PlayerWinds.east);
@@ -221,15 +215,13 @@ unittest
 	claimFlow._claimEvents[1].handle(new ChiRequest(player3, ponnableTile,
 			ChiCandidate(player3.game.closedHand.tiles[0], player3.game.closedHand.tiles[1]),
 			game));
-	assertThrown!AssertError(claimFlow.advanceIfDone, 
-		"Player 3 should not be allowed to claim as there is a player in between");
+    claimFlow.advanceIfDone.should.throwException!AssertError;
 }
 
 unittest
 {
     import fluent.asserts;
     import mahjong.engine.creation;
-    import mahjong.test.utils;
     scope(exit) switchFlow(null);
     auto game = setup(2);
     auto player1 = game.players[0];
@@ -250,7 +242,6 @@ unittest
 {
     import fluent.asserts;
     import mahjong.engine.creation;
-    import mahjong.test.utils;
     scope(exit) switchFlow(null);
     auto game = setup(2);
     auto player1 = game.players[0];
