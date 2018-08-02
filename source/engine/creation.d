@@ -134,7 +134,6 @@ version(unittest)
     		++tileNumber;
     	}
     	auto tile = new Tile(typeOfTile, value);
-    	tile.face = face;
     	return tile;
     }
 

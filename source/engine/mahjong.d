@@ -590,8 +590,7 @@ unittest // Check whether the example hands are seen as mahjong hands.
 			isMahjong = scanHandForMahjong(hand, null).isMahjong;
 			assert(isHand == isMahjong, "For %s, the mahjong should be %s".format(line, isHand));
 			write("The mahjong is ", isMahjong, ".  ");
-			foreach(stone; hand) {write(stone);}
-			writeln();
+			writeln(line);
 		}
 		writeln();
 
