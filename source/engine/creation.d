@@ -8,11 +8,47 @@ import mahjong.domain.enums;
 import mahjong.domain.tile;
 import mahjong.engine.sort;
 
+auto allTiles()
+{
+    import std.algorithm : map;
+    import std.range : iota;
+    import mahjong.share.range : flatMap;
+    return iota(Types.wind, Types.ball+1)
+        .map!(type => cast(Types)type)
+        .flatMap!(type =>
+            iota(type.amountOfTiles).map!(value => new Tile(type, value)));
+}
+
+unittest
+{
+    import std.algorithm : any;
+    import fluent.asserts;
+    auto aWind = ComparativeTile(Types.wind, Winds.east);
+    allTiles.any!(tile => aWind.hasEqualValue(tile)).should.equal(true);
+    auto aDragon = ComparativeTile(Types.dragon, Dragons.green);
+    allTiles.any!(tile => aDragon.hasEqualValue(tile)).should.equal(true);
+    auto aCharacter = ComparativeTile(Types.character, Numbers.one);
+    allTiles.any!(tile => aCharacter.hasEqualValue(tile)).should.equal(true);
+    auto aBamboo = ComparativeTile(Types.bamboo, Numbers.five);
+    allTiles.any!(tile => aBamboo.hasEqualValue(tile)).should.equal(true);
+    auto aBall = ComparativeTile(Types.ball, Numbers.nine);
+    allTiles.any!(tile => aBall.hasEqualValue(tile)).should.equal(true);
+    auto noWind = ComparativeTile(Types.wind, Winds.north + 1);
+    allTiles.any!(tile => noWind.hasEqualValue(tile)).should.equal(false);
+    auto noDragon = ComparativeTile(Types.dragon, Dragons.white + 1);
+    allTiles.any!(tile => noDragon.hasEqualValue(tile)).should.equal(false);
+    auto noNumber = ComparativeTile(Types.character, Numbers.nine + 1);
+    allTiles.any!(tile => noNumber.hasEqualValue(tile)).should.equal(false);
+}
+
 void setUpWall(ref Tile[] wall, int dups = 4)
 {
 	for(int i = 0; i < dups; ++i)
 	{
-		wall ~= createSetOfTiles();
+        foreach(tile; allTiles)
+        {
+            wall ~= tile;
+        }
 	}
 	defineDoras(wall);
 }
