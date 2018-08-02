@@ -7,6 +7,7 @@ import mahjong.engine.flow;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.menu.menuitem;
+import mahjong.share.range;
 
 alias TurnOptionController = IngameOptionsController!(TurnOptionFactory, "");
 
@@ -14,39 +15,49 @@ class TurnOptionFactory
 {
     this(const Player player, const Tile selectedTile, const Metagame metagame, TurnEvent turnEvent)
     {
-        addTsumoOption(metagame, player, turnEvent);
-        addPromoteToKanOption(metagame, player, selectedTile, turnEvent);
-        addDeclareClosedKanOption(metagame, player, selectedTile, turnEvent);
-        addDiscardOption(metagame, selectedTile, turnEvent);
+        addTsumoOption(player, turnEvent);
+        addRiichiOption(metagame, player, selectedTile, turnEvent);
+        addPromoteToKanOption(player, selectedTile, turnEvent);
+        addDeclareClosedKanOption(player, selectedTile, turnEvent);
+        addDiscardOption(selectedTile, turnEvent);
         _isDiscardTheOnlyOption = _options.length == 1;
         addCancelOption;
     }
 
-    private void addTsumoOption(const Metagame metagame, const Player player, TurnEvent turnEvent)
+    private void addTsumoOption(const Player player, TurnEvent turnEvent)
     {
         if(!player.canTsumo) return;
-        auto tsumoOption = new TsumoOption(metagame, player, turnEvent);
+        auto tsumoOption = new TsumoOption(player, turnEvent);
         _options ~= tsumoOption;
         _defaultOption = tsumoOption;
     }
 
-    private void addPromoteToKanOption(const Metagame metagame, const Player player, 
+    private void addRiichiOption(const Metagame metagame, const Player player, 
+        const Tile selectedTile, TurnEvent turnEvent)
+    {
+        if(!player.canDeclareRiichi(selectedTile, metagame)) return;
+        auto riichiOption = new RiichiOption(selectedTile, turnEvent);
+        _options ~= riichiOption;
+        if(!_defaultOption) _defaultOption = riichiOption;
+    }
+
+    private void addPromoteToKanOption(const Player player, 
         const Tile selectedTile, TurnEvent turnEvent)
     {
         if(!player.canPromoteToKan(selectedTile)) return;
-        _options ~= new PromoteToKanOption(metagame, player, selectedTile, turnEvent);
+        _options ~= new PromoteToKanOption(player, selectedTile, turnEvent);
     }
 
-    private void addDeclareClosedKanOption(const Metagame metagame, const Player player, 
+    private void addDeclareClosedKanOption(const Player player, 
         const Tile selectedTile, TurnEvent turnEvent)
     {
         if(!player.canDeclareClosedKan(selectedTile)) return;
-        _options ~= new DeclareClosedKanOption(metagame, player, selectedTile, turnEvent);
+        _options ~= new DeclareClosedKanOption(player, selectedTile, turnEvent);
     }
 
-    private void addDiscardOption(const Metagame metagame, const Tile selectedTile, TurnEvent turnEvent)
+    private void addDiscardOption(const Tile selectedTile, TurnEvent turnEvent)
     {
-        auto discardOption = new DiscardOption(metagame, selectedTile, turnEvent);
+        auto discardOption = new DiscardOption(selectedTile, turnEvent);
         _options = discardOption ~ _options;
         if(_defaultOption is null)
         {
@@ -76,6 +87,144 @@ class TurnOptionFactory
     {
         return _isDiscardTheOnlyOption;
     }
+}
+
+version(unittest)
+{
+    import std.algorithm;
+    import std.stdio;
+    import std.string;
+    import mahjong.engine.creation;
+    import mahjong.engine.flow;
+    import mahjong.engine.notifications;
+    import mahjong.test.utils;
+    void assertIn(T)(TurnOptionFactory factory)
+    {
+        assert(factory.options.any!(co => co.isOfType!T), 
+            "TurnOption %s not found.".format(T.stringof));
+    }
+    void assertNotIn(T)(TurnOptionFactory factory)
+    {
+        assert(factory.options.all!(co => !co.isOfType!T), 
+            "TurnOption %s found when it should not.".format(T.stringof));
+    }
+    TurnOptionFactory constructFactory(dstring tilesOfTurnPlayer, size_t indexOfDiscard, 
+        Player player, Metagame metagame)
+    {
+        player.closedHand.tiles = tilesOfTurnPlayer.convertToTiles;
+        auto discardedTile = player.closedHand.tiles[indexOfDiscard];
+        writeln("Discarding ", discardedTile);
+        return new TurnOptionFactory(player, discardedTile, metagame, 
+            new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService),
+                metagame, player, discardedTile));
+    }
+}
+
+unittest
+{
+    import std.array;
+    import fluent.asserts;
+    auto eventHandler = new TestEventHandler;
+    auto player = new Player(eventHandler);
+    auto metagame = new Metagame([player]);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto tiles = "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d;
+    auto factory = constructFactory(tiles, 13, player, metagame);
+    assertIn!CancelOption(factory);
+    assertIn!DiscardOption(factory);
+    assertNotIn!PromoteToKanOption(factory);
+    assertNotIn!DeclareClosedKanOption(factory);
+    assertNotIn!TsumoOption(factory);
+    assertNotIn!RiichiOption(factory);
+    factory.defaultOption.should.be.instanceOf!DiscardOption;
+    factory.isDiscardTheOnlyOption.should.equal(true);
+}
+
+unittest
+{
+    import std.array;
+    import fluent.asserts;
+    auto eventHandler = new TestEventHandler;
+    auto player = new Player(eventHandler);
+    auto metagame = new Metagame([player]);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d;
+    auto factory = constructFactory(tiles, 0, player, metagame);
+    assertIn!CancelOption(factory);
+    assertIn!DiscardOption(factory);
+    assertNotIn!PromoteToKanOption(factory);
+    assertNotIn!DeclareClosedKanOption(factory);
+    assertIn!TsumoOption(factory);
+    assertIn!RiichiOption(factory);
+    factory.defaultOption.should.be.instanceOf!TsumoOption;
+    factory.isDiscardTheOnlyOption.should.equal(false);
+}
+
+unittest
+{
+    import std.array;
+    import fluent.asserts;
+    auto eventHandler = new TestEventHandler;
+    auto player = new Player(eventHandler);
+    auto metagame = new Metagame([player]);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d;
+    auto factory = constructFactory(tiles, 9, player, metagame);
+    assertIn!CancelOption(factory);
+    assertIn!DiscardOption(factory);
+    assertNotIn!PromoteToKanOption(factory);
+    assertIn!DeclareClosedKanOption(factory);
+    assertNotIn!TsumoOption(factory);
+    assertNotIn!RiichiOption(factory);
+    factory.defaultOption.should.be.instanceOf!DiscardOption;
+    factory.isDiscardTheOnlyOption.should.equal(false);
+}
+
+unittest
+{
+    import std.array;
+    import fluent.asserts;
+    auto eventHandler = new TestEventHandler;
+    auto player = new Player(eventHandler);
+    auto metagame = new Metagame([player]);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀗🀗"d;
+    auto openPon = "🀌🀌🀌"d.convertToTiles;
+    player.openHand.addPon(openPon);
+    auto factory = constructFactory(tiles, 8, player, metagame);
+    assertIn!CancelOption(factory);
+    assertIn!DiscardOption(factory);
+    assertIn!PromoteToKanOption(factory);
+    assertNotIn!DeclareClosedKanOption(factory);
+    assertNotIn!TsumoOption(factory);
+    assertNotIn!RiichiOption(factory);
+    factory.defaultOption.should.be.instanceOf!DiscardOption;
+    factory.isDiscardTheOnlyOption.should.equal(false);
+}
+
+unittest
+{
+    import std.array;
+    import fluent.asserts;
+    auto eventHandler = new TestEventHandler;
+    auto player = new Player(eventHandler);
+    auto metagame = new Metagame([player]);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto tiles = "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d;
+    auto factory = constructFactory(tiles, 5, player, metagame);
+    assertIn!CancelOption(factory);
+    assertIn!DiscardOption(factory);
+    assertNotIn!PromoteToKanOption(factory);
+    assertNotIn!DeclareClosedKanOption(factory);
+    assertNotIn!TsumoOption(factory);
+    assertIn!RiichiOption(factory);
+    factory.defaultOption.should.be.instanceOf!RiichiOption;
+    factory.isDiscardTheOnlyOption.should.equal(false);
 }
 
 class TurnOption : MenuItem, IRelevantTiles
@@ -124,16 +273,14 @@ class AssertiveTurnOption : TurnOption
 
 class PromoteToKanOption : AssertiveTurnOption
 {
-    this(const Metagame metagame, const Player player, const Tile selectedTile, TurnEvent event)
+    this(const Player player, const Tile selectedTile, TurnEvent event)
     {
         super("Kan");
-        _metagame = metagame;
         _player = player;
         _selectedTile = selectedTile;
         _event = event;
     }
 
-    private const Metagame _metagame;
     private const Player _player;
     private const Tile _selectedTile;
     private TurnEvent _event;
@@ -151,16 +298,14 @@ class PromoteToKanOption : AssertiveTurnOption
 
 class DeclareClosedKanOption : AssertiveTurnOption
 {
-    this(const Metagame metagame, const Player player, const Tile selectedTile, TurnEvent event)
+    this(const Player player, const Tile selectedTile, TurnEvent event)
     {
         super("Kan");
-        _metagame = metagame;
         _player = player;
         _selectedTile = selectedTile;
         _event = event;
     }
 
-    private const Metagame _metagame;
     private const Player _player;
     private const Tile _selectedTile;
     private TurnEvent _event;
@@ -178,15 +323,13 @@ class DeclareClosedKanOption : AssertiveTurnOption
 
 class TsumoOption : AssertiveTurnOption
 {
-    this(const Metagame metagame, const Player player, TurnEvent event)
+    this(const Player player, TurnEvent event)
     {
         super("Tsumo");
-        _metagame = metagame;
         _player = player;
         _event = event;
     }
 
-    private const Metagame _metagame;
     private const Player _player;
     private TurnEvent _event;
 
@@ -201,17 +344,38 @@ class TsumoOption : AssertiveTurnOption
     }
 }
 
-class DiscardOption : AssertiveTurnOption
+class RiichiOption : AssertiveTurnOption
 {
-    this(const Metagame metagame, const Tile selectedTile, TurnEvent event)
+    this(const Tile selectedTile, TurnEvent event)
     {
-        super("Discard");
-        _metagame = metagame;
+        super("Riichi");
         _selectedTile = selectedTile;
         _event = event;
     }
 
-    private const Metagame _metagame;
+    private const Tile _selectedTile;
+    private TurnEvent _event;
+
+    protected override void apply() 
+    {
+        _event.declareRiichi(_selectedTile);
+    }
+
+    override const(Tile)[] relevantTiles() 
+    {
+        return _event.player.closedHand.tiles.without([_selectedTile]);
+    }
+}
+
+class DiscardOption : AssertiveTurnOption
+{
+    this(const Tile selectedTile, TurnEvent event)
+    {
+        super("Discard");
+        _selectedTile = selectedTile;
+        _event = event;
+    }
+
     private const Tile _selectedTile;
     private TurnEvent _event;
 
@@ -224,110 +388,4 @@ class DiscardOption : AssertiveTurnOption
     {
         return [_selectedTile];
     }
-}
-
-version(unittest)
-{
-    import std.algorithm;
-    import std.string;
-    import mahjong.engine.creation;
-    import mahjong.engine.flow;
-    import mahjong.engine.notifications;
-    import mahjong.test.utils;
-    void assertIn(T)(TurnOptionFactory factory)
-    {
-        assert(factory.options.any!(co => co.isOfType!T), 
-            "TurnOption %s not found.".format(T.stringof));
-    }
-    void assertNotIn(T)(TurnOptionFactory factory)
-    {
-        assert(factory.options.all!(co => !co.isOfType!T), 
-            "TurnOption %s found when it should not.".format(T.stringof));
-    }
-    TurnOptionFactory constructFactory(dstring tilesOfTurnPlayer, size_t indexOfDiscard, 
-        Player player, Metagame metagame)
-    {
-        player.closedHand.tiles = tilesOfTurnPlayer.convertToTiles;
-        auto discardedTile = player.closedHand.tiles[indexOfDiscard];
-        return new TurnOptionFactory(player, discardedTile, metagame, 
-            new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService),
-                metagame, player, discardedTile));
-    }
-}
-
-unittest
-{
-    import std.array;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
-    metagame.initializeRound;
-    metagame.beginRound;
-    auto tiles = "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d;
-    auto factory = constructFactory(tiles, 13, player, metagame);
-    assertIn!CancelOption(factory);
-    assertIn!DiscardOption(factory);
-    assertNotIn!PromoteToKanOption(factory);
-    assertNotIn!DeclareClosedKanOption(factory);
-    assertNotIn!TsumoOption(factory);
-    assert(factory.defaultOption.isOfType!DiscardOption, "The discard option should be the default");
-    assert(factory.isDiscardTheOnlyOption, "Only the discard option should be in there.");
-}
-
-unittest
-{
-    import std.array;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
-    metagame.initializeRound;
-    metagame.beginRound;
-    auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d;
-    auto factory = constructFactory(tiles, 0, player, metagame);
-    assertIn!CancelOption(factory);
-    assertIn!DiscardOption(factory);
-    assertNotIn!PromoteToKanOption(factory);
-    assertNotIn!DeclareClosedKanOption(factory);
-    assertIn!TsumoOption(factory);
-    assert(factory.defaultOption.isOfType!TsumoOption, "The tsumo option should be the default");
-    assert(!factory.isDiscardTheOnlyOption, "Next to discarding the tile, the player can also claim tsumo.");
-}
-
-unittest
-{
-    import std.array;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
-    metagame.initializeRound;
-    metagame.beginRound;
-    auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d;
-    auto factory = constructFactory(tiles, 9, player, metagame);
-    assertIn!CancelOption(factory);
-    assertIn!DiscardOption(factory);
-    assertNotIn!PromoteToKanOption(factory);
-    assertIn!DeclareClosedKanOption(factory);
-    assertNotIn!TsumoOption(factory);
-    assert(factory.defaultOption.isOfType!DiscardOption, "The discard option should be the default");
-    assert(!factory.isDiscardTheOnlyOption, "Next to discarding the tile, the player can also declare a closed kan.");
-}
-unittest
-{
-    import std.array;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
-    metagame.initializeRound;
-    metagame.beginRound;
-    auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀗🀗"d;
-    auto openPon = "🀌🀌🀌"d.convertToTiles;
-    player.openHand.addPon(openPon);
-    auto factory = constructFactory(tiles, 8, player, metagame);
-    assertIn!CancelOption(factory);
-    assertIn!DiscardOption(factory);
-    assertIn!PromoteToKanOption(factory);
-    assertNotIn!DeclareClosedKanOption(factory);
-    assertNotIn!TsumoOption(factory);
-    assert(factory.defaultOption.isOfType!DiscardOption, "The discard option should be the default");
-    assert(!factory.isDiscardTheOnlyOption, "Next to discarding the tile, the player can also upgrade to an open kan.");
 }
