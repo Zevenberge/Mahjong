@@ -58,30 +58,42 @@ class GameEndEvent
 
 unittest
 {
+    import fluent.asserts;
+    import mahjong.engine.opts;
+    gameOpts = new DefaultGameOpts;
+    scope(exit) gameOpts = null;
 	auto eventHandler = new TestEventHandler;
 	auto metagame = new Metagame([eventHandler.createPlayer]);
 	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
 	flow = gameEndFlow;
 	flow.advanceIfDone;
-	assert(flow !is null, "as no-one confirmed, the flow should not be null");
-	assert(flow == gameEndFlow, "The flow should still be the game end flow.");
+    flow.should.not.beNull;
+    flow.should.equal(gameEndFlow);
 }
 
 unittest
 {
+    import fluent.asserts;
+    import mahjong.engine.opts;
+    gameOpts = new DefaultGameOpts;
+    scope(exit) gameOpts = null;
 	auto eventHandler = new TestEventHandler;
 	auto metagame = new Metagame([eventHandler.createPlayer]);
 	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
-	assert(eventHandler.gameEndEvent !is null, "A game end event shouldbe distributed to each player");
+    eventHandler.gameEndEvent.should.not.beNull;
 }
 
 unittest
 {
+    import fluent.asserts;
+    import mahjong.engine.opts;
+    gameOpts = new DefaultGameOpts;
+    scope(exit) gameOpts = null;
 	auto eventHandler = new TestEventHandler;
 	auto metagame = new Metagame([eventHandler.createPlayer]);
 	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
 	flow = gameEndFlow;
 	eventHandler.gameEndEvent.handle;
 	flow.advanceIfDone;
-	assert(flow is null, "When every player agreed that the game ended, the flow should resolve itself");
+    flow.should.beNull;
 }

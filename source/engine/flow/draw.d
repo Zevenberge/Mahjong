@@ -22,31 +22,26 @@ class DrawFlow : Flow
 		switchFlow(new TurnFlow(_player, _metagame, _notificationService));
 	}
 }
-///
+
 unittest
 {
-	import std.stdio;
+    import fluent.asserts;
 	import mahjong.domain.enums;
 	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	
-	writeln("Testing draw flow.");
-	gameOpts = new DefaultGameOpts ;
+
+	gameOpts = new DefaultGameOpts;
+    scope(exit) gameOpts = null;
 	
 	auto player = new Player(new TestEventHandler);
 	player.startGame(PlayerWinds.east);
 	auto metagame = new Metagame([player]);
 	auto wall = new Wall;
 	wall.setUp;
-	writeln("Setup finished.");
 	auto wallLength = wall.length;
-	// The flow of the game determines that it is time to draw.
 	auto drawFlow = new DrawFlow(player, metagame, wall, new NullNotificationService);
 	switchFlow(drawFlow);
 	flow.advanceIfDone;
-	assert(wallLength - 1 == wall.length, "A tile should be taken from the wall.");
-	assert(player.game.closedHand.length == 1, "The player should be given a tile.");
-	assert(flow.isOfType!TurnFlow, 
-		"After drawing, the flow should have switched to the turn");
-	writeln("Draw flow test succeeded.");
+    wall.length.should.equal(wallLength - 1).because("a tile is drawn");
+    player.closedHand.length.should.equal(1).because("they drew a tile");
+    flow.should.be.instanceOf!TurnFlow;
 }
