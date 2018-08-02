@@ -165,6 +165,11 @@ unittest
     dragon.isWind.should.equal(false);
 }
 
+bool isDora(const Tile tile) @property pure
+{
+    return tile.dora > 0;
+}
+
 struct ComparativeTile
 {
     Types type;

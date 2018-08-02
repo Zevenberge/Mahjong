@@ -53,20 +53,22 @@ void setUpWall(ref Tile[] wall, int dups = 4)
 	defineDoras(wall);
 }
 
-Tile[] createSetOfTiles() 
+unittest
 {
-	dchar[] tiles = defineTiles(); // First load all mahjong tiles.
-	return convertToTiles(tiles);
-}
-
-Tile[] convertToTiles(const(dchar)[] faces)
-{
-	Tile[] tiles;
-	foreach(face; stride(faces,1))
-	{
-		tiles ~= getTile(face);
-	}
-	return tiles;
+    import std.algorithm : filter, any;
+    import std.array;
+    import fluent.asserts;
+    Tile[] wall;
+    setUpWall(wall);
+    wall.length.should.equal(136);
+    auto doras = wall.filter!(tile => tile.isDora).array;
+    doras.length.should.equal(3);
+    auto redFiveCharacter = ComparativeTile(Types.character, Numbers.five);
+    doras.any!(tile => tile.hasEqualValue(redFiveCharacter)).should.equal(true);
+    auto redFiveBamboo = ComparativeTile(Types.bamboo, Numbers.five);
+    doras.any!(tile => tile.hasEqualValue(redFiveBamboo)).should.equal(true);
+    auto redFiveBall = ComparativeTile(Types.ball, Numbers.five);
+    doras.any!(tile => tile.hasEqualValue(redFiveBall)).should.equal(true);
 }
 
 private void defineDoras(ref Tile[] wall)
@@ -76,87 +78,77 @@ in
 }
 body
 {
-	++wall[44].dora;
-	++wall[80].dora;
-	++wall[116].dora;
+	++wall[11].dora;
+	++wall[20].dora;
+	++wall[29].dora;
 }
 
-
-private dchar[] defineTiles()
+version(unittest)
 {
-	dchar[] tiles;
-	tiles ~= "🀀🀁🀂🀃🀅🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑🀒🀓🀔🀕🀖🀗🀘🀙🀚🀛🀜🀝🀞🀟🀠🀡"d;
-	return tiles;
-	/* Set of Mahjong tiles in Unicode format
-	 🀀 	🀁 	🀂 	🀃 	🀄 	🀅 	🀆 	🀇 	🀈 	🀉 	🀊 	🀋 	🀌 	🀍 	🀎 	🀏
-	 🀐 	🀑 	🀒 	🀓 	🀔 	🀕 	🀖 	🀗 	🀘 	🀙 	🀚 	🀛 	🀜 	🀝 	🀞 	🀟
-	 🀠 	🀡 	🀢 	🀣 	🀤 	🀥 	🀦 	🀧 	🀨 	🀩 	🀪 	🀫
-	 */
-}
+    Tile[] convertToTiles(const(dchar)[] faces)
+    {
+        Tile[] tiles;
+        foreach(face; stride(faces,1))
+        {
+            tiles ~= getTile(face);
+        }
+        return tiles;
+    }
+    private Tile getTile(dchar face)
+    {
+    	dchar[] tiles = defineTiles(); // Always load the default tile set such that the correct Numbers are compared!!
+    	Types typeOfTile;
+    	int value;
+    	int tileNumber;
+    	foreach(stone; stride(tiles,1))
+    	{
+    		if(stone == face)
+    		{
+    			switch (tileNumber) 
+    			{
+    				case 0: .. case 3:
+    					typeOfTile = Types.wind;
+    					value = tileNumber;
+    					break;
+    				case 4: .. case 6:
+    					typeOfTile = Types.dragon;
+    					value = tileNumber - 4;
+    					break;
+    				case 7: .. case 15:
+    					typeOfTile = Types.character;
+    					value = tileNumber - 7;
+    					break;
+    				case 16: .. case 24:
+    					typeOfTile = Types.bamboo;
+    					value = tileNumber - 16;
+    					break;
+    				case 25: .. case 33:
+    					typeOfTile = Types.ball;
+    					value = tileNumber - 25;
+    					break;
+    				default:
+    					fatal("Could not identify tile by the face. Terminating program.");
+    			}
+    			break;
+    		}
+    		++tileNumber;
+    	}
+    	auto tile = new Tile(typeOfTile, value);
+    	tile.face = face;
+    	return tile;
+    }
 
-
-private Tile getTile(dchar face)
-{
-	dchar[] tiles = defineTiles(); // Always load the default tile set such that the correct Numbers are compared!!
-	Types typeOfTile;
-	int value;
-	int tileNumber;
-	foreach(stone; stride(tiles,1))
-	{
-		if(stone == face)
-		{
-			switch (tileNumber) 
-			{
-				case 0: .. case 3:
-					typeOfTile = Types.wind;
-					value = tileNumber;
-					break;
-				case 4: .. case 6:
-					typeOfTile = Types.dragon;
-					value = tileNumber - 4;
-					break;
-				case 7: .. case 15:
-					typeOfTile = Types.character;
-					value = tileNumber - 7;
-					break;
-				case 16: .. case 24:
-					typeOfTile = Types.bamboo;
-					value = tileNumber - 16;
-					break;
-				case 25: .. case 33:
-					typeOfTile = Types.ball;
-					value = tileNumber - 25;
-					break;
-				default:
-					fatal("Could not identify tile by the face. Terminating program.");
-			}
-			break;
-		}
-		++tileNumber;
-	}
-	auto tile = new Tile(typeOfTile, value);
-	tile.face = face;
-	return tile;
-}
-unittest{
-	import std.stdio;
-	writeln("Checking the labelling of the wall...");
-	Tile[] wall;
-	setUpWall(wall);
-	foreach(stone; wall)
-	{
-		if (stone.face == '🀀')
-		{
-			assert(stone.type == Types.wind);
-			assert(stone.value == Winds.east);
-		} 
-		else if (stone.face == '🀏')
-		{  
-			assert(stone.type == Types.character);
-			assert(stone.value == Numbers.nine);
-		}
-	}
-	writeln(" The tiles are correctly labelled.");
+    private dchar[] defineTiles()
+    {
+        dchar[] tiles;
+        tiles ~= "🀀🀁🀂🀃🀅🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑🀒🀓🀔🀕🀖🀗🀘🀙🀚🀛🀜🀝🀞🀟🀠🀡"d;
+        return tiles;
+        /* Set of Mahjong tiles in Unicode format
+         🀀     🀁  🀂  🀃  🀄  🀅  🀆  🀇  🀈  🀉  🀊  🀋  🀌  🀍  🀎  🀏
+         🀐     🀑  🀒  🀓  🀔  🀕  🀖  🀗  🀘  🀙  🀚  🀛  🀜  🀝  🀞  🀟
+         🀠     🀡  🀢  🀣  🀤  🀥  🀦  🀧  🀨  🀩  🀪  🀫
+         */
+    }
 }
 
 void shuffleWall(ref Tile[] wall)
