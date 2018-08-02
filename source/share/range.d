@@ -56,7 +56,7 @@ unittest
 
 }
 
-template without(alias equality)
+template without(alias equality = (a, b) => a == b)
 {
 	T[] without(T)(T[] arr, T[] exclusion)
 	{
@@ -133,8 +133,16 @@ template flatMap(alias fun) //if(isInputRange!(ReturnType!fun))
 {
 	auto flatMap(Range)(Range range) if(isInputRange!Range)
 	{
-		if(range.empty) return null;
-		return .fold!((a,b) => a ~ b)(range.map!(fun));
+        auto mappedResult = range.map!fun;
+        static if(is(ElementType!(typeof(mappedResult)) == E[], E))
+        {
+            if(mappedResult.empty) return null;
+            return fold!((a, b) => a ~ b)(mappedResult);
+        }
+        else
+        {
+            return joiner(mappedResult);
+        }
 	}
 }
 
@@ -157,6 +165,21 @@ unittest
 	Bubble[] bubbles; // Empty range;
 	auto flattened = bubbles.flatMap!(x => x.ints).array;
 	assert(flattened.length == 0, "Flat-mapping an empty range should return an empty range of the result type");
+}
+
+unittest
+{
+    import std.range : iota;
+    import fluent.asserts;
+    struct Counter
+    {
+        auto oneTwoThree()
+        {
+            return iota(1, 4);
+        }
+    }
+    auto counters = [Counter(), Counter(), Counter()].flatMap!(c => c.oneTwoThree);
+    counters.should.equal([1, 2, 3, 1, 2, 3, 1, 2, 3]);
 }
 
 template atLeastOneUntil()
