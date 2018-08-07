@@ -59,25 +59,21 @@ class GameStartEvent
 
 unittest
 {
-	import std.stdio;
+    import fluent.asserts;
 	import mahjong.engine.opts;
-	import mahjong.test.utils;
 
-	writeln("Testing game start flow");
 	gameOpts = new DefaultGameOpts ;
-
+    scope(exit) gameOpts = null;
 
 	auto eventHandler = new TestEventHandler;
 	auto flow = new GameStartFlow([eventHandler], new NullNotificationService);
-	assert(flow.metagame.players.length == 1, "One player should have been created");
+    flow.metagame.should.not.beNull;
+    flow.metagame.players.length.should.equal(1);
 	switchFlow(flow);
-	assert(.flow.isOfType!GameStartFlow, "GameStartFlow should be set as flow");
-	writeln("Testing whether the flow advances when it should not");
+    .flow.should.be.instanceOf!GameStartFlow;
 	flow.advanceIfDone;
-	assert(.flow.isOfType!GameStartFlow, "As the players are not ready, the flow should not have advanced");
+    .flow.should.be.instanceOf!GameStartFlow.because("the players are not ready");
 	eventHandler.gameStartEvent.isReady = true;
-	writeln("Testing whether the flow advances when it should");
 	flow.advanceIfDone;
-	assert(.flow.isOfType!RoundStartFlow, "As the players are ready, the flow should have advanced to the start of the round");
-	writeln("Game start flow test succeeded.");
+    .flow.should.be.instanceOf!RoundStartFlow.because("the players are ready");
 }

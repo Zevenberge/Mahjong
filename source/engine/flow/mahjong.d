@@ -86,6 +86,10 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
 	import mahjong.engine.creation;
+    import mahjong.engine.opts;
+
+    gameOpts = new DefaultGameOpts ;
+    //scope(exit) gameOpts = null;
 	auto eventhandler = new TestEventHandler;
 	auto player1 = new Player(eventhandler);
 	player1.game = new Ingame(PlayerWinds.east);
