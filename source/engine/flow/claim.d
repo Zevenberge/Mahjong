@@ -112,6 +112,7 @@ class ClaimFlow : Flow
 version(unittest)
 {
 	import mahjong.domain.enums;
+    import mahjong.engine.opts;
 	Metagame setup(size_t amountOfPlayers)
 	{
 		import std.conv;
@@ -119,11 +120,11 @@ version(unittest)
 		Player[] players;
 		for(int i = 0; i < amountOfPlayers; ++i)
 		{
-			auto player = new Player(new TestEventHandler, names[i]);
+			auto player = new Player();
 			player.startGame(i.to!PlayerWinds);
 			players ~= player;
 		}
-		auto metagame = new Metagame(players);
+		auto metagame = new Metagame(players, new DefaultGameOpts);
 		metagame.currentPlayer = players[0];
 		return metagame;
 	}

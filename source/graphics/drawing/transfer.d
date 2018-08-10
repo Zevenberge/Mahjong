@@ -109,16 +109,17 @@ unittest
 	// Hit all the code so that we at least know that there is no null-pointer dereference.
 	import fluent.asserts;
 	import mahjong.domain.player;
+    import mahjong.domain.wrappers;
 	import mahjong.engine.flow;
 	import mahjong.graphics.opts;
 	import mahjong.test.window;
 	styleOpts = new DefaultStyleOpts;
 	drawingOpts = new DefaultDrawingOpts;
 	auto testWindow = new TestWindow;
-	auto player1 = new Player(new TestEventHandler);
-	player1.drawPlayer(testWindow, 0);
-	auto player2 = new Player(new TestEventHandler);
-	player2.drawPlayer(testWindow, 0);
+	auto player1 = new Player();
+	player1.drawPlayer(AmountOfPlayers(2), testWindow, 0);
+	auto player2 = new Player();
+	player2.drawPlayer(AmountOfPlayers(2), testWindow, 0);
 	auto transaction1 = new Transaction(player1, -1500);
 	auto transaction2 = new Transaction(player2, 1500);
 	auto transferScreen = new TransferScreen([transaction1, transaction2]);

@@ -59,11 +59,9 @@ class GameEndEvent
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.player;
     import mahjong.engine.opts;
-    gameOpts = new DefaultGameOpts;
-    scope(exit) gameOpts = null;
-	auto eventHandler = new TestEventHandler;
-	auto metagame = new Metagame([eventHandler.createPlayer]);
+	auto metagame = new Metagame([new Player], new DefaultGameOpts);
 	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
 	flow = gameEndFlow;
 	flow.advanceIfDone;
@@ -74,11 +72,10 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.player;
     import mahjong.engine.opts;
-    gameOpts = new DefaultGameOpts;
-    scope(exit) gameOpts = null;
 	auto eventHandler = new TestEventHandler;
-	auto metagame = new Metagame([eventHandler.createPlayer]);
+	auto metagame = new Metagame([new Player(eventHandler, 30_000)], new DefaultGameOpts);
 	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
     eventHandler.gameEndEvent.should.not.beNull;
 }
@@ -86,11 +83,10 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.player;
     import mahjong.engine.opts;
-    gameOpts = new DefaultGameOpts;
-    scope(exit) gameOpts = null;
 	auto eventHandler = new TestEventHandler;
-	auto metagame = new Metagame([eventHandler.createPlayer]);
+	auto metagame = new Metagame([new Player(eventHandler, 30_000)], new DefaultGameOpts);
 	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
 	flow = gameEndFlow;
 	eventHandler.gameEndEvent.handle;

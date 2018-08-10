@@ -1,5 +1,7 @@
 module mahjong.domain.player;
 
+import std.algorithm : map;
+import std.array : array;
 import std.experimental.logger;
 import std.string;
 import std.uuid;
@@ -31,20 +33,15 @@ class Player
     {
         this()
         {
-            this(new TestEventHandler);
+            this(new TestEventHandler, 30_000);
         }
     }
 
-	this(GameEventHandler eventHandler)
+	this(GameEventHandler eventHandler, int initialScore)
 	{
 		id = randomUUID;
-		_score = gameOpts.initialScore;
+		_score = initialScore;
 		this.eventHandler = eventHandler;
-	}
-	this(GameEventHandler eventHandler, dstring name)
-	{
-		this.name = name;
-		this(eventHandler);
 	}
 
 	void startGame(PlayerWinds wind)
@@ -69,15 +66,14 @@ class Player
     {
         import fluent.asserts;
         import mahjong.engine.creation;
-        gameOpts = new DefaultGameOpts;
-        auto player = new Player(new TestEventHandler);
+        auto player = new Player();
         player.startGame(PlayerWinds.east);
         player.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
-        auto player2 = new Player(new TestEventHandler);
+        auto player2 = new Player();
         player2.startGame(PlayerWinds.south);
-        auto player3 = new Player(new TestEventHandler);
+        auto player3 = new Player();
         player3.startGame(PlayerWinds.west);
-        auto metagame = new Metagame([player, player2, player3]);
+        auto metagame = new Metagame([player, player2, player3], new DefaultGameOpts);
         metagame.currentPlayer = player3;
         auto chiableTile = "🀕"d.convertToTiles[0];
         chiableTile.origin = player3;
@@ -95,7 +91,7 @@ class Player
 
     Tile declareRiichi(const Tile discard, Metagame metagame)
     {
-        _score -= gameOpts.riichiFare;
+        _score -= metagame.riichiFare;
         metagame.riichiIsDeclared;
         return game.declareRiichi(discard, metagame);
     }
@@ -104,10 +100,8 @@ class Player
     {
         import fluent.asserts;
         import mahjong.engine.opts;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
-        auto player = new Player(new TestEventHandler);
-        auto metagame = new Metagame([player]);
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         player.game = ingame;
@@ -130,8 +124,7 @@ class Player
 
     unittest
     {
-        gameOpts = new DefaultGameOpts;
-        auto player = new Player(new TestEventHandler);
+        auto player = new Player(new TestEventHandler, 30_000);
         auto transaction = new Transaction(player, 5000);
         player.applyTransaction(transaction);
         assert(player.score == 35000, "The amount should have been added to the player's score.");
@@ -139,8 +132,7 @@ class Player
 
     unittest
     {
-        gameOpts = new DefaultGameOpts;
-        auto player = new Player(new TestEventHandler);
+        auto player = new Player(new TestEventHandler, 30_000);
         auto transaction = new Transaction(player, -5000);
         player.applyTransaction(transaction);
         assert(player.score == 25000, "The amount should have been subtracted from the player's score.");
@@ -150,9 +142,8 @@ class Player
     {
         import core.exception;
         import std.exception;
-        gameOpts = new DefaultGameOpts;
-        auto player1 = new Player(new TestEventHandler);
-        auto player2 = new Player(new TestEventHandler);
+        auto player1 = new Player();
+        auto player2 = new Player();
         auto transaction = new Transaction(player2, 5000);
         assertThrown!AssertError(player1.applyTransaction(transaction), "Applying someone else's transaction should not be allowed.");
     }
@@ -170,5 +161,7 @@ class Player
 	}
 }
 
-
-
+Player[] createPlayers(GameEventHandler[] eventHandlers, Opts opts)
+{
+    return eventHandlers.map!(d => new Player(d, opts.initialScore)).array;
+}

@@ -29,13 +29,10 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.engine.opts;
 
-	gameOpts = new DefaultGameOpts;
-    scope(exit) gameOpts = null;
-	
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player;
 	player.startGame(PlayerWinds.east);
-	auto metagame = new Metagame([player]);
-	auto wall = new Wall;
+	auto metagame = new Metagame([player], new DefaultGameOpts);
+	auto wall = new Wall(new DefaultGameOpts);
 	wall.setUp;
 	auto wallLength = wall.length;
 	auto drawFlow = new DrawFlow(player, metagame, wall, new NullNotificationService);

@@ -15,6 +15,8 @@ import mahjong.graphics.eventhandler;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
 import mahjong.graphics.popup.service;
+alias Opts = mahjong.engine.opts.Opts;
+alias DrawingOpts = mahjong.graphics.opts.Opts;
 
 private MainMenu _mainMenu;
 MainMenu composeMainMenu()
@@ -45,9 +47,9 @@ MainMenu composeMainMenu()
 private void startRiichiMahjong()
 {
 	info("Riichi mahjong selected");
-	drawingOpts = new DefaultDrawingOpts;
-	gameOpts = new DefaultGameOpts;
 	startGame(
+        new DefaultGameOpts,
+        new DefaultDrawingOpts,
 		new UiEventHandler, 
 		new AiEventHandler(new SimpleAI), 
 		new AiEventHandler(new SimpleAI), 
@@ -56,51 +58,42 @@ private void startRiichiMahjong()
 ///
 unittest
 {
-	import std.stdio;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	writeln("Testing the start of the normal mahjong.");
+    import fluent.asserts;
+    import mahjong.domain.enums;
 	setDefaultTestController;
 	startRiichiMahjong;
-	assert(Controller.instance.isOfType!IdleController, 
-		"The controller should be instantiated");
-	assert(drawingOpts.isOfType!DefaultDrawingOpts, 
-		"For simple riichi mahjong, the drawing options should be the default");
-	assert(gameOpts.isOfType!DefaultGameOpts,
-		"For simple riichi mahjong, the game options should be the default");
-	writeln("Test of the start of the normal mahjong succeeded.");
+    Controller.instance.should.be.instanceOf!IdleController;
+    drawingOpts.should.be.instanceOf!DefaultDrawingOpts;
+    (cast(GameController)Controller.instance).gameMode.should.equal(GameMode.Riichi);
 }
 
 private void startBambooBattle()
 {
 	info("Bamboo battle selected");
-	drawingOpts = new BambooDrawingOpts;
-	gameOpts = new BambooOpts;
 	startGame(
+        new DefaultBambooOpts,
+        new BambooDrawingOpts,
 		new UiEventHandler, 
 		new AiEventHandler(new SimpleAI));
 }
 ///
 unittest
 {
-	import std.stdio;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	writeln("Testing the start of the bamboo mahjong.");
+    import fluent.asserts;
+    import mahjong.domain.enums;
 	setDefaultTestController;
 	startBambooBattle;
-	assert(Controller.instance.isOfType!IdleController, 
-		"The controller should be instantiated");
-	assert(drawingOpts.isOfType!BambooDrawingOpts, 
-		"For bamboo riichi mahjong, the drawing options should be specific");
-	assert(gameOpts.isOfType!BambooOpts,
-		"For bamboo riichi mahjong, the game options should be specific");
-	writeln("Test of the start of the normal mahjong succeeded.");
+    Controller.instance.should.be.instanceOf!IdleController;
+    drawingOpts.should.be.instanceOf!BambooDrawingOpts;
+    (cast(GameController)Controller.instance).gameMode.should.equal(GameMode.Bamboo);
 }
 
-private void startGame(GameEventHandler[] eventHandlers...)
+private void startGame(
+    Opts gameOpts, DrawingOpts drawingOpts,
+    GameEventHandler[] eventHandlers...)
 {
-	switchFlow(new GameStartFlow(eventHandlers, new PopupService));
+    .drawingOpts = drawingOpts;
+	switchFlow(new GameStartFlow(eventHandlers, gameOpts, new PopupService));
 	trace("Initiated Game Start Flow");
 }
 

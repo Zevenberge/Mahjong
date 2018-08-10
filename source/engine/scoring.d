@@ -11,6 +11,7 @@ import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
+import mahjong.domain.wrappers;
 import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
@@ -22,20 +23,21 @@ Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
     auto yaku = mahjong.result.determineYaku(mahjong.player, metagame);
     auto miniPoints = mahjong.calculateMiniPoints(metagame.leadingWind);
     auto amountOfDoras = mahjong.result.countAmountOfDoras(metagame.wall);
-    return new Scoring(yaku, miniPoints, amountOfDoras, metagame.counters, mahjong.player.isClosedHand);
+    return new Scoring(yaku, miniPoints, amountOfDoras, metagame.counters, mahjong.player.isClosedHand, metagame.amountOfPlayers);
 }
 
 class Scoring
 {
     private this(const(Yaku)[] yakus, size_t miniPoints, 
         size_t amountOfDoras, size_t amountOfCounters,
-        bool isClosedHand)
+        bool isClosedHand, AmountOfPlayers amountOfPlayers)
     {
         this.yakus = yakus;
         this.miniPoints = miniPoints.roundMiniPoints;
         this.amountOfDoras = amountOfDoras;
         this.amountOfCounters = amountOfCounters;
         _isClosedHand = isClosedHand;
+        _amountOfPlayers = amountOfPlayers;
     }
 
     const(Yaku)[] yakus;
@@ -43,6 +45,7 @@ class Scoring
     const size_t amountOfDoras;
     const size_t amountOfCounters;
     private bool _isClosedHand;
+    private AmountOfPlayers _amountOfPlayers;
 
     Payment calculatePayment(bool isWinningPlayerEast)
     {
@@ -58,20 +61,19 @@ class Scoring
     private Payment calculatePaymentForLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
     {
         auto rawPayment = findRawPaymentForLimitHands(amountOfFan);
-        return new Payment(rawPayment.east, rawPayment.nonEast, amountOfCounters, isWinningPlayerEast);
+        return new Payment(rawPayment.east, rawPayment.nonEast, amountOfCounters, isWinningPlayerEast, _amountOfPlayers);
     }
 
     private Payment calculatePaymentForNonLimitHands(size_t amountOfFan, bool isWinningPlayerEast)
     {
         auto rawPayment = prelimitScores[amountOfFan][miniPoints];
-        return new Payment(rawPayment.east, rawPayment.nonEast, amountOfCounters, isWinningPlayerEast);
+        return new Payment(rawPayment.east, rawPayment.nonEast, amountOfCounters, isWinningPlayerEast, _amountOfPlayers);
     }
 }
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 0, false);
+    auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.east == 4000, "Payment should be issued for a mangan");
     assert(payment.nonEast == 2000, "Payment should be issued for a mangan");
@@ -80,8 +82,7 @@ unittest
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 1, false);
+    auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 1, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.east == 4100, "Every player should pay 100 extra for every counter");
     assert(payment.nonEast == 2100, "Every player should pay 100 extra for every counter");
@@ -90,8 +91,7 @@ unittest
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto scoring = new Scoring([Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou], 46, 0, 0, false);
+    auto scoring = new Scoring([Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou], 46, 0, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.east == 3200, "3 fan 50 is 3200 for east");
     assert(payment.nonEast == 1600, "3 fan 50 is 1600 for non-east");
@@ -100,8 +100,7 @@ unittest
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto scoring = new Scoring([Yaku.chiiToitsu], 25, 0, 0, false);
+    auto scoring = new Scoring([Yaku.chiiToitsu], 25, 0, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     // Tsumo is not possible.
     assert(payment.ron == 1600, "2 fan 25 mp equals 2000 in a non-east ron");
@@ -109,35 +108,36 @@ unittest
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto scoring = new Scoring([Yaku.riichi], 30, 4, 0, false);
+    auto scoring = new Scoring([Yaku.riichi], 30, 4, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.ron == 8000, "1 yaku + 4 dora is a mangan");
 }
 
 class Payment
 {
-    this(int east, int nonEast, size_t counters, bool isWinningPlayerEast)
+    this(int east, int nonEast, size_t counters, bool isWinningPlayerEast,
+        AmountOfPlayers amountOfPlayers)
     {
+        _amountOfPlayers = amountOfPlayers.value.to!int;
         auto extraPaymentForCounters = 100 * counters.to!int;
         this.east = east + extraPaymentForCounters;
         // If the winning player is east, all non-easy players pay the east level.
         this.nonEast = (isWinningPlayerEast ? east : nonEast) + extraPaymentForCounters;
     }
 
+    private const int _amountOfPlayers;
     const int east;
     const int nonEast;
     int ron() @property
     {
         // Sum the payments of every player.
-        return east + (gameOpts.amountOfPlayers - 2) * nonEast;
+        return east + (_amountOfPlayers - 2) * nonEast;
     }
 }
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto payment = new Payment(2000, 1000, 0, false);
+    auto payment = new Payment(2000, 1000, 0, false, AmountOfPlayers(4));
     assert(payment.east == 2000, "The east value should have been initialized at 2000");
     assert(payment.nonEast == 1000, "The non-east value should have been initialized at the base value of 1000");
     assert(payment.ron == 4000, "The ron payment should be east + 2*non-east");
@@ -145,8 +145,7 @@ unittest
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto payment = new Payment(2000, 1000, 4, false);
+    auto payment = new Payment(2000, 1000, 4, false, AmountOfPlayers(4));
     assert(payment.east == 2400, "Each player pays 400 extra");
     assert(payment.nonEast == 1400, "Each player pays 400 extra");
     assert(payment.ron == 5200, "Each players pays 400 extra, totalling 1200 extra");
@@ -154,8 +153,7 @@ unittest
 
 unittest
 {
-    gameOpts = new DefaultGameOpts;
-    auto payment = new Payment(2000, 1000, 0, true);
+    auto payment = new Payment(2000, 1000, 0, true, AmountOfPlayers(4));
     assert(payment.east == 2000, "The east value should again have been initialized at 2000");
     assert(payment.nonEast == 2000, "Because east won, the non-east players also pay 2000");
     assert(payment.ron == 6000, "The ron payment should be 3*east");
@@ -163,8 +161,7 @@ unittest
 
 unittest
 {
-    gameOpts = new BambooOpts;
-    auto payment = new Payment(2000, 1000, 0, false);
+    auto payment = new Payment(2000, 1000, 0, false, AmountOfPlayers(2));
     assert(payment.east == 2000, "The east value should have been initialized at 2000");
     // Non east is not actually relevant.
     assert(payment.ron == 2000, "The ron payment should be simply east, because there are no other players.");
@@ -172,8 +169,7 @@ unittest
 
 unittest
 {
-    gameOpts = new BambooOpts;
-    auto payment = new Payment(2000, 1000, 0, true);
+    auto payment = new Payment(2000, 1000, 0, true, AmountOfPlayers(2));
     assert(payment.east == 2000, "The east value should have been initialized at 2000 and is invariant of who won.");
     // Non east is not actually relevant.
     assert(payment.ron == 2000, "The ron payment should be simply east, because there are no other players and is invariant of who won.");
@@ -181,8 +177,7 @@ unittest
 
 unittest
 {
-    gameOpts = new BambooOpts;
-    auto payment = new Payment(2000, 1000, 3, true);
+    auto payment = new Payment(2000, 1000, 3, true, AmountOfPlayers(2));
     assert(payment.east == 2300, "The payment should be upped by 100 for each counter.");
     // Non east is not actually relevant.
     assert(payment.ron == 2300, "As there is only one other player, the total payment is also upped with only 100 per counter..");
@@ -200,14 +195,13 @@ unittest
 {
     import mahjong.engine.creation;
     import mahjong.engine.flow;
-    gameOpts = new BambooOpts;
     auto wall = new MockWall(new Tile(Types.dragon, Dragons.red));
-    auto player1 = new Player(new TestEventHandler);
+    auto player1 = new Player();
     player1.game = new Ingame(PlayerWinds.east);
     player1.drawTile(wall);
-    auto player2 = new Player(new TestEventHandler);
+    auto player2 = new Player();
     player2.game = new Ingame(PlayerWinds.south);
-    auto metagame = new Metagame([player1, player2]);
+    auto metagame = new Metagame([player1, player2], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
     auto mahjongData = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
     auto transactions = [mahjongData].toTransactions(metagame);
@@ -219,18 +213,17 @@ unittest
 {
     import mahjong.engine.creation;
     import mahjong.engine.flow;
-    gameOpts = new BambooOpts;
-    auto player1 = new Player(new TestEventHandler);
+    auto player1 = new Player();
     player1.game = new Ingame(PlayerWinds.east);
     player1.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
-    auto player2 = new Player(new TestEventHandler);
+    auto player2 = new Player();
     player2.game = new Ingame(PlayerWinds.south);
-    auto player3 = new Player(new TestEventHandler);
+    auto player3 = new Player();
     player3.game = new Ingame(PlayerWinds.west);
     auto tile = new Tile(Types.dragon, Dragons.red);
     tile.origin = player2;
     player1.ron(tile);
-    auto metagame = new Metagame([player1, player2, player3]);
+    auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
     auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
     auto transactions = [mahjongData1].toTransactions(metagame);
@@ -242,20 +235,19 @@ unittest
 {
     import mahjong.engine.creation;
     import mahjong.engine.flow;
-    gameOpts = new BambooOpts;
-    auto player1 = new Player(new TestEventHandler);
+    auto player1 = new Player();
     player1.game = new Ingame(PlayerWinds.east);
     player1.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
-    auto player2 = new Player(new TestEventHandler);
+    auto player2 = new Player();
     player2.game = new Ingame(PlayerWinds.south);
-    auto player3 = new Player(new TestEventHandler);
+    auto player3 = new Player();
     player3.game = new Ingame(PlayerWinds.west);
     player3.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
     auto tile = new Tile(Types.dragon, Dragons.red);
     tile.origin = player2;
     player1.ron(tile);
     player3.ron(tile);
-    auto metagame = new Metagame([player1, player2, player3]);
+    auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
     auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
     auto mahjongData2 = MahjongData(player3, MahjongResult(true, [new SevenPairsSet(null)]));
@@ -292,7 +284,7 @@ private Transaction[] getRiichiTransactions(const Metagame metagame, const Mahjo
     if(mahjongData.length == 1)
     {
         auto player = mahjongData[0].player;
-        return [new Transaction(player, metagame.amountOfRiichiSticks * gameOpts.riichiFare)];
+        return [new Transaction(player, metagame.amountOfRiichiSticks * metagame.riichiFare)];
     }
     return splitRiichiSticksPerPlayer(metagame, mahjongData);
 }
@@ -303,7 +295,7 @@ version(unittest)
     {
         this(int amountOfRiichiSticks)
         {
-            super([new Player()]);
+            super([new Player()], new DefaultGameOpts);
             _amountOfRiichiSticks = amountOfRiichiSticks;
         }
         private int _amountOfRiichiSticks;
@@ -327,8 +319,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    gameOpts = new DefaultGameOpts;
-    scope(exit) gameOpts = null;
     auto winningPlayer = new Player;
     auto metagame = new RiichiStickMetagame(42);
     auto mahjongData = MahjongData(winningPlayer, MahjongResult(true, null));
@@ -356,15 +346,13 @@ private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const 
         if(i > metagame.amountOfRiichiSticks) break;
     }
     return mahjongData
-        .map!(md => new Transaction(md.player, riichiSticksPerPlayer[md.player] * gameOpts.riichiFare))
+        .map!(md => new Transaction(md.player, riichiSticksPerPlayer[md.player] * metagame.riichiFare))
         .array;
 }
 
 unittest
 {
     import fluent.asserts;
-    gameOpts = new DefaultGameOpts;
-    scope(exit) gameOpts = null;
     auto player1 = new Player;
     auto player2 = new Player;
     auto metagame = new RiichiStickMetagame(42);
@@ -383,8 +371,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    gameOpts = new DefaultGameOpts;
-    scope(exit) gameOpts = null;
     auto player1 = new Player;
     auto player2 = new Player;
     auto metagame = new RiichiStickMetagame(41);
@@ -450,8 +436,7 @@ class Transaction
 unittest
 {
     import mahjong.engine.flow;
-    gameOpts = new DefaultGameOpts;
-    auto player = new Player(new TestEventHandler);
+    auto player = new Player();
     auto transactionA = new Transaction(player, 1234);
     auto transactionB = new Transaction(player, 5678);
     auto sumOfTransactions = transactionA + transactionB;
@@ -465,8 +450,8 @@ unittest
     import std.exception;
     import core.exception;
     import mahjong.engine.flow;
-    auto player = new Player(new TestEventHandler);
-    auto player2 = new Player(new TestEventHandler);
+    auto player = new Player();
+    auto player2 = new Player();
     auto transactionA = new Transaction(player, 123);
     auto transactionB = new Transaction(player2, 456);
     assertThrown!AssertError(transactionA + transactionB, "Summing transactions of two different player is not allowed.");
@@ -587,6 +572,7 @@ version(unittest)
     {
         this(const(Tile)[] doraIndicators)
         {
+            super(new DefaultGameOpts);
             _doraIndicators = doraIndicators;
         }
         private const(Tile)[] _doraIndicators;

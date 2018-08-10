@@ -146,10 +146,10 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        ingame.declareRiichi(ingame.closedHand.tiles.front, 
+            new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.origin = new Ingame(PlayerWinds.north);
         ingame.isChiable(tile).should.equal(false);
@@ -192,7 +192,6 @@ class Ingame
         return closedHand.isPonnable(discard);
     }
 
-
     unittest
     {
         import fluent.asserts;
@@ -212,10 +211,10 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        ingame.declareRiichi(ingame.closedHand.tiles.front, 
+            new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.origin = new Ingame(PlayerWinds.north);
         ingame.isPonnable(tile).should.equal(false);
@@ -245,6 +244,7 @@ class Ingame
         {
             this(bool isMaxAmountOfKansReached)
             {
+                super(new DefaultGameOpts);
                 _isMaxAmountOfKansReached = isMaxAmountOfKansReached;
             }
             private const bool _isMaxAmountOfKansReached;
@@ -271,13 +271,13 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        ingame.declareRiichi(ingame.closedHand.tiles.front, 
+            new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.origin = new Ingame(PlayerWinds.north);
-        ingame.isKannable(tile, new Wall).should.equal(false);
+        ingame.isKannable(tile, new Wall(new DefaultGameOpts)).should.equal(false);
     }
 
     void kan(Tile discard, Wall wall)
@@ -295,7 +295,8 @@ class Ingame
         import fluent.asserts;
         import mahjong.domain.exceptions;
         import mahjong.engine.creation;
-        auto wall = new Wall;
+        import mahjong.engine.opts;
+        auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
         wall.dice;
         auto game = new Ingame(PlayerWinds.east, "🀕🀕🀕"d);
@@ -368,8 +369,6 @@ class Ingame
     unittest
     {
         import mahjong.engine.creation;
-        import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
@@ -390,8 +389,6 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
-        import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
@@ -403,8 +400,6 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
-        import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto randomTile = "🀀"d.convertToTiles[0];
@@ -416,8 +411,6 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
-        import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
@@ -445,12 +438,11 @@ class Ingame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
         auto tile = ingame.closedHand.tiles.back;
         auto initialLength = ingame.closedHand.tiles.length;
-        auto wall = new Wall;
+        auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
         wall.dice;
         ingame.canDeclareClosedKan(tile).should.equal(true);
@@ -477,14 +469,13 @@ class Ingame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
         auto tile = ingame.closedHand.tiles.back;
         tile.origin = new Ingame(PlayerWinds.south);
         ingame.pon(tile);
         auto initialLength = ingame.closedHand.tiles.length;
-        auto wall = new Wall;
+        auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
         wall.dice;
         ingame.canPromoteToKan(ingame.closedHand.tiles.back).should.equal(true);
@@ -531,7 +522,6 @@ class Ingame
     {
         import mahjong.engine.creation;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ponTile = "🀟"d.convertToTiles[0];
@@ -544,7 +534,6 @@ class Ingame
     {
         import mahjong.engine.creation;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto chiTile = "🀡"d.convertToTiles[0];
@@ -562,9 +551,6 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(true);
@@ -588,8 +574,6 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.opts;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.isRiichi.should.equal(false);
@@ -603,9 +587,6 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.declareRiichi(toBeDiscardedTile, true);
@@ -676,12 +657,11 @@ class Ingame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
         ingame.couldHaveClaimed(ronTile);
-        auto wall = new Wall;
+        auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
         wall.dice;
         ingame.drawTile(wall);
@@ -695,13 +675,12 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        ingame.declareRiichi(ingame.closedHand.tiles.front, new Metagame([new Player(new TestEventHandler)]));
+        ingame.declareRiichi(ingame.closedHand.tiles.front, false);
         auto ronTile = "🀡"d.convertToTiles[0];
         ingame.couldHaveClaimed(ronTile);
-        auto wall = new Wall;
+        auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
         wall.dice;
         ingame.drawTile(wall);
@@ -742,9 +721,9 @@ unittest
         .because("there are multiple discards");
 }
 
-bool hasAllTheKans(const Ingame game) @property
+bool hasAllTheKans(const Ingame game, int maxAmountOfKans)
 {
-    return game.openHand.hasAllKans;
+    return game.openHand.hasAllKans(maxAmountOfKans);
 }
 
 bool canDiscard(const Ingame game, const Tile potentialDiscard) pure

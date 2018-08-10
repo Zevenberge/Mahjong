@@ -30,20 +30,19 @@ class TurnFlow : Flow
 
     unittest
     {
+        import fluent.asserts;
         import mahjong.domain.enums;
         import mahjong.engine.opts;
-        import mahjong.test.utils;
 
-        auto eventHandler = new TestEventHandler;
-        auto player = new Player(eventHandler);
+        auto player = new Player();
         player.startGame(PlayerWinds.east);
-        auto metagame = new Metagame([player]);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         auto tile = new Tile(Types.dragon, Dragons.green);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService);
         switchFlow(flow);
-        assert(.flow.isOfType!TurnFlow, "TurnFlow should be set as flow");
+        .flow.should.be.instanceOf!TurnFlow;
         flow.advanceIfDone;
-        assert(.flow.isOfType!TurnFlow, "As the player is not ready, the flow should not have advanced");
+        .flow.should.be.instanceOf!TurnFlow.because("the player is not ready");
     }
 
 	private: 
@@ -153,6 +152,7 @@ class TurnEvent
         {
             this(Tile tileToDraw)
             {
+                super(new DefaultGameOpts);
                 _tileToDraw = tileToDraw;
             }
             private Tile _tileToDraw;
@@ -162,12 +162,9 @@ class TurnEvent
             }
         }
 
-        gameOpts = new DefaultGameOpts;
-
-        auto eventHandler = new TestEventHandler;
-        auto player = new Player(eventHandler);
+        auto player = new Player();
         player.startGame(PlayerWinds.east);
-        auto metagame = new Metagame([player]);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         auto tile = new Tile(Types.dragon, Dragons.green);
         auto wall = new MockWall(tile);
         player.drawTile(wall);
@@ -190,11 +187,9 @@ class TurnEvent
         import mahjong.domain.enums;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
-        auto eventHandler = new TestEventHandler;
-        auto player = new Player(eventHandler);
+        auto player = new Player();
         player.startGame(PlayerWinds.east);
-        auto metagame = new Metagame([player]);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
         auto flow = new TurnFlow(player, metagame, new NullNotificationService);
@@ -221,11 +216,9 @@ class TurnEvent
         import mahjong.domain.enums;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
-        gameOpts = new DefaultGameOpts;
-        auto eventHandler = new TestEventHandler;
-        auto player = new Player(eventHandler);
+        auto player = new Player();
         player.startGame(PlayerWinds.east);
-        auto metagame = new Metagame([player]);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
         auto flow = new TurnFlow(player, metagame, new NullNotificationService);
@@ -254,12 +247,11 @@ class TurnEvent
         import mahjong.engine.mahjong;
         import mahjong.engine.opts;
 
-        auto eventHandler = new TestEventHandler;
-        auto player = new Player(eventHandler);
+        auto player = new Player();
         player.startGame(PlayerWinds.east);
         player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
         player.hasDrawnTheirLastTile;
-        auto metagame = new Metagame([player]);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService);
         switchFlow(flow);
         flow._event.claimTsumo;
@@ -282,9 +274,8 @@ class TurnEvent
         import mahjong.engine.mahjong;
         import mahjong.engine.opts;
 
-        auto eventHandler = new TestEventHandler;
-        auto player = new Player(eventHandler);
-        auto metagame = new Metagame([player]);
+        auto player = new Player();
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         player.startGame(PlayerWinds.east);
         player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;

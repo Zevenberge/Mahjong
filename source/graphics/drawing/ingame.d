@@ -7,6 +7,7 @@ import std.range;
 import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.ingame;
+import mahjong.domain.wrappers;
 import mahjong.graphics.conv;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.closedhand;
@@ -17,9 +18,10 @@ import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 
 alias drawIngame = draw;
-void draw(const Ingame ingame, RenderTarget view)
+void draw(const Ingame ingame, const AmountOfPlayers amountOfPlayers,
+    RenderTarget view)
 {
-	auto drawable = getDrawable(ingame);
+    auto drawable = getDrawable(ingame, amountOfPlayers);
 	drawable.draw(view);
 }
 
@@ -32,12 +34,13 @@ void clearIngameCache()
 }
 
 private IngameDrawable[UUID] _ingameDrawables;
-private IngameDrawable getDrawable(const Ingame ingame)
+private IngameDrawable getDrawable(const Ingame ingame,
+    const AmountOfPlayers amountOfPlayers)
 {
 	if(ingame.id !in _ingameDrawables)
 	{
 		trace("Initialising new ingame drawable");
-		auto drawable = new IngameDrawable(ingame);
+		auto drawable = new IngameDrawable(ingame, amountOfPlayers);
 		_ingameDrawables[ingame.id] = drawable;
 		return drawable;
 	}
@@ -48,17 +51,19 @@ private class IngameDrawable
 {
 	size_t previousAmountOfDiscards;
 	
-	this(const Ingame game)
+	this(const Ingame game, const AmountOfPlayers amountOfPlayers)
 	{
 		_game = game;
+        _amountOfPlayers = amountOfPlayers;
 	}
 	
 	private const Ingame _game;
+    private const AmountOfPlayers _amountOfPlayers;
 	
 	void draw(RenderTarget target)
 	{
 		_game.closedHand.drawClosedHand(target);
-		_game.openHand.drawOpenHand(_game, target);
+		_game.openHand.drawOpenHand(_game, _amountOfPlayers, target);
 		drawDiscards(target);
 	}
 

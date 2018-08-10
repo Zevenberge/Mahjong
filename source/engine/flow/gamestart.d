@@ -10,15 +10,18 @@ import mahjong.engine.opts;
 
 class GameStartFlow : Flow
 {
-	this(GameEventHandler[] eventHandlers, INotificationService notificationService)
+	this(GameEventHandler[] eventHandlers, Opts gameOpts,
+        INotificationService notificationService)
 	in
 	{
 		assert(!eventHandlers.empty, "Expected at least a single event handler");
+        assert(gameOpts !is null, "Options were not supplied");
 	}
 	body
 	{
 		info("Starting game.");
-		auto game = gameOpts.createMetagame(eventHandlers);
+        auto players = eventHandlers.map!(eh => new Player(eh, gameOpts.initialScore)).array;
+        auto game = new Metagame(players, gameOpts);
 		super(game, notificationService);
 		_events = eventHandlers.map!((handler) 
 			{
@@ -60,13 +63,9 @@ class GameStartEvent
 unittest
 {
     import fluent.asserts;
-	import mahjong.engine.opts;
-
-	gameOpts = new DefaultGameOpts ;
-    scope(exit) gameOpts = null;
 
 	auto eventHandler = new TestEventHandler;
-	auto flow = new GameStartFlow([eventHandler], new NullNotificationService);
+	auto flow = new GameStartFlow([eventHandler], new DefaultGameOpts, new NullNotificationService);
     flow.metagame.should.not.beNull;
     flow.metagame.players.length.should.equal(1);
 	switchFlow(flow);

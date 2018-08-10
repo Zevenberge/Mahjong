@@ -97,15 +97,14 @@ version(unittest)
     import mahjong.engine.creation;
     import mahjong.engine.flow;
     import mahjong.engine.notifications;
-    import mahjong.test.utils;
     void assertIn(T)(TurnOptionFactory factory)
     {
-        assert(factory.options.any!(co => co.isOfType!T), 
+        assert(factory.options.any!(co => cast(T)co), 
             "TurnOption %s not found.".format(T.stringof));
     }
     void assertNotIn(T)(TurnOptionFactory factory)
     {
-        assert(factory.options.all!(co => !co.isOfType!T), 
+        assert(factory.options.all!(co => !cast(T)co), 
             "TurnOption %s found when it should not.".format(T.stringof));
     }
     TurnOptionFactory constructFactory(dstring tilesOfTurnPlayer, size_t indexOfDiscard, 
@@ -124,9 +123,9 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
+    import mahjong.engine.opts;
+    auto player = new Player();
+    auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
     auto tiles = "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d;
@@ -145,9 +144,9 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
+    import mahjong.engine.opts;
+    auto player = new Player();
+    auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
     auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d;
@@ -166,9 +165,9 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
+    import mahjong.engine.opts;
+    auto player = new Player();
+    auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
     auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d;
@@ -187,9 +186,9 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
+    import mahjong.engine.opts;
+    auto player = new Player();
+    auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
     auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀗🀗"d;
@@ -210,9 +209,9 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    auto eventHandler = new TestEventHandler;
-    auto player = new Player(eventHandler);
-    auto metagame = new Metagame([player]);
+    import mahjong.engine.opts;
+    auto player = new Player();
+    auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
     auto tiles = "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d;

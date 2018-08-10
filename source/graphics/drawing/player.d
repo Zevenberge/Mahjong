@@ -6,6 +6,7 @@ import std.uuid;
 
 import dsfml.graphics;
 import mahjong.domain.player;
+import mahjong.domain.wrappers;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
 import mahjong.graphics.drawing.closedhand;
@@ -23,7 +24,8 @@ import mahjong.graphics.traits;
 import mahjong.graphics.utils;
 
 alias drawPlayer = draw;
-void draw(const Player player, RenderTarget view, float rotation)
+void draw(const Player player, AmountOfPlayers amountOfPlayers, 
+    RenderTarget view, float rotation)
 {
 	PlayerVisuals visual;
 	if(player.id !in _players)
@@ -37,7 +39,7 @@ void draw(const Player player, RenderTarget view, float rotation)
 		visual = _players[player.id];
 	}
 	visual.draw(view);
-	if(player.game !is null) player.game.drawIngame(view);
+	if(player.game !is null) player.game.drawIngame(amountOfPlayers, view);
 }
 
 void clearPlayerCache()

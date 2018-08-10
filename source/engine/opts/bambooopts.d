@@ -5,25 +5,21 @@ import mahjong.domain.enums;
 import mahjong.engine.flow;
 import mahjong.engine.opts;
 
-class BambooOpts : DefaultGameOpts
+class DefaultBambooOpts : DefaultGameOpts
 {
-	override int amountOfPlayers()
+	override int amountOfPlayers() pure const
 	{
 		return 2;
 	}
-	override int deadWallLength()
+	override int deadWallLength() pure const
 	{
 		return 0;
 	}
-	override GameMode gameMode()
+	override GameMode gameMode() pure const
 	{
 		return GameMode.Bamboo;
 	}
-	override Metagame createMetagame(GameEventHandler[] eventHandlers) 
-	{
-		return new BambooMetagame(createPlayers(eventHandlers));
-	}
-	override PlayerWinds finalLeadingWind()
+	override PlayerWinds finalLeadingWind() pure const
 	{
 		return PlayerWinds.north;
 	}

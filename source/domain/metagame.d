@@ -10,6 +10,7 @@ import std.uuid;
 
 import mahjong.domain.enums;
 import mahjong.domain;
+import mahjong.domain.wrappers;
 import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
@@ -52,9 +53,9 @@ class Metagame
 		return players.filter!(p => p != player);
 	}
 
-	size_t amountOfPlayers() @property pure const
+	AmountOfPlayers amountOfPlayers() @property pure const
 	{
-		return players.length;
+		return AmountOfPlayers(players.length);
 	}
 
 	Wall wall;
@@ -78,9 +79,10 @@ class Metagame
 		return _counters;
 	}
 
-	this(Player[] players)
+	this(Player[] players, const Opts opts)
 	{
 		this.players = players;
+        _opts = opts;
 		info("Initialising metagame");
 		placePlayers;
 		_initialWind = uniform(0, players.length).to!int; 
@@ -138,7 +140,7 @@ class Metagame
 
 	protected Wall getWall()
 	{
-		return new Wall;
+		return new Wall(_opts);
 	}
 
 	void beginRound()
@@ -210,7 +212,7 @@ class Metagame
 
 	bool isGameOver()
 	{
-		return _leadingWind > gameOpts.finalLeadingWind;
+		return _leadingWind > _opts.finalLeadingWind;
 	}
 	/*
 	 The game itself.
@@ -276,10 +278,8 @@ class Metagame
     {
         import fluent.asserts;
         import mahjong.engine.flow;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
-        auto player = new Player(new TestEventHandler);
-        auto metagame = new Metagame([player]);
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
         metagame.isFirstTurn.should.equal(true);
@@ -289,10 +289,8 @@ class Metagame
     {
         import fluent.asserts;
         import mahjong.engine.flow;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
-        auto player = new Player(new TestEventHandler);
-        auto metagame = new Metagame([player]);
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
         metagame.advanceTurn;
@@ -309,10 +307,8 @@ class Metagame
     {
         import fluent.asserts;
         import mahjong.engine.flow;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
-        auto player = new Player(new TestEventHandler);
-        auto metagame = new Metagame([player]);
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
         metagame.aTileHasBeenClaimed;
@@ -340,13 +336,10 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow;
         import mahjong.domain.enums;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
-        auto player1 = new Player(new TestEventHandler);
-        auto player2 = new Player(new TestEventHandler);
-        auto metagame = new Metagame([player1, player2]);
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
         player1.setDiscards([new Tile(Types.wind, Winds.east)]);
@@ -361,19 +354,16 @@ class Metagame
     private bool areAllKansDeclaredAndNotByOnePlayer()
     {
         if(!wall.isMaxAmountOfKansReached) return false;
-        return !players.any!(player => player.hasAllTheKans);
+        return !players.any!(player => player.hasAllTheKans(_opts.maxAmountOfKans));
     }
 
     unittest
     {
         import fluent.asserts;
         import mahjong.engine.creation;
-        import mahjong.engine.flow;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
-        auto player1 = new Player(new TestEventHandler);
-        auto player2 = new Player(new TestEventHandler);
-        auto metagame = new Metagame([player1, player2]);
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
         void kan(Player player)
         {
             player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
@@ -410,11 +400,9 @@ class Metagame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.flow;
-        scope(exit) gameOpts = null;
-        gameOpts = new DefaultGameOpts;
-        auto player1 = new Player(new TestEventHandler);
-        auto player2 = new Player(new TestEventHandler);
-        auto metagame = new Metagame([player1, player2]);
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
         player1.game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
@@ -479,17 +467,27 @@ class Metagame
 				player.closeHand; 
 		}
 	}
+
+    private const Opts _opts;
+
+    int riichiFare() pure const
+    {
+        return _opts.riichiFare;
+    }
+
+    GameMode gameMode() pure const
+    {
+        return _opts.gameMode;
+    }
 }
 
 unittest
 {
 	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new DefaultGameOpts;
-	auto player = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto metagame = new Metagame([player, player2, player3]);
+	auto player = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto metagame = new Metagame([player, player2, player3], new DefaultGameOpts);
 	metagame.currentPlayer = player;
 	assert(metagame.currentPlayer == player, "The current player should be set and identical to the value set");
 	assert(metagame.nextPlayer == player2, "If it is player 1's turn, player 2 should be next.");
@@ -501,12 +499,10 @@ unittest
 {
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = players[metagame._initialWind];
@@ -521,13 +517,10 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = players[metagame._initialWind];
@@ -545,13 +538,10 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	foreach(i; 0..2)
@@ -569,15 +559,12 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto player4 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = metagame.currentPlayer;
@@ -594,15 +581,12 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto player4 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	foreach(i; 0..3)
@@ -618,13 +602,10 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = players[metagame._initialWind];
@@ -642,14 +623,12 @@ unittest
 	import core.exception;
 	import std.exception;
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	gameOpts = new DefaultGameOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto player4 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultGameOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	foreach(i; 0..7)
@@ -671,27 +650,14 @@ unittest
 
 class BambooMetagame : Metagame
 {
-	this(Player[] players)
+	this(Player[] players, const Opts gameOpts)
 	{
-		super(players);
+		super(players, gameOpts);
 	}
 
 	override Wall getWall()
 	{
-		return new BambooWall;
-	}
-}
-
-class EightPlayerMetagame : Metagame
-{
-	this(Player[] players)
-	{
-		super(players);
-	}
-
-	override Wall getWall()
-	{
-		return new EightPlayerWall;
+		return new BambooWall(_opts);
 	}
 }
 
@@ -717,7 +683,7 @@ unittest
     auto player2 = new Player;
     auto player3 = new Player;
     auto player4 = new Player;
-    auto metagame = new Metagame([player1, player2, player3, player4]);
+    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
     metagame.currentPlayer = player3;
     metagame.playersByTurnOrder.should.equal(
         [player3, player4, player1, player2]
@@ -745,10 +711,15 @@ unittest
     player3.game = winningGame;
     auto player4 = new Player;
     player4.game = losingGame;
-    auto metagame = new Metagame([player1, player2, player3, player4]);
+    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
     metagame.currentPlayer = player2;
     auto mahjongData = metagame.constructMahjongData;
     mahjongData.length.should.equal(2);
     mahjongData[0].player.should.equal(player3);
     mahjongData[1].player.should.equal(player1);
+}
+
+int riichiFare(const Metagame metagame) @property
+{
+    return metagame._opts.riichiFare;
 }
