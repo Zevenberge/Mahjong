@@ -66,6 +66,18 @@ void move(const Tile tile, FloatCoords finalCoords)
 	addUniqueAnimation(animation);
 }
 
+void rotate(const Tile tile)
+{
+    auto visual = tile.getTileVisuals;
+    visual.rotate;
+}
+
+bool isRotated(const Tile tile) @property
+{
+    auto visual = tile.getTileVisuals;
+    return visual.isRotated;
+}
+
 deprecated void setPosition(Tile tile, Vector2f pos)
 {
 	trace("Setting the position of the tile");
@@ -128,6 +140,17 @@ private class TileVisuals
 	{
 		_shouldBeDisplayed = false;
 	}
+
+    private bool _isRotated;
+    bool isRotated() pure const @property
+    {
+        return _isRotated;
+    }
+
+    void rotate()
+    {
+        _isRotated = true;
+    }
 	
 	private void updateCoords()
 	{

@@ -1,6 +1,6 @@
 module mahjong.graphics.drawing.ingame;
 
-import std.algorithm.iteration;
+import std.algorithm;
 import std.conv;
 import std.experimental.logger;
 import std.range;
@@ -23,6 +23,36 @@ void draw(const Ingame ingame, const AmountOfPlayers amountOfPlayers,
 {
     auto drawable = getDrawable(ingame, amountOfPlayers);
 	drawable.draw(view);
+}
+
+@("Drawing a game without open tiles should succeed")
+unittest
+{
+	import std.typecons : BlackHole;
+	import mahjong.domain.enums : PlayerWinds;
+	scope(exit) clearIngameCache;
+	auto ingame = new Ingame(PlayerWinds.east, "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d);
+	auto renderMock = new BlackHole!RenderTarget;
+	auto amountOfPlayers = AmountOfPlayers(4);
+	draw(ingame, amountOfPlayers, renderMock);
+	// Implicit assert
+}
+
+@("Drawing a game with open tiles should succeed")
+unittest
+{
+	import std.typecons : BlackHole;
+	import mahjong.domain.enums : PlayerWinds, Types, Winds;
+	import mahjong.domain.tile : Tile;
+	scope(exit) clearIngameCache;
+	auto ingame = new Ingame(PlayerWinds.east, "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀗🀗"d);
+	auto tileToClaim = new Tile(Types.wind, Winds.south);
+	tileToClaim.origin = new Ingame(PlayerWinds.south);
+	ingame.pon(tileToClaim);
+	auto renderMock = new BlackHole!RenderTarget;
+	auto amountOfPlayers = AmountOfPlayers(4);
+	draw(ingame, amountOfPlayers, renderMock);
+	// Implicit assert
 }
 
 void clearIngameCache()
@@ -69,7 +99,7 @@ private class IngameDrawable
 
 	private void drawDiscards(RenderTarget view)
 	{
-		auto amountOfDiscards = _game.discards.length;
+		immutable amountOfDiscards = _game.discards.length;
 		if(amountOfDiscards == previousAmountOfDiscards + 1)
 		{
 			// One additional tile was discarded.
@@ -95,28 +125,38 @@ private class IngameDrawable
 	{
 		auto tileSize = drawingOpts.tileSize;
 		auto tileIndex = getDiscardIndex(_game.discards.length.to!int - 1);
-		auto movement = calculatePositionInSquare(
-						drawingOpts.amountOfDiscardsPerLine, 
-						discardUndershoot,
-						tileIndex, tileSize.toRect);
-		auto position = styleOpts.center;
-		return FloatCoords(position+movement, 0);
+		auto position = calculateOriginalCoordinates(tileIndex, tileSize.y);
+		return correctForRiichi(position, tileSize);
 	}
-}
 
-private void placeDiscards(const Ingame ingame)
-{
-	foreach(number, tile; ingame.discards)
+	private Vector2f calculateOriginalCoordinates(Vector2i tileIndex, float tileHeight)
 	{
-		auto tileSize = tile.getGlobalBounds;
-		auto tileIndex = getDiscardIndex(number.to!int);
-		auto movement = calculatePositionInSquare(
-						drawingOpts.amountOfDiscardsPerLine, 
-						discardUndershoot,
-						tileIndex, tileSize);
-		auto position = styleOpts.center;
-		tile.setCoords(FloatCoords(position+movement, 0));
+		immutable topLeft = calculatePositionForTheFirstDiscard();
+		immutable yPosition = topLeft.y + tileIndex.y * tileHeight;
+		if(tileIndex.x == 0)
+		{
+			return Vector2f(topLeft.x, yPosition);
+		}
+		else
+		{
+			immutable previousTile = _game.discards[$-2].getGlobalBounds;
+			immutable leftBounds = previousTile.left + previousTile.width;
+			return Vector2f(leftBounds, yPosition);
+		}
 	}
+
+    private FloatCoords correctForRiichi(Vector2f originalCoords, Vector2f tileSize)
+    {
+        if(_game.isRiichi && !_game.discards.any!(tile => tile.isRotated))
+		{
+			_game.discards[$-1].rotate;
+			return FloatCoords(
+				originalCoords.x,
+				originalCoords.y + tileSize.y, 
+				-90);
+		}
+		return FloatCoords(originalCoords, 0);
+    }
 }
 
 private Vector2i getDiscardIndex(int number)
@@ -137,13 +177,27 @@ private Vector2i getDiscardIndex(int number)
 	return Vector2i(x,y);
 }
 
+private Vector2f calculatePositionForTheFirstDiscard()
+{
+	return styleOpts.center + 
+		calculateOffsetFromCenterInASquare(
+			drawingOpts.amountOfDiscardsPerLine, 
+			discardUndershoot);
+}
+
+Vector2f calculateOffsetFromCenterInASquare(const int amountOfTiles, const float undershootInTiles)
+{
+	immutable tileWidth = drawingOpts.tileWidth;
+	immutable delta = (amountOfTiles - undershootInTiles) * tileWidth /2;
+	return Vector2f(-delta, delta);
+}
+
 deprecated Vector2f calculatePositionInSquare(const int amountOfTiles, const float undershootInTiles, const Vector2i tileIndex, const FloatRect sizeOfTile)
 { /*
      This function calculates the position of the nth tile with in the bottom player quadrant. This function assumes that the amountOfTiles tiles form a square with an undershoot in tiles. Please note that it is the responsibility of the caller to ensure that nthTile < amountOfTiles.
      Furthermore, this function assumes an unrotated tile. It returns the draw position of the tile with respect to the center of the board. Unrotated tiles will therefore be displaye next to each other.
   */
-	float delta = (amountOfTiles - undershootInTiles)* sizeOfTile.width /2; // Distance from the center to the inner line of the square.
-	auto movement = Vector2f(-delta, delta);
+	auto movement = calculateOffsetFromCenterInASquare(amountOfTiles, undershootInTiles);
 	movement.x += sizeOfTile.width * tileIndex.x;
 	movement.y += tileIndex.y * sizeOfTile.height;
 	return movement;
