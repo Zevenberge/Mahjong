@@ -55,6 +55,21 @@ unittest
 	// Implicit assert
 }
 
+@("Draw a discard")
+unittest
+{
+	import std.typecons : BlackHole;
+	import mahjong.domain.enums : PlayerWinds, Types, Winds;
+	import mahjong.domain.tile : Tile;
+	scope(exit) clearIngameCache;
+	auto ingame = new Ingame(PlayerWinds.east, "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀗🀗"d);
+	ingame.discard(ingame.closedHand.tiles[0]);
+	auto renderMock = new BlackHole!RenderTarget;
+	auto amountOfPlayers = AmountOfPlayers(4);
+	draw(ingame, amountOfPlayers, renderMock);
+	// Implicit assert
+}
+
 void clearIngameCache()
 {
 	info("Clearing ingame cache");
