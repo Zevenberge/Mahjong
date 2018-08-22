@@ -192,7 +192,7 @@ private Vector2i getDiscardIndex(int number)
 	return Vector2i(x,y);
 }
 
-private Vector2f calculatePositionForTheFirstDiscard()
+Vector2f calculatePositionForTheFirstDiscard()
 {
 	return styleOpts.center + 
 		calculateOffsetFromCenterInASquare(
