@@ -544,6 +544,7 @@ class Ingame
 
     bool canDeclareRiichi(const Tile potentialDiscard) const
     {
+        if(_isRiichi) return false;
         auto remainingTiles = closedHand.tiles.without!((a,b) => a is b)([potentialDiscard]);
         return isPlayerTenpai(remainingTiles, openHand);
     }
@@ -556,6 +557,16 @@ class Ingame
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(true);
         auto toNotBeDiscardedTile = ingame.closedHand.tiles[2];
         ingame.canDeclareRiichi(toNotBeDiscardedTile).should.equal(false);
+    }
+
+    @("Cannot declare riichi when already riichi")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        ingame._isRiichi = true;
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
     }
 
     Tile declareRiichi(const Tile discard, const Metagame metagame)
