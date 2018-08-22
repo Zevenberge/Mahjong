@@ -177,7 +177,25 @@ class Metagame
 		auto data = this.constructMahjongData;
 		applyTransactions(data);
 		moveWinds;
+        _amountOfRiichiSticks = 0;
 	}
+
+    @("End of a round should reset the counters")
+    unittest
+    {
+        import fluent.asserts;
+        auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+        auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+        auto player1 = new Player;
+        player1.game = winningGame;
+        player1.hasDrawnTheirLastTile;
+        auto metagame = new Metagame([player1], new DefaultGameOpts);
+        metagame.setUpWall;
+        metagame.currentPlayer = player1;
+        metagame.riichiIsDeclared;
+        metagame.finishRound;
+        metagame.amountOfRiichiSticks.should.equal(0);
+    }
 
 	private void applyTransactions(const(MahjongData)[] data)
 	{
