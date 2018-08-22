@@ -13,15 +13,18 @@ alias TurnOptionController = IngameOptionsController!(TurnOptionFactory, "");
 
 class TurnOptionFactory
 {
-    this(const Player player, const Tile selectedTile, const Metagame metagame, TurnEvent turnEvent)
+    this(const Tile selectedTile, 
+        TurnEvent turnEvent, bool canCancel)
     {
+        auto player = turnEvent.player;
+        auto metagame = turnEvent.metagame;
         addTsumoOption(player, turnEvent);
         addRiichiOption(metagame, player, selectedTile, turnEvent);
         addPromoteToKanOption(player, selectedTile, turnEvent);
         addDeclareClosedKanOption(player, selectedTile, turnEvent);
         addDiscardOption(selectedTile, turnEvent);
         _isDiscardTheOnlyOption = _options.length == 1;
-        addCancelOption;
+        if(canCancel) addCancelOption;
     }
 
     private void addTsumoOption(const Player player, TurnEvent turnEvent)
@@ -108,14 +111,14 @@ version(unittest)
             "TurnOption %s found when it should not.".format(T.stringof));
     }
     TurnOptionFactory constructFactory(dstring tilesOfTurnPlayer, size_t indexOfDiscard, 
-        Player player, Metagame metagame)
+        Player player, Metagame metagame, bool canCancel = true)
     {
         player.closedHand.tiles = tilesOfTurnPlayer.convertToTiles;
         auto discardedTile = player.closedHand.tiles[indexOfDiscard];
         writeln("Discarding ", discardedTile);
-        return new TurnOptionFactory(player, discardedTile, metagame, 
+        return new TurnOptionFactory(discardedTile,
             new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService),
-                metagame, player, discardedTile));
+                metagame, player, discardedTile, canCancel));
     }
 }
 
@@ -224,6 +227,21 @@ unittest
     assertIn!RiichiOption(factory);
     factory.defaultOption.should.be.instanceOf!RiichiOption;
     factory.isDiscardTheOnlyOption.should.equal(false);
+}
+
+@("If cancel is no option, it should not be included")
+unittest
+{
+    import std.array;
+    import fluent.asserts;
+    import mahjong.engine.opts;
+    auto player = new Player();
+    auto metagame = new Metagame([player], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d;
+    auto factory = constructFactory(tiles, 0, player, metagame, false);
+    assertNotIn!CancelOption(factory);
 }
 
 class TurnOption : MenuItem, IRelevantTiles
