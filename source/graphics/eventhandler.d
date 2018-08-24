@@ -4,6 +4,7 @@ import std.experimental.logger;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers;
 import mahjong.graphics.drawing.ingame;
+import mahjong.graphics.drawing.tile;
 
 class UiEventHandler : GameEventHandler
 {
@@ -25,6 +26,7 @@ class UiEventHandler : GameEventHandler
             }
             else
             {
+                event.drawnTile.display;
                 Controller.instance.substitute(
                     new TurnOptionController(Controller.instance.getWindow, event.metagame, 
                         Controller.instance, factory)
