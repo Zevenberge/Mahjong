@@ -179,20 +179,18 @@ unittest
 	assert(!chi.canPromoteSetToKan(kanTile), "A different chi should not be promotable to kan.");
 }
 
-bool hasAllKans(const OpenHand hand) @property
+bool hasAllKans(const OpenHand hand, int maxAmountOfKans)
 {
-    return hand.amountOfKans == gameOpts.maxAmountOfKans;
+    return hand.amountOfKans == maxAmountOfKans;
 }
 
 unittest
 {
     import fluent.asserts;
-    scope(exit) gameOpts = null;
-    gameOpts = new DefaultGameOpts;
     auto hand = new OpenHand;
-    hand.hasAllKans.should.equal(false);
+    hand.hasAllKans(4).should.equal(false);
     hand._amountOfKans = 3;
-    hand.hasAllKans.should.equal(false);
+    hand.hasAllKans(4).should.equal(false);
     hand._amountOfKans = 4;
-    hand.hasAllKans.should.equal(true);
+    hand.hasAllKans(4).should.equal(true);
 }

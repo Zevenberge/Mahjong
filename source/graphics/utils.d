@@ -1,10 +1,19 @@
 module mahjong.graphics.utils;
 
 import dsfml.graphics : Transform, RenderTexture, Vector2u, Vector2f, Vector2;
+import mahjong.graphics.opts : styleOpts;
 
 Transform unity()
 {
 	return Transform(1,0,0, 0,1,0, 0,0,1);
+}
+
+Transform rotationAroundCenter(float rotation)
+{
+    auto center = styleOpts.center;
+    auto transform = unity;
+    transform.rotate(rotation, center.x, center.y);
+    return transform;
 }
 
 void correctOutOfBounds(ref size_t position, size_t length)

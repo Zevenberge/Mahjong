@@ -10,11 +10,7 @@ class GameEventHandler
 	abstract void handle(RoundStartEvent event);
 	abstract void handle(ClaimEvent event);
 	abstract void handle(MahjongEvent event);
-	abstract void handle(GameEndEvent event);
-	Player createPlayer()
-	{
-		return new Player(this);
-	}
+	abstract void handle(GameEndEvent event);	
 }
 
 version(unittest)

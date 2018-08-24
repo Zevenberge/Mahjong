@@ -84,25 +84,23 @@ unittest
 	import mahjong.engine.flow;
 	import mahjong.engine.opts;
 	import mahjong.graphics.opts;
-	import mahjong.test.utils;
-	gameOpts = new DefaultGameOpts;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	void assertIn(T)(ClaimOptionFactory factory)
 	{
-		assert(factory.options.any!(co => co.isOfType!T), "ClaimOption %s not found.".format(T.stringof));
+		assert(factory.options.any!(co => cast(T)co), "ClaimOption %s not found.".format(T.stringof));
 	}
 	void assertNotIn(T)(ClaimOptionFactory factory)
 	{
-		assert(factory.options.all!(co => !co.isOfType!T), "ClaimOption %s found when it should not.".format(T.stringof));
+		assert(factory.options.all!(co => !cast(T)co), "ClaimOption %s found when it should not.".format(T.stringof));
 	}
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.startGame(PlayerWinds.north);
-	auto player2 = new Player(new TestEventHandler);
+	auto player2 = new Player();
 	player2.startGame(PlayerWinds.east);
-	auto player3 = new Player(new TestEventHandler);
+	auto player3 = new Player();
 	player3.startGame(PlayerWinds.south);
-	auto metagame = new Metagame([player, player2, player3]);
+	auto metagame = new Metagame([player, player2, player3], new DefaultGameOpts);
     metagame.initializeRound;
 	metagame.currentPlayer = player;
 	ClaimOptionFactory constructFactory(dstring tilesOfClaimingPlayer, dstring discard, 
@@ -256,7 +254,7 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
@@ -294,7 +292,7 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
@@ -332,7 +330,7 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];

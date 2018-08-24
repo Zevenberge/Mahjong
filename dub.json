@@ -6,7 +6,7 @@
 	"lflags" : ["-L/usr/local/lib/dsfml"],
 	"targetPath":"bin/",
 	"dependencies": {
-		"dsfml": "~master",
-		"fluent-asserts": "~>0.12.0"
+		"dsfml": "~>2.1.0",
+		"fluent-asserts": "~>0.12.3"
 	}
 }

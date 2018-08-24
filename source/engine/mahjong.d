@@ -296,7 +296,7 @@ body
 		{
 			return MahjongResult(true, [new SevenPairsSet(sortedHand)]);
 		}
-		if(isThirteenOrphans(hand))
+		if(isThirteenOrphans(sortedHand))
 		{ 
 			return MahjongResult(true, [new ThirteenOrphanSet(sortedHand)]);
 		}
@@ -586,13 +586,11 @@ unittest // Check whether the example hands are seen as mahjong hands.
 		{   
 			assert(line.length == 14, "A complete hand is 14 tiles");
 			auto hand = convertToTiles(line);
-			sortHand(hand);
 			bool isMahjong;
 			isMahjong = scanHandForMahjong(hand, null).isMahjong;
 			assert(isHand == isMahjong, "For %s, the mahjong should be %s".format(line, isHand));
 			write("The mahjong is ", isMahjong, ".  ");
-			foreach(stone; hand) {write(stone);}
-			writeln();
+			writeln(line);
 		}
 		writeln();
 
@@ -639,18 +637,8 @@ version(unittest)
 
 bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
 {
-    foreach(type; EnumMembers!Types)
-    {
-        for(int value = Numbers.min; value <= Numbers.max; ++value)
-        {
-            auto tile = new Tile(type, value);
-            if(.scanHandForMahjong(closedHand ~ tile, openHand.sets).isMahjong)
-            {
-                return true;
-            }
-        }
-    }
-    return false;
+    import mahjong.engine.creation;
+    return allTiles.any!(tile => scanHandForMahjong(closedHand ~tile, openHand.sets).isMahjong);
 }
 
 unittest
@@ -662,4 +650,13 @@ unittest
     isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
     auto noTenpaiHand = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
     isPlayerTenpai(noTenpaiHand, emptyOpenHand).should.equal(false);
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto tenpaiHand = "🀀🀁🀂🀃🀄🀆🀆🀇🀏🀐🀘🀙🀡"d.convertToTiles;
+    auto emptyOpenHand = new OpenHand;
+    isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
 }

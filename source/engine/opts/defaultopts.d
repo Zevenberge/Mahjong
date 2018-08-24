@@ -9,39 +9,39 @@ import mahjong.engine.opts;
 
 class DefaultGameOpts : Opts
 {
-	int amountOfPlayers()
+	int amountOfPlayers() pure const
 	{
 		return 4;
 	}
-	int deadWallLength()
+	int deadWallLength() pure const
 	{
 		return 14;
 	}
-	int kanBuffer()
+    int riichiBuffer() pure const
+    {
+        return 4;
+    }
+	int kanBuffer() pure const
 	{
 		return 0;
 	}
-	int maxAmountOfKans()
+	int maxAmountOfKans() pure const
 	{
 		return 4;
 	}
-	GameMode gameMode()
+	GameMode gameMode() pure const
 	{
 		return GameMode.Riichi;
 	}
-	int initialScore()
+	int initialScore() pure const
 	{
 		return 30_000;
 	}
-	Metagame createMetagame(GameEventHandler[] delegators)
-	{
-		return new Metagame(createPlayers(delegators));
-	}
-	protected Player[] createPlayers(GameEventHandler[] eventHandlers)
-	{
-		return eventHandlers.map!(d => d.createPlayer).array;
-	}
-	PlayerWinds finalLeadingWind()
+    int riichiFare() pure const
+    {
+        return 1_000;
+    }	
+	PlayerWinds finalLeadingWind() pure const
 	{
 		return PlayerWinds.south;
 	}

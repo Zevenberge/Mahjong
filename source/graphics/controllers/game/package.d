@@ -12,6 +12,7 @@ public import mahjong.graphics.controllers.game.turnoption;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain;
+import mahjong.domain.enums;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu;
@@ -73,4 +74,9 @@ class GameController : Controller
 	{
 		flow.advanceIfDone;
 	}
+
+    final GameMode gameMode() @property pure const
+    {
+        return _metagame.gameMode;
+    }
 }

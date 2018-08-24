@@ -39,13 +39,14 @@ unittest
 {
 	// Check no segfaults test.
 	import fluent.asserts;
+    import mahjong.domain.wrappers;
 	import mahjong.engine.flow;
+    import mahjong.engine.opts;
 	import mahjong.graphics.drawing.player;
 	import mahjong.test.window;
-	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	player.draw(new RenderSprite(FloatRect()), 0);
-	auto metagame = new Metagame([player, player, player, player]);
+	auto player = new Player();
+	player.draw(AmountOfPlayers(4), new RenderSprite(FloatRect()), 0);
+	auto metagame = new Metagame([player, player, player, player], new DefaultGameOpts);
 	auto screen = new GameEndScreen(metagame, FloatRect(100,200,300,400));
 	auto window = new TestWindow;
 	screen.draw(window);

@@ -269,7 +269,6 @@ FloatRect calcGlobalBounds(T) (T opts)
 }
 
 void setRotationAroundCenter(Sprite sprite, float rotation)
-body
 {
 	auto center = sprite.getCenter;
 	sprite.rotation = rotation;

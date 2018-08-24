@@ -39,7 +39,7 @@ void initialiseTiles(const Wall wall)
 {
 	info("Placing up the default wall tiles.");
 
-	int widthOfWall = cast(int)wall.tiles.length / (2*gameOpts.amountOfPlayers);
+	int widthOfWall = cast(int)wall.tiles.length / (2*4); // Assume a square wall of two tiles high..
 	trace("Width of the wall is ", widthOfWall);
 	auto size = drawingOpts.tileSize;
 	float undershoot = TileSize.y/TileSize.x;

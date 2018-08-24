@@ -56,7 +56,7 @@ unittest
 
 }
 
-template without(alias equality)
+template without(alias equality = (a, b) => a == b)
 {
 	T[] without(T)(T[] arr, T[] exclusion)
 	{
@@ -133,8 +133,16 @@ template flatMap(alias fun) //if(isInputRange!(ReturnType!fun))
 {
 	auto flatMap(Range)(Range range) if(isInputRange!Range)
 	{
-		if(range.empty) return null;
-		return .fold!((a,b) => a ~ b)(range.map!(fun));
+        auto mappedResult = range.map!fun;
+        static if(is(ElementType!(typeof(mappedResult)) == E[], E))
+        {
+            if(mappedResult.empty) return null;
+            return fold!((a, b) => a ~ b)(mappedResult);
+        }
+        else
+        {
+            return joiner(mappedResult);
+        }
 	}
 }
 
@@ -158,47 +166,39 @@ unittest
 	auto flattened = bubbles.flatMap!(x => x.ints).array;
 	assert(flattened.length == 0, "Flat-mapping an empty range should return an empty range of the result type");
 }
-/+
-auto range(T)(T[] array)
+
+unittest
 {
-	return Range(array);
+    import std.range : iota;
+    import fluent.asserts;
+    struct Counter
+    {
+        auto oneTwoThree()
+        {
+            return iota(1, 4);
+        }
+    }
+    auto counters = [Counter(), Counter(), Counter()].flatMap!(c => c.oneTwoThree);
+    counters.should.equal([1, 2, 3, 1, 2, 3, 1, 2, 3]);
 }
 
-private struct Range(T)
+template atLeastOneUntil()
 {
-	this(T[] array)
-	{
-		_array;
-		_forwardIndex = 0;
-		_backwardIndex = _array.length - 1;
-	}
-	private T[] _array;
+    auto atLeastOneUntil(Range, Needle)(Range range, Needle needle)
+    {
+        static assert(isInputRange!Range, 
+            "An input range should be supplied instead of " ~ Range.stringof);
+        bool isOnePassed = false;
+        return range.until!((x, y) {
+                if(isOnePassed) return x == y;
+                isOnePassed = true;
+                return false;
+            })(needle);
+    }
+}
 
-	private size_t _forwardIndex;
-	void popFront()
-	{
-		++_forwardIndex;
-	}
-
-	T front()
-	{
-		return _array[_forwardIndex];
-	}
-
-	private size_t _backwardIndex;
-
-	void popBack()
-	{
-		--_backwardIndex;
-	}
-
-	T back()
-	{
-		return _array[_backwardIndex];
-	}
-
-	bool empty()
-	{
-		return _forwardIndex >= _array.length || _backwardIndex < 0;
-	}
-}+/
+unittest
+{
+    import fluent.asserts;
+    [4, 5, 4].atLeastOneUntil(4).should.equal([4, 5]);
+}

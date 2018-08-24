@@ -6,8 +6,12 @@ import std.uuid;
 
 import dsfml.graphics;
 import mahjong.domain.player;
+import mahjong.domain.wrappers;
+import mahjong.graphics.anime.animation;
+import mahjong.graphics.anime.story;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
+import mahjong.graphics.coords;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.openhand;
@@ -23,7 +27,8 @@ import mahjong.graphics.traits;
 import mahjong.graphics.utils;
 
 alias drawPlayer = draw;
-void draw(const Player player, RenderTarget view, float rotation)
+void draw(const Player player, AmountOfPlayers amountOfPlayers, 
+    RenderTarget view, float rotation)
 {
 	PlayerVisuals visual;
 	if(player.id !in _players)
@@ -36,8 +41,18 @@ void draw(const Player player, RenderTarget view, float rotation)
 	{
 		visual = _players[player.id];
 	}
-	visual.draw(view);
-	if(player.game !is null) player.game.drawIngame(view);
+    visual.draw(view);
+	if(player.game !is null) player.game.drawIngame(amountOfPlayers, view);
+}
+
+@("Drawing a player without game should not segfault")
+unittest
+{
+    import std.typecons : BlackHole;
+    scope(exit) clearPlayerCache;
+    auto renderTarget = new BlackHole!RenderTarget;
+    auto player = new Player();
+    draw(player, AmountOfPlayers(4), renderTarget, 0);
 }
 
 void clearPlayerCache()
@@ -69,12 +84,14 @@ private class PlayerVisuals
 		Sprite _completeSprite;
 		Texture _iconTexture;
 		Sprite _icon;
+        Sprite _riichiStick;
 		Text _score;
 		int _numberedScore = -1;
 		int _numberedWind = -1;
 		Text _wind;
 		const Player _player;
 		float _rotation;
+        Transform _rotationAroundCenter;
 		
 		void initialiseNewTexture()
 		{
@@ -183,6 +200,54 @@ private class PlayerVisuals
 			}
 			info("Redrawn the player texture");
 		}
+        void drawRiichiStick(RenderTarget view)
+        {
+            if(_player.game !is null && _player.isRiichi)
+            {
+                if(_riichiStick is null)
+                {
+                    createRiichiStick;
+                    placeRiichiStickOnTopOfIcon;
+                    animateRiichiStickTowardCenter();
+                }
+                view.draw(_riichiStick);
+            }
+        }
+
+        void createRiichiStick()
+        {
+            _riichiStick = new Sprite(stickTexture);
+            _riichiStick.textureRect = thousandYenStick;
+            _riichiStick.scale = Vector2f(0.5, 0.5);
+            _riichiStick.color = Color(255,255,255,0);
+        }
+
+        void placeRiichiStickOnTopOfIcon()
+        {
+            auto positionOfScoreLabel = iconPosition + _scoreLabel.position;
+            auto originalPosition = _rotationAroundCenter.transformPoint(positionOfScoreLabel);
+            _riichiStick.position = originalPosition;
+        }
+
+        void animateRiichiStickTowardCenter()
+        {
+            auto widthOfStick = _riichiStick.getGlobalBounds().width;
+            auto positionOfFirstDiscard = calculatePositionForTheFirstDiscard;
+            auto yCoordinateOfBottomOfLastDiscard = positionOfFirstDiscard.y + 
+                drawingOpts.amountOfDiscardLines * drawingOpts.tileSize.y;
+            auto unrotatedFinalPoint = Vector2f(styleOpts.center.x - widthOfStick/2f,
+                yCoordinateOfBottomOfLastDiscard + 5f);
+            auto finalPosition = _rotationAroundCenter.transformPoint(unrotatedFinalPoint);
+            info("Riichi stick final position = ", finalPosition);
+            auto finalCoords = FloatCoords(finalPosition, _rotation);
+            auto animation = new Storyboard([
+                parallel([
+                            _riichiStick.moveTo(finalCoords, 30),
+                            _riichiStick.appear(10)
+                        ])
+                ]);
+            addAnimation(animation);
+        }
 	}
 	
 	public:
@@ -190,6 +255,7 @@ private class PlayerVisuals
 		{
 			updateIfRequired;
 			view.draw(_completeSprite);
+            drawRiichiStick(view);
 		}
 		
 		this(string iconFile, const Player player, float rotation)
@@ -197,6 +263,7 @@ private class PlayerVisuals
 			info("Initialising player visuals");
 			_player = player;
 			_rotation = rotation;
+            _rotationAroundCenter = rotationAroundCenter(rotation);
 			initialiseNewTexture;
 			initialiseIcon(iconFile);
 			initialiseScoreLabel;

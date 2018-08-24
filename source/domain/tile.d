@@ -9,7 +9,6 @@ import mahjong.domain.ingame;
 
 class Tile
 { 
-    dchar face; // The unicode face of the tile. 
     const ComparativeTile _;
     alias _ this;
     const UUID id;
@@ -45,7 +44,8 @@ class Tile
 
     override string toString() const
     {
-        return(to!string(face));
+        import std.format;
+        return format!"%s-%s"(type, value);
     }
     
     bool isIdentical(const Tile other) pure const
@@ -163,6 +163,11 @@ unittest
     wind.isWind.should.equal(true);
     auto dragon = ComparativeTile(Types.dragon, Dragons.white);
     dragon.isWind.should.equal(false);
+}
+
+bool isDora(const Tile tile) @property pure
+{
+    return tile.dora > 0;
 }
 
 struct ComparativeTile

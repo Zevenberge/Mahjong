@@ -37,7 +37,7 @@ private void drawPlayers(const Metagame game, RenderTarget target)
 	{
 		auto rotation = drawingOpts.rotationPerPlayer * i.to!int;
 		renderTexture.clear(Color.Transparent);
-		player.drawPlayer(renderTexture, rotation);
+		player.drawPlayer(game.amountOfPlayers, renderTexture, rotation);
 		renderTexture.display;
 		_playerSprite.setRotationAroundCenter(rotation);
 		target.draw(_playerSprite);
