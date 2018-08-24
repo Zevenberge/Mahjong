@@ -149,7 +149,7 @@ class UiEventHandler : GameEventHandler
 
     override void handle(AbortiveDrawEvent event)
     {
-
+        Controller.instance.substitute(new AbortiveDrawController(Controller.instance.getWindow, event.metagame, event));
     }
 
 	override void handle(GameEndEvent event) 
