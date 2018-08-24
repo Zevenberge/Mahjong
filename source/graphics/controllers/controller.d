@@ -67,6 +67,14 @@ abstract class Controller
         _instance = controller;
     }
     private static Controller _instance;
+
+    version(unittest)
+    {
+        static void cleanUp()
+        {
+            _instance = null;
+        }
+    }
 }
 
 class NullController : Controller

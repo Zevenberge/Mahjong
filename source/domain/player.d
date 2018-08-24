@@ -34,6 +34,8 @@ class Player
         this()
         {
             this(new TestEventHandler, 30_000);
+            game = new Ingame(PlayerWinds.autumn, "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d);
+            game.hasDrawnTheirLastTile;
         }
     }
 

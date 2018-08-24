@@ -118,7 +118,7 @@ version(unittest)
         writeln("Discarding ", discardedTile);
         return new TurnOptionFactory(discardedTile,
             new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService),
-                metagame, player, discardedTile, canCancel));
+                metagame, player, discardedTile), canCancel);
     }
 }
 
