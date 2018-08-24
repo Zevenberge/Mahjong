@@ -114,6 +114,39 @@ class Player
         metagame.amountOfRiichiSticks.should.equal(1);
     }
 
+    void abortGame(Metagame metagame)
+    {
+        if(isRiichi)
+        {
+            _score += metagame.riichiFare;
+        }
+    }
+
+    @("If the player is not riichi, an aborted game has no effect")
+    unittest
+    {
+        import fluent.asserts;
+        auto player = new Player(new TestEventHandler, 30_000);
+        player.game = new Ingame(PlayerWinds.east);
+        player.abortGame(null);
+        player.score.should.equal(30_000);
+    }
+
+    @("If the player is riichi, the aborted game resets the riichi.")
+    unittest
+    {
+        import fluent.asserts;
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.initializeRound;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        player.game = ingame;
+        player.declareRiichi(toBeDiscardedTile, metagame);
+        player.abortGame(metagame);
+        player.score.should.equal(30_000);
+    }
+
 	void applyTransaction(const Transaction transaction)
 	in
 	{
