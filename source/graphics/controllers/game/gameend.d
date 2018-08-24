@@ -15,14 +15,14 @@ import mahjong.graphics.utils : freeze;
 
 class GameEndController : MahjongController
 {
-	this(RenderWindow window, Metagame metagame, GameEndEvent event)
+	this(RenderWindow window, const Metagame metagame, GameEndEvent event)
 	{
 		super(window, metagame, freezeGameGraphicsOnATexture(metagame));
 		_screen = new GameEndScreen(metagame, innerScreenBounds);
 		_event = event;
 	}
 
-	private RenderTexture freezeGameGraphicsOnATexture(Metagame metagame)
+	private RenderTexture freezeGameGraphicsOnATexture(const Metagame metagame)
 	{
 		auto screen = styleOpts.screenSize;
 		return freeze!((target) {})(Vector2u(screen.x, screen.y));

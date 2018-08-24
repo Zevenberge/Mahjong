@@ -11,35 +11,28 @@ import mahjong.engine.mahjong;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class MahjongFlow : Flow
+class MahjongFlow : WaitForEveryPlayer!MahjongEvent
 {
 	this(Metagame game, INotificationService notificationService)
 	{
 		trace("Constructing mahjong flow");
+        _mahjongData = game.constructMahjongData;
 		super(game, notificationService);
-		auto data = game.constructMahjongData;
-		notifyPlayers(data);
 	}
 
-	private void notifyPlayers(const(MahjongData)[] data)
-	{
-		foreach(player; _metagame.players)
-		{
-			auto event = new MahjongEvent(metagame, data);
-			_events ~= event;
-			player.eventHandler.handle(event);
-		}
-	}
+    private const(MahjongData[]) _mahjongData;
 
-	private MahjongEvent[] _events;
+    protected override MahjongEvent createEvent()
+    {
+        return new MahjongEvent(_metagame, _mahjongData);
+    }
 
-	override void advanceIfDone()
-	{
-		if(!_events.all!(e => e.isHandled)) return;
-		_metagame.finishRound;
-		mixin(gameOverSwitch);
-		flow = new RoundStartFlow(_metagame, _notificationService);
-	}
+    protected override void advance()
+    {
+        _metagame.finishRound;
+        mixin(gameOverSwitch);
+        flow = new RoundStartFlow(_metagame, _notificationService);
+    }
 }
 
 enum gameOverSwitch =
