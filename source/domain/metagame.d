@@ -228,6 +228,69 @@ class Metagame
 		return !players.first!(p => p.isEast).isMahjong;
 	}
 
+    void abortRound()
+    {
+        foreach(player; players)
+        {
+            player.abortGame(this);
+            if(player.isRiichi) _amountOfRiichiSticks--;
+        }
+    }
+
+    @("During an abortive draw, nothing happens")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow.eventhandler;
+        auto players = [new Player(new TestEventHandler, 30_000), 
+            new Player(new TestEventHandler, 30_000)];
+        auto metagame = new Metagame(players, new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame._counters = 5;
+        metagame.abortRound;
+        metagame.amountOfRiichiSticks.should.equal(0);
+        metagame.counters.should.equal(5);
+        players[0].score.should.equal(30_000);
+        players[1].score.should.equal(30_000);
+    }
+
+    @("If a player is riichi, it will be undone")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow.eventhandler;
+        auto players = [new Player(new TestEventHandler, 30_000), 
+            new Player(new TestEventHandler, 30_000)];
+        auto metagame = new Metagame(players, new DefaultGameOpts);
+        metagame.initializeRound;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        players[0].game = ingame;
+        players[0].declareRiichi(toBeDiscardedTile, metagame);
+        metagame.abortRound;
+        metagame.amountOfRiichiSticks.should.equal(0);
+        metagame.counters.should.equal(0);
+        players[0].score.should.equal(30_000);
+    }
+
+    @("If a player is riichi, the amount of riichi sticks will be reduced by one for each riichi")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow.eventhandler;
+        auto players = [new Player(new TestEventHandler, 30_000), 
+            new Player(new TestEventHandler, 30_000)];
+        auto metagame = new Metagame(players, new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame._amountOfRiichiSticks = 5;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        players[0].game = ingame;
+        players[0].declareRiichi(toBeDiscardedTile, metagame);
+        metagame.abortRound;
+        metagame.amountOfRiichiSticks.should.equal(5);
+    }
+
 	bool isGameOver()
 	{
 		return _leadingWind > _opts.finalLeadingWind;

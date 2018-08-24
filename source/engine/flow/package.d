@@ -15,6 +15,8 @@ public
 	import mahjong.engine.flow.turnend;
 }
 
+import std.algorithm : all;
+import std.traits;
 import mahjong.domain.metagame;
 import mahjong.engine.notifications;
 
@@ -41,4 +43,50 @@ Flow flow;
 void switchFlow(Flow newFlow)
 {
 	flow = newFlow;
+}
+
+abstract class WaitForEveryPlayer(TEvent) : Flow
+    if(canBeHandled!TEvent && canPlayerHandle!TEvent)
+{
+    this(Metagame metagame, INotificationService notificationService)
+    {
+        super(metagame, notificationService);
+        notifyPlayers;
+    }
+
+    private void notifyPlayers()
+    {
+        foreach(player; _metagame.players)
+        {
+            auto event = createEvent();
+            _events ~= event;
+            player.eventHandler.handle(event);
+        }
+    }
+
+    protected abstract TEvent createEvent();
+
+    private TEvent[] _events;
+
+    override void advanceIfDone()
+    {
+        if(isDone) advance();
+    }
+
+    private bool isDone()
+    {
+        return _events.all!(e => e.isHandled);
+    }
+
+    protected abstract void advance();
+}
+
+template canBeHandled(TEvent)
+{
+    enum canBeHandled = hasMember!(TEvent, "isHandled");
+}
+
+template canPlayerHandle(TEvent)
+{
+    enum canPlayerHandle = __traits(compiles, (GameEventHandler.init).handle(TEvent.init));
 }

@@ -6,30 +6,21 @@ import mahjong.domain.metagame;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class GameEndFlow : Flow
+class GameEndFlow : WaitForEveryPlayer!GameEndEvent
 {
 	this(Metagame metagame, INotificationService notificationService)
 	{
 		trace("Constructing game end flow");
 		super(metagame, notificationService);
-		notifyPlayers;
 	}
 
-	private void notifyPlayers()
-	{
-		foreach(player; _metagame.players)
-		{
-			auto event = new GameEndEvent(_metagame);
-			_events ~= event;
-			player.eventHandler.handle(event);
-		}
-	}
+    protected override GameEndEvent createEvent()
+    {
+        return new GameEndEvent(_metagame);
+    }
 
-	private GameEndEvent[] _events;
-
-	override void advanceIfDone()
-	{
-		if(!_events.all!(e => e.isHandled)) return;
+	protected override void advance()
+    {
 		info("Game ended. Releasing flow.");
 		flow = null;
 	}
@@ -42,7 +33,7 @@ class GameEndEvent
 		this.metagame = metagame;
 	}
 
-	Metagame metagame;
+	const Metagame metagame;
 
 	private bool _isHandled;
 	bool isHandled() @property
