@@ -770,3 +770,37 @@ unittest
         ingame.canDiscard(tile).should.equal(false);
     }
 }
+
+bool isEligibleForRedraw(const Ingame game, const Metagame metagame)
+{
+    return isEligibleForRedraw(game, metagame.isFirstTurn);
+}
+
+private bool isEligibleForRedraw(const Ingame game, bool isFirstTurn)
+{
+    return isFirstTurn && game.closedHand.hasNineOrMoreUniqueHonoursOrTerminals;
+}
+
+@("If a player has 9 or more honours or terminals in the first turn, they may redraw")
+unittest
+{
+    import fluent.asserts;
+    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d);
+    isEligibleForRedraw(ingame, true).should.equal(true);
+}
+
+@("If a player has 9 or more honours or terminals in a later turn, they are out of luck")
+unittest
+{
+    import fluent.asserts;
+    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d);
+    isEligibleForRedraw(ingame, false).should.equal(false);
+}
+
+@("If a player has less than 9 honours or terminals in the first turn, they may not redraw")
+unittest
+{
+    import fluent.asserts;
+    auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    isEligibleForRedraw(ingame, true).should.equal(false);
+}

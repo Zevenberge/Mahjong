@@ -130,6 +130,11 @@ unittest
     assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
 }
 
+bool isHonourOrTerminal(const ComparativeTile tile)
+{
+    return tile.isHonour || tile.isTerminal;
+}
+
 bool isConstructive(const ComparativeTile first, const ComparativeTile other) pure
 {
     return !first.isHonour && first.type == other.type &&
