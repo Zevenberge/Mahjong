@@ -115,6 +115,19 @@ class TurnFlow : Flow
             _notificationService.notify(Notification.Riichi, _player);
             _flow = new ClaimFlow(discard, _metagame, _notificationService);
         }
+
+        void forceRedraw()
+        in
+        {
+            assert(_player.isEligibleForRedraw(_metagame), "A player should be allowed to force a redraw.");
+        }
+        do
+        {
+            info("Redraw forced by ", _player);
+            _metagame.declareRedraw;
+            _notificationService.notify(Notification.AbortiveDraw, _player);
+            _flow = new AbortiveDrawFlow(_metagame, _notificationService);
+        }
 }
 
 class TurnEvent
@@ -137,7 +150,7 @@ class TurnEvent
 	void discard(const Tile tile)
 	{
         handle;
-		_flow.discard(tile);
+        _flow.discard(tile);
 	}
 
     unittest
@@ -287,6 +300,36 @@ class TurnEvent
         .flow.should.be.instanceOf!ClaimFlow
             .because("a riichi results in a regular discard");
         player.isRiichi.should.equal(true);
+    }
+
+    void forceRedraw()
+    {
+        handle;
+        _flow.forceRedraw;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.engine.creation;
+        import mahjong.engine.mahjong;
+        import mahjong.engine.opts;
+
+        auto player = new Player();
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        player.startGame(PlayerWinds.east);
+        player.game.closedHand.tiles = "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d.convertToTiles;
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
+        switchFlow(flow);
+        flow._event.forceRedraw;
+        flow.advanceIfDone;
+        .flow.should.be.instanceOf!AbortiveDrawFlow
+            .because("the game should be aborted");
+        metagame.isAbortiveDraw.should.equal(true)
+            .because("the metagame itself should also be aborted");
     }
 
     private void handle()
