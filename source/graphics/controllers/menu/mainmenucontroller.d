@@ -13,6 +13,12 @@ class MainMenuController : MenuControllerBase!MainMenu
 		trace("Creating Main Menu controller");
 		super(window, mainMenu);
 	}
+
+    void showMenu()
+    {
+        info("Showing main menu");
+        instance = this;
+    }
 	
 	protected override bool menuClosed()
 	{

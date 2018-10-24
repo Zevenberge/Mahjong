@@ -4,22 +4,25 @@ import std.conv;
 import dsfml.graphics;
 import mahjong.graphics.anime.animation;
 
-class AppearTextAnimation : Animation
+alias AppearTextAnimation = AppearAnimation!Text;
+alias AppearSpriteAnimation = AppearAnimation!Sprite;
+class AppearAnimation(T) : Animation
 {
-	this(Text text, int amountOfFrames)
+	this(T item, int amountOfFrames)
 	{
-		_text = text;
+		_item = item;
 		_amountOfFrames = amountOfFrames;
 	}
+	mixin ColorProperty!T;
 
-	private Text _text;
+	private T _item;
 	private int _amountOfFrames;
 
 	protected override void nextFrame()
 	{
-		auto color = _text.getColor;
+		auto color = getItemColor;
 		auto increment = (255 - color.a)/_amountOfFrames;
-		_text.setColor(
+		setItemColor(
 			Color(color.r, color.g, color.b, (color.a + increment).to!ubyte)
 			);
 		--_amountOfFrames;
@@ -61,22 +64,33 @@ unittest
 	assert(text.getColor.a == 255, "A short-circuit of the animation should result in a fully opaque text");
 }
 
-class FadeSpriteAnimation : Animation
+unittest
 {
-	this(Sprite sprite, int amountOfFrames)
+	auto sprite = new Sprite;
+	sprite.color = Color(255,255,255,0);
+	auto animation = new AppearSpriteAnimation(sprite, 300);
+	animation.forceFinish;
+	assert(sprite.color.a == 255, "The full functionality should also be available for a sprite");
+}
+alias FadeSpriteAnimation = FadeAnimation!Sprite;
+alias FadeTextAnimation = FadeAnimation!Text;
+class FadeAnimation(T) : Animation
+{
+	this(T item, int amountOfFrames)
 	{
-		_sprite = sprite;
+		_item = item;
 		_amountOfFrames = amountOfFrames;
 	}
 
-	private Sprite _sprite;
+	mixin ColorProperty!T;
+	private T _item;
 	private int _amountOfFrames;
 	
 	protected override void nextFrame()
 	{
-		auto color = _sprite.color;
+		auto color = getItemColor;
 		auto increment = color.a/_amountOfFrames;
-		_sprite.color = Color(color.r, color.g, color.b, (color.a - increment).to!ubyte);
+		setItemColor = Color(color.r, color.g, color.b, (color.a - increment).to!ubyte);
 		--_amountOfFrames;
 	}
 
@@ -112,4 +126,39 @@ unittest
 	auto animation = new FadeSpriteAnimation(sprite, 300);
 	animation.forceFinish;
 	assert(sprite.color.a == 0, "The sprite should be gone after being forced to finish");
+}
+
+unittest
+{
+	auto text = new Text;
+	text.setColor = Color(255, 255, 255, 255);
+	auto animation = new FadeTextAnimation(text, 300);
+	animation.forceFinish;
+	assert(text.getColor.a == 0, "The text should be gone after being forced to finish");
+}
+
+private mixin template ColorProperty(T)
+{
+	static if(is(T == Sprite))
+	{
+		private auto getItemColor()
+		{
+			return _item.color;
+		}
+		private void setItemColor(Color color)
+		{
+			_item.color = color;
+		}
+	}
+	static if(is(T == Text))
+	{
+		private auto getItemColor()
+		{
+			return _item.getColor;
+		}
+		private void setItemColor(Color color)
+		{
+			_item.setColor = color;
+		}
+	}
 }

@@ -136,7 +136,7 @@ class ResultController : MahjongController
 
 	private void finishRound()
 	{
-		controller = new TransferController(_window, _metagame, _renderTexture, _event);
+		Controller.instance.substitute(new TransferController(_window, _metagame, _renderTexture, _event));
 	}
 }
 
@@ -184,7 +184,7 @@ class TransferController : MahjongController
 	private void finishRound()
 	{
 		_event.handle;
-		controller = new IdleController(_window, _metagame);
+		Controller.instance.substitute(new IdleController(_window, _metagame));
 	}
 }
 

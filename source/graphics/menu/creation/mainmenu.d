@@ -14,6 +14,9 @@ import mahjong.graphics.enums.resources;
 import mahjong.graphics.eventhandler;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
+import mahjong.graphics.popup.service;
+alias Opts = mahjong.engine.opts.Opts;
+alias DrawingOpts = mahjong.graphics.opts.Opts;
 
 private MainMenu _mainMenu;
 MainMenu composeMainMenu()
@@ -44,9 +47,9 @@ MainMenu composeMainMenu()
 private void startRiichiMahjong()
 {
 	info("Riichi mahjong selected");
-	drawingOpts = new DefaultDrawingOpts;
-	gameOpts = new DefaultGameOpts;
 	startGame(
+        new DefaultGameOpts,
+        new DefaultDrawingOpts,
 		new UiEventHandler, 
 		new AiEventHandler(new SimpleAI), 
 		new AiEventHandler(new SimpleAI), 
@@ -55,78 +58,69 @@ private void startRiichiMahjong()
 ///
 unittest
 {
-	import std.stdio;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	writeln("Testing the start of the normal mahjong.");
+    import fluent.asserts;
+    import mahjong.domain.enums;
 	setDefaultTestController;
 	startRiichiMahjong;
-	assert(controller.isOfType!IdleController, 
-		"The controller should be instantiated");
-	assert(drawingOpts.isOfType!DefaultDrawingOpts, 
-		"For simple riichi mahjong, the drawing options should be the default");
-	assert(gameOpts.isOfType!DefaultGameOpts,
-		"For simple riichi mahjong, the game options should be the default");
-	writeln("Test of the start of the normal mahjong succeeded.");
+    Controller.instance.should.be.instanceOf!IdleController;
+    drawingOpts.should.be.instanceOf!DefaultDrawingOpts;
+    (cast(GameController)Controller.instance).gameMode.should.equal(GameMode.Riichi);
 }
 
 private void startBambooBattle()
 {
 	info("Bamboo battle selected");
-	drawingOpts = new BambooDrawingOpts;
-	gameOpts = new BambooOpts;
 	startGame(
+        new DefaultBambooOpts,
+        new BambooDrawingOpts,
 		new UiEventHandler, 
 		new AiEventHandler(new SimpleAI));
 }
 ///
 unittest
 {
-	import std.stdio;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	writeln("Testing the start of the bamboo mahjong.");
+    import fluent.asserts;
+    import mahjong.domain.enums;
 	setDefaultTestController;
 	startBambooBattle;
-	assert(controller.isOfType!IdleController, 
-		"The controller should be instantiated");
-	assert(drawingOpts.isOfType!BambooDrawingOpts, 
-		"For bamboo riichi mahjong, the drawing options should be specific");
-	assert(gameOpts.isOfType!BambooOpts,
-		"For bamboo riichi mahjong, the game options should be specific");
-	writeln("Test of the start of the normal mahjong succeeded.");
+    Controller.instance.should.be.instanceOf!IdleController;
+    drawingOpts.should.be.instanceOf!BambooDrawingOpts;
+    (cast(GameController)Controller.instance).gameMode.should.equal(GameMode.Bamboo);
 }
 
-private void startGame(GameEventHandler[] eventHandlers...)
+private void startGame(
+    Opts gameOpts, DrawingOpts drawingOpts,
+    GameEventHandler[] eventHandlers...)
 {
-	switchFlow(new GameStartFlow(eventHandlers));
+    .drawingOpts = drawingOpts;
+	switchFlow(new GameStartFlow(eventHandlers, gameOpts, new PopupService));
 	trace("Initiated Game Start Flow");
 }
 
 private void startThunderThrill()
 {
 	info("Thunder thrill selected");
-	controller.roundUp();
+	Controller.instance.roundUp();
 	info("Opening placeholder screen");
-	controller = new PlaceholderController(controller.getWindow, 
-		"Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650));
+	Controller.instance.substitute(new PlaceholderController(Controller.instance.getWindow, 
+		"Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650)));
 	trace("Swapped controller");
 }
 
 private void startSimpleMahjong()
 {
 	info("Simple mahjong selected");
-	controller.roundUp();
+	Controller.instance.roundUp();
 	info("Opening placeholder screen");
-	controller = new PlaceholderController(controller.getWindow, 
-		"Coming soon.", chineseBg, IntRect(0, 0, 900, 1000));
+	Controller.instance.substitute(new PlaceholderController(Controller.instance.getWindow, 
+		"Coming soon.", chineseBg, IntRect(0, 0, 900, 1000)));
 	trace("Swapped controller");
 }
 
 private void quit()
 {
 	info("Quit selected");
-	controller.getWindow.close;
+	Controller.instance.getWindow.close;
 }
 
 

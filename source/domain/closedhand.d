@@ -151,3 +151,40 @@ unittest
 	assertThrown!IllegalClaimException(closedHand.declareClosedKan(closedHand.tiles.front), 
 		"Trying to declare a closed kan when it is not allowed should be rewarded with an exception.");
 }
+
+bool hasNineOrMoreUniqueHonoursOrTerminals(const ClosedHand hand)
+{
+    auto honoursOrTerminals = hand.tiles.filter!(t => t.isHonourOrTerminal);
+    auto uniqueHonoursOrTerminals = honoursOrTerminals.uniq!((a, b) => a.hasEqualValue(b));
+    return uniqueHonoursOrTerminals.count >= 9;
+}
+
+@("A hand with less than 9 honours or terminals should not be eligible for redraw")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto hand = new ClosedHand;
+    hand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    hand.hasNineOrMoreUniqueHonoursOrTerminals.should.equal(false);
+}
+
+@("A hand with 9 or more honours of terminals is eligible for redraw")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto hand = new ClosedHand;
+    hand.tiles = "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d.convertToTiles;
+    hand.hasNineOrMoreUniqueHonoursOrTerminals.should.equal(true);
+}
+
+@("Doubles do not count for redraw")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto hand = new ClosedHand;
+    hand.tiles = "🀀🀁🀂🀃🀄🀅🀆🀆🀏🀝🀟🀟🀠🀠"d.convertToTiles;
+    hand.hasNineOrMoreUniqueHonoursOrTerminals.should.equal(false);
+}

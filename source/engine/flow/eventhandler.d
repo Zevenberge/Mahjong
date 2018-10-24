@@ -10,11 +10,8 @@ class GameEventHandler
 	abstract void handle(RoundStartEvent event);
 	abstract void handle(ClaimEvent event);
 	abstract void handle(MahjongEvent event);
-	abstract void handle(GameEndEvent event);
-	Player createPlayer()
-	{
-		return new Player(this);
-	}
+    abstract void handle(AbortiveDrawEvent event);
+	abstract void handle(GameEndEvent event);	
 }
 
 version(unittest)
@@ -57,6 +54,13 @@ version(unittest)
 			trace("Handling mahjong event");
 			mahjongEvent = event;
 		}
+
+        AbortiveDrawEvent abortiveDrawEvent;
+        override void handle(AbortiveDrawEvent event)
+        {
+            trace("Handling abortive draw event");
+            abortiveDrawEvent = event;
+        }
 
 		GameEndEvent gameEndEvent;
 		override void handle(GameEndEvent event) 

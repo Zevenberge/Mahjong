@@ -9,43 +9,37 @@ import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.engine.mahjong;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
-class MahjongFlow : Flow
+class MahjongFlow : WaitForEveryPlayer!MahjongEvent
 {
-	this(Metagame game)
+	this(Metagame game, INotificationService notificationService)
 	{
 		trace("Constructing mahjong flow");
-		super(game);
-		auto data = game.constructMahjongData;
-		notifyPlayers(data);
+        _mahjongData = game.constructMahjongData;
+		super(game, notificationService);
 	}
 
-	private void notifyPlayers(const(MahjongData)[] data)
-	{
-		foreach(player; _metagame.players)
-		{
-			auto event = new MahjongEvent(metagame, data);
-			_events ~= event;
-			player.eventHandler.handle(event);
-		}
-	}
+    private const(MahjongData[]) _mahjongData;
 
-	private MahjongEvent[] _events;
+    protected override MahjongEvent createEvent()
+    {
+        return new MahjongEvent(_metagame, _mahjongData);
+    }
 
-	override void advanceIfDone()
-	{
-		if(!_events.all!(e => e.isHandled)) return;
-		_metagame.finishRound;
-		mixin(gameOverSwitch);
-		flow = new RoundStartFlow(_metagame);
-	}
+    protected override void advance()
+    {
+        _metagame.finishRound;
+        mixin(gameOverSwitch);
+        flow = new RoundStartFlow(_metagame, _notificationService);
+    }
 }
 
 enum gameOverSwitch =
 q{
 	if(_metagame.isGameOver)
 	{
-		flow = new GameEndFlow(_metagame);
+		flow = new GameEndFlow(_metagame, _notificationService);
 		return;
 	}
 };
@@ -85,12 +79,14 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
 	import mahjong.engine.creation;
+    import mahjong.engine.opts;
+
 	auto eventhandler = new TestEventHandler;
-	auto player1 = new Player(eventhandler);
+	auto player1 = new Player(eventhandler, 30_000);
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
-	auto metagame = new Metagame([player1]);
-	auto flow = new MahjongFlow(metagame);
+	auto metagame = new Metagame([player1], new DefaultGameOpts);
+	auto flow = new MahjongFlow(metagame, new NullNotificationService);
 	assert(eventhandler.mahjongEvent !is null, "A mahjong event should have been distributed.");
 	assert(eventhandler.mahjongEvent.data.empty, "No player has a mahjong, so the data should be empty.");
 }
@@ -100,12 +96,13 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
 	import mahjong.engine.creation;
+    import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
-	auto player1 = new Player(eventhandler);
+	auto player1 = new Player(eventhandler, 30_000);
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
-	auto metagame = new Metagame([player1]);
-	auto flow = new MahjongFlow(metagame);
+	auto metagame = new Metagame([player1], new DefaultGameOpts);
+	auto flow = new MahjongFlow(metagame, new NullNotificationService);
 	assert(eventhandler.mahjongEvent.data.length == 1, "As the only player has a mahjong, one data should be added");
 }
 unittest
@@ -114,15 +111,16 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
 	import mahjong.engine.creation;
+    import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
-	auto player1 = new Player(eventhandler);
+	auto player1 = new Player(eventhandler, 30_000);
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
-	auto player2 = new Player(eventhandler);
+	auto player2 = new Player();
 	player2.game = new Ingame(PlayerWinds.south);
 	player2.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
-	auto metagame = new Metagame([player1, player2]);
-	auto flow = new MahjongFlow(metagame);
+	auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+	auto flow = new MahjongFlow(metagame, new NullNotificationService);
 	assert(eventhandler.mahjongEvent.data.length == 1, "As only one of two players has a mahjong, one data should be added");
 	assert(eventhandler.mahjongEvent.data[0].player == player1, "The mahjong player is player 1");
 }
@@ -132,51 +130,54 @@ unittest
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
 	import mahjong.engine.creation;
+    import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
-	auto player1 = new Player(eventhandler);
+	auto player1 = new Player(eventhandler, 30_000);
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
-	auto player2 = new Player(eventhandler);
+	auto player2 = new Player();
 	player2.game = new Ingame(PlayerWinds.south);
 	player2.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
-	auto player3 = new Player(eventhandler);
+	auto player3 = new Player();
 	player3.game = new Ingame(PlayerWinds.west);
 	player3.game.closedHand.tiles = "🀃🀃🀃🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
-	auto metagame = new Metagame([player1, player2, player3]);
-	auto flow = new MahjongFlow(metagame);
+	auto metagame = new Metagame([player1, player2, player3], new DefaultGameOpts);
+	auto flow = new MahjongFlow(metagame, new NullNotificationService);
 	assert(eventhandler.mahjongEvent.data.length == 2, "As two out of three players have a mahjong");
 }
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
 	import mahjong.engine.creation;
-	import mahjong.test.utils;
+    import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
-	auto player1 = new Player(eventhandler);
+	auto player1 = new Player(eventhandler, 30_000);
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
-	auto metagame = new Metagame([player1]);
-	flow = new MahjongFlow(metagame);
+	auto metagame = new Metagame([player1], new DefaultGameOpts);
+	flow = new MahjongFlow(metagame, new NullNotificationService);
 	eventhandler.mahjongEvent.handle;
 	flow.advanceIfDone;
-	assert(flow.isOfType!RoundStartFlow, "After a mahjong, a new round should start");
+    .flow.should.be.instanceOf!RoundStartFlow.because("a new round should start");
 }
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
 	import mahjong.engine.creation;
-	import mahjong.test.utils;
+    import mahjong.engine.opts;
 	class NoMoreGame : Metagame
 	{
 		this(Player[] players)
 		{
-			super(players);
+			super(players, new DefaultGameOpts);
 		}
 
 		override bool isGameOver() 
@@ -186,15 +187,16 @@ unittest
 	}
 
 	auto eventhandler = new TestEventHandler;
-	auto player1 = new Player(eventhandler);
+	auto player1 = new Player(eventhandler, 30_000);
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
 	auto metagame = new NoMoreGame([player1]);
-	flow = new MahjongFlow(metagame);
+	flow = new MahjongFlow(metagame, new NullNotificationService);
 	eventhandler.mahjongEvent.handle;
 	flow.advanceIfDone;
-	assert(flow.isOfType!GameEndFlow, "After a mahjong, a new round should start");
+    .flow.should.be.instanceOf!GameEndFlow;
 }
+
 struct MahjongData
 {
 	const(Player) player;
@@ -224,7 +226,7 @@ unittest
 	import mahjong.domain.wall;
 	import mahjong.engine.creation;
 	auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.game = new Ingame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
 	player.drawTile(wall);
@@ -239,7 +241,7 @@ unittest
 	import mahjong.domain.ingame;
 	import mahjong.domain.tile;
 	import mahjong.engine.creation;
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.game = new Ingame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗"d.convertToTiles;
 	auto tile = new Tile(Types.bamboo, Numbers.eight);
@@ -258,7 +260,7 @@ unittest
 	import mahjong.domain.wall;
 	import mahjong.engine.creation;
 	auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.game = new Ingame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
 	auto tile = new Tile(Types.wind, Winds.east);

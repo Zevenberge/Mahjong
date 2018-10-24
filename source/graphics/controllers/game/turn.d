@@ -56,7 +56,7 @@ class TurnController : GameController
 				selectNext;
 				break;
 			case Return:
-				confirmSelectedTile;
+				selectedItem.confirm(_event, true);
 				break;
 			default:
 				// Do nothing
@@ -64,30 +64,32 @@ class TurnController : GameController
 		}
 	}
 
-	private void confirmSelectedTile()
-	{
-		auto factory = new TurnOptionFactory(_event.player, selectedItem, _metagame, _event);
-		if(factory.isDiscardTheOnlyOption)
-		{
-			discardSelectedTile;
-		}	
-		else
-		{
-			showTurnOptionMenu(factory);
-		}
-	}
-
-	private void discardSelectedTile()
-	{
-		info("Discarding tile");
-		controller = new IdleController(_window, _metagame);
-		_event.discard(selectedItem);
-	}
-
-	private void showTurnOptionMenu(TurnOptionFactory factory)
-	{
-		controller = new TurnOptionController(_window, _metagame, this, factory);
-	}
-
 	mixin Select!(const Tile);
+}
+
+void confirm(const(Tile) selectedItem, TurnEvent event, bool canCancel)
+{
+    auto factory = new TurnOptionFactory(selectedItem, event, canCancel);
+    if(factory.isDiscardTheOnlyOption)
+    {
+        discardSelectedTile(event, selectedItem);
+    }   
+    else
+    {
+        showTurnOptionMenu(factory, event.metagame);
+    }
+}
+
+private void discardSelectedTile(TurnEvent event, const(Tile) selectedItem)
+{
+    info("Discarding tile");
+    Controller.instance.substitute(new IdleController(Controller.instance.getWindow(), event.metagame));
+    event.discard(selectedItem);
+}
+
+private void showTurnOptionMenu(TurnOptionFactory factory, const(Metagame) metagame)
+{
+    Controller.instance.substitute(
+        new TurnOptionController(Controller.instance.getWindow(), 
+            metagame, Controller.instance, factory));
 }

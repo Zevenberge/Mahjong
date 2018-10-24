@@ -20,7 +20,6 @@ interface Opts
 	}
 	float iconSpacing();
 	uint iconSize();
-	int initialScore();
 	int criticalScore();
 	int amountOfDiscardLines();
 	int amountOfDiscardsPerLine();

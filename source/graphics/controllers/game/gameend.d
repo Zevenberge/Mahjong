@@ -15,14 +15,14 @@ import mahjong.graphics.utils : freeze;
 
 class GameEndController : MahjongController
 {
-	this(RenderWindow window, Metagame metagame, GameEndEvent event)
+	this(RenderWindow window, const Metagame metagame, GameEndEvent event)
 	{
 		super(window, metagame, freezeGameGraphicsOnATexture(metagame));
 		_screen = new GameEndScreen(metagame, innerScreenBounds);
 		_event = event;
 	}
 
-	private RenderTexture freezeGameGraphicsOnATexture(Metagame metagame)
+	private RenderTexture freezeGameGraphicsOnATexture(const Metagame metagame)
 	{
 		auto screen = styleOpts.screenSize;
 		return freeze!((target) {})(Vector2u(screen.x, screen.y));
@@ -41,7 +41,7 @@ class GameEndController : MahjongController
 	{
 		info("Rounding up game.");
 		_event.handle;
-		controller = new MainMenuController(_window, composeMainMenu);
+        Controller.instance.substitute(new MainMenuController(_window, composeMainMenu));
 	}
 }
 
@@ -49,24 +49,27 @@ unittest
 {
 	// Check no segfaults test.
 	import dsfml.graphics : Event, Keyboard;
+    import fluent.asserts;
 	import mahjong.domain.player;
+    import mahjong.domain.wrappers;
 	import mahjong.engine.flow;
+    import mahjong.engine.opts;
 	import mahjong.graphics.drawing.player;
 	import mahjong.graphics.rendersprite;
-	import mahjong.test.utils;
 	import mahjong.test.window;
-	scope(exit) controller = null;
-	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	player.draw(new RenderSprite(FloatRect()), 0);
-	auto metagame = new Metagame([player, player, player, player]);
+	scope(exit) setDefaultTestController;
+	auto player = new Player();
+	player.draw(AmountOfPlayers(4), new RenderSprite(FloatRect()), 0);
+	auto metagame = new Metagame([player, player, player, player], new DefaultGameOpts);
 	auto window = new TestWindow;
 	auto event = new GameEndEvent(metagame);
-	controller = new GameEndController(window, metagame, event);
-	controller.draw;
+    setDefaultTestController;
+	Controller.instance.substitute(new GameEndController(window, metagame, event));
+	Controller.instance.draw;
 	Event keyEvent = Event(Event.EventType.KeyReleased);
 	keyEvent.key = Event.KeyEvent(Keyboard.Key.Return, false, false, false, false);
-	controller.handleEvent(keyEvent);
+	Controller.instance.handleEvent(keyEvent);
 	assert(event.isHandled, "After pressing enter, the event should have been handled.");
-	assert(controller.isOfType!MainMenuController, "After a game, the user is returned to the main manu.");
+    Controller.instance.should.be.instanceOf!MainMenuController
+        .because("after a game, the user is returned to the main menu");
 }

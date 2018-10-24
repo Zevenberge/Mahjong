@@ -11,6 +11,7 @@ import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.count;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.anime.movement;
+import mahjong.graphics.anime.story;
 import mahjong.graphics.coords;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.player;
@@ -108,16 +109,17 @@ unittest
 	// Hit all the code so that we at least know that there is no null-pointer dereference.
 	import fluent.asserts;
 	import mahjong.domain.player;
+    import mahjong.domain.wrappers;
 	import mahjong.engine.flow;
 	import mahjong.graphics.opts;
 	import mahjong.test.window;
 	styleOpts = new DefaultStyleOpts;
 	drawingOpts = new DefaultDrawingOpts;
 	auto testWindow = new TestWindow;
-	auto player1 = new Player(new TestEventHandler);
-	player1.drawPlayer(testWindow, 0);
-	auto player2 = new Player(new TestEventHandler);
-	player2.drawPlayer(testWindow, 0);
+	auto player1 = new Player();
+	player1.drawPlayer(AmountOfPlayers(2), testWindow, 0);
+	auto player2 = new Player();
+	player2.drawPlayer(AmountOfPlayers(2), testWindow, 0);
 	auto transaction1 = new Transaction(player1, -1500);
 	auto transaction2 = new Transaction(player2, 1500);
 	auto transferScreen = new TransferScreen([transaction1, transaction2]);
@@ -208,11 +210,13 @@ private class Transfer
 		Animation appearAnimation = new AppearTextAnimation(_transaction, 90);
 		auto finalCoords = FloatCoords(_transaction.position - Vector2f(0, 40), 0);
 		Animation movementAnimation = new MovementAnimation(_transaction, finalCoords, 90);
-		Animation appearMoveTextAnimation = new ParallelAnimation([appearAnimation, movementAnimation]);
 		Animation countTransferAnimation = new CountAnimation(_transaction, transaction.amount, 0);
 		auto initialScore = transaction.player.score;
 		Animation countScoreAnimation = new CountAnimation(_remainingPoints, initialScore, initialScore + transaction.amount);
-		_animation = new Chain!ParallelAnimation(appearMoveTextAnimation, [countTransferAnimation, countScoreAnimation]);
+		_animation = new Storyboard([
+				[appearAnimation, movementAnimation].parallel, 
+				[countTransferAnimation, countScoreAnimation].parallel
+			]);
 	}
 
 	private Text _transaction;

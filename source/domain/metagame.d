@@ -10,12 +10,11 @@ import std.uuid;
 
 import mahjong.domain.enums;
 import mahjong.domain;
+import mahjong.domain.wrappers;
 import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 import mahjong.engine.scoring;
-import mahjong.graphics.enums.game;
-import mahjong.graphics.enums.kanji;
 import mahjong.share.range;
 
 class Metagame
@@ -54,9 +53,9 @@ class Metagame
 		return players.filter!(p => p != player);
 	}
 
-	size_t amountOfPlayers() @property pure const
+	AmountOfPlayers amountOfPlayers() @property pure const
 	{
-		return players.length;
+		return AmountOfPlayers(players.length);
 	}
 
 	Wall wall;
@@ -80,9 +79,10 @@ class Metagame
 		return _counters;
 	}
 
-	this(Player[] players)
+	this(Player[] players, const Opts opts)
 	{
 		this.players = players;
+        _opts = opts;
 		info("Initialising metagame");
 		placePlayers;
 		_initialWind = uniform(0, players.length).to!int; 
@@ -116,7 +116,24 @@ class Metagame
 		startPlayersGame;
 		setUpWall;
 		removeTurnPlayer;
+        _isRedrawDeclared = false;
 	}
+
+    @("If the game is aborted due to a redraw, a redraw should no longer be requested")
+    unittest
+    { 
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame.declareRedraw;
+        metagame.abortRound;
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.isAbortiveDraw.should.equal(false);
+    }
 
 	private void startPlayersGame()
 	{
@@ -140,7 +157,7 @@ class Metagame
 
 	protected Wall getWall()
 	{
-		return new Wall;
+		return new Wall(_opts);
 	}
 
 	void beginRound()
@@ -148,6 +165,7 @@ class Metagame
 		wall.dice;
 		distributeTiles;
 		setTurnPlayerToEast;
+        _isFirstTurn = true;
 	}
 
 	private void distributeTiles()
@@ -173,10 +191,28 @@ class Metagame
 	void finishRound()
 	{
 		++_round;
-		auto data = constructMahjongData;
+		auto data = this.constructMahjongData;
 		applyTransactions(data);
 		moveWinds;
+        _amountOfRiichiSticks = 0;
 	}
+
+    @("End of a round should reset the counters")
+    unittest
+    {
+        import fluent.asserts;
+        auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+        auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+        auto player1 = new Player;
+        player1.game = winningGame;
+        player1.hasDrawnTheirLastTile;
+        auto metagame = new Metagame([player1], new DefaultGameOpts);
+        metagame.setUpWall;
+        metagame.currentPlayer = player1;
+        metagame.riichiIsDeclared;
+        metagame.finishRound;
+        metagame.amountOfRiichiSticks.should.equal(0);
+    }
 
 	private void applyTransactions(const(MahjongData)[] data)
 	{
@@ -209,9 +245,72 @@ class Metagame
 		return !players.first!(p => p.isEast).isMahjong;
 	}
 
+    void abortRound()
+    {
+        foreach(player; players)
+        {
+            player.abortGame(this);
+            if(player.isRiichi) _amountOfRiichiSticks--;
+        }
+    }
+
+    @("During an abortive draw, nothing happens")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow.eventhandler;
+        auto players = [new Player(new TestEventHandler, 30_000), 
+            new Player(new TestEventHandler, 30_000)];
+        auto metagame = new Metagame(players, new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame._counters = 5;
+        metagame.abortRound;
+        metagame.amountOfRiichiSticks.should.equal(0);
+        metagame.counters.should.equal(5);
+        players[0].score.should.equal(30_000);
+        players[1].score.should.equal(30_000);
+    }
+
+    @("If a player is riichi, it will be undone")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow.eventhandler;
+        auto players = [new Player(new TestEventHandler, 30_000), 
+            new Player(new TestEventHandler, 30_000)];
+        auto metagame = new Metagame(players, new DefaultGameOpts);
+        metagame.initializeRound;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        players[0].game = ingame;
+        players[0].declareRiichi(toBeDiscardedTile, metagame);
+        metagame.abortRound;
+        metagame.amountOfRiichiSticks.should.equal(0);
+        metagame.counters.should.equal(0);
+        players[0].score.should.equal(30_000);
+    }
+
+    @("If a player is riichi, the amount of riichi sticks will be reduced by one for each riichi")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow.eventhandler;
+        auto players = [new Player(new TestEventHandler, 30_000), 
+            new Player(new TestEventHandler, 30_000)];
+        auto metagame = new Metagame(players, new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame._amountOfRiichiSticks = 5;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        players[0].game = ingame;
+        players[0].declareRiichi(toBeDiscardedTile, metagame);
+        metagame.abortRound;
+        metagame.amountOfRiichiSticks.should.equal(5);
+    }
+
 	bool isGameOver()
 	{
-		return _leadingWind > gameOpts.finalLeadingWind;
+		return _leadingWind > _opts.finalLeadingWind;
 	}
 	/*
 	 The game itself.
@@ -231,22 +330,21 @@ class Metagame
 		}
 	}
 
-	void tsumo(Player player)
-	in
+    void riichiIsDeclared()
+    {
+        _amountOfRiichiSticks++;
+    }
+
+    int amountOfRiichiSticks() @property pure const
+    {
+        return _amountOfRiichiSticks;
+    }
+
+    private int _amountOfRiichiSticks;
+
+	void tsumo()	
 	{
-		assert(player == currentPlayer);
-	}
-	body
-	{
-		flipOverWinningTiles();
-		if(player.isMahjong)
-		{
-			info("Player ", cast(Kanji)currentPlayer.wind, " won");
-		}
-		else
-		{
-			info("Player ", cast(Kanji)currentPlayer.wind, " chombo'd");
-		}
+		flipOverWinningTiles();	
 	}
 
 	void advanceTurn()
@@ -260,17 +358,187 @@ class Metagame
 		{
 			trace("Advancing turn.");
 			_turn = (_turn + 1) % players.length;
+            if(currentPlayer is _initialEastPlayer)
+            {
+                _isFirstTurn = false;
+            }
 		}
 	}
 
+    private bool _isFirstTurn;
+
+    bool isFirstTurn() @property pure const
+    {
+        return _isFirstTurn;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.isFirstTurn.should.equal(true);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.advanceTurn;
+        metagame.isFirstTurn.should.equal(false)
+            .because("all players already had a turn");
+    }
+
+    void aTileHasBeenClaimed()
+    {
+        _isFirstTurn = false;
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.aTileHasBeenClaimed;
+        metagame.isFirstTurn.should.equal(false)
+            .because("all players already had a turn");
+    }
+
 	bool isAbortiveDraw() @property
 	{
-		return false;
+		return _isRedrawDeclared
+            || didAllPlayersDiscardTheSameWindInTheFirstTurn
+            || areAllKansDeclaredAndNotByOnePlayer
+            || isEveryPlayerRiichi;
 	}
 
-	bool isExhaustiveDraw() @property
+    private bool didAllPlayersDiscardTheSameWindInTheFirstTurn()
+    {
+        if(!_isFirstTurn) return false;
+        auto firstPlayer = players[0];
+        if(firstPlayer.discards.length != 1) return false;
+        auto firstPlayersDiscard = firstPlayer.discards[0];
+        if(!firstPlayersDiscard.isWind) return false;
+        return players[1..$].all!(player => player.doesDiscardsOnlyContain(firstPlayersDiscard));
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.setDiscards([new Tile(Types.wind, Winds.east)]);
+        player2.setDiscards([new Tile(Types.wind, Winds.east)]);
+        metagame.isAbortiveDraw.should.equal(true)
+            .because("all players discarded the same wind in the first round");
+        metagame.aTileHasBeenClaimed;
+        metagame.isAbortiveDraw.should.equal(false)
+            .because("the first round has been interrupted");
+    }
+
+    private bool areAllKansDeclaredAndNotByOnePlayer()
+    {
+        if(!wall.isMaxAmountOfKansReached) return false;
+        return !players.any!(player => player.hasAllTheKans(_opts.maxAmountOfKans));
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        void kan(Player player)
+        {
+            player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
+            auto kannableTile = "🀕"d.convertToTiles[0];
+            kannableTile.origin = new Ingame(PlayerWinds.north);
+            player.kan(kannableTile, metagame.wall);
+        }
+        metagame.initializeRound;
+        metagame.beginRound;
+        kan(player1);
+        kan(player1);
+        kan(player2);
+        kan(player2);
+        metagame.isAbortiveDraw.should.equal(true)
+            .because("two players shares all available kans");
+
+        metagame.initializeRound;
+        metagame.beginRound;
+        kan(player1);
+        kan(player1);
+        kan(player1);
+        kan(player1);
+        metagame.isAbortiveDraw.should.equal(false)
+            .because("one player claimed all available kans");
+    }
+
+    private bool isEveryPlayerRiichi()
+    {
+        return players.all!(player => player.isRiichi);
+    }
+
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        player2.game = new Ingame(PlayerWinds.south, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        player1.declareRiichi(player1.closedHand.tiles[3], metagame);
+        metagame.isAbortiveDraw.should.equal(false);
+        player2.declareRiichi(player2.closedHand.tiles[3], metagame);
+        metagame.isAbortiveDraw.should.equal(true);
+    }
+
+    void declareRedraw()
+    {
+        _isRedrawDeclared = true;
+    }
+    private bool _isRedrawDeclared;
+
+    @("If a redraw is declared, the game is aborted")
+    unittest
+    { 
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame.declareRedraw;
+        metagame.isAbortiveDraw.should.equal(true);
+    }
+
+    bool canRiichiBeDeclared() @property const
+    {
+        return wall.canRiichiBeDeclared;
+    }
+
+	bool isExhaustiveDraw() @property const
 	{
-		return wall.length <= gameOpts.deadWallLength;
+        return wall.isExhaustiveDraw;
 	}
 
 	deprecated("Move to exhaustive draw flow.")
@@ -298,7 +566,7 @@ class Metagame
 			if(player.isTenpai)
 			{
 				player.showHand;
-				info(cast(Kanji)player.wind, " is tenpai!");
+				info(player.wind, " is tenpai!");
 			}
 			else
 			{
@@ -307,20 +575,7 @@ class Metagame
 		}
 	}
 
-	const(MahjongData)[] constructMahjongData()
-	{
-		return players.map!((player){
-				auto mahjongResult = scanHandForMahjong(player);
-				return MahjongData(player, mahjongResult);
-			}).filter!(data => data.result.isMahjong).array;
-	}
-
-	/*
-	 Random useful functions.
-	 */
-
-	
-	private void flipOverWinningTiles()
+    private void flipOverWinningTiles()
 	{
 		foreach(player; players)
 		{
@@ -330,17 +585,27 @@ class Metagame
 				player.closeHand; 
 		}
 	}
+
+    private const Opts _opts;
+
+    int riichiFare() pure const
+    {
+        return _opts.riichiFare;
+    }
+
+    GameMode gameMode() pure const
+    {
+        return _opts.gameMode;
+    }
 }
 
 unittest
 {
 	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new DefaultGameOpts;
-	auto player = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto metagame = new Metagame([player, player2, player3]);
+	auto player = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto metagame = new Metagame([player, player2, player3], new DefaultGameOpts);
 	metagame.currentPlayer = player;
 	assert(metagame.currentPlayer == player, "The current player should be set and identical to the value set");
 	assert(metagame.nextPlayer == player2, "If it is player 1's turn, player 2 should be next.");
@@ -352,12 +617,10 @@ unittest
 {
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = players[metagame._initialWind];
@@ -372,13 +635,10 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = players[metagame._initialWind];
@@ -396,13 +656,10 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	foreach(i; 0..2)
@@ -420,15 +677,12 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto player4 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = metagame.currentPlayer;
@@ -445,15 +699,12 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto player4 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	foreach(i; 0..3)
@@ -469,13 +720,10 @@ unittest
 unittest
 {
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	import mahjong.engine.opts;
-	gameOpts = new BambooOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
 	auto players = [player1, player2];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = players[metagame._initialWind];
@@ -493,14 +741,12 @@ unittest
 	import core.exception;
 	import std.exception;
 	import mahjong.engine.creation;
-	import mahjong.engine.flow;
-	gameOpts = new DefaultGameOpts;
-	auto player1 = new Player(new TestEventHandler);
-	auto player2 = new Player(new TestEventHandler);
-	auto player3 = new Player(new TestEventHandler);
-	auto player4 = new Player(new TestEventHandler);
+	auto player1 = new Player();
+	auto player2 = new Player();
+	auto player3 = new Player();
+	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players);
+	auto metagame = new Metagame(players, new DefaultGameOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	foreach(i; 0..7)
@@ -522,29 +768,76 @@ unittest
 
 class BambooMetagame : Metagame
 {
-	this(Player[] players)
+	this(Player[] players, const Opts gameOpts)
 	{
-		super(players);
+		super(players, gameOpts);
 	}
 
 	override Wall getWall()
 	{
-		return new BambooWall;
+		return new BambooWall(_opts);
 	}
 }
 
-class EightPlayerMetagame : Metagame
+void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
 {
-	this(Player[] players)
-	{
-		super(players);
-	}
-
-	override Wall getWall()
-	{
-		return new EightPlayerWall;
-	}
+    foreach(player; metagame.players)
+    {
+        player.couldHaveClaimed(tile);
+    }
 }
 
+auto playersByTurnOrder(Metagame metagame) @property
+{
+    return metagame.players.cycle
+        .find(metagame.getCurrentPlayer)
+        .atLeastOneUntil(metagame.getCurrentPlayer);
+}
 
+unittest
+{
+    import fluent.asserts;
+    auto player1 = new Player;
+    auto player2 = new Player;
+    auto player3 = new Player;
+    auto player4 = new Player;
+    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
+    metagame.currentPlayer = player3;
+    metagame.playersByTurnOrder.should.equal(
+        [player3, player4, player1, player2]
+        );
+}
 
+const(MahjongData)[] constructMahjongData(Metagame metagame)
+{
+    return metagame.playersByTurnOrder.map!((player){
+            auto mahjongResult = scanHandForMahjong(player);
+            return MahjongData(player, mahjongResult);
+        }).filter!(data => data.result.isMahjong).array;
+}
+
+unittest
+{
+    import fluent.asserts;
+    auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+    auto player1 = new Player;
+    player1.game = winningGame;
+    auto player2 = new Player;
+    player2.game = losingGame;
+    auto player3 = new Player;
+    player3.game = winningGame;
+    auto player4 = new Player;
+    player4.game = losingGame;
+    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
+    metagame.currentPlayer = player2;
+    auto mahjongData = metagame.constructMahjongData;
+    mahjongData.length.should.equal(2);
+    mahjongData[0].player.should.equal(player3);
+    mahjongData[1].player.should.equal(player1);
+}
+
+int riichiFare(const Metagame metagame) @property
+{
+    return metagame._opts.riichiFare;
+}

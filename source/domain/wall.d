@@ -15,20 +15,22 @@ import mahjong.engine.opts;
 class Wall
 {
 	const UUID id;
+    private const Opts _opts;
 	private Tile[] _tiles;
 	const(Tile)[] tiles() @property pure const
 	{
 		return _tiles;
 	}
 
-	this()
+	this(const Opts opts)
 	{
 		trace("Constructing the wall");
 		id = randomUUID;
+        _opts = opts;
 	}
 
 	
-	@property public size_t length()
+	size_t length() @property pure const
 	{
 		return _tiles.length;
 	}
@@ -91,7 +93,7 @@ class Wall
 	}
 	private int calculateWallShift(int diceRoll)
 	{
-		auto plyrs = gameOpts.amountOfPlayers;
+		auto plyrs = _opts.amountOfPlayers;
 		int wallSide = (diceRoll-1)%plyrs;
 		return ((plyrs - wallSide-1) % plyrs) * to!int(length)/plyrs;
 	}
@@ -125,6 +127,7 @@ class Wall
 		return drawnTile;
 	}
 
+    private ubyte _amountOfKans;
 	Tile drawKanTile()
 	{ 
 		flipDoraIndicator;
@@ -133,22 +136,31 @@ class Wall
 	
 	protected Tile getKanTile()
 	{
+        _amountOfKans++;
 		Tile kanTile = _tiles[$-1];
 		_tiles = _tiles[0 .. $-1];
 		return kanTile;
 	}
 
-	bool isExhaustiveDraw()
+    bool canRiichiBeDeclared() @property const
+    {
+        return (_tiles.length - _opts.deadWallLength) > _opts.riichiBuffer;
+    }
+
+	bool isExhaustiveDraw() @property const
 	{
-		return _tiles.length <= gameOpts.deadWallLength;
+		return _tiles.length <= _opts.deadWallLength;
 	}
 
+    bool isMaxAmountOfKansReached() const
+    {
+        return _amountOfKans == _opts.maxAmountOfKans;
+    }
 }
 
 unittest
 {
-	gameOpts = new DefaultGameOpts;
-	auto wall = new Wall;
+	auto wall = new Wall(new DefaultGameOpts);
 	wall.setUp;
 	wall.dice;
 	assert(wall.doraIndicators.length == 1, "The wall should be initialised with one flipped dora indicator");
@@ -162,13 +174,12 @@ unittest
 	import mahjong.domain.player;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
-	gameOpts = new DefaultGameOpts;
-	auto wall = new Wall;
+	auto wall = new Wall(new DefaultGameOpts);
 	wall.setUp;
 	wall.dice;
 	auto initialWallLength = wall.length;
 	auto lastTile = wall.tiles.back;
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
@@ -179,8 +190,32 @@ unittest
 	assert(wall.doraIndicators.length == 2, "An additional dora indicator should be flipped.");
 }
 
+unittest
+{
+    import fluent.asserts;
+    class TwoKanOps : DefaultGameOpts
+    {
+        override int maxAmountOfKans() pure const
+        {
+            return 2;
+        }
+    }
+    auto wall = new Wall(new TwoKanOps);
+    wall.setUp;
+    wall.dice;
+    wall.drawKanTile;
+    wall.isMaxAmountOfKansReached.should.equal(false);
+    wall.drawKanTile;
+    wall.isMaxAmountOfKansReached.should.equal(true);
+}
+
 class BambooWall : Wall
 {
+    this(const Opts opts)
+    {
+        super(opts);
+    }
+
 	protected override void initialise()
 	{
 		for(int j = Numbers.min; j <= Numbers.max; ++j)
@@ -224,13 +259,12 @@ unittest
 	import mahjong.domain.player;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
-	gameOpts = new DefaultGameOpts;
-	auto wall = new BambooWall;
+	auto wall = new BambooWall(new DefaultGameOpts);
 	wall.setUp;
 	wall.dice;
 	auto initialWallLength = wall.length;
 	auto firstTile = wall.tiles.front;
-	auto player = new Player(new TestEventHandler);
+	auto player = new Player();
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
@@ -239,10 +273,6 @@ unittest
 	assert(player.game.closedHand.tiles.front == firstTile, "The first tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
 }
-class EightPlayerWall : Wall
-{
-	
-}
 
 version(unittest)
 {
@@ -250,6 +280,7 @@ version(unittest)
 	{
 		this(Tile tileToDraw)
 		{
+            super(new DefaultGameOpts);
 			_tileToDraw = tileToDraw;
 		}
 

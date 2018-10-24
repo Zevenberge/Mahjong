@@ -7,6 +7,7 @@ import std.random;
 import std.conv; 
 import std.file;
 import std.string;
+import std.traits;
 
 import mahjong.domain.closedhand;
 import mahjong.domain.enums;
@@ -174,6 +175,7 @@ unittest
 	honourKan[0].origin = new Ingame(PlayerWinds.east);
 	assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 16, "An open honour pon is 16");
 }
+
 class ChiSet : Set
 {
 	this(const Tile[] tiles) pure
@@ -294,7 +296,7 @@ body
 		{
 			return MahjongResult(true, [new SevenPairsSet(sortedHand)]);
 		}
-		if(isThirteenOrphans(hand))
+		if(isThirteenOrphans(sortedHand))
 		{ 
 			return MahjongResult(true, [new ThirteenOrphanSet(sortedHand)]);
 		}
@@ -584,13 +586,11 @@ unittest // Check whether the example hands are seen as mahjong hands.
 		{   
 			assert(line.length == 14, "A complete hand is 14 tiles");
 			auto hand = convertToTiles(line);
-			sortHand(hand);
 			bool isMahjong;
 			isMahjong = scanHandForMahjong(hand, null).isMahjong;
 			assert(isHand == isMahjong, "For %s, the mahjong should be %s".format(line, isHand));
 			write("The mahjong is ", isMahjong, ".  ");
-			foreach(stone; hand) {write(stone);}
-			writeln();
+			writeln(line);
 		}
 		writeln();
 
@@ -635,3 +635,28 @@ version(unittest)
 	}
 }
 
+bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
+{
+    import mahjong.engine.creation;
+    return allTiles.any!(tile => scanHandForMahjong(closedHand ~tile, openHand.sets).isMahjong);
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto tenpaiHand = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    auto emptyOpenHand = new OpenHand;
+    isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
+    auto noTenpaiHand = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
+    isPlayerTenpai(noTenpaiHand, emptyOpenHand).should.equal(false);
+}
+
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto tenpaiHand = "🀀🀁🀂🀃🀄🀆🀆🀇🀏🀐🀘🀙🀡"d.convertToTiles;
+    auto emptyOpenHand = new OpenHand;
+    isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
+}

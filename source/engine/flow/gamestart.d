@@ -5,20 +5,24 @@ import std.experimental.logger;
 import std.array;
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 import mahjong.engine.opts;
 
 class GameStartFlow : Flow
 {
-	this(GameEventHandler[] eventHandlers)
+	this(GameEventHandler[] eventHandlers, Opts gameOpts,
+        INotificationService notificationService)
 	in
 	{
 		assert(!eventHandlers.empty, "Expected at least a single event handler");
+        assert(gameOpts !is null, "Options were not supplied");
 	}
 	body
 	{
 		info("Starting game.");
-		auto game = gameOpts.createMetagame(eventHandlers);
-		super(game);
+        auto players = eventHandlers.map!(eh => new Player(eh, gameOpts.initialScore)).array;
+        auto game = new Metagame(players, gameOpts);
+		super(game, notificationService);
 		_events = eventHandlers.map!((handler) 
 			{
 				auto event = new GameStartEvent(metagame);
@@ -35,7 +39,7 @@ class GameStartFlow : Flow
 		if(isDone)
 		{
 			info("Started game. Switching to round start flow.");
-			switchFlow(new RoundStartFlow(_metagame));
+			switchFlow(new RoundStartFlow(_metagame, _notificationService));
 		}
 	}
 
@@ -58,25 +62,17 @@ class GameStartEvent
 
 unittest
 {
-	import std.stdio;
-	import mahjong.engine.opts;
-	import mahjong.test.utils;
-
-	writeln("Testing game start flow");
-	gameOpts = new DefaultGameOpts ;
-
+    import fluent.asserts;
 
 	auto eventHandler = new TestEventHandler;
-	auto flow = new GameStartFlow([eventHandler]);
-	assert(flow.metagame.players.length == 1, "One player should have been created");
+	auto flow = new GameStartFlow([eventHandler], new DefaultGameOpts, new NullNotificationService);
+    flow.metagame.should.not.beNull;
+    flow.metagame.players.length.should.equal(1);
 	switchFlow(flow);
-	assert(.flow.isOfType!GameStartFlow, "GameStartFlow should be set as flow");
-	writeln("Testing whether the flow advances when it should not");
+    .flow.should.be.instanceOf!GameStartFlow;
 	flow.advanceIfDone;
-	assert(.flow.isOfType!GameStartFlow, "As the players are not ready, the flow should not have advanced");
+    .flow.should.be.instanceOf!GameStartFlow.because("the players are not ready");
 	eventHandler.gameStartEvent.isReady = true;
-	writeln("Testing whether the flow advances when it should");
 	flow.advanceIfDone;
-	assert(.flow.isOfType!RoundStartFlow, "As the players are ready, the flow should have advanced to the start of the round");
-	writeln("Game start flow test succeeded.");
+    .flow.should.be.instanceOf!RoundStartFlow.because("the players are ready");
 }

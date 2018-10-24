@@ -2,12 +2,13 @@ module mahjong.engine.flow.draw;
 
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class DrawFlow : Flow
 {
-	this(Player player, Metagame metagame, Wall wall)
+	this(Player player, Metagame metagame, Wall wall, INotificationService notificationService)
 	{
-		super(metagame);
+		super(metagame, notificationService);
 		_player = player;
 		_wall = wall;
 	}
@@ -18,34 +19,26 @@ class DrawFlow : Flow
 	override void advanceIfDone()
 	{
 		_player.drawTile(_wall);
-		switchFlow(new TurnFlow(_player, _metagame));
+		switchFlow(new TurnFlow(_player, _metagame, _notificationService));
 	}
 }
-///
+
 unittest
 {
-	import std.stdio;
+    import fluent.asserts;
 	import mahjong.domain.enums;
 	import mahjong.engine.opts;
-	import mahjong.test.utils;
-	
-	writeln("Testing draw flow.");
-	gameOpts = new DefaultGameOpts ;
-	
-	auto player = new Player(new TestEventHandler);
+
+	auto player = new Player;
 	player.startGame(PlayerWinds.east);
-	auto metagame = new Metagame([player]);
-	auto wall = new Wall;
+	auto metagame = new Metagame([player], new DefaultGameOpts);
+	auto wall = new Wall(new DefaultGameOpts);
 	wall.setUp;
-	writeln("Setup finished.");
 	auto wallLength = wall.length;
-	// The flow of the game determines that it is time to draw.
-	auto drawFlow = new DrawFlow(player, metagame, wall);
+	auto drawFlow = new DrawFlow(player, metagame, wall, new NullNotificationService);
 	switchFlow(drawFlow);
 	flow.advanceIfDone;
-	assert(wallLength - 1 == wall.length, "A tile should be taken from the wall.");
-	assert(player.game.closedHand.length == 1, "The player should be given a tile.");
-	assert(flow.isOfType!TurnFlow, 
-		"After drawing, the flow should have switched to the turn");
-	writeln("Draw flow test succeeded.");
+    wall.length.should.equal(wallLength - 1).because("a tile is drawn");
+    player.closedHand.length.should.equal(1).because("they drew a tile");
+    flow.should.be.instanceOf!TurnFlow;
 }

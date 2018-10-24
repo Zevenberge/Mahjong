@@ -4,13 +4,14 @@ import std.algorithm;
 import std.experimental.logger;
 import mahjong.domain;
 import mahjong.engine.flow;
+import mahjong.engine.notifications;
 
 class RoundStartFlow : Flow
 {
-	this(Metagame metagame)
+	this(Metagame metagame, INotificationService notificationService)
 	{
 		info("Starting round.");
-		super(metagame);
+		super(metagame, notificationService);
 		metagame.initializeRound;
 		foreach(player; metagame.players)
 		{
@@ -29,7 +30,8 @@ class RoundStartFlow : Flow
 			info("All players are ready. Initialising game");
 			_metagame.beginRound;
 			info("Started round. Switching to draw flow");
-			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, _metagame.wall));
+			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, 
+					_metagame.wall, _notificationService));
 		}
 	}
 
@@ -52,28 +54,21 @@ class RoundStartEvent
 
 unittest
 {
-	import std.stdio;
+    import fluent.asserts;
 	import mahjong.engine.opts;
-	import mahjong.test.utils;
-
-	writeln("Testing round start flow");
-	gameOpts = new DefaultGameOpts;
 
 	auto eventHandler = new TestEventHandler;
-	auto player = new Player(eventHandler);
-	auto metagame = new Metagame([player]);
-	auto flow = new RoundStartFlow(metagame);
+	auto player = new Player(eventHandler, 30_000);
+	auto metagame = new Metagame([player], new DefaultGameOpts);
+	auto flow = new RoundStartFlow(metagame, new NullNotificationService);
 	switchFlow(flow);
-	assert(.flow.isOfType!RoundStartFlow, "RoundStartFlow should be set as flow");
-	assert(metagame.currentPlayer is null, "As the game is not started, there should be no turn player");
-	writeln("Testing whether the flow advances when it should not");
+    .flow.should.be.instanceOf!RoundStartFlow;
+    metagame.currentPlayer.should.beNull.because("the game has not started");
 	flow.advanceIfDone;
-	assert(.flow.isOfType!RoundStartFlow, "As the players are not ready, the flow should not have advanced");
+    .flow.should.be.instanceOf!RoundStartFlow.because("the players are not yet ready");
 	eventHandler.roundStartEvent.isReady = true;
-	writeln("Testing whether the flow advances when it should");
 	flow.advanceIfDone;
-	assert(.flow.isOfType!DrawFlow, "As the players are ready, the flow should have advanced to the start of the turn (draw flow)");
-	assert(metagame.currentPlayer == player, "The only player should be in turn now");
-	assert(metagame.round == 1, "The game should have started in the first round");
-	writeln("Round start flow test succeeded.");
+    .flow.should.be.instanceOf!DrawFlow.because("the players want to move on");
+    metagame.currentPlayer.should.equal(player);
+    metagame.round.should.equal(1);
 }

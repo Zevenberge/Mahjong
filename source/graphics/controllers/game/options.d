@@ -49,19 +49,34 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 
 	private const Metagame _metagame;
 
-	void swapIdleController()
+	void finishedSelecting()
 	{
+		info("Finished selecting an option. Swapping out idle controller.");
 		auto idleController = cast(IdleController)_innerController;
 		if(!idleController)
 		{
 			idleController = new IdleController(_window, _metagame);
 		}
-		controller = idleController;
+        instance = idleController;
 	}
+
+    override void substitute(Controller newController)
+    {
+        if(auto menuController = cast(MenuController)newController)
+        {
+            // A new menu is opened. Close this one and open the new one.
+            closeMenu;
+            instance.substitute(newController);
+        }
+        else
+        {
+            _innerController = newController;
+        }
+    }
 
 	override void draw() 
 	{
-		if(controller == this) 
+		if(isLeadingController) 
 		{
 			super.draw;
 			drawMarkersOnRelevantTiles;
@@ -85,7 +100,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 
 	protected override bool menuClosed() 
 	{
-		controller = new MenuController(_window, this, getPauseMenu);
+		Controller.instance.substitute(new MenuController(_window, this, getPauseMenu));
 		return false;
 	}
 
