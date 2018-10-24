@@ -116,7 +116,7 @@ class TurnFlow : Flow
             _flow = new ClaimFlow(discard, _metagame, _notificationService);
         }
 
-        void forceRedraw()
+        void declareRedraw()
         in
         {
             assert(_player.isEligibleForRedraw(_metagame), "A player should be allowed to force a redraw.");
@@ -302,10 +302,10 @@ class TurnEvent
         player.isRiichi.should.equal(true);
     }
 
-    void forceRedraw()
+    void declareRedraw()
     {
         handle;
-        _flow.forceRedraw;
+        _flow.declareRedraw;
     }
 
     unittest
@@ -324,7 +324,7 @@ class TurnEvent
         player.game.closedHand.tiles = "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d.convertToTiles;
         auto flow = new TurnFlow(player, metagame, new NullNotificationService);
         switchFlow(flow);
-        flow._event.forceRedraw;
+        flow._event.declareRedraw;
         flow.advanceIfDone;
         .flow.should.be.instanceOf!AbortiveDrawFlow
             .because("the game should be aborted");
