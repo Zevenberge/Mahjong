@@ -22,6 +22,7 @@ class TurnOptionFactory
         addRiichiOption(metagame, player, selectedTile, turnEvent);
         addPromoteToKanOption(player, selectedTile, turnEvent);
         addDeclareClosedKanOption(player, selectedTile, turnEvent);
+        addDeclareRedrawOption(player, metagame, turnEvent);
         addDiscardOption(selectedTile, turnEvent);
         _isDiscardTheOnlyOption = _options.length == 1;
         if(canCancel) addCancelOption;
@@ -56,6 +57,13 @@ class TurnOptionFactory
     {
         if(!player.canDeclareClosedKan(selectedTile)) return;
         _options ~= new DeclareClosedKanOption(player, selectedTile, turnEvent);
+    }
+
+    private void addDeclareRedrawOption(const Player player, 
+        const Metagame metagame, TurnEvent turnEvent)
+    {
+        if(!player.isEligibleForRedraw(metagame)) return;
+        _options ~= new DeclareRedrawOption(turnEvent);
     }
 
     private void addDiscardOption(const Tile selectedTile, TurnEvent turnEvent)
@@ -131,7 +139,7 @@ unittest
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
-    auto tiles = "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d;
+    auto tiles = "🀀🀀🀄🀄🀄🀆🀆🀇🀇🀏🀕🀕🀚🀚"d;
     auto factory = constructFactory(tiles, 13, player, metagame);
     assertIn!CancelOption(factory);
     assertIn!DiscardOption(factory);
@@ -139,6 +147,7 @@ unittest
     assertNotIn!DeclareClosedKanOption(factory);
     assertNotIn!TsumoOption(factory);
     assertNotIn!RiichiOption(factory);
+    assertNotIn!DeclareRedrawOption(factory);
     factory.defaultOption.should.be.instanceOf!DiscardOption;
     factory.isDiscardTheOnlyOption.should.equal(true);
 }
@@ -242,6 +251,20 @@ unittest
     auto tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d;
     auto factory = constructFactory(tiles, 0, player, metagame, false);
     assertNotIn!CancelOption(factory);
+}
+
+@("An option to declare a redraw should be included if relevant")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.opts;
+    auto player = new Player();
+    auto metagame = new Metagame([player], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto tiles = "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d;
+    auto factory = constructFactory(tiles, 0, player, metagame, false);
+    assertIn!DeclareRedrawOption(factory);
 }
 
 class TurnOption : MenuItem, IRelevantTiles
@@ -381,6 +404,27 @@ class RiichiOption : AssertiveTurnOption
     override const(Tile)[] relevantTiles() 
     {
         return _event.player.closedHand.tiles.without([_selectedTile]);
+    }
+}
+
+class DeclareRedrawOption : AssertiveTurnOption
+{
+    this(TurnEvent event)
+    {
+        super("Redraw");
+        _event = event;
+    }
+
+    private TurnEvent _event;
+
+    protected override void apply() 
+    {
+        _event.declareRedraw;
+    }
+
+    override const(Tile)[] relevantTiles() 
+    {
+        return null;
     }
 }
 

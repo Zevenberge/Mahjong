@@ -116,7 +116,24 @@ class Metagame
 		startPlayersGame;
 		setUpWall;
 		removeTurnPlayer;
+        _isRedrawDeclared = false;
 	}
+
+    @("If the game is aborted due to a redraw, a redraw should no longer be requested")
+    unittest
+    { 
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame.declareRedraw;
+        metagame.abortRound;
+        metagame.initializeRound;
+        metagame.beginRound;
+        metagame.isAbortiveDraw.should.equal(false);
+    }
 
 	private void startPlayersGame()
 	{
@@ -399,7 +416,8 @@ class Metagame
 
 	bool isAbortiveDraw() @property
 	{
-		return didAllPlayersDiscardTheSameWindInTheFirstTurn
+		return _isRedrawDeclared
+            || didAllPlayersDiscardTheSameWindInTheFirstTurn
             || areAllKansDeclaredAndNotByOnePlayer
             || isEveryPlayerRiichi;
 	}
@@ -491,6 +509,25 @@ class Metagame
         player1.declareRiichi(player1.closedHand.tiles[3], metagame);
         metagame.isAbortiveDraw.should.equal(false);
         player2.declareRiichi(player2.closedHand.tiles[3], metagame);
+        metagame.isAbortiveDraw.should.equal(true);
+    }
+
+    void declareRedraw()
+    {
+        _isRedrawDeclared = true;
+    }
+    private bool _isRedrawDeclared;
+
+    @("If a redraw is declared, the game is aborted")
+    unittest
+    { 
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.flow;
+        auto player1 = new Player();
+        auto player2 = new Player();
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame.declareRedraw;
         metagame.isAbortiveDraw.should.equal(true);
     }
 
