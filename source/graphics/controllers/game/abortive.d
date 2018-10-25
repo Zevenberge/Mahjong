@@ -7,6 +7,7 @@ import mahjong.engine.flow;
 import mahjong.graphics.controllers.game;
 
 alias AbortiveDrawController = HandleSimpleEventController!AbortiveDrawEvent;
+alias ExhaustiveDrawController = HandleSimpleEventController!ExhaustiveDrawEvent;
 
 class HandleSimpleEventController(TEvent) : GameController
 {

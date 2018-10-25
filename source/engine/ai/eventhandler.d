@@ -32,6 +32,10 @@ class AiEventHandler : GameEventHandler
 	{
 		event.handle;
 	}
+	override void handle(ExhaustiveDrawEvent event)
+	{
+		event.handle;
+	}
     override void handle(AbortiveDrawEvent event)
     {
         event.handle;

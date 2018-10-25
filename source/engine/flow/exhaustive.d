@@ -5,7 +5,7 @@ import mahjong.domain.metagame;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class ExhaustiveDrawFlow : Flow
+class ExhaustiveDrawFlow : WaitForEveryPlayer!ExhaustiveDrawEvent
 {
     this(Metagame game, INotificationService notificationService)
     {
@@ -14,8 +14,35 @@ class ExhaustiveDrawFlow : Flow
         super(game, notificationService);
     }
 
-    override void advanceIfDone()
+    protected override ExhaustiveDrawEvent createEvent()
     {
-        
+        return new ExhaustiveDrawEvent(_metagame);
     }
+
+    protected override void advance()
+    {
+        _metagame.finishRound;
+        mixin(switchToNextRoundOrGameOver);
+    }
+}
+
+class ExhaustiveDrawEvent
+{
+    this(const Metagame metagame)
+    {
+        this.metagame = metagame;
+    }
+
+    const Metagame metagame;
+
+    private bool _isHandled;
+	bool isHandled() @property
+	{
+		return _isHandled;
+	}
+
+	void handle()
+	{
+		_isHandled = true;
+	}
 }

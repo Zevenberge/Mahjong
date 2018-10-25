@@ -30,18 +30,19 @@ class MahjongFlow : WaitForEveryPlayer!MahjongEvent
     protected override void advance()
     {
         _metagame.finishRound;
-        mixin(gameOverSwitch);
-        flow = new RoundStartFlow(_metagame, _notificationService);
+        mixin(switchToNextRoundOrGameOver);
+        
     }
 }
 
-enum gameOverSwitch =
+enum switchToNextRoundOrGameOver =
 q{
 	if(_metagame.isGameOver)
 	{
-		flow = new GameEndFlow(_metagame, _notificationService);
+		switchFlow(new GameEndFlow(_metagame, _notificationService));
 		return;
 	}
+	switchFlow(new RoundStartFlow(_metagame, _notificationService));
 };
 
 class MahjongEvent
