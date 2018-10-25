@@ -190,11 +190,14 @@ class Metagame
 
 	void finishRound()
 	{
-		++_round;
-		auto data = this.constructMahjongData;
-		applyTransactions(data);
-		moveWinds;
-        _amountOfRiichiSticks = 0;
+		if(isExhaustiveDraw)
+		{
+			new ExhaustiveDrawRoundFinisher(this).finish;
+		}
+		else
+		{
+			new RoundFinisher(this).finish;
+		}
 	}
 
     @("End of a round should reset the counters")
@@ -213,37 +216,6 @@ class Metagame
         metagame.finishRound;
         metagame.amountOfRiichiSticks.should.equal(0);
     }
-
-	private void applyTransactions(const(MahjongData)[] data)
-	{
-		auto transactions = data.toTransactions(this);
-		foreach(transaction; transactions)
-		{
-			auto player = players.first!(p => p == transaction.player);
-			player.applyTransaction(transaction);
-		}
-	}
-
-	private void moveWinds()
-	{
-		if(!needToMoveWinds) 
-		{
-			++_counters;
-			return;
-		}
-		_counters = 0;
-		_initialWind = ((_initialWind - 1 + players.length) % players.length).to!int;
-		if(_initialEastPlayer == getEastPlayer)
-		{
-			_leadingWind = (_leadingWind + 1).to!PlayerWinds;
-			_round = 1;
-		}
-	}
-
-	private bool needToMoveWinds()
-	{
-		return !players.first!(p => p.isEast).isMahjong;
-	}
 
     void abortRound()
     {
@@ -541,7 +513,7 @@ class Metagame
         return wall.isExhaustiveDraw;
 	}
 
-	deprecated("Move to exhaustive draw flow.")
+	deprecated("Move to engine/scoring.d.")
 	private void exhaustiveDraw()
 	{
 		checkNagashiMangan;
@@ -841,3 +813,110 @@ int riichiFare(const Metagame metagame) @property
 {
     return metagame._opts.riichiFare;
 }
+
+private class RoundFinisher
+{
+	this(Metagame metagame)
+	{
+		_metagame = metagame;
+	}
+
+	protected Metagame _metagame;
+
+	final void finish()
+	{
+		applyTransactions(calculateTransactions);
+		moveWinds;
+		modifyCounter;
+        resetAmountOfRiichiSticks;
+	}
+
+	private void applyTransactions(Transaction[] transactions)
+	{
+		foreach(transaction; transactions)
+		{
+			auto player = _metagame.players.first!(p => p == transaction.player);
+			player.applyTransaction(transaction);
+		}
+	}
+
+	protected Transaction[] calculateTransactions()
+	{
+		auto data = _metagame.constructMahjongData;
+		return data.toTransactions(_metagame);
+	}
+
+	private void moveWinds()
+	{
+		++_metagame._round;
+		if(!needToMoveWinds) 
+		{
+			return;
+		}
+		_metagame._initialWind = ((_metagame._initialWind - 1 + _metagame.players.length) % 
+									_metagame.players.length).to!int;
+		if(_metagame._initialEastPlayer == _metagame.getEastPlayer)
+		{
+			_metagame._leadingWind = (_metagame._leadingWind + 1).to!PlayerWinds;
+			_metagame._round = 1;
+		}
+	}
+
+	private void modifyCounter()
+	{
+		final switch(shouldIncrementOrResetCounter) with(IncrementOrReset)
+		{
+			case reset:
+				_metagame._counters = 0;
+				break;
+			case increment:
+				_metagame._counters++;
+				break;
+		}
+	}
+
+	protected bool needToMoveWinds()
+	{
+		return !_metagame.getEastPlayer.isMahjong;
+	}
+
+	protected IncrementOrReset shouldIncrementOrResetCounter()
+	{
+		return needToMoveWinds ? IncrementOrReset.reset : IncrementOrReset.increment;
+	}
+
+	protected void resetAmountOfRiichiSticks()
+	{
+		_metagame._amountOfRiichiSticks = 0;
+	}
+}
+
+private class ExhaustiveDrawRoundFinisher : RoundFinisher
+{
+	this(Metagame metagame)
+	{
+		super(metagame);
+	}
+
+	protected override Transaction[] calculateTransactions()
+	{
+		return null;
+	}
+
+	protected override bool needToMoveWinds()
+	{
+		return !_metagame.getEastPlayer.isTenpai; // Or Non-east is Nagashi mangan
+	}
+
+	protected override IncrementOrReset shouldIncrementOrResetCounter()
+	{
+		return IncrementOrReset.increment;
+	}
+
+	protected override void resetAmountOfRiichiSticks()
+	{
+		// Do nothing, unless there is a nagashi mangan.
+	}
+}
+
+private enum IncrementOrReset {increment, reset}
