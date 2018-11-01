@@ -115,7 +115,6 @@ class Metagame
 		info("Initializing the next round");
 		startPlayersGame;
 		setUpWall;
-		removeTurnPlayer;
         _isRedrawDeclared = false;
 	}
 
@@ -142,11 +141,6 @@ class Metagame
 			auto wind = ((_initialWind + i) % players.length).to!PlayerWinds;
 			player.startGame(wind);
 		}
-	}
-	
-	private void removeTurnPlayer()
-	{
-		_turn = -1;
 	}
 
 	private void setUpWall()
@@ -215,6 +209,20 @@ class Metagame
         metagame.riichiIsDeclared;
         metagame.finishRound;
         metagame.amountOfRiichiSticks.should.equal(0);
+    
+    }
+
+    @("An exhaustive draw should increment the counter")
+    unittest
+    {
+        import fluent.asserts;
+        auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
+        auto player = new Player;
+        player.game = nonTenpaiGame;
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.wall = new MockWall(true);
+        metagame.finishRound;
+        metagame.counters.should.equal(1);
     }
 
     void abortRound()
@@ -606,6 +614,7 @@ unittest
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.engine.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
@@ -619,10 +628,10 @@ unittest
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
-	assert(nonEastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
-	assert(!eastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
-	assert(metagame.round == 2, "The round counter should have been upped.");
-	assert(metagame.counters == 0, "As the turn advanced, there are no more counters");
+    nonEastPlayer.isEast.should.equal(true).because("the non-east player was mahjong");
+    eastPlayer.isEast.should.equal(false).because("the non-east player was mahjong");
+    metagame.round.should.equal(2).because("it should be incremented");
+    metagame.counters.should.equal(0).because("the turn advanced with a mahjong");
 }
 
 unittest
@@ -826,8 +835,8 @@ private class RoundFinisher
 	final void finish()
 	{
 		applyTransactions(calculateTransactions);
-		moveWinds;
 		modifyCounter;
+        moveWinds;
         resetAmountOfRiichiSticks;
 	}
 

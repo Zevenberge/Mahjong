@@ -63,7 +63,6 @@ unittest
 	auto flow = new RoundStartFlow(metagame, new NullNotificationService);
 	switchFlow(flow);
     .flow.should.be.instanceOf!RoundStartFlow;
-    metagame.currentPlayer.should.beNull.because("the game has not started");
 	flow.advanceIfDone;
     .flow.should.be.instanceOf!RoundStartFlow.because("the players are not yet ready");
 	eventHandler.roundStartEvent.isReady = true;

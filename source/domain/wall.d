@@ -278,12 +278,19 @@ version(unittest)
 {
 	class MockWall : Wall
 	{
+        this(bool isExhaustiveDraw)
+        {
+            _isExhaustiveDraw = isExhaustiveDraw;
+            this(null);
+        }
+
 		this(Tile tileToDraw)
 		{
             super(new DefaultGameOpts);
 			_tileToDraw = tileToDraw;
 		}
 
+        private bool _isExhaustiveDraw;
 		private Tile _tileToDraw;
 
 		override Tile drawTile() 
@@ -295,6 +302,12 @@ version(unittest)
 		{
 			return  _tileToDraw;
 		}
+
+        override bool isExhaustiveDraw() const 
+        {
+            return _isExhaustiveDraw;
+        }
+
 	}
 }
 
