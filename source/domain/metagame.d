@@ -225,6 +225,43 @@ class Metagame
         metagame.counters.should.equal(1);
     }
 
+    @("When east is not tenpai, winds should be moved as usual.")
+    unittest
+    {
+        import fluent.asserts;
+        auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
+        auto player1 = new Player;
+        player1.game = nonTenpaiGame;
+        auto player2 = new Player;
+        player2.game = new Ingame(PlayerWinds.south, ""d);
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame._initialWind = 0; // Force the first player to be east.
+        metagame.wall = new MockWall(true);
+        metagame.finishRound;
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.isEast.should.equal(false);
+        player2.isEast.should.equal(true);
+    }
+
+    @("When east is tenpai, winds should not be moved.")
+    unittest
+    {
+        import fluent.asserts;
+        auto player1 = new Player;
+        player1.game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d);
+        auto player2 = new Player;
+        player2.game = new Ingame(PlayerWinds.south, ""d);
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame._initialWind = 0; // Force the first player to be east.
+        metagame.wall = new MockWall(true);
+        metagame.finishRound;
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.isEast.should.equal(true);
+        player2.isEast.should.equal(false);
+    }
+
     void abortRound()
     {
         foreach(player; players)
