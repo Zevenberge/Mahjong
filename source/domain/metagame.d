@@ -115,7 +115,6 @@ class Metagame
 		info("Initializing the next round");
 		startPlayersGame;
 		setUpWall;
-		removeTurnPlayer;
         _isRedrawDeclared = false;
 	}
 
@@ -142,11 +141,6 @@ class Metagame
 			auto wind = ((_initialWind + i) % players.length).to!PlayerWinds;
 			player.startGame(wind);
 		}
-	}
-	
-	private void removeTurnPlayer()
-	{
-		_turn = -1;
 	}
 
 	private void setUpWall()
@@ -190,11 +184,14 @@ class Metagame
 
 	void finishRound()
 	{
-		++_round;
-		auto data = this.constructMahjongData;
-		applyTransactions(data);
-		moveWinds;
-        _amountOfRiichiSticks = 0;
+		if(isExhaustiveDraw)
+		{
+			new ExhaustiveDrawRoundFinisher(this).finish;
+		}
+		else
+		{
+			new RoundFinisher(this).finish;
+		}
 	}
 
     @("End of a round should reset the counters")
@@ -212,38 +209,58 @@ class Metagame
         metagame.riichiIsDeclared;
         metagame.finishRound;
         metagame.amountOfRiichiSticks.should.equal(0);
+    
     }
 
-	private void applyTransactions(const(MahjongData)[] data)
-	{
-		auto transactions = data.toTransactions(this);
-		foreach(transaction; transactions)
-		{
-			auto player = players.first!(p => p == transaction.player);
-			player.applyTransaction(transaction);
-		}
-	}
+    @("An exhaustive draw should increment the counter")
+    unittest
+    {
+        import fluent.asserts;
+        auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
+        auto player = new Player;
+        player.game = nonTenpaiGame;
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.wall = new MockWall(true);
+        metagame.finishRound;
+        metagame.counters.should.equal(1);
+    }
 
-	private void moveWinds()
-	{
-		if(!needToMoveWinds) 
-		{
-			++_counters;
-			return;
-		}
-		_counters = 0;
-		_initialWind = ((_initialWind - 1 + players.length) % players.length).to!int;
-		if(_initialEastPlayer == getEastPlayer)
-		{
-			_leadingWind = (_leadingWind + 1).to!PlayerWinds;
-			_round = 1;
-		}
-	}
+    @("When east is not tenpai, winds should be moved as usual.")
+    unittest
+    {
+        import fluent.asserts;
+        auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
+        auto player1 = new Player;
+        player1.game = nonTenpaiGame;
+        auto player2 = new Player;
+        player2.game = new Ingame(PlayerWinds.south, ""d);
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame._initialWind = 0; // Force the first player to be east.
+        metagame.wall = new MockWall(true);
+        metagame.finishRound;
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.isEast.should.equal(false);
+        player2.isEast.should.equal(true);
+    }
 
-	private bool needToMoveWinds()
-	{
-		return !players.first!(p => p.isEast).isMahjong;
-	}
+    @("When east is tenpai, winds should not be moved.")
+    unittest
+    {
+        import fluent.asserts;
+        auto player1 = new Player;
+        player1.game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d);
+        auto player2 = new Player;
+        player2.game = new Ingame(PlayerWinds.south, ""d);
+        auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+        metagame._initialWind = 0; // Force the first player to be east.
+        metagame.wall = new MockWall(true);
+        metagame.finishRound;
+        metagame.initializeRound;
+        metagame.beginRound;
+        player1.isEast.should.equal(true);
+        player2.isEast.should.equal(false);
+    }
 
     void abortRound()
     {
@@ -541,7 +558,7 @@ class Metagame
         return wall.isExhaustiveDraw;
 	}
 
-	deprecated("Move to exhaustive draw flow.")
+	deprecated("Move to engine/scoring.d.")
 	private void exhaustiveDraw()
 	{
 		checkNagashiMangan;
@@ -634,6 +651,7 @@ unittest
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.engine.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
@@ -647,10 +665,10 @@ unittest
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
-	assert(nonEastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
-	assert(!eastPlayer.isEast, "the non east player was mahjong, the turns should have advanced");
-	assert(metagame.round == 2, "The round counter should have been upped.");
-	assert(metagame.counters == 0, "As the turn advanced, there are no more counters");
+    nonEastPlayer.isEast.should.equal(true).because("the non-east player was mahjong");
+    eastPlayer.isEast.should.equal(false).because("the non-east player was mahjong");
+    metagame.round.should.equal(2).because("it should be incremented");
+    metagame.counters.should.equal(0).because("the turn advanced with a mahjong");
 }
 
 unittest
@@ -841,3 +859,110 @@ int riichiFare(const Metagame metagame) @property
 {
     return metagame._opts.riichiFare;
 }
+
+private class RoundFinisher
+{
+	this(Metagame metagame)
+	{
+		_metagame = metagame;
+	}
+
+	protected Metagame _metagame;
+
+	final void finish()
+	{
+		applyTransactions(calculateTransactions);
+		modifyCounter;
+        moveWinds;
+        resetAmountOfRiichiSticks;
+	}
+
+	private void applyTransactions(Transaction[] transactions)
+	{
+		foreach(transaction; transactions)
+		{
+			auto player = _metagame.players.first!(p => p == transaction.player);
+			player.applyTransaction(transaction);
+		}
+	}
+
+	protected Transaction[] calculateTransactions()
+	{
+		auto data = _metagame.constructMahjongData;
+		return data.toTransactions(_metagame);
+	}
+
+	private void moveWinds()
+	{
+		++_metagame._round;
+		if(!needToMoveWinds) 
+		{
+			return;
+		}
+		_metagame._initialWind = ((_metagame._initialWind - 1 + _metagame.players.length) % 
+									_metagame.players.length).to!int;
+		if(_metagame._initialEastPlayer == _metagame.getEastPlayer)
+		{
+			_metagame._leadingWind = (_metagame._leadingWind + 1).to!PlayerWinds;
+			_metagame._round = 1;
+		}
+	}
+
+	private void modifyCounter()
+	{
+		final switch(shouldIncrementOrResetCounter) with(IncrementOrReset)
+		{
+			case reset:
+				_metagame._counters = 0;
+				break;
+			case increment:
+				_metagame._counters++;
+				break;
+		}
+	}
+
+	protected bool needToMoveWinds()
+	{
+		return !_metagame.getEastPlayer.isMahjong;
+	}
+
+	protected IncrementOrReset shouldIncrementOrResetCounter()
+	{
+		return needToMoveWinds ? IncrementOrReset.reset : IncrementOrReset.increment;
+	}
+
+	protected void resetAmountOfRiichiSticks()
+	{
+		_metagame._amountOfRiichiSticks = 0;
+	}
+}
+
+private class ExhaustiveDrawRoundFinisher : RoundFinisher
+{
+	this(Metagame metagame)
+	{
+		super(metagame);
+	}
+
+	protected override Transaction[] calculateTransactions()
+	{
+		return null;
+	}
+
+	protected override bool needToMoveWinds()
+	{
+		return !_metagame.getEastPlayer.isTenpai; // Or Non-east is Nagashi mangan
+	}
+
+	protected override IncrementOrReset shouldIncrementOrResetCounter()
+	{
+		return IncrementOrReset.increment;
+	}
+
+	protected override void resetAmountOfRiichiSticks()
+	{
+		// Do nothing, unless there is a nagashi mangan.
+	}
+}
+
+private enum IncrementOrReset {increment, reset}

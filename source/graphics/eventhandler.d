@@ -147,6 +147,11 @@ class UiEventHandler : GameEventHandler
 		Controller.instance.substitute(new ResultController(Controller.instance.getWindow, event.metagame, event));
 	}
 
+    override void handle(ExhaustiveDrawEvent event)
+	{
+		Controller.instance.substitute(new ExhaustiveDrawController(Controller.instance.getWindow, event.metagame, event));
+	}
+
     override void handle(AbortiveDrawEvent event)
     {
         Controller.instance.substitute(new AbortiveDrawController(Controller.instance.getWindow, event.metagame, event));

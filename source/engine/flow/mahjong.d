@@ -18,6 +18,7 @@ class MahjongFlow : WaitForEveryPlayer!MahjongEvent
 		trace("Constructing mahjong flow");
         _mahjongData = game.constructMahjongData;
 		super(game, notificationService);
+        trace("Finished constructing mahjong flow");
 	}
 
     private const(MahjongData[]) _mahjongData;
@@ -30,18 +31,19 @@ class MahjongFlow : WaitForEveryPlayer!MahjongEvent
     protected override void advance()
     {
         _metagame.finishRound;
-        mixin(gameOverSwitch);
-        flow = new RoundStartFlow(_metagame, _notificationService);
+        mixin(switchToNextRoundOrGameOver);
+        
     }
 }
 
-enum gameOverSwitch =
+enum switchToNextRoundOrGameOver =
 q{
 	if(_metagame.isGameOver)
 	{
-		flow = new GameEndFlow(_metagame, _notificationService);
+		switchFlow(new GameEndFlow(_metagame, _notificationService));
 		return;
 	}
+	switchFlow(new RoundStartFlow(_metagame, _notificationService));
 };
 
 class MahjongEvent
@@ -156,9 +158,10 @@ unittest
     import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
 	auto player1 = new Player(eventhandler, 30_000);
+    auto metagame = new Metagame([player1], new DefaultGameOpts);
+    metagame.initializeRound;
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
-	auto metagame = new Metagame([player1], new DefaultGameOpts);
 	flow = new MahjongFlow(metagame, new NullNotificationService);
 	eventhandler.mahjongEvent.handle;
 	flow.advanceIfDone;
@@ -178,19 +181,23 @@ unittest
 		this(Player[] players)
 		{
 			super(players, new DefaultGameOpts);
+            initializeRound;
+            _isGameOver = true;
 		}
+
+        private bool _isGameOver;
 
 		override bool isGameOver() 
 		{
-			return true;
+			return _isGameOver;
 		}
 	}
 
 	auto eventhandler = new TestEventHandler;
 	auto player1 = new Player(eventhandler, 30_000);
+    auto metagame = new NoMoreGame([player1]);
 	player1.game = new Ingame(PlayerWinds.east);
 	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
-	auto metagame = new NoMoreGame([player1]);
 	flow = new MahjongFlow(metagame, new NullNotificationService);
 	eventhandler.mahjongEvent.handle;
 	flow.advanceIfDone;
