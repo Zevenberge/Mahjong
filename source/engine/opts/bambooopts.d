@@ -23,4 +23,8 @@ class DefaultBambooOpts : DefaultGameOpts
 	{
 		return PlayerWinds.north;
 	}
+    override Wall createWall() pure const 
+    {
+        return new BambooWall(this);
+    }
 }

@@ -145,13 +145,8 @@ class Metagame
 
 	private void setUpWall()
 	{
-		wall = getWall;
+		wall = _opts.createWall;
 		wall.setUp;
-	}
-
-	protected Wall getWall()
-	{
-		return new Wall(_opts);
 	}
 
 	void beginRound()
@@ -700,7 +695,7 @@ unittest
 	auto player3 = new Player();
 	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players, new DefaultBambooOpts);
+	auto metagame = new Metagame(players, new DefaultGameOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = metagame.currentPlayer;
@@ -722,7 +717,7 @@ unittest
 	auto player3 = new Player();
 	auto player4 = new Player();
 	auto players = [player1, player2, player3, player4];
-	auto metagame = new Metagame(players, new DefaultBambooOpts);
+	auto metagame = new Metagame(players, new DefaultGameOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
 	foreach(i; 0..3)
@@ -782,19 +777,6 @@ unittest
 	assert(metagame.isGameOver, "The game should have been finished after 2x 4 rounds of non-east wins.");
 	assertThrown!AssertError(metagame.initializeRound, "Attempting to start a new round should be blocked");
 
-}
-
-class BambooMetagame : Metagame
-{
-	this(Player[] players, const Opts gameOpts)
-	{
-		super(players, gameOpts);
-	}
-
-	override Wall getWall()
-	{
-		return new BambooWall(_opts);
-	}
 }
 
 void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
@@ -858,6 +840,14 @@ unittest
 int riichiFare(const Metagame metagame) @property
 {
     return metagame._opts.riichiFare;
+}
+
+size_t amountOfRiichiSticksAtTheBeginningOfTheRound(const Metagame metagame) @property pure
+{
+    import mahjong.share.range : sum;
+    return metagame.amountOfRiichiSticks - metagame.players.sum!((p) {
+            if(p.game && p.isRiichi) return 1; return 0;
+        });
 }
 
 private class RoundFinisher

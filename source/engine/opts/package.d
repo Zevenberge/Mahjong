@@ -18,4 +18,5 @@ interface Opts
     int riichiFare() pure const;
 	GameMode gameMode() pure const;
 	PlayerWinds finalLeadingWind() pure const;
+    Wall createWall() pure const;
 }
