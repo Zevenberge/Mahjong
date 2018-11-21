@@ -545,10 +545,12 @@ class Ingame
     bool canDeclareRiichi(const Tile potentialDiscard) const
     {
         if(_isRiichi) return false;
+        if(!openHand.isClosedHand) return false;
         auto remainingTiles = closedHand.tiles.without!((a,b) => a is b)([potentialDiscard]);
         return isPlayerTenpai(remainingTiles, openHand);
     }
 
+    @("Can declare riichi when becoming tenpai after a discard")
     unittest
     {
         import fluent.asserts;
@@ -566,6 +568,18 @@ class Ingame
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         ingame._isRiichi = true;
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
+    }
+
+    @("Cannot declare riichi when having claimed a tile")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto discard = new Tile(Types.wind, Winds.east);
+        discard.origin = new Ingame(PlayerWinds.south);
+        ingame.pon(discard);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[0];
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
     }
 
