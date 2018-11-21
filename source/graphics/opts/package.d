@@ -25,6 +25,7 @@ interface Opts
 	int amountOfDiscardsPerLine();
 	void initialiseWall(const Wall wall);
 	void placeCounter(Sprite counter);
+    void placeRiichiStick(Sprite stick);
 }
 
 StyleOpts styleOpts;

@@ -45,4 +45,8 @@ class DefaultGameOpts : Opts
 	{
 		return PlayerWinds.south;
 	}
+    Wall createWall() pure const
+    {
+        return new Wall(this);
+    }
 }

@@ -24,16 +24,21 @@ void draw(const Wall wall, RenderTarget view)
 	wall.tiles.filter!(t => t.isOpen).each!(t => t.drawTile(view));
 }
 
+void clearWall()
+{
+    _isInitialised = false;
+}
+
 private void initialiseWall(const Wall wall)
 {
-	if(_initialisedWall != wall.id)
+	if(!_isInitialised)
 	{
-		_initialisedWall = wall.id;
+        _isInitialised = true;
 		drawingOpts.initialiseWall(wall);
 	}
 }
 
-private UUID _initialisedWall;
+private bool _isInitialised;
 
 void initialiseTiles(const Wall wall)
 {
