@@ -50,6 +50,12 @@ class DefaultDrawingOpts : Opts
 	{
 		counter.center!(CenterDirection.Both)(styleOpts.gameScreenSize.toVector2f.toRect);
 	}
+
+    void placeRiichiStick(Sprite stick)
+    {
+        placeCounter(stick);
+        stick.move(Vector2f(0f, stick.getGlobalBounds().height * 1.5f));
+    }
 }
 
 class DefaultStyleOpts : StyleOpts

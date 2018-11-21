@@ -16,9 +16,9 @@ class BambooDrawingOpts : DefaultDrawingOpts
 	override void initialiseWall(const Wall wall)
 	in
 	{
-		assert(cast(BambooWall)wall !is null);
+		assert((cast(BambooWall)wall) !is null);
 	}
-	body
+	do
 	{
 		auto bWall = cast(BambooWall)wall;
 		initialiseTiles(bWall);
@@ -29,4 +29,10 @@ class BambooDrawingOpts : DefaultDrawingOpts
 		super.placeCounter(counter);
 		counter.move(Vector2f(0, -50));
 	}
+
+    override void placeRiichiStick(Sprite stick) 
+    {
+        super.placeCounter(stick);
+        stick.move(Vector2f(0, 50-stick.getGlobalBounds().height));
+    }
 }
