@@ -1,10 +1,12 @@
 ﻿module mahjong.domain.metagame.round;
 
+import std.algorithm;
 import std.conv;
 import std.random;
 import mahjong.domain.enums;
 import mahjong.domain.metagame;
 import mahjong.domain.wrappers;
+import mahjong.engine.mahjong;
 import mahjong.engine.scoring;
 import mahjong.share.range;
 
@@ -130,6 +132,10 @@ package Round finishRoundWithMahjong(Metagame metagame, Round round)
 
 package Round finishRoundWithExhaustiveDraw(Metagame metagame, Round round)
 {
+    if(metagame.players.any!(p => p.isNagashiMangan))
+    {
+        return finishRoundWithMahjong(metagame, round);
+    }
     round.addCounter;
     bool needToMoveWinds = !metagame.eastPlayer.isTenpai;
     if(needToMoveWinds)

@@ -9,6 +9,7 @@ import mahjong.domain.closedhand;
 import mahjong.domain.enums;
 import mahjong.domain.openhand;
 import mahjong.domain.ingame;
+import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.sort;
@@ -66,6 +67,19 @@ unittest
 {
 	auto set = new SevenPairsSet(null);
 	assert(set.miniPoints(PlayerWinds.west, PlayerWinds.east) == 0, "A seven pairs set should have no minipoints whatshowever");
+}
+
+class NagashiManganSet : Set
+{
+    this() pure
+    {
+        super(null);
+    }
+
+    override size_t miniPoints(PlayerWinds ownWind, PlayerWinds leadingWind) pure const
+    {
+        return 0;
+    }
 }
 
 class PonSet : Set
@@ -644,10 +658,48 @@ unittest
     isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
 }
 
-MahjongData calculateMahjongData(const Player player)
+auto constructMahjongData(Metagame metagame)
 {
-    auto mahjongResult = scanHandForMahjong(player);
-    return MahjongData(player, mahjongResult);
+    bool isExhaustiveDraw = metagame.isExhaustiveDraw;
+    return metagame.playersByTurnOrder
+        .map!(p => p.calculateMahjongData(isExhaustiveDraw))
+        .filter!(data => data.result.isMahjong).array;
+}
+
+unittest
+{
+    import std.range;
+    import fluent.asserts;
+    import mahjong.engine.opts;
+    auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+    auto player1 = new Player;
+    auto player2 = new Player;
+    auto player3 = new Player;
+    auto player4 = new Player;
+    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
+    player1.game = winningGame;
+    player2.game = losingGame;
+    player3.game = winningGame;
+    player4.game = losingGame;
+    metagame.currentPlayer = player2;
+    auto mahjongData = metagame.constructMahjongData.array;
+    mahjongData.length.should.equal(2);
+    mahjongData[0].player.should.equal(player3);
+    mahjongData[1].player.should.equal(player1);
+}
+
+private MahjongData calculateMahjongData(const Player player, bool isExhaustiveDraw)
+{
+    if(isExhaustiveDraw)
+    {
+        return MahjongData(player, MahjongResult(player.isNagashiMangan, [new NagashiManganSet]));
+    }
+    else
+    {
+        auto mahjongResult = scanHandForMahjong(player);
+        return MahjongData(player, mahjongResult);
+    }
 }
 
 @("If a player is mahjong, it should be concluded as such")
@@ -657,7 +709,7 @@ unittest
     auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto player = new Player;
     player.game = winningGame;
-    auto result = player.calculateMahjongData;
+    auto result = player.calculateMahjongData(false);
     result.isMahjong.should.equal(true);
 }
 
@@ -668,8 +720,20 @@ unittest
     auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
     auto player = new Player;
     player.game = losingGame;
-    auto result = player.calculateMahjongData;
+    auto result = player.calculateMahjongData(false);
     result.isMahjong.should.equal(false);
+}
+
+@("If the game is an exhaustive draw, a nagashi mangan is counted as a mahjong")
+unittest
+{
+    import fluent.asserts;
+    auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+    auto player = new Player;
+    player.game = losingGame;
+    auto result = player.calculateMahjongData(true);
+    result.isMahjong.should.equal(true);
+    result.isNagashiMangan.should.equal(true);
 }
 
 struct MahjongData
@@ -774,5 +838,9 @@ private struct MahjongResult
     bool isSevenPairs() @property pure const
     {
         return sets.length == 1 && cast(SevenPairsSet)sets[0];
+    }
+    bool isNagashiMangan() @property pure const
+    {
+        return sets.length == 1 && cast(NagashiManganSet)sets[0];
     }
 }

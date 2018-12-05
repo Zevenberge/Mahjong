@@ -261,7 +261,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     auto scoring = data.calculateScoring(metagame);
     auto payment = scoring.calculatePayment(data.player.isEast);
     Transaction[] transactions;
-    if(data.isTsumo)
+    if(data.isTsumo || data.isNagashiMangan)
     {
         foreach(player; metagame.otherPlayers(data.player))
         {

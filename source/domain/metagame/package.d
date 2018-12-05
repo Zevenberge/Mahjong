@@ -11,8 +11,6 @@ import mahjong.domain.enums;
 import mahjong.domain;
 import mahjong.domain.metagame.round;
 import mahjong.domain.wrappers;
-import mahjong.engine.flow.mahjong;
-import mahjong.engine.mahjong;
 import mahjong.engine.opts;
 
 class Metagame
@@ -153,13 +151,13 @@ class Metagame
         auto player1 = new Player;
         player1.game = winningGame;
         player1.hasDrawnTheirLastTile;
+        player1.isNotNagashiMangan;
         auto metagame = new Metagame([player1], new DefaultGameOpts);
         metagame.setUpWall;
         metagame.currentPlayer = player1;
         metagame.riichiIsDeclared;
         metagame.finishRound;
-        metagame.amountOfRiichiSticks.should.equal(0);
-    
+        metagame.amountOfRiichiSticks.should.equal(0); 
     }
 
     @("An exhaustive draw should increment the counter")
@@ -169,6 +167,7 @@ class Metagame
         auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
         auto player = new Player;
         player.game = nonTenpaiGame;
+        player.isNotNagashiMangan;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.wall = new MockWall(true);
         metagame.finishRound;
@@ -182,8 +181,10 @@ class Metagame
         auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
         auto player1 = new Player;
         player1.game = nonTenpaiGame;
+        player1.isNotNagashiMangan;
         auto player2 = new Player;
         player2.game = new Ingame(PlayerWinds.south, ""d);
+        player2.isNotNagashiMangan;
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
         metagame._round = Round(0); // Force the first player to be east.
         metagame.wall = new MockWall(true);
@@ -200,8 +201,10 @@ class Metagame
         import fluent.asserts;
         auto player1 = new Player;
         player1.game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d);
+        player1.isNotNagashiMangan;
         auto player2 = new Player;
         player2.game = new Ingame(PlayerWinds.south, ""d);
+        player2.isNotNagashiMangan;
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
         metagame._round = Round(0); // Force the first player to be east.
         metagame.wall = new MockWall(true);
@@ -506,7 +509,7 @@ class Metagame
 
 	bool isExhaustiveDraw() @property const
 	{
-        return wall.isExhaustiveDraw;
+        return wall && wall.isExhaustiveDraw;
 	}
 
 	deprecated("Move to engine/scoring.d.")
@@ -734,35 +737,6 @@ void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
     {
         player.couldHaveClaimed(tile);
     }
-}
-
-auto constructMahjongData(Metagame metagame)
-{
-    return metagame.playersByTurnOrder
-        .map!(p => p.calculateMahjongData)
-        .filter!(data => data.result.isMahjong).array;
-}
-
-unittest
-{
-    import fluent.asserts;
-    import std.range;
-    auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
-    auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
-    auto player1 = new Player;
-    player1.game = winningGame;
-    auto player2 = new Player;
-    player2.game = losingGame;
-    auto player3 = new Player;
-    player3.game = winningGame;
-    auto player4 = new Player;
-    player4.game = losingGame;
-    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
-    metagame.currentPlayer = player2;
-    auto mahjongData = metagame.constructMahjongData.array;
-    mahjongData.length.should.equal(2);
-    mahjongData[0].player.should.equal(player3);
-    mahjongData[1].player.should.equal(player1);
 }
 
 int riichiFare(const Metagame metagame) @property pure

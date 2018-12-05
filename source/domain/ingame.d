@@ -30,6 +30,25 @@ class Ingame
             this(wind);
             closedHand.tiles = tiles.convertToTiles;
         }
+
+        void setDiscards(Tile[] discs)
+        {
+            _discards = discs;
+            foreach(tile; _discards)
+            {
+                tile.origin = this;
+            }
+        }
+
+        void hasDrawnTheirLastTile() pure
+        {
+            _lastTile = closedHand.tiles[0];
+        }
+
+        void isNotNagashiMangan()
+        {
+            _discards ~= new Tile(Types.ball, Numbers.five);
+        }
     }
 
     const UUID id;
@@ -50,20 +69,8 @@ class Ingame
         return _discards;
     }
 
-    version(unittest)
-    {
-        void setDiscards(Tile[] discs)
-        {
-            _discards = discs;
-            foreach(tile; _discards)
-            {
-                tile.origin = this;
-            }
-        }
-    }
-
     private Tile[] _claimedDiscards;
-    private const(Tile)[] allDiscards() @property pure
+    private const(Tile)[] allDiscards() @property pure const
     {
         return discards ~_claimedDiscards;
     }
@@ -74,7 +81,7 @@ class Ingame
         _claimedDiscards ~= tile;
     }
 
-    bool isNagashiMangan() @property
+    bool isNagashiMangan() @property pure const
     {
         return openHand.isClosedHand && allDiscards.all!(t => t.isHonour || t.isTerminal);
     }
@@ -691,14 +698,6 @@ class Ingame
         tile.origin = this;
         tile.open;
         return tile;
-    }
-
-    version(unittest)
-    {
-        void hasDrawnTheirLastTile() pure
-        {
-            _lastTile = closedHand.tiles[0];
-        }
     }
 
     private Tile _lastTile; 
