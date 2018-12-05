@@ -3,8 +3,8 @@ module mahjong.domain.metagame;
 public import mahjong.domain.metagame.players;
 
 import std.algorithm;
+import std.array;
 import std.experimental.logger;
-import std.range;
 import std.conv;
 
 import mahjong.domain.enums;
@@ -736,17 +736,17 @@ void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
     }
 }
 
-const(MahjongData)[] constructMahjongData(Metagame metagame)
+auto constructMahjongData(Metagame metagame)
 {
-    return metagame.playersByTurnOrder.map!((player){
-            auto mahjongResult = scanHandForMahjong(player);
-            return MahjongData(player, mahjongResult);
-        }).filter!(data => data.result.isMahjong).array;
+    return metagame.playersByTurnOrder
+        .map!(p => p.calculateMahjongData)
+        .filter!(data => data.result.isMahjong).array;
 }
 
 unittest
 {
     import fluent.asserts;
+    import std.range;
     auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
     auto player1 = new Player;
@@ -759,7 +759,7 @@ unittest
     player4.game = losingGame;
     auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
     metagame.currentPlayer = player2;
-    auto mahjongData = metagame.constructMahjongData;
+    auto mahjongData = metagame.constructMahjongData.array;
     mahjongData.length.should.equal(2);
     mahjongData[0].player.should.equal(player3);
     mahjongData[1].player.should.equal(player1);

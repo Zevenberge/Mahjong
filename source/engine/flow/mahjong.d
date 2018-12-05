@@ -6,7 +6,6 @@ import std.conv;
 import std.experimental.logger;
 import mahjong.domain.enums;
 import mahjong.domain.metagame;
-import mahjong.domain.player;
 import mahjong.engine.mahjong;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
@@ -80,6 +79,7 @@ unittest
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
+    import mahjong.domain.player;
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
 
@@ -97,6 +97,7 @@ unittest
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
+    import mahjong.domain.player;
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
@@ -112,6 +113,7 @@ unittest
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
+    import mahjong.domain.player;
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
@@ -131,6 +133,7 @@ unittest
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
+    import mahjong.domain.player;
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
@@ -154,6 +157,7 @@ unittest
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
+    import mahjong.domain.player;
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
@@ -174,6 +178,7 @@ unittest
 	import mahjong.domain.closedhand;
 	import mahjong.domain.enums;
 	import mahjong.domain.ingame;
+    import mahjong.domain.player;
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
 	class NoMoreGame : Metagame
@@ -202,80 +207,5 @@ unittest
 	eventhandler.mahjongEvent.handle;
 	flow.advanceIfDone;
     .flow.should.be.instanceOf!GameEndFlow;
-}
-
-struct MahjongData
-{
-	const(Player) player;
-	const(MahjongResult) result;
-	bool isWinningPlayerEast() @property pure const
-	{
-		return player.isEast;
-	}
-	size_t calculateMiniPoints(PlayerWinds leadingWind) pure const
-	{
-		if(result.isSevenPairs) return 25;
-		auto miniPointsFromSets = result.calculateMiniPoints(player.wind.to!PlayerWinds, leadingWind);
-		auto miniPointsFromWinning = isTsumo ? 30 : 20;
-		return miniPointsFromSets + miniPointsFromWinning;
-	}
-
-	bool isTsumo() @property pure const
-	{
-		return player.lastTile.isOwn;
-	}
-}
-
-unittest
-{
-	import mahjong.domain.ingame;
-	import mahjong.domain.tile;
-	import mahjong.domain.wall;
-	import mahjong.engine.creation;
-	auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
-	auto player = new Player();
-	player.game = new Ingame(PlayerWinds.east);
-	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
-	player.drawTile(wall);
-	auto mahjongResult = player.scanHandForMahjong;
-	auto data = MahjongData(player, mahjongResult);
-	assert(data.isTsumo, "Being mahjong after drawing a tile is a tsumo"); 
-	assert(data.calculateMiniPoints(PlayerWinds.south) == 40, "Pon of honours + pair of dragons + tsumo = 40");
-}
-
-unittest
-{
-	import mahjong.domain.ingame;
-	import mahjong.domain.tile;
-	import mahjong.engine.creation;
-	auto player = new Player();
-	player.game = new Ingame(PlayerWinds.east);
-	player.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗"d.convertToTiles;
-	auto tile = new Tile(Types.bamboo, Numbers.eight);
-	tile.origin = new Ingame(PlayerWinds.south);
-	player.ron(tile);
-	auto mahjongResult = player.scanHandForMahjong;
-	auto data = MahjongData(player, mahjongResult);
-	assert(!data.isTsumo, "Being mahjong after ron is not a tsumo"); 
-	assert(data.calculateMiniPoints(PlayerWinds.south) == 25, "Seven pairs is always 25, regardless of what pairs");
-}
-
-unittest
-{
-	import mahjong.domain.ingame;
-	import mahjong.domain.tile;
-	import mahjong.domain.wall;
-	import mahjong.engine.creation;
-	auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
-	auto player = new Player();
-	player.game = new Ingame(PlayerWinds.east);
-	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
-	auto tile = new Tile(Types.wind, Winds.east);
-	tile.origin = new Ingame(PlayerWinds.south);
-	player.kan(tile, wall);
-	auto mahjongResult = player.scanHandForMahjong;
-	auto data = MahjongData(player, mahjongResult);
-	assert(data.isTsumo, "Being mahjong after kan is a tsumo"); 
-	assert(data.calculateMiniPoints(PlayerWinds.south) == 48, "Open kan of honours + pair of dragons + tsumo = 48");
 }
 

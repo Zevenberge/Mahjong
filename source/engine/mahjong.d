@@ -3,39 +3,18 @@ module mahjong.engine.mahjong;
 import std.experimental.logger;
 import std.algorithm;
 import std.array;
-import std.random;
 import std.conv; 
-import std.file;
-import std.string;
-import std.traits;
 
 import mahjong.domain.closedhand;
 import mahjong.domain.enums;
 import mahjong.domain.openhand;
 import mahjong.domain.ingame;
+import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.sort;
 import mahjong.engine.yaku; 
 import mahjong.share.range;
 import mahjong.share.numbers;
-
-struct MahjongResult
-{
-	const bool isMahjong;
-	const Set[] sets;
-	size_t calculateMiniPoints(const PlayerWinds ownWind, const PlayerWinds leadingWind) pure const
-	{
-		return sets.sum!(s => s.miniPoints(ownWind, leadingWind));
-	}
-	auto tiles() @property pure const
-	{
-		return sets.flatMap!(s => s.tiles);
-	}
-	bool isSevenPairs() @property pure const
-	{
-		return sets.length == 1 && cast(SevenPairsSet)sets[0];
-	}
-}
 
 abstract class Set
 {
@@ -572,6 +551,7 @@ private HandSetSeperation seperateEqualSetOfGivenLength(const(Tile)[] hand, cons
 		set);
 }
 
+@("Are the example hands mahjong hands?")
 unittest // Check whether the example hands are seen as mahjong hands.
 {
 	import std.stdio;
@@ -603,11 +583,12 @@ unittest // Check whether the example hands are seen as mahjong hands.
 	writeln(" The function reads the example hands correctly.");
 }
 
-
 version(unittest)
 {
+    import std.file;
 	import std.range;
 	import std.stdio;
+    import std.string;
 	import mahjong.engine.creation;
 	/// Read the given file into dstring lines
 	dstring[] readLines(string filename)
@@ -641,6 +622,7 @@ bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
     return allTiles.any!(tile => scanHandForMahjong(closedHand ~tile, openHand.sets).isMahjong);
 }
 
+@("Is the player tenpai")
 unittest
 {
     import fluent.asserts;
@@ -652,6 +634,7 @@ unittest
     isPlayerTenpai(noTenpaiHand, emptyOpenHand).should.equal(false);
 }
 
+@("If the player only needs one more tile, they are tenpai")
 unittest
 {
     import fluent.asserts;
@@ -659,4 +642,137 @@ unittest
     auto tenpaiHand = "🀀🀁🀂🀃🀄🀆🀆🀇🀏🀐🀘🀙🀡"d.convertToTiles;
     auto emptyOpenHand = new OpenHand;
     isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
+}
+
+MahjongData calculateMahjongData(const Player player)
+{
+    auto mahjongResult = scanHandForMahjong(player);
+    return MahjongData(player, mahjongResult);
+}
+
+@("If a player is mahjong, it should be concluded as such")
+unittest
+{
+    import fluent.asserts;
+    auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto player = new Player;
+    player.game = winningGame;
+    auto result = player.calculateMahjongData;
+    result.isMahjong.should.equal(true);
+}
+
+@("If a player is not mahjong, it should also be concluded as such")
+unittest
+{
+    import fluent.asserts;
+    auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+    auto player = new Player;
+    player.game = losingGame;
+    auto result = player.calculateMahjongData;
+    result.isMahjong.should.equal(false);
+}
+
+struct MahjongData
+{
+    this(const Player player, bool isMahjong, const(Set)[] sets)
+    {
+        this(player, MahjongResult(isMahjong, sets));
+    }
+
+    this(const Player player, const MahjongResult result)
+    {
+        this.player = player;
+        this.result = result;
+    }
+
+    const(Player) player;
+    const(MahjongResult) result;
+    alias result this;
+    bool isWinningPlayerEast() @property pure const
+    {
+        return player.isEast;
+    }
+    size_t calculateMiniPoints(PlayerWinds leadingWind) pure const
+    {
+        if(result.isSevenPairs) return 25;
+        auto miniPointsFromSets = result.calculateMiniPoints(player.wind.to!PlayerWinds, leadingWind);
+        auto miniPointsFromWinning = isTsumo ? 30 : 20;
+        return miniPointsFromSets + miniPointsFromWinning;
+    }
+
+    bool isTsumo() @property pure const
+    {
+        return player.lastTile.isOwn;
+    }
+}
+
+unittest
+{
+    import mahjong.domain.ingame;
+    import mahjong.domain.tile;
+    import mahjong.domain.wall;
+    import mahjong.engine.creation;
+    auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
+    auto player = new Player();
+    player.game = new Ingame(PlayerWinds.east);
+    player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
+    player.drawTile(wall);
+    auto mahjongResult = player.scanHandForMahjong;
+    auto data = MahjongData(player, mahjongResult);
+    assert(data.isTsumo, "Being mahjong after drawing a tile is a tsumo"); 
+    assert(data.calculateMiniPoints(PlayerWinds.south) == 40, "Pon of honours + pair of dragons + tsumo = 40");
+}
+
+unittest
+{
+    import mahjong.domain.ingame;
+    import mahjong.domain.tile;
+    import mahjong.engine.creation;
+    auto player = new Player();
+    player.game = new Ingame(PlayerWinds.east);
+    player.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗"d.convertToTiles;
+    auto tile = new Tile(Types.bamboo, Numbers.eight);
+    tile.origin = new Ingame(PlayerWinds.south);
+    player.ron(tile);
+    auto mahjongResult = player.scanHandForMahjong;
+    auto data = MahjongData(player, mahjongResult);
+    assert(!data.isTsumo, "Being mahjong after ron is not a tsumo"); 
+    assert(data.calculateMiniPoints(PlayerWinds.south) == 25, "Seven pairs is always 25, regardless of what pairs");
+}
+
+unittest
+{
+    import mahjong.domain.ingame;
+    import mahjong.domain.tile;
+    import mahjong.domain.wall;
+    import mahjong.engine.creation;
+    auto wall = new MockWall(new Tile(Types.ball, Numbers.six));
+    auto player = new Player();
+    player.game = new Ingame(PlayerWinds.east);
+    player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.origin = new Ingame(PlayerWinds.south);
+    player.kan(tile, wall);
+    auto mahjongResult = player.scanHandForMahjong;
+    auto data = MahjongData(player, mahjongResult);
+    assert(data.isTsumo, "Being mahjong after kan is a tsumo"); 
+    assert(data.calculateMiniPoints(PlayerWinds.south) == 48, "Open kan of honours + pair of dragons + tsumo = 48");
+}
+
+private struct MahjongResult
+{
+    const bool isMahjong;
+    const Set[] sets;
+    size_t calculateMiniPoints(const PlayerWinds ownWind, const PlayerWinds leadingWind) pure const
+    {
+        return sets.sum!(s => s.miniPoints(ownWind, leadingWind));
+    }
+    auto tiles() @property pure const
+    {
+        return sets.flatMap!(s => s.tiles);
+    }
+    bool isSevenPairs() @property pure const
+    {
+        return sets.length == 1 && cast(SevenPairsSet)sets[0];
+    }
 }
