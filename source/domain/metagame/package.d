@@ -1,82 +1,43 @@
 module mahjong.domain.metagame;
 
+public import mahjong.domain.metagame.players;
+
 import std.algorithm;
-import std.array;
 import std.experimental.logger;
-import std.random;
 import std.range;
 import std.conv;
-import std.uuid;
 
 import mahjong.domain.enums;
 import mahjong.domain;
+import mahjong.domain.metagame.round;
 import mahjong.domain.wrappers;
 import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
-import mahjong.engine.scoring;
-import mahjong.share.range;
 
 class Metagame
 {
-	Player[] players; 
+	Player[] players;
 
-	const(Player) currentPlayer() @property pure const
-	{ 
-		return _turn == -1 ? null : players[_turn]; 
-	}
-
-	Player getCurrentPlayer() pure
-	{
-		return _turn == -1 ? null : players[_turn]; 
-	}
-
-	Player currentPlayer(Player player) @property
-	{
-		_turn = players.indexOf(player);
-		return player;
-	}
-
-	const(Player) nextPlayer() @property pure const
-	{
-		return players[(_turn+1)%$];
-	}
-
-	auto otherPlayers() 
-	{
-		auto currentPlayer = this.currentPlayer;
-		return players.filter!(p => p != currentPlayer);
-	}
-
-	auto otherPlayers(const Player player) const
-	{
-		return players.filter!(p => p != player);
-	}
-
-	AmountOfPlayers amountOfPlayers() @property pure const
-	{
-		return AmountOfPlayers(players.length);
-	}
+    package const size_t _leadingWindStartingLocation;
 
 	Wall wall;
-	private PlayerWinds _leadingWind;
+
+    package Round _round;
+
 	PlayerWinds leadingWind() @property pure const
 	{
-		return _leadingWind;
+		return _round.leadingWind;
 	}
-	private const Player _initialEastPlayer;
-	private int _initialWind;
 
-	private uint _round = 1;
 	uint round() @property pure const
 	{
-		return _round;
+		return _round.number;
 	}
 
-	private size_t _counters = 0;
 	size_t counters() @property pure const
 	{
-		return _counters;
+		return _round.counters;
 	}
 
 	this(Player[] players, const Opts opts)
@@ -85,15 +46,9 @@ class Metagame
         _opts = opts;
 		info("Initialising metagame");
 		placePlayers;
-		_initialWind = uniform(0, players.length).to!int; 
-		_initialEastPlayer = getEastPlayer;
-		_leadingWind = PlayerWinds.east;
+        _round = Round.createRandom(this.amountOfPlayers);
+        _leadingWindStartingLocation = _round.roundStartingPosition;
 		info("Initialised metagame");
-	}
-
-	private Player getEastPlayer()
-	{
-		return players[($-_initialWind)%$];
 	}
 
 	private void placePlayers()
@@ -138,7 +93,7 @@ class Metagame
 	{
 		foreach(int i, player; players)
 		{ 
-			auto wind = ((_initialWind + i) % players.length).to!PlayerWinds;
+			auto wind = ((_round.roundStartingPosition + i) % players.length).to!PlayerWinds;
 			player.startGame(wind);
 		}
 	}
@@ -181,11 +136,11 @@ class Metagame
 	{
 		if(isExhaustiveDraw)
 		{
-			new ExhaustiveDrawRoundFinisher(this).finish;
+            _round = this.finishRoundWithExhaustiveDraw(_round);
 		}
 		else
 		{
-			new RoundFinisher(this).finish;
+            _round = this.finishRoundWithMahjong(_round);
 		}
 	}
 
@@ -230,7 +185,7 @@ class Metagame
         auto player2 = new Player;
         player2.game = new Ingame(PlayerWinds.south, ""d);
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
-        metagame._initialWind = 0; // Force the first player to be east.
+        metagame._round = Round(0); // Force the first player to be east.
         metagame.wall = new MockWall(true);
         metagame.finishRound;
         metagame.initializeRound;
@@ -248,7 +203,7 @@ class Metagame
         auto player2 = new Player;
         player2.game = new Ingame(PlayerWinds.south, ""d);
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
-        metagame._initialWind = 0; // Force the first player to be east.
+        metagame._round = Round(0); // Force the first player to be east.
         metagame.wall = new MockWall(true);
         metagame.finishRound;
         metagame.initializeRound;
@@ -262,7 +217,7 @@ class Metagame
         foreach(player; players)
         {
             player.abortGame(this);
-            if(player.isRiichi) _amountOfRiichiSticks--;
+            if(player.isRiichi) _round.removeRiichiStick;
         }
     }
 
@@ -275,7 +230,7 @@ class Metagame
             new Player(new TestEventHandler, 30_000)];
         auto metagame = new Metagame(players, new DefaultGameOpts);
         metagame.initializeRound;
-        metagame._counters = 5;
+        metagame._round = Round.withCounters(5);
         metagame.abortRound;
         metagame.amountOfRiichiSticks.should.equal(0);
         metagame.counters.should.equal(5);
@@ -311,7 +266,10 @@ class Metagame
             new Player(new TestEventHandler, 30_000)];
         auto metagame = new Metagame(players, new DefaultGameOpts);
         metagame.initializeRound;
-        metagame._amountOfRiichiSticks = 5;
+        foreach(_; 0..5)
+        {
+            metagame.riichiIsDeclared();
+        }
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         players[0].game = ingame;
@@ -322,13 +280,13 @@ class Metagame
 
 	bool isGameOver()
 	{
-		return _leadingWind > _opts.finalLeadingWind;
+		return _round.leadingWind > _opts.finalLeadingWind;
 	}
 	/*
 	 The game itself.
 	 */
 
-	private size_t _turn = 0; 
+	package size_t _turn = 0; 
 
 	private void setTurnPlayerToEast() 
 	{
@@ -342,17 +300,15 @@ class Metagame
 		}
 	}
 
-    void riichiIsDeclared()
+    void riichiIsDeclared() pure
     {
-        _amountOfRiichiSticks++;
+        _round.addRiichiStick();
     }
 
     int amountOfRiichiSticks() @property pure const
     {
-        return _amountOfRiichiSticks;
+        return _round.amountOfRiichiSticks;
     }
-
-    private int _amountOfRiichiSticks;
 
 	void tsumo()	
 	{
@@ -370,7 +326,7 @@ class Metagame
 		{
 			trace("Advancing turn.");
 			_turn = (_turn + 1) % players.length;
-            if(currentPlayer is _initialEastPlayer)
+            if(_turn == _round.roundStartingPosition)
             {
                 _isFirstTurn = false;
             }
@@ -600,15 +556,6 @@ class Metagame
 
     private const Opts _opts;
 
-    int riichiFare() pure const
-    {
-        return _opts.riichiFare;
-    }
-
-    GameMode gameMode() pure const
-    {
-        return _opts.gameMode;
-    }
 }
 
 unittest
@@ -625,8 +572,10 @@ unittest
 	assert(metagame.nextPlayer == player, "If it is player 3's turn, the next player should loop back to 1");
 }
 
+@("If east is mahjong, then a counter should be placed.")
 unittest
 {
+    import fluent.asserts;
 	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	auto player1 = new Player();
@@ -635,13 +584,13 @@ unittest
 	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
-	auto eastPlayer = players[metagame._initialWind];
+	auto eastPlayer = metagame.eastPlayer;
 	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
-	assert(eastPlayer.isEast, "the east player was mahjong, the turns should not have advanced");
-	assert(1 == metagame.counters, "A counter should have been placed");
+    eastPlayer.isEast.should.equal(true).because("they were mahjong and therefore retain the east position");
+    metagame.counters.should.equal(1).because("east remains east");
 }
 
 unittest
@@ -654,8 +603,8 @@ unittest
 	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
-	auto eastPlayer = players[metagame._initialWind];
-	auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+    auto eastPlayer = metagame.eastPlayer;
+	auto nonEastPlayer = metagame.otherPlayers.front;
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
 	metagame.finishRound;
 	metagame.initializeRound;
@@ -677,7 +626,7 @@ unittest
 	metagame.beginRound;
 	foreach(i; 0..2)
 	{
-		auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
 		metagame.finishRound;
 		metagame.initializeRound;
@@ -739,7 +688,7 @@ unittest
 	auto metagame = new Metagame(players, new DefaultBambooOpts);
 	metagame.initializeRound;
 	metagame.beginRound;
-	auto eastPlayer = players[metagame._initialWind];
+	auto eastPlayer = metagame.eastPlayer;
 	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
 	metagame.finishRound;
 	metagame.initializeRound;
@@ -764,14 +713,14 @@ unittest
 	metagame.beginRound;
 	foreach(i; 0..7)
 	{
-		auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
 		metagame.finishRound;
 		assert(!metagame.isGameOver, "There are still turns left to play!");
 		metagame.initializeRound;
 		metagame.beginRound;
 	}
-	auto nonEastPlayer = players[(metagame._initialWind + 1)%$];
+	auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
 	metagame.finishRound;
 	assert(metagame.isGameOver, "The game should have been finished after 2x 4 rounds of non-east wins.");
@@ -785,27 +734,6 @@ void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
     {
         player.couldHaveClaimed(tile);
     }
-}
-
-auto playersByTurnOrder(Metagame metagame) @property
-{
-    return metagame.players.cycle
-        .find(metagame.getCurrentPlayer)
-        .atLeastOneUntil(metagame.getCurrentPlayer);
-}
-
-unittest
-{
-    import fluent.asserts;
-    auto player1 = new Player;
-    auto player2 = new Player;
-    auto player3 = new Player;
-    auto player4 = new Player;
-    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
-    metagame.currentPlayer = player3;
-    metagame.playersByTurnOrder.should.equal(
-        [player3, player4, player1, player2]
-        );
 }
 
 const(MahjongData)[] constructMahjongData(Metagame metagame)
@@ -837,9 +765,14 @@ unittest
     mahjongData[1].player.should.equal(player1);
 }
 
-int riichiFare(const Metagame metagame) @property
+int riichiFare(const Metagame metagame) @property pure
 {
     return metagame._opts.riichiFare;
+}
+
+GameMode gameMode(const Metagame metagame) @property pure
+{
+    return metagame._opts.gameMode;
 }
 
 size_t amountOfRiichiSticksAtTheBeginningOfTheRound(const Metagame metagame) @property pure
@@ -849,110 +782,3 @@ size_t amountOfRiichiSticksAtTheBeginningOfTheRound(const Metagame metagame) @pr
             if(p.game && p.isRiichi) return 1; return 0;
         });
 }
-
-private class RoundFinisher
-{
-	this(Metagame metagame)
-	{
-		_metagame = metagame;
-	}
-
-	protected Metagame _metagame;
-
-	final void finish()
-	{
-		applyTransactions(calculateTransactions);
-		modifyCounter;
-        moveWinds;
-        resetAmountOfRiichiSticks;
-	}
-
-	private void applyTransactions(Transaction[] transactions)
-	{
-		foreach(transaction; transactions)
-		{
-			auto player = _metagame.players.first!(p => p == transaction.player);
-			player.applyTransaction(transaction);
-		}
-	}
-
-	protected Transaction[] calculateTransactions()
-	{
-		auto data = _metagame.constructMahjongData;
-		return data.toTransactions(_metagame);
-	}
-
-	private void moveWinds()
-	{
-		++_metagame._round;
-		if(!needToMoveWinds) 
-		{
-			return;
-		}
-		_metagame._initialWind = ((_metagame._initialWind - 1 + _metagame.players.length) % 
-									_metagame.players.length).to!int;
-		if(_metagame._initialEastPlayer == _metagame.getEastPlayer)
-		{
-			_metagame._leadingWind = (_metagame._leadingWind + 1).to!PlayerWinds;
-			_metagame._round = 1;
-		}
-	}
-
-	private void modifyCounter()
-	{
-		final switch(shouldIncrementOrResetCounter) with(IncrementOrReset)
-		{
-			case reset:
-				_metagame._counters = 0;
-				break;
-			case increment:
-				_metagame._counters++;
-				break;
-		}
-	}
-
-	protected bool needToMoveWinds()
-	{
-		return !_metagame.getEastPlayer.isMahjong;
-	}
-
-	protected IncrementOrReset shouldIncrementOrResetCounter()
-	{
-		return needToMoveWinds ? IncrementOrReset.reset : IncrementOrReset.increment;
-	}
-
-	protected void resetAmountOfRiichiSticks()
-	{
-		_metagame._amountOfRiichiSticks = 0;
-	}
-}
-
-private class ExhaustiveDrawRoundFinisher : RoundFinisher
-{
-	this(Metagame metagame)
-	{
-		super(metagame);
-	}
-
-	protected override Transaction[] calculateTransactions()
-	{
-		return null;
-	}
-
-	protected override bool needToMoveWinds()
-	{
-		return !_metagame.getEastPlayer.isTenpai; // Or Non-east is Nagashi mangan
-	}
-
-	protected override IncrementOrReset shouldIncrementOrResetCounter()
-	{
-		return IncrementOrReset.increment;
-	}
-
-	protected override void resetAmountOfRiichiSticks()
-	{
-		// Do nothing, unless there is a nagashi mangan.
-	}
-}
-
-private enum IncrementOrReset {increment, reset}

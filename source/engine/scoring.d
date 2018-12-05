@@ -278,7 +278,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     return transactions;
 }
 
-private Transaction[] getRiichiTransactions(const Metagame metagame, const MahjongData[] mahjongData)
+private Transaction[] getRiichiTransactions(const Metagame metagame, const MahjongData[] mahjongData) pure
 {
     if(metagame.amountOfRiichiSticks == 0) return null;
     if(mahjongData.length == 1)
@@ -328,7 +328,7 @@ unittest
     transactions[0].amount.should.equal(42_000);
 }
 
-private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const MahjongData[] mahjongData)
+private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const MahjongData[] mahjongData) pure
 {
     int[const(Player)] riichiSticksPerPlayer;
     int i = 1;
@@ -386,7 +386,7 @@ unittest
     transactions[1].amount.should.equal(20_000);
 }
 
-private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
+private Transaction[] mergeTransactions(Transactions)(Transactions transactions) pure
     if(isInputRange!Transactions && is(ElementType!Transactions : Transaction))
 {
     Transaction[const Player] mergedTransactions;
@@ -406,7 +406,7 @@ private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
 
 class Transaction
 {
-    this(const Player player, const int amount)
+    this(const Player player, const int amount) pure
     {
         this.player = player;
         this.amount = amount;
@@ -415,10 +415,10 @@ class Transaction
     const Player player;
     const int amount;
 
-    Transaction opBinary(string op)(Transaction rhs)
+    Transaction opBinary(string op)(Transaction rhs) pure
         in
     {
-        assert(player == rhs.player, "Cannot sum the transactions of two players");
+        assert(player is rhs.player, "Cannot sum the transactions of two players");
     }
     body
     {
@@ -554,7 +554,7 @@ unittest
     assert(30 == roundMiniPoints(30), "When the number is dividable by 10, the rounded minipoints don't change");
 }
 
-private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall wall)
+private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall wall) pure
 {
     auto doraIndicators = wall.doraIndicators;
     size_t doras = 0;
@@ -638,7 +638,7 @@ unittest
     assert(doras == 2, "When the indicator is in there twice, the doras count double");
 }
 
-private const(ComparativeTile) getDoraValue(const Tile doraIndicator)
+private const(ComparativeTile) getDoraValue(const Tile doraIndicator) pure
 {
     return ComparativeTile(doraIndicator.type,
         (doraIndicator.value + 1) % doraIndicator.type.amountOfTiles);

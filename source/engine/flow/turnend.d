@@ -28,7 +28,7 @@ class TurnEndFlow : Flow
 		{
 			trace("Advancing to the next turn.");
 			_metagame.advanceTurn;
-			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, _metagame.wall, _notificationService));
+			switchFlow(new DrawFlow(_metagame.currentPlayer, _metagame, _metagame.wall, _notificationService));
 		}
 	}
 }
