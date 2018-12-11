@@ -23,12 +23,25 @@ Player currentPlayer(Metagame metagame, Player player) @property
     }
     return player;
 }
-const(Player) nextPlayer(const Metagame metagame) @property pure
+
+inout(Player) nextPlayer(inout Metagame metagame) @property pure
 {
     with(metagame)
     {
         return players[(_turn+1)%$];
     }
+}
+
+@("Is the initial next player south?")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.enums;
+    import mahjong.engine.opts;
+    auto metagame = new Metagame([new Player, new Player], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    metagame.nextPlayer.wind.should.equal(PlayerWinds.south);
 }
 
 auto otherPlayers(Metagame metagame) pure
