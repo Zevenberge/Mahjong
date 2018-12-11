@@ -614,8 +614,10 @@ unittest
 	metagame.initializeRound;
 	metagame.beginRound;
     auto eastPlayer = metagame.eastPlayer;
+    eastPlayer.isNotNagashiMangan;
 	auto nonEastPlayer = metagame.otherPlayers.front;
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    nonEastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
@@ -636,8 +638,10 @@ unittest
 	metagame.beginRound;
 	foreach(i; 0..2)
 	{
+        metagame.eastPlayer.isNotNagashiMangan;
 		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        nonEastPlayer.isNotNagashiMangan;
 		metagame.finishRound;
 		metagame.initializeRound;
 		metagame.beginRound;
@@ -658,8 +662,9 @@ unittest
 	metagame.initializeRound;
 	metagame.beginRound;
 	auto eastPlayer = metagame.currentPlayer;
+    eastPlayer.isNotNagashiMangan;
 	auto southPlayer = metagame.nextPlayer;
-	assert(southPlayer.wind == PlayerWinds.south, "Sanity check");
+    southPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
@@ -681,6 +686,7 @@ unittest
 	metagame.beginRound;
 	foreach(i; 0..3)
 	{
+        metagame.eastPlayer.isNotNagashiMangan;
 		metagame.finishRound;
 		metagame.initializeRound;
 		metagame.beginRound;
@@ -700,9 +706,11 @@ unittest
 	metagame.beginRound;
 	auto eastPlayer = metagame.eastPlayer;
 	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    eastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
+    eastPlayer.isNotNagashiMangan;
 	// East does not win.
 	metagame.finishRound;
 	assert(metagame.counters == 0, "The amount of counters should have been reset");
@@ -723,15 +731,19 @@ unittest
 	metagame.beginRound;
 	foreach(i; 0..7)
 	{
+        metagame.eastPlayer.isNotNagashiMangan;
 		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        nonEastPlayer.isNotNagashiMangan;
 		metagame.finishRound;
 		assert(!metagame.isGameOver, "There are still turns left to play!");
 		metagame.initializeRound;
 		metagame.beginRound;
 	}
+    metagame.eastPlayer.isNotNagashiMangan;
 	auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    nonEastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	assert(metagame.isGameOver, "The game should have been finished after 2x 4 rounds of non-east wins.");
 	assertThrown!AssertError(metagame.initializeRound, "Attempting to start a new round should be blocked");
