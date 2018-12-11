@@ -134,7 +134,6 @@ package Round finishRoundWithMahjong(Metagame metagame, Round round)
 @("If east is nagashi mangan, they will retain east.")
 unittest
 {
-    import std.range;
     import fluent.asserts;
     import mahjong.domain.player;
     import mahjong.domain.wall;
@@ -144,7 +143,7 @@ unittest
     metagame.beginRound;
     metagame.wall = new MockWall(true);
     auto east = metagame.eastPlayer;
-    auto south = metagame.otherPlayers.array[0];
+    auto south = metagame.nextPlayer;
     south.isNotNagashiMangan;
     metagame.finishRound;
     metagame.initializeRound;
@@ -154,7 +153,7 @@ unittest
 
 package Round finishRoundWithExhaustiveDraw(Metagame metagame, Round round)
 {
-    if(metagame.players.any!(p => p.isNagashiMangan))
+    if(metagame.isAnyPlayerNagashiMangan)
     {
         return finishRoundWithMahjong(metagame, round);
     }

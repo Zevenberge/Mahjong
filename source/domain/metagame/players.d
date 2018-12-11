@@ -89,3 +89,8 @@ unittest
         [player3, player4, player1, player2]
         );
 }
+
+bool isAnyPlayerNagashiMangan(const Metagame metagame)
+{
+    return metagame.players.any!(p => p.isNagashiMangan);
+}
