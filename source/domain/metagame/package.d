@@ -58,6 +58,7 @@ class Metagame
 		}
 	}
 
+    private bool _isInitialised;
 	void initializeRound()
 	in
 	{
@@ -69,6 +70,7 @@ class Metagame
 		startPlayersGame;
 		setUpWall;
         _isRedrawDeclared = false;
+        _isInitialised = true;
 	}
 
     @("If the game is aborted due to a redraw, a redraw should no longer be requested")
@@ -103,6 +105,11 @@ class Metagame
 	}
 
 	void beginRound()
+    in
+    {
+        assert(_isInitialised, "Don't forget to initialize before beginning.");
+    }
+    body
 	{
 		wall.dice;
 		distributeTiles;
