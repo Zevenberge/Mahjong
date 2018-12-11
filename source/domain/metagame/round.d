@@ -117,7 +117,8 @@ package Round finishRoundWithMahjong(Metagame metagame, Round round)
     metagame.applyTransactions(transactions);
     round.increment;
     round.removeRiichiSticks;
-    bool needToMoveWinds = !metagame.eastPlayer.isMahjong;
+    auto eastPlayer = metagame.eastPlayer;
+    bool needToMoveWinds = !(eastPlayer.isNagashiMangan || eastPlayer.isMahjong);
     if(needToMoveWinds)
     {
         round.resetCounter;
@@ -128,6 +129,27 @@ package Round finishRoundWithMahjong(Metagame metagame, Round round)
         round.addCounter;
     }
     return round;
+}
+
+@("If east is nagashi mangan, they will retain east.")
+unittest
+{
+    import std.range;
+    import fluent.asserts;
+    import mahjong.domain.player;
+    import mahjong.domain.wall;
+    import mahjong.engine.opts;
+    auto metagame = new Metagame([new Player(), new Player()], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    metagame.wall = new MockWall(true);
+    auto east = metagame.eastPlayer;
+    auto south = metagame.otherPlayers.array[0];
+    south.isNotNagashiMangan;
+    metagame.finishRound;
+    metagame.initializeRound;
+    metagame.beginRound;
+    metagame.eastPlayer.should.equal(east);
 }
 
 package Round finishRoundWithExhaustiveDraw(Metagame metagame, Round round)
