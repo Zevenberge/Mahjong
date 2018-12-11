@@ -10,6 +10,7 @@ class ExhaustiveDrawFlow : WaitForEveryPlayer!ExhaustiveDrawEvent
     this(Metagame game, INotificationService notificationService)
     {
         trace("Initialising exhaustive draw flow");
+        game.exhaustiveDraw;
         notificationService.notify(Notification.ExhaustiveDraw);
         super(game, notificationService);
     }

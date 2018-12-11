@@ -325,23 +325,15 @@ class Metagame
 		flipOverWinningTiles();	
 	}
 
-	void advanceTurn()
-	{
-		if(isExhaustiveDraw)
-		{
-			info("Exhaustive draw reached.");
-			exhaustiveDraw;
-		}
-		else
-		{
-			trace("Advancing turn.");
-			_turn = (_turn + 1) % players.length;
-            if(_turn == _round.roundStartingPosition)
-            {
-                _isFirstTurn = false;
-            }
-		}
-	}
+    void advanceTurn()
+    {    
+        trace("Advancing turn.");
+        _turn = (_turn + 1) % players.length;
+        if(_turn == _round.roundStartingPosition)
+        {
+            _isFirstTurn = false;
+        }
+    }
 
     private bool _isFirstTurn;
 
@@ -519,32 +511,13 @@ class Metagame
         return wall && wall.isExhaustiveDraw;
 	}
 
-	deprecated("Move to engine/scoring.d.")
-	private void exhaustiveDraw()
-	{
-		checkNagashiMangan;
-		checkTenpai;
-	}
-	
-	private void checkNagashiMangan()
-	{
-		foreach(player; players)
-		{
-			if(player.isNagashiMangan)
-			{
-				// Go ro results screen.
-				info("Nagashi Mangan!");
-			}
-		}
-	}
-	private void checkTenpai()
+	void exhaustiveDraw()
 	{
 		foreach(player; players)
 		{
 			if(player.isTenpai)
 			{
 				player.showHand;
-				info(player.wind, " is tenpai!");
 			}
 			else
 			{
