@@ -22,7 +22,7 @@ Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
 {
     auto yaku = mahjong.result.determineYaku(mahjong.player, metagame);
     auto miniPoints = mahjong.calculateMiniPoints(metagame.leadingWind);
-    auto amountOfDoras = mahjong.result.countAmountOfDoras(metagame.wall);
+    auto amountOfDoras = mahjong.countAmountOfDoras(metagame.wall);
     return new Scoring(yaku, miniPoints, amountOfDoras, metagame.counters, mahjong.player.isClosedHand, metagame.amountOfPlayers);
 }
 
@@ -203,7 +203,7 @@ unittest
     player2.game = new Ingame(PlayerWinds.south);
     auto metagame = new Metagame([player1, player2], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
+    auto mahjongData = MahjongData(player1, true, [new SevenPairsSet(null)]);
     auto transactions = [mahjongData].toTransactions(metagame);
     assert(transactions.length == 2, "Expected a plus and a minus transaction");
     // TODO assert that the scoring is ok.
@@ -225,7 +225,7 @@ unittest
     player1.ron(tile);
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
+    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(null)]);
     auto transactions = [mahjongData1].toTransactions(metagame);
     assert(transactions.length == 2, "Only the player who discarded and the winning player should be paid");
     // TODO assert that the scoring is ok.
@@ -249,8 +249,8 @@ unittest
     player3.ron(tile);
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
-    auto mahjongData2 = MahjongData(player3, MahjongResult(true, [new SevenPairsSet(null)]));
+    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(null)]);
+    auto mahjongData2 = MahjongData(player3, true, [new SevenPairsSet(null)]);
     auto transactions = [mahjongData1, mahjongData2].toTransactions(metagame);
     assert(transactions.length == 3, "Expected two plus and a minus transaction because of a possible double ron");
     // TODO assert that the scoring is ok.
@@ -261,7 +261,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     auto scoring = data.calculateScoring(metagame);
     auto payment = scoring.calculatePayment(data.player.isEast);
     Transaction[] transactions;
-    if(data.isTsumo)
+    if(data.isTsumo || data.isNagashiMangan)
     {
         foreach(player; metagame.otherPlayers(data.player))
         {
@@ -278,7 +278,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     return transactions;
 }
 
-private Transaction[] getRiichiTransactions(const Metagame metagame, const MahjongData[] mahjongData)
+private Transaction[] getRiichiTransactions(const Metagame metagame, const MahjongData[] mahjongData) pure
 {
     if(metagame.amountOfRiichiSticks == 0) return null;
     if(mahjongData.length == 1)
@@ -321,14 +321,14 @@ unittest
     import fluent.asserts;
     auto winningPlayer = new Player;
     auto metagame = new RiichiStickMetagame(42);
-    auto mahjongData = MahjongData(winningPlayer, MahjongResult(true, null));
+    auto mahjongData = MahjongData(winningPlayer, true, null);
     auto transactions = getRiichiTransactions(metagame,[mahjongData]);
     transactions.length.should.equal(1);
     transactions[0].player.should.equal(winningPlayer);
     transactions[0].amount.should.equal(42_000);
 }
 
-private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const MahjongData[] mahjongData)
+private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const MahjongData[] mahjongData) pure
 {
     int[const(Player)] riichiSticksPerPlayer;
     int i = 1;
@@ -357,8 +357,8 @@ unittest
     auto player2 = new Player;
     auto metagame = new RiichiStickMetagame(42);
     auto mahjongData = [
-        MahjongData(player1, MahjongResult(true, null)),
-        MahjongData(player2, MahjongResult(true, null))
+        MahjongData(player1, true, null),
+        MahjongData(player2, true, null)
     ];
     auto transactions = getRiichiTransactions(metagame, mahjongData);
     transactions.length.should.equal(2);
@@ -375,8 +375,8 @@ unittest
     auto player2 = new Player;
     auto metagame = new RiichiStickMetagame(41);
     auto mahjongData = [
-        MahjongData(player1, MahjongResult(true, null)),
-        MahjongData(player2, MahjongResult(true, null))
+        MahjongData(player1, true, null),
+        MahjongData(player2, true, null)
     ];
     auto transactions = getRiichiTransactions(metagame, mahjongData);
     transactions.length.should.equal(2);
@@ -386,7 +386,7 @@ unittest
     transactions[1].amount.should.equal(20_000);
 }
 
-private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
+private Transaction[] mergeTransactions(Transactions)(Transactions transactions) pure
     if(isInputRange!Transactions && is(ElementType!Transactions : Transaction))
 {
     Transaction[const Player] mergedTransactions;
@@ -406,7 +406,7 @@ private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
 
 class Transaction
 {
-    this(const Player player, const int amount)
+    this(const Player player, const int amount) pure
     {
         this.player = player;
         this.amount = amount;
@@ -415,10 +415,10 @@ class Transaction
     const Player player;
     const int amount;
 
-    Transaction opBinary(string op)(Transaction rhs)
+    Transaction opBinary(string op)(Transaction rhs) pure
         in
     {
-        assert(player == rhs.player, "Cannot sum the transactions of two players");
+        assert(player is rhs.player, "Cannot sum the transactions of two players");
     }
     body
     {
@@ -554,7 +554,7 @@ unittest
     assert(30 == roundMiniPoints(30), "When the number is dividable by 10, the rounded minipoints don't change");
 }
 
-private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall wall)
+private size_t countAmountOfDoras(const MahjongData mahjongResult, const Wall wall) pure
 {
     auto doraIndicators = wall.doraIndicators;
     size_t doras = 0;
@@ -587,7 +587,7 @@ version(unittest)
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.eight);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
@@ -600,7 +600,7 @@ unittest
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
@@ -613,7 +613,7 @@ unittest
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new PonSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.six),
@@ -627,7 +627,7 @@ unittest
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
@@ -638,7 +638,7 @@ unittest
     assert(doras == 2, "When the indicator is in there twice, the doras count double");
 }
 
-private const(ComparativeTile) getDoraValue(const Tile doraIndicator)
+private const(ComparativeTile) getDoraValue(const Tile doraIndicator) pure
 {
     return ComparativeTile(doraIndicator.type,
         (doraIndicator.value + 1) % doraIndicator.type.amountOfTiles);

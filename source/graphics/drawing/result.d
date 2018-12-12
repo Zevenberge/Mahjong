@@ -9,6 +9,7 @@ import dsfml.graphics;
 import mahjong.domain.metagame;
 import mahjong.domain.tile;
 import mahjong.engine.flow.mahjong;
+import mahjong.engine.mahjong;
 import mahjong.engine.scoring;
 import mahjong.engine.yaku;
 import mahjong.graphics.anime.animation;

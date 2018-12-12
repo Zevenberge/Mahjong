@@ -30,6 +30,25 @@ class Ingame
             this(wind);
             closedHand.tiles = tiles.convertToTiles;
         }
+
+        void setDiscards(Tile[] discs)
+        {
+            _discards = discs;
+            foreach(tile; _discards)
+            {
+                tile.origin = this;
+            }
+        }
+
+        void hasDrawnTheirLastTile() pure
+        {
+            _lastTile = closedHand.tiles[0];
+        }
+
+        void isNotNagashiMangan()
+        {
+            _discards ~= new Tile(Types.ball, Numbers.five);
+        }
     }
 
     const UUID id;
@@ -50,20 +69,8 @@ class Ingame
         return _discards;
     }
 
-    version(unittest)
-    {
-        void setDiscards(Tile[] discs)
-        {
-            _discards = discs;
-            foreach(tile; _discards)
-            {
-                tile.origin = this;
-            }
-        }
-    }
-
     private Tile[] _claimedDiscards;
-    private const(Tile)[] allDiscards() @property pure
+    private const(Tile)[] allDiscards() @property pure const
     {
         return discards ~_claimedDiscards;
     }
@@ -74,9 +81,56 @@ class Ingame
         _claimedDiscards ~= tile;
     }
 
-    bool isNagashiMangan() @property
+    bool isNagashiMangan() @property pure const
     {
-        return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
+        return openHand.isClosedHand && allDiscards.all!(t => t.isHonour || t.isTerminal);
+    }
+
+    @("When starting, the player is nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.isNagashiMangan.should.equal(true);
+    }
+
+    @("When discarding a honour, the player remains nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+        ingame.discard(ingame.closedHand.tiles[0]);
+        ingame.isNagashiMangan.should.equal(true);
+    }
+
+    @("When discarding a terminal, the player remains nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+        ingame.discard(ingame.closedHand.tiles[11]);
+        ingame.isNagashiMangan.should.equal(true);
+    }
+
+    @("When discarding a normal tile, the player loses nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
+        ingame.discard(ingame.closedHand.tiles[11]);
+        ingame.isNagashiMangan.should.equal(false);
+    }
+
+    @("When claiming a tile, the player loses nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
+        auto tile = new Tile(Types.wind, Winds.east);
+        tile.origin = new Ingame(PlayerWinds.west);
+        ingame.pon(tile);
+        ingame.isNagashiMangan.should.equal(false);
     }
 
     bool isClosedHand() @property pure const
@@ -644,14 +698,6 @@ class Ingame
         tile.origin = this;
         tile.open;
         return tile;
-    }
-
-    version(unittest)
-    {
-        void hasDrawnTheirLastTile() pure
-        {
-            _lastTile = closedHand.tiles[0];
-        }
     }
 
     private Tile _lastTile; 

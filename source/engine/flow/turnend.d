@@ -22,26 +22,38 @@ class TurnEndFlow : Flow
 		else if(_metagame.isExhaustiveDraw)
 		{
 			info("Exhaustive draw reached.");
-			switchFlow(new ExhaustiveDrawFlow(_metagame, _notificationService));
+            if(_metagame.isAnyPlayerNagashiMangan)
+            {
+                switchFlow(new MahjongFlow(_metagame, _notificationService));
+            }
+            else
+            {
+                switchFlow(new ExhaustiveDrawFlow(_metagame, _notificationService));
+            }
 		}
 		else
 		{
 			trace("Advancing to the next turn.");
 			_metagame.advanceTurn;
-			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, _metagame.wall, _notificationService));
+			switchFlow(new DrawFlow(_metagame.currentPlayer, _metagame, _metagame.wall, _notificationService));
 		}
 	}
 }
 
 version(unittest)
 {
+    import std.algorithm;
     import fluent.asserts;
     import mahjong.engine.opts;
 	class TestMetagame : Metagame
 	{
-		this()
+		this(bool nagashiMangan)
 		{
 			super([new Player(), new Player()], new DefaultGameOpts);
+            if(!nagashiMangan)
+            {
+                players.each!(p => p.isNotNagashiMangan);
+            }
 		}
 
 		private bool _isExhaustiveDraw;
@@ -56,9 +68,9 @@ version(unittest)
 			return _isExhaustiveDraw;
 		}
 	}
-    auto createGameAndSetFlowToTurnEndFlow()
+    auto createGameAndSetFlowToTurnEndFlow(bool nagashiMangan = false)
     {
-    	auto meta = new TestMetagame;
+    	auto meta = new TestMetagame(nagashiMangan);
     	auto turnEndFlow = new TurnEndFlow(meta, new NullNotificationService);
     	switchFlow(turnEndFlow);
         return meta;
@@ -98,4 +110,13 @@ unittest
     meta._isExhaustiveDraw = true;
 	.flow.advanceIfDone;
     .flow.should.be.instanceOf!ExhaustiveDrawFlow;
+}
+
+@("If the game is exhausted and there is a nagashi mangan, the flow should switch to a mahjong flow")
+unittest
+{
+    auto meta = createGameAndSetFlowToTurnEndFlow(true);  
+    meta._isExhaustiveDraw = true;
+    .flow.advanceIfDone;
+    .flow.should.be.instanceOf!MahjongFlow;
 }
