@@ -548,7 +548,7 @@ class Ingame
      Functions related to the mahjong call.
      */
 
-    bool isTenpai()
+    bool isTenpai() const
     {
         return .isPlayerTenpai(closedHand.tiles, openHand);
     }
