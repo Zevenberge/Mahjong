@@ -8,7 +8,7 @@ import mahjong.domain.enums;
 import mahjong.domain.tile;
 import mahjong.engine.sort;
 
-auto allTiles()
+auto allTiles() pure
 {
     import std.algorithm : map;
     import std.range : iota;
