@@ -2,7 +2,6 @@
 
 import std.algorithm.iteration;
 import std.array;
-import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.metagame;
 import mahjong.engine.flow.mahjong;
@@ -14,7 +13,6 @@ import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.result;
-import mahjong.graphics.drawing.transfer;
 import mahjong.graphics.opts;
 import mahjong.graphics.utils : freeze;
 
@@ -88,7 +86,9 @@ class MahjongController : ResultController
 
 	private void finishRound()
 	{
-		Controller.instance.substitute(new TransferController(_window, _metagame, _renderTexture, _event));
+		Controller.instance.substitute(
+            new TransferController!MahjongEvent(_window, _metagame, _renderTexture, 
+                _event, _event.data.toTransactions(_metagame)));
 	}
 }
 

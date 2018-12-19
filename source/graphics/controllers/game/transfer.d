@@ -2,29 +2,25 @@
 
 import dsfml.graphics;
 import mahjong.domain.metagame;
-import mahjong.engine.flow.mahjong;
+import mahjong.engine.flow.traits;
 import mahjong.engine.scoring;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.transfer;
 
-class TransferController : ResultController
+class TransferController(TEvent) : ResultController
+    if(isSimpleEvent!TEvent)
 {
-    this(RenderWindow window, const Metagame metagame, RenderTexture background, MahjongEvent event)
+    this(RenderWindow window, const Metagame metagame, RenderTexture background, 
+        TEvent event, Transaction[] transactions)
     {
         super(window, metagame, background);
         _event = event;
-        composeTransferScreen;
-    }
-
-    private void composeTransferScreen()
-    {
-        auto transactions = _event.data.toTransactions(_metagame);
         _transferScreen = new TransferScreen(transactions);
     }
 
     private TransferScreen _transferScreen;
-    private MahjongEvent _event;
+    private TEvent _event;
 
     override void draw()
     {
