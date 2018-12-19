@@ -379,7 +379,7 @@ Transaction[] calculateTenpaiTransactions(const Metagame metagame)
             nonTenpaiPlayers ~= player;
         }
     }
-    if(tenpaiPlayers.length == 0) return null;
+    if(tenpaiPlayers.length == 0 || nonTenpaiPlayers.length == 0) return null;
     int total = (metagame.players.length.to!int-1) * metagame.riichiFare;
     return tenpaiPlayers.map!(p => new Transaction(p, total/tenpaiPlayers.length.to!int))
         .chain(nonTenpaiPlayers.map!(p => new Transaction(p, -total/nonTenpaiPlayers.length.to!int)))
@@ -452,6 +452,21 @@ unittest
     winner2.shouldGet(1_000, transactions);
     winner3.shouldGet(1_000, transactions);
     loser.shouldGet(-3_000, transactions);
+}
+
+@("If everyone is tenpai, no transactions are generated")
+unittest
+{
+    import fluent.asserts;
+    auto winner1 = createTenpaiPlayer;
+    auto winner2 = createTenpaiPlayer;
+    auto winner3 = createTenpaiPlayer;
+    auto winner4 = createTenpaiPlayer;
+    auto metagame = new Metagame(
+        [winner1, winner2, winner3, winner4], 
+        new DefaultGameOpts);
+    auto transactions = metagame.calculateTenpaiTransactions;
+    transactions.length.should.equal(0);
 }
 
 private Transaction[] mergeTransactions(Transactions)(Transactions transactions) pure
