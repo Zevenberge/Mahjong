@@ -48,7 +48,6 @@ class GameEndController : ResultController
 unittest
 {
 	// Check no segfaults test.
-	import dsfml.graphics : Event, Keyboard;
     import fluent.asserts;
 	import mahjong.domain.player;
     import mahjong.domain.wrappers;
@@ -56,6 +55,7 @@ unittest
     import mahjong.engine.opts;
 	import mahjong.graphics.drawing.player;
 	import mahjong.graphics.rendersprite;
+    import mahjong.test.key;
 	import mahjong.test.window;
 	scope(exit) setDefaultTestController;
 	auto player = new Player();
@@ -66,9 +66,7 @@ unittest
     setDefaultTestController;
 	Controller.instance.substitute(new GameEndController(window, metagame, event));
 	Controller.instance.draw;
-	Event keyEvent = Event(Event.EventType.KeyReleased);
-	keyEvent.key = Event.KeyEvent(Keyboard.Key.Return, false, false, false, false);
-	Controller.instance.handleEvent(keyEvent);
+    Controller.instance.handleEvent(returnKeyPressed);
 	assert(event.isHandled, "After pressing enter, the event should have been handled.");
     Controller.instance.should.be.instanceOf!MainMenuController
         .because("after a game, the user is returned to the main menu");
