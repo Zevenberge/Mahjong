@@ -14,7 +14,6 @@ import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.result;
 import mahjong.graphics.opts;
-import mahjong.graphics.utils : freeze;
 
 class MahjongController : ResultController
 {
@@ -31,13 +30,7 @@ class MahjongController : ResultController
 		_resultScreens = _event.data.map!(mahjongData => new ResultScreen(mahjongData, _metagame)).array;
 		currentScreen.initialize;
 	}
-
-	private RenderTexture freezeGameGraphicsOnATexture(const Metagame metagame)
-	{
-		auto screen = styleOpts.screenSize;
-		return freeze!(target => metagame.drawGame(target))(Vector2u(screen.x, screen.y));
-	}
-
+	
 	private ResultScreen[] _resultScreens;
 	private ResultScreen currentScreen() @property
 	{
