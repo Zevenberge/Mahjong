@@ -6,6 +6,7 @@ import mahjong.engine.flow.mahjong;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.result;
+import mahjong.graphics.opts;
 
 abstract class ResultController : GameController
 {
