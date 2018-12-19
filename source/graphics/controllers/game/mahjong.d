@@ -18,55 +18,7 @@ import mahjong.graphics.drawing.transfer;
 import mahjong.graphics.opts;
 import mahjong.graphics.utils : freeze;
 
-class MahjongController : GameController
-{
-	this(RenderWindow window, const Metagame metagame, RenderTexture background)
-	{
-		super(window, metagame);
-		_renderTexture = background;
-		_game = new Sprite;
-		_game.setTexture = background.getTexture;
-		setHaze;
-	}
-
-	private void setHaze()
-	{
-		auto screen = styleOpts.gameScreenSize;
-		_haze = new RectangleShape(
-			Vector2f(screen.x - 2*margin.x, screen.y - 2*margin.y));
-		_haze.position = margin;
-		_haze.fillColor = styleOpts.mahjongResultsHazeColor;
-	}
-
-	protected RenderTexture _renderTexture;
-	private MahjongEvent _event;
-	private Sprite _game;
-	private RectangleShape _haze;
-
-	override void draw()
-	{
-		drawGameBg(_window);
-		_window.draw(_game);
-		_window.draw(_haze);
-	}
-
-	protected override void handleGameKey(Event.KeyEvent key) 
-	{
-		switch(key.code) with(Keyboard.Key)
-		{
-			case Return:
-				advanceScreen;
-				break;
-			default:
-				// Do nothing.
-				break;
-		}
-	}
-
-	protected abstract void advanceScreen();
-}
-
-class ResultController : MahjongController
+class MahjongController : ResultController
 {
 	this(RenderWindow window, const Metagame metagame, MahjongEvent event)
 	{
@@ -137,54 +89,6 @@ class ResultController : MahjongController
 	private void finishRound()
 	{
 		Controller.instance.substitute(new TransferController(_window, _metagame, _renderTexture, _event));
-	}
-}
-
-class TransferController : MahjongController
-{
-	this(RenderWindow window, const Metagame metagame, RenderTexture background, MahjongEvent event)
-	{
-		super(window, metagame, background);
-		_event = event;
-		composeTransferScreen;
-	}
-
-	private void composeTransferScreen()
-	{
-		auto transactions = _event.data.toTransactions(_metagame);
-		_transferScreen = new TransferScreen(transactions);
-	}
-
-	private TransferScreen _transferScreen;
-	private MahjongEvent _event;
-
-	override void draw()
-	{
-		super.draw();
-		_transferScreen.draw(_window);
-	}
-
-	protected override void advanceScreen()
-	{
-		if(!_transferScreen.done)
-		{
-			finishTransfer;
-		}
-		else
-		{
-			finishRound;
-		}
-	}
-
-	private void finishTransfer()
-	{
-		_transferScreen.forceFinish;
-	}
-
-	private void finishRound()
-	{
-		_event.handle;
-		Controller.instance.substitute(new IdleController(_window, _metagame));
 	}
 }
 

@@ -13,7 +13,7 @@ import mahjong.graphics.menu.creation.mainmenu;
 import mahjong.graphics.opts : styleOpts;
 import mahjong.graphics.utils : freeze;
 
-class GameEndController : MahjongController
+class GameEndController : ResultController
 {
 	this(RenderWindow window, const Metagame metagame, GameEndEvent event)
 	{
