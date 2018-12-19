@@ -2,6 +2,7 @@ module mahjong.graphics.controllers.game;
 
 public import mahjong.graphics.controllers.game.abortive;
 public import mahjong.graphics.controllers.game.claim;
+public import mahjong.graphics.controllers.game.exhaustive;
 public import mahjong.graphics.controllers.game.gameend;
 public import mahjong.graphics.controllers.game.idle;
 public import mahjong.graphics.controllers.game.mahjong;
