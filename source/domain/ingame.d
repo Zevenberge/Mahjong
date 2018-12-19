@@ -49,6 +49,18 @@ class Ingame
         {
             _discards ~= new Tile(Types.ball, Numbers.five);
         }
+
+        void willBeTenpai()
+        {
+            import mahjong.engine.creation;
+            closedHand.tiles = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        }
+
+        void willNotBeTenpai()
+        {
+            import mahjong.engine.creation;
+            closedHand.tiles = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
+        }
     }
 
     const UUID id;
