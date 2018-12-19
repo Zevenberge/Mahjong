@@ -1,4 +1,4 @@
-﻿module mahjong.engine.scoring;
+module mahjong.engine.scoring;
 
 import std.algorithm;
 import std.array;
@@ -324,8 +324,7 @@ unittest
     auto mahjongData = MahjongData(winningPlayer, true, null);
     auto transactions = getRiichiTransactions(metagame,[mahjongData]);
     transactions.length.should.equal(1);
-    transactions[0].player.should.equal(winningPlayer);
-    transactions[0].amount.should.equal(42_000);
+    winningPlayer.shouldGet(42_000, transactions);
 }
 
 private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const MahjongData[] mahjongData) pure
@@ -362,10 +361,8 @@ unittest
     ];
     auto transactions = getRiichiTransactions(metagame, mahjongData);
     transactions.length.should.equal(2);
-    transactions[0].player.should.equal(player1);
-    transactions[0].amount.should.equal(21_000);
-    transactions[1].player.should.equal(player2);
-    transactions[1].amount.should.equal(21_000);
+    player1.shouldGet(21_000, transactions);
+    player2.shouldGet(21_000, transactions);
 }
 
 unittest
@@ -380,10 +377,24 @@ unittest
     ];
     auto transactions = getRiichiTransactions(metagame, mahjongData);
     transactions.length.should.equal(2);
-    transactions[0].player.should.equal(player1);
-    transactions[0].amount.should.equal(21_000);
-    transactions[1].player.should.equal(player2);
-    transactions[1].amount.should.equal(20_000);
+    player1.shouldGet(21_000, transactions);
+    player2.shouldGet(20_000, transactions);
+}
+
+version(unittest)
+{
+    private void shouldGet(Player player, int amount, Transaction[] transactions)
+    {
+        import fluent.asserts;
+        auto result = transactions.find!(tx => tx.player == player);
+        if(amount == 0)
+        {
+            if(result.empty) return; 
+            // Not having a transaction also counts as not getting anything
+}
+        result.empty.should.equal(false);
+        result.front.amount.should.equal(amount);
+    }
 }
 
 private Transaction[] mergeTransactions(Transactions)(Transactions transactions) pure
