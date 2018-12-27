@@ -41,6 +41,10 @@ body
     {
         yakus ~= Yaku.riichi;
     }
+    if(environment.isRiichi && environment.isFirstTurnAfterRiichi)
+    {
+        yakus ~= Yaku.ippatsu;
+    }
     return yakus;
 }
 
@@ -100,6 +104,26 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.doubleRiichi]);
+}
+
+@("If the player finished within one round of their riichi declaration, they get the ippatsu yaku")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: true,
+        isSelfDraw: false,
+        isFirstTurnAfterRiichi: true,
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.riichi, Yaku.ippatsu]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
