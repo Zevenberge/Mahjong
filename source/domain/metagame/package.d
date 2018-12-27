@@ -539,6 +539,13 @@ class Metagame
 
     private const Opts _opts;
 
+    version(unittest)
+    {
+        void exhaust()
+        {
+            wall = new MockWall(true);
+        }
+    }
 }
 
 unittest

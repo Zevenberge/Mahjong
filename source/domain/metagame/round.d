@@ -157,6 +157,7 @@ package Round finishRoundWithExhaustiveDraw(Metagame metagame, Round round)
     {
         return finishRoundWithMahjong(metagame, round);
     }
+    metagame.applyTransactions(metagame.calculateTenpaiTransactions);
     round.addCounter;
     bool needToMoveWinds = !metagame.eastPlayer.isTenpai;
     if(needToMoveWinds)
@@ -164,6 +165,35 @@ package Round finishRoundWithExhaustiveDraw(Metagame metagame, Round round)
         round.moveWinds(metagame.amountOfPlayers, metagame._leadingWindStartingLocation);
     }
     return round;
+}
+
+@("After an exhaustive draw, tenpai fees are paid")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.player;
+    import mahjong.engine.opts;
+    auto player1 = new Player;
+    auto player2 = new Player;
+    auto player3 = new Player;
+    auto player4 = new Player;
+    auto metagame = new Metagame([player1, player2, player3, player4], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    player1.willBeTenpai;
+    player1.isNotNagashiMangan;
+    player2.willNotBeTenpai;
+    player2.isNotNagashiMangan;
+    player3.willNotBeTenpai;
+    player3.isNotNagashiMangan;
+    player4.willNotBeTenpai;
+    player4.isNotNagashiMangan;
+    metagame.exhaust;
+    metagame.finishRound;
+    player1.score.should.equal(33_000).because("they were tenpai");
+    player2.score.should.equal(29_000).because("P1 was tenpai");
+    player3.score.should.equal(29_000).because("P1 was tenpai");
+    player4.score.should.equal(29_000).because("P1 was tenpai");
 }
 
 private void applyTransactions(Metagame metagame, Transaction[] transactions)

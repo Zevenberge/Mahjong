@@ -1,13 +1,12 @@
 ﻿module mahjong.graphics.controllers.game.abortive;
 
-import std.traits : hasMember;
 import dsfml.graphics : RenderWindow, Event, Keyboard;
 import mahjong.domain.metagame;
 import mahjong.engine.flow;
+import mahjong.engine.flow.traits;
 import mahjong.graphics.controllers.game;
 
 alias AbortiveDrawController = HandleSimpleEventController!AbortiveDrawEvent;
-alias ExhaustiveDrawController = HandleSimpleEventController!ExhaustiveDrawEvent;
 
 class HandleSimpleEventController(TEvent) : GameController
 {
@@ -27,9 +26,4 @@ class HandleSimpleEventController(TEvent) : GameController
             _event.handle;
         }
     }
-}
-
-template isSimpleEvent(TEvent)
-{
-    enum isSimpleEvent = hasMember!(TEvent, handle);
 }

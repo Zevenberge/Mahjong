@@ -49,6 +49,18 @@ class Ingame
         {
             _discards ~= new Tile(Types.ball, Numbers.five);
         }
+
+        void willBeTenpai()
+        {
+            import mahjong.engine.creation;
+            closedHand.tiles = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        }
+
+        void willNotBeTenpai()
+        {
+            import mahjong.engine.creation;
+            closedHand.tiles = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
+        }
     }
 
     const UUID id;
@@ -548,7 +560,7 @@ class Ingame
      Functions related to the mahjong call.
      */
 
-    bool isTenpai()
+    bool isTenpai() const
     {
         return .isPlayerTenpai(closedHand.tiles, openHand);
     }

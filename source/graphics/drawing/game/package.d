@@ -15,6 +15,7 @@ import mahjong.graphics.enums.geometry;
 import mahjong.graphics.enums.kanji;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
+import mahjong.graphics.utils : freeze;
 
 alias drawGame = draw;
 void draw(const Metagame game, RenderTarget target)
@@ -32,6 +33,12 @@ void clearCache()
     clearGameInfo;
 	clearPlayerCache;
     clearSprites;
+}
+
+RenderTexture freezeGameGraphicsOnATexture(const Metagame metagame)
+{
+    auto screen = styleOpts.screenSize;
+    return freeze!(target => metagame.drawGame(target))(Vector2u(screen.x, screen.y));
 }
 
 private void drawPlayers(const Metagame game, RenderTarget target)
