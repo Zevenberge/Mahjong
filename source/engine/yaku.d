@@ -32,6 +32,10 @@ in
 }
 body
 {
+    if(mahjongResult.isNagashiMangan)
+    {
+        return [Yaku.nagashiMangan];
+    }
     Yaku[] yakus;
     yakus ~= determineRiichiRelatedYakus(environment);
     yakus ~= determineSituationalYaku(environment);
@@ -42,7 +46,6 @@ body
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -55,6 +58,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.length.should.equal(0);
+}
+
+@("Nagashi mangan should be short-circuited")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new NagashiManganSet]); 
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        isRiichi: false,
+        isSelfDraw: false,
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.nagashiMangan]);
 }
 
 private Yaku[] determineRiichiRelatedYakus(const Environment environment) pure
@@ -86,7 +105,6 @@ private Yaku[] determineRiichiRelatedYakus(const Environment environment) pure
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -105,7 +123,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -125,7 +142,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -167,7 +183,6 @@ private Yaku[] determineSituationalYaku(const Environment environment) pure
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -186,7 +201,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -206,7 +220,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -226,7 +239,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -244,7 +256,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto opponent = new Ingame(PlayerWinds.east);
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
