@@ -5,7 +5,6 @@ import std.array;
 import std.conv;
 import std.experimental.logger;
 import std.random;
-import std.uuid;
 
 import mahjong.domain.enums;
 import mahjong.domain.tile;
@@ -14,7 +13,6 @@ import mahjong.engine.opts;
 
 class Wall
 {
-	const UUID id;
     private const Opts _opts;
 	private Tile[] _tiles;
 	const(Tile)[] tiles() @property pure const
@@ -22,10 +20,9 @@ class Wall
 		return _tiles;
 	}
 
-	this(const Opts opts)
+	this(const Opts opts) pure
 	{
-		trace("Constructing the wall");
-		id = randomUUID;
+        debug trace("Constructing the wall");
         _opts = opts;
 	}
 
@@ -211,7 +208,7 @@ unittest
 
 class BambooWall : Wall
 {
-    this(const Opts opts)
+    this(const Opts opts) pure
     {
         super(opts);
     }
@@ -278,12 +275,19 @@ version(unittest)
 {
 	class MockWall : Wall
 	{
+        this(bool isExhaustiveDraw)
+        {
+            _isExhaustiveDraw = isExhaustiveDraw;
+            this(null);
+        }
+
 		this(Tile tileToDraw)
 		{
             super(new DefaultGameOpts);
 			_tileToDraw = tileToDraw;
 		}
 
+        private bool _isExhaustiveDraw;
 		private Tile _tileToDraw;
 
 		override Tile drawTile() 
@@ -295,6 +299,12 @@ version(unittest)
 		{
 			return  _tileToDraw;
 		}
+
+        override bool isExhaustiveDraw() const 
+        {
+            return _isExhaustiveDraw;
+        }
+
 	}
 }
 

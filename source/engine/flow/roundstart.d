@@ -30,7 +30,7 @@ class RoundStartFlow : Flow
 			info("All players are ready. Initialising game");
 			_metagame.beginRound;
 			info("Started round. Switching to draw flow");
-			switchFlow(new DrawFlow(_metagame.getCurrentPlayer, _metagame, 
+			switchFlow(new DrawFlow(_metagame.currentPlayer, _metagame, 
 					_metagame.wall, _notificationService));
 		}
 	}
@@ -63,7 +63,6 @@ unittest
 	auto flow = new RoundStartFlow(metagame, new NullNotificationService);
 	switchFlow(flow);
     .flow.should.be.instanceOf!RoundStartFlow;
-    metagame.currentPlayer.should.beNull.because("the game has not started");
 	flow.advanceIfDone;
     .flow.should.be.instanceOf!RoundStartFlow.because("the players are not yet ready");
 	eventHandler.roundStartEvent.isReady = true;

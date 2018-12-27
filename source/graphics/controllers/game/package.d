@@ -2,11 +2,14 @@ module mahjong.graphics.controllers.game;
 
 public import mahjong.graphics.controllers.game.abortive;
 public import mahjong.graphics.controllers.game.claim;
+public import mahjong.graphics.controllers.game.exhaustive;
 public import mahjong.graphics.controllers.game.gameend;
 public import mahjong.graphics.controllers.game.idle;
 public import mahjong.graphics.controllers.game.mahjong;
 public import mahjong.graphics.controllers.game.popup;
 public import mahjong.graphics.controllers.game.options;
+public import mahjong.graphics.controllers.game.result;
+public import mahjong.graphics.controllers.game.transfer;
 public import mahjong.graphics.controllers.game.turn;
 public import mahjong.graphics.controllers.game.turnoption;
 

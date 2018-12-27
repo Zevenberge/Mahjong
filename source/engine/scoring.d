@@ -22,7 +22,7 @@ Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
 {
     auto yaku = mahjong.result.determineYaku(mahjong.player, metagame);
     auto miniPoints = mahjong.calculateMiniPoints(metagame.leadingWind);
-    auto amountOfDoras = mahjong.result.countAmountOfDoras(metagame.wall);
+    auto amountOfDoras = mahjong.countAmountOfDoras(metagame.wall);
     return new Scoring(yaku, miniPoints, amountOfDoras, metagame.counters, mahjong.player.isClosedHand, metagame.amountOfPlayers);
 }
 
@@ -203,7 +203,7 @@ unittest
     player2.game = new Ingame(PlayerWinds.south);
     auto metagame = new Metagame([player1, player2], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
+    auto mahjongData = MahjongData(player1, true, [new SevenPairsSet(null)]);
     auto transactions = [mahjongData].toTransactions(metagame);
     assert(transactions.length == 2, "Expected a plus and a minus transaction");
     // TODO assert that the scoring is ok.
@@ -225,7 +225,7 @@ unittest
     player1.ron(tile);
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
+    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(null)]);
     auto transactions = [mahjongData1].toTransactions(metagame);
     assert(transactions.length == 2, "Only the player who discarded and the winning player should be paid");
     // TODO assert that the scoring is ok.
@@ -249,8 +249,8 @@ unittest
     player3.ron(tile);
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData1 = MahjongData(player1, MahjongResult(true, [new SevenPairsSet(null)]));
-    auto mahjongData2 = MahjongData(player3, MahjongResult(true, [new SevenPairsSet(null)]));
+    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(null)]);
+    auto mahjongData2 = MahjongData(player3, true, [new SevenPairsSet(null)]);
     auto transactions = [mahjongData1, mahjongData2].toTransactions(metagame);
     assert(transactions.length == 3, "Expected two plus and a minus transaction because of a possible double ron");
     // TODO assert that the scoring is ok.
@@ -261,7 +261,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     auto scoring = data.calculateScoring(metagame);
     auto payment = scoring.calculatePayment(data.player.isEast);
     Transaction[] transactions;
-    if(data.isTsumo)
+    if(data.isTsumo || data.isNagashiMangan)
     {
         foreach(player; metagame.otherPlayers(data.player))
         {
@@ -278,7 +278,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     return transactions;
 }
 
-private Transaction[] getRiichiTransactions(const Metagame metagame, const MahjongData[] mahjongData)
+private Transaction[] getRiichiTransactions(const Metagame metagame, const MahjongData[] mahjongData) pure
 {
     if(metagame.amountOfRiichiSticks == 0) return null;
     if(mahjongData.length == 1)
@@ -289,23 +289,6 @@ private Transaction[] getRiichiTransactions(const Metagame metagame, const Mahjo
     return splitRiichiSticksPerPlayer(metagame, mahjongData);
 }
 
-version(unittest)
-{
-    class RiichiStickMetagame : Metagame
-    {
-        this(int amountOfRiichiSticks)
-        {
-            super([new Player()], new DefaultGameOpts);
-            _amountOfRiichiSticks = amountOfRiichiSticks;
-        }
-        private int _amountOfRiichiSticks;
-
-        override int amountOfRiichiSticks() pure const 
-        {
-            return _amountOfRiichiSticks;
-        }
-    }
-}
 
 unittest
 {
@@ -321,14 +304,13 @@ unittest
     import fluent.asserts;
     auto winningPlayer = new Player;
     auto metagame = new RiichiStickMetagame(42);
-    auto mahjongData = MahjongData(winningPlayer, MahjongResult(true, null));
+    auto mahjongData = MahjongData(winningPlayer, true, null);
     auto transactions = getRiichiTransactions(metagame,[mahjongData]);
     transactions.length.should.equal(1);
-    transactions[0].player.should.equal(winningPlayer);
-    transactions[0].amount.should.equal(42_000);
+    winningPlayer.shouldGet(42_000, transactions);
 }
 
-private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const MahjongData[] mahjongData)
+private Transaction[] splitRiichiSticksPerPlayer(const Metagame metagame, const MahjongData[] mahjongData) pure
 {
     int[const(Player)] riichiSticksPerPlayer;
     int i = 1;
@@ -357,15 +339,13 @@ unittest
     auto player2 = new Player;
     auto metagame = new RiichiStickMetagame(42);
     auto mahjongData = [
-        MahjongData(player1, MahjongResult(true, null)),
-        MahjongData(player2, MahjongResult(true, null))
+        MahjongData(player1, true, null),
+        MahjongData(player2, true, null)
     ];
     auto transactions = getRiichiTransactions(metagame, mahjongData);
     transactions.length.should.equal(2);
-    transactions[0].player.should.equal(player1);
-    transactions[0].amount.should.equal(21_000);
-    transactions[1].player.should.equal(player2);
-    transactions[1].amount.should.equal(21_000);
+    player1.shouldGet(21_000, transactions);
+    player2.shouldGet(21_000, transactions);
 }
 
 unittest
@@ -375,18 +355,121 @@ unittest
     auto player2 = new Player;
     auto metagame = new RiichiStickMetagame(41);
     auto mahjongData = [
-        MahjongData(player1, MahjongResult(true, null)),
-        MahjongData(player2, MahjongResult(true, null))
+        MahjongData(player1, true, null),
+        MahjongData(player2, true, null)
     ];
     auto transactions = getRiichiTransactions(metagame, mahjongData);
     transactions.length.should.equal(2);
-    transactions[0].player.should.equal(player1);
-    transactions[0].amount.should.equal(21_000);
-    transactions[1].player.should.equal(player2);
-    transactions[1].amount.should.equal(20_000);
+    player1.shouldGet(21_000, transactions);
+    player2.shouldGet(20_000, transactions);
 }
 
-private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
+Transaction[] calculateTenpaiTransactions(const Metagame metagame)
+{
+    const(Player)[] tenpaiPlayers;
+    const(Player)[] nonTenpaiPlayers;
+    foreach(player; metagame.players)
+    {
+        if(player.isTenpai)
+        {
+            tenpaiPlayers ~= player;
+        }
+        else
+        {
+            nonTenpaiPlayers ~= player;
+        }
+    }
+    if(tenpaiPlayers.length == 0 || nonTenpaiPlayers.length == 0) return null;
+    int total = (metagame.players.length.to!int-1) * metagame.riichiFare;
+    return tenpaiPlayers.map!(p => new Transaction(p, total/tenpaiPlayers.length.to!int))
+        .chain(nonTenpaiPlayers.map!(p => new Transaction(p, -total/nonTenpaiPlayers.length.to!int)))
+        .array;
+}
+
+@("When no-one is tenpai, there shouldn't be any transactions")
+unittest
+{
+    import fluent.asserts;
+    auto metagame = new Metagame(
+        [createNonTenpaiPlayer, createNonTenpaiPlayer, createNonTenpaiPlayer, createNonTenpaiPlayer], 
+        new DefaultGameOpts);
+    auto transactions = metagame.calculateTenpaiTransactions;
+    transactions.length.should.equal(0);
+}
+
+@("If one player is tenpai, everyone should pay that player")
+unittest
+{
+    import fluent.asserts;
+    auto winner = createTenpaiPlayer;
+    auto loser1 = createNonTenpaiPlayer;
+    auto loser2 = createNonTenpaiPlayer;
+    auto loser3 = createNonTenpaiPlayer;
+    auto metagame = new Metagame(
+        [winner, loser1, loser2, loser3], 
+        new DefaultGameOpts);
+    auto transactions = metagame.calculateTenpaiTransactions;
+    transactions.length.should.equal(4);
+    winner.shouldGet(3_000, transactions);
+    loser1.shouldGet(-1_000, transactions);
+    loser2.shouldGet(-1_000, transactions);
+    loser3.shouldGet(-1_000, transactions);
+}
+
+@("If two players are tenpai, the penalty and gains are split")
+unittest
+{
+    import fluent.asserts;
+    auto winner1 = createTenpaiPlayer;
+    auto winner2 = createTenpaiPlayer;
+    auto loser1 = createNonTenpaiPlayer;
+    auto loser2 = createNonTenpaiPlayer;
+    auto metagame = new Metagame(
+        [winner1, winner2, loser1, loser2], 
+        new DefaultGameOpts);
+    auto transactions = metagame.calculateTenpaiTransactions;
+    transactions.length.should.equal(4);
+    winner1.shouldGet(1_500, transactions);
+    winner2.shouldGet(1_500, transactions);
+    loser1.shouldGet(-1_500, transactions);
+    loser2.shouldGet(-1_500, transactions);
+}
+
+@("If three players are tenpai, the last one is should pay them all")
+unittest
+{
+    import fluent.asserts;
+    auto winner1 = createTenpaiPlayer;
+    auto winner2 = createTenpaiPlayer;
+    auto winner3 = createTenpaiPlayer;
+    auto loser = createNonTenpaiPlayer;
+    auto metagame = new Metagame(
+        [winner1, winner2, winner3, loser], 
+        new DefaultGameOpts);
+    auto transactions = metagame.calculateTenpaiTransactions;
+    transactions.length.should.equal(4);
+    winner1.shouldGet(1_000, transactions);
+    winner2.shouldGet(1_000, transactions);
+    winner3.shouldGet(1_000, transactions);
+    loser.shouldGet(-3_000, transactions);
+}
+
+@("If everyone is tenpai, no transactions are generated")
+unittest
+{
+    import fluent.asserts;
+    auto winner1 = createTenpaiPlayer;
+    auto winner2 = createTenpaiPlayer;
+    auto winner3 = createTenpaiPlayer;
+    auto winner4 = createTenpaiPlayer;
+    auto metagame = new Metagame(
+        [winner1, winner2, winner3, winner4], 
+        new DefaultGameOpts);
+    auto transactions = metagame.calculateTenpaiTransactions;
+    transactions.length.should.equal(0);
+}
+
+private Transaction[] mergeTransactions(Transactions)(Transactions transactions) pure
     if(isInputRange!Transactions && is(ElementType!Transactions : Transaction))
 {
     Transaction[const Player] mergedTransactions;
@@ -406,7 +489,7 @@ private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
 
 class Transaction
 {
-    this(const Player player, const int amount)
+    this(const Player player, const int amount) pure
     {
         this.player = player;
         this.amount = amount;
@@ -415,10 +498,10 @@ class Transaction
     const Player player;
     const int amount;
 
-    Transaction opBinary(string op)(Transaction rhs)
-        in
+    Transaction opBinary(string op)(Transaction rhs) pure
+    in
     {
-        assert(player == rhs.player, "Cannot sum the transactions of two players");
+        assert(player is rhs.player, "Cannot sum the transactions of two players");
     }
     body
     {
@@ -554,7 +637,7 @@ unittest
     assert(30 == roundMiniPoints(30), "When the number is dividable by 10, the rounded minipoints don't change");
 }
 
-private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall wall)
+private size_t countAmountOfDoras(const MahjongData mahjongResult, const Wall wall) pure
 {
     auto doraIndicators = wall.doraIndicators;
     size_t doras = 0;
@@ -566,28 +649,10 @@ private size_t countAmountOfDoras(const MahjongResult mahjongResult, const Wall 
     return doras;
 }
 
-version(unittest)
-{
-    class DoraIndicatorWall : Wall
-    {
-        this(const(Tile)[] doraIndicators)
-        {
-            super(new DefaultGameOpts);
-            _doraIndicators = doraIndicators;
-        }
-        private const(Tile)[] _doraIndicators;
-
-        override const(Tile)[] doraIndicators() pure const @property
-        {
-            return _doraIndicators;
-        }
-    }
-}
-
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.eight);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
@@ -600,7 +665,7 @@ unittest
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
@@ -613,7 +678,7 @@ unittest
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new PonSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.six),
@@ -627,7 +692,7 @@ unittest
 unittest
 {
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
-    auto mahjongResult = MahjongResult(false, 
+    auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
@@ -638,7 +703,7 @@ unittest
     assert(doras == 2, "When the indicator is in there twice, the doras count double");
 }
 
-private const(ComparativeTile) getDoraValue(const Tile doraIndicator)
+private const(ComparativeTile) getDoraValue(const Tile doraIndicator) pure
 {
     return ComparativeTile(doraIndicator.type,
         (doraIndicator.value + 1) % doraIndicator.type.amountOfTiles);
@@ -690,3 +755,63 @@ enum limit_hands {mangan = 5, haneman = 6, baiman = 8,
     sanbaiman = 11, yakuman = 13, double_yakuman = 26, 
     triple_yakuman = 39, quadra_yakuman = 52, penta_yakuman = 65, 
     hexa_yakuman = 78, septa_yakuman = 91};
+
+version(unittest)
+{
+    class RiichiStickMetagame : Metagame
+    {
+        this(int amountOfRiichiSticks)
+        {
+            super([new Player()], new DefaultGameOpts);
+            _amountOfRiichiSticks = amountOfRiichiSticks;
+        }
+        private int _amountOfRiichiSticks;
+
+        override int amountOfRiichiSticks() pure const 
+        {
+            return _amountOfRiichiSticks;
+        }
+    }
+
+    private Player createNonTenpaiPlayer()
+    {
+        auto player = new Player;
+        player.game = new Ingame(PlayerWinds.east, "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d);
+        return player;
+    }
+
+    private Player createTenpaiPlayer()
+    {
+        auto player = new Player;
+        player.game = new Ingame(PlayerWinds.east, "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+        return player;
+    }
+
+    private void shouldGet(Player player, int amount, Transaction[] transactions)
+    {
+        import fluent.asserts;
+        auto result = transactions.find!(tx => tx.player == player);
+        if(amount == 0)
+        {
+            if(result.empty) return; 
+            // Not having a transaction also counts as not getting anything
+        }
+        result.empty.should.equal(false);
+        result.front.amount.should.equal(amount);
+    }
+
+    class DoraIndicatorWall : Wall
+    {
+        this(const(Tile)[] doraIndicators)
+        {
+            super(new DefaultGameOpts);
+            _doraIndicators = doraIndicators;
+        }
+        private const(Tile)[] _doraIndicators;
+
+        override const(Tile)[] doraIndicators() pure const @property
+        {
+            return _doraIndicators;
+        }
+    }
+}

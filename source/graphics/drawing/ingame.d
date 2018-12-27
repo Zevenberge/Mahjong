@@ -13,6 +13,7 @@ import mahjong.graphics.coords;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.openhand;
 import mahjong.graphics.drawing.tile;
+import mahjong.graphics.drawing.wall;
 import mahjong.graphics.enums.geometry;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
@@ -74,6 +75,7 @@ void clearIngameCache()
 {
 	info("Clearing ingame cache");
 	_ingameDrawables.clear;
+    clearWall;
 	clearOpenHandCache;
 	clearTileCache;
 }

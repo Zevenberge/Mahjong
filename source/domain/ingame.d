@@ -30,6 +30,37 @@ class Ingame
             this(wind);
             closedHand.tiles = tiles.convertToTiles;
         }
+
+        void setDiscards(Tile[] discs)
+        {
+            _discards = discs;
+            foreach(tile; _discards)
+            {
+                tile.origin = this;
+            }
+        }
+
+        void hasDrawnTheirLastTile() pure
+        {
+            _lastTile = closedHand.tiles[0];
+        }
+
+        void isNotNagashiMangan()
+        {
+            _discards ~= new Tile(Types.ball, Numbers.five);
+        }
+
+        void willBeTenpai()
+        {
+            import mahjong.engine.creation;
+            closedHand.tiles = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        }
+
+        void willNotBeTenpai()
+        {
+            import mahjong.engine.creation;
+            closedHand.tiles = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
+        }
     }
 
     const UUID id;
@@ -50,20 +81,8 @@ class Ingame
         return _discards;
     }
 
-    version(unittest)
-    {
-        void setDiscards(Tile[] discs)
-        {
-            _discards = discs;
-            foreach(tile; _discards)
-            {
-                tile.origin = this;
-            }
-        }
-    }
-
     private Tile[] _claimedDiscards;
-    private const(Tile)[] allDiscards() @property pure
+    private const(Tile)[] allDiscards() @property pure const
     {
         return discards ~_claimedDiscards;
     }
@@ -74,9 +93,56 @@ class Ingame
         _claimedDiscards ~= tile;
     }
 
-    bool isNagashiMangan() @property
+    bool isNagashiMangan() @property pure const
     {
-        return openHand.sets.empty && allDiscards.all!(t => t.isHonour || t.isTerminal);
+        return openHand.isClosedHand && allDiscards.all!(t => t.isHonour || t.isTerminal);
+    }
+
+    @("When starting, the player is nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.isNagashiMangan.should.equal(true);
+    }
+
+    @("When discarding a honour, the player remains nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+        ingame.discard(ingame.closedHand.tiles[0]);
+        ingame.isNagashiMangan.should.equal(true);
+    }
+
+    @("When discarding a terminal, the player remains nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+        ingame.discard(ingame.closedHand.tiles[11]);
+        ingame.isNagashiMangan.should.equal(true);
+    }
+
+    @("When discarding a normal tile, the player loses nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
+        ingame.discard(ingame.closedHand.tiles[11]);
+        ingame.isNagashiMangan.should.equal(false);
+    }
+
+    @("When claiming a tile, the player loses nagashi mangan")
+    unittest
+    {
+        import fluent.asserts;
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
+        auto tile = new Tile(Types.wind, Winds.east);
+        tile.origin = new Ingame(PlayerWinds.west);
+        ingame.pon(tile);
+        ingame.isNagashiMangan.should.equal(false);
     }
 
     bool isClosedHand() @property pure const
@@ -494,7 +560,7 @@ class Ingame
      Functions related to the mahjong call.
      */
 
-    bool isTenpai()
+    bool isTenpai() const
     {
         return .isPlayerTenpai(closedHand.tiles, openHand);
     }
@@ -545,10 +611,12 @@ class Ingame
     bool canDeclareRiichi(const Tile potentialDiscard) const
     {
         if(_isRiichi) return false;
+        if(!openHand.isClosedHand) return false;
         auto remainingTiles = closedHand.tiles.without!((a,b) => a is b)([potentialDiscard]);
         return isPlayerTenpai(remainingTiles, openHand);
     }
 
+    @("Can declare riichi when becoming tenpai after a discard")
     unittest
     {
         import fluent.asserts;
@@ -566,6 +634,18 @@ class Ingame
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         ingame._isRiichi = true;
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
+    }
+
+    @("Cannot declare riichi when having claimed a tile")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto discard = new Tile(Types.wind, Winds.east);
+        discard.origin = new Ingame(PlayerWinds.south);
+        ingame.pon(discard);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[0];
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
     }
 
@@ -630,14 +710,6 @@ class Ingame
         tile.origin = this;
         tile.open;
         return tile;
-    }
-
-    version(unittest)
-    {
-        void hasDrawnTheirLastTile() pure
-        {
-            _lastTile = closedHand.tiles[0];
-        }
     }
 
     private Tile _lastTile; 

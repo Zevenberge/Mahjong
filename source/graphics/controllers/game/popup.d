@@ -10,7 +10,7 @@ import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
 import mahjong.graphics.popup.popup;
 
-class PopupController : GameController//, ISubstituteInnerController
+class PopupController : GameController
 {
 	this(GameController underlying, 
 		Popup popup)

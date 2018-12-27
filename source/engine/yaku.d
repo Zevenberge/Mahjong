@@ -11,14 +11,14 @@ enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu,
             kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, suuKanTsu, ryuuIisou, 
 			chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii};
 
-const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
+const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame) pure
 {
 	auto leadingWind = metagame.leadingWind;
 	auto ownWind = player.wind;
 	return [Yaku.riichi, Yaku.ippatsu, Yaku.menzenTsumo];
 }
 
-size_t convertToFan(const Yaku yaku, bool isClosedHand)
+size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
 {
 	final switch(yaku) with(Yaku)
 	{
