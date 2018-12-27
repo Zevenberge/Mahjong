@@ -34,6 +34,7 @@ body
 {
     Yaku[] yakus;
     yakus ~= determineRiichiRelatedYakus(environment);
+    yakus ~= determineSituationalYaku(environment);
     return yakus;
 }
 
@@ -138,6 +139,35 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.riichi, Yaku.ippatsu]);
+}
+
+private Yaku[] determineSituationalYaku(const Environment environment) pure
+{
+    Yaku[] yakus;
+    if(environment.isClosedHand && environment.isSelfDraw)
+    {
+        yakus ~= Yaku.menzenTsumo;
+    }
+    return yakus;
+}
+
+@("If the player draws their final tile, the yaku menzen tsumo is awarded")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: false,
+        isSelfDraw: true,
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.menzenTsumo]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
