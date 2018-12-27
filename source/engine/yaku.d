@@ -156,6 +156,10 @@ private Yaku[] determineSituationalYaku(const Environment environment) pure
     {
         yakus ~= Yaku.chanKan;
     }
+    if(environment.isLastTileBeforeExhaustiveDraw)
+    {
+        yakus ~= Yaku.haitei;
+    }
     return yakus;
 }
 
@@ -230,13 +234,29 @@ unittest
         ownWind: PlayerWinds.west,
         lastTile: game.closedHand.tiles[0],
         isRiichi: false,
-        isKanSteal: true,
-        isClosedHand: true
+        isKanSteal: true
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.chanKan]);
 }
 
+@("Salvaging the last tile is a haitei")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: false,
+        isLastTileBeforeExhaustiveDraw: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.haitei]);
+}
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
 {
@@ -280,6 +300,7 @@ private struct Environment
     const bool isReplacementTileFromKan;
     const bool isKanSteal;
     const bool isClosedHand;
+    const bool isLastTileBeforeExhaustiveDraw;
     const Tile lastTile;
 }
 
