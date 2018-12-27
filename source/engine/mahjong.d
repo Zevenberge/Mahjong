@@ -823,7 +823,7 @@ unittest
     assert(data.calculateMiniPoints(PlayerWinds.south) == 48, "Open kan of honours + pair of dragons + tsumo = 48");
 }
 
-private struct MahjongResult
+struct MahjongResult
 {
     const bool isMahjong;
     const Set[] sets;
