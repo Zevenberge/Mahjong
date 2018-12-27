@@ -1,5 +1,6 @@
 module mahjong.engine.yaku;
 
+import std.algorithm : all;
 import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
@@ -13,7 +14,7 @@ enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu,
             kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, suuKanTsu, ryuuIisou, 
 			chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii};
 
-const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame) pure
+const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
 in
 {
     assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");
@@ -25,7 +26,7 @@ body
 	return [Yaku.riichi, Yaku.ippatsu, Yaku.menzenTsumo];
 }
 
-private const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Environment environment) pure
+private const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Environment environment)
 in
 {
     assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");
@@ -39,6 +40,7 @@ body
     Yaku[] yakus;
     yakus ~= determineRiichiRelatedYakus(environment);
     yakus ~= determineSituationalYaku(environment);
+    yakus ~= determineWholeHandYaku(mahjongResult, environment.isClosedHand);
     return yakus;
 }
 
@@ -267,6 +269,48 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.haitei]);
+}
+
+private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool isClosedHand)
+{
+    Yaku[] yakus;
+    if(isClosedHand && mahjongResult.tiles.all!(t => t.isSimple))
+    {
+        yakus ~= Yaku.tanyao;
+    }
+    return yakus;
+}
+
+@("If the hand is all simples and open, it does not count as a yaku")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.west, "🀚🀚🀚🀜🀝🀝🀞🀞🀟🀓🀔🀕🀖🀖"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.length.should.equal(0);
+}
+
+@("If the hand is all simples and closed, it is tanyao")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.west, "🀚🀚🀚🀜🀝🀝🀞🀞🀟🀓🀔🀕🀖🀖"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.tanyao]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
