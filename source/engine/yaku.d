@@ -33,18 +33,7 @@ in
 body
 {
     Yaku[] yakus;
-    if(environment.isDoubleRiichi)
-    {
-        yakus ~= Yaku.doubleRiichi;
-    }
-    else if(environment.isRiichi)
-    {
-        yakus ~= Yaku.riichi;
-    }
-    if(environment.isRiichi && environment.isFirstTurnAfterRiichi)
-    {
-        yakus ~= Yaku.ippatsu;
-    }
+    yakus ~= determineRiichiRelatedYakus(environment);
     return yakus;
 }
 
@@ -65,6 +54,31 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.length.should.equal(0);
+}
+
+private Yaku[] determineRiichiRelatedYakus(const Environment environment) pure
+{
+    if(environment.isRiichi)
+    {
+        Yaku[] yakus;
+        if(environment.isDoubleRiichi)
+        {
+            yakus ~= Yaku.doubleRiichi;
+        }
+        else
+        {
+            yakus ~= Yaku.riichi;
+        }
+        if(environment.isFirstTurnAfterRiichi)
+        {
+            yakus ~= Yaku.ippatsu;
+        }
+        return yakus;
+    }
+    else
+    {
+        return null;
+    }
 }
 
 @("If the player is riichi, the yaku riichi should be granted")
