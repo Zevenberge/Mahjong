@@ -278,6 +278,10 @@ private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool is
     {
         yakus ~= Yaku.tanyao;
     }
+    if(mahjongResult.isSevenPairs)
+    {
+        yakus ~= Yaku.chiiToitsu;
+    }
     return yakus;
 }
 
@@ -311,6 +315,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.tanyao]);
+}
+
+@("If the hand is seven pairs, the yaku is chiitoitsu")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.west, "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.chiiToitsu]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
