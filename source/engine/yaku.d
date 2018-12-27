@@ -148,6 +148,10 @@ private Yaku[] determineSituationalYaku(const Environment environment) pure
     {
         yakus ~= Yaku.menzenTsumo;
     }
+    if(environment.isReplacementTileFromKan)
+    {
+        yakus ~= Yaku.rinshanKaihou;
+    }
     return yakus;
 }
 
@@ -168,6 +172,46 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.menzenTsumo]);
+}
+
+@("If the player is open while they get a kan replacement, they are rinchan kaihou")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: false,
+        isSelfDraw: true,
+        isReplacementTileFromKan: true,
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.rinshanKaihou]);
+}
+
+@("If the player draws their final tile as a kan replacement, it is both tsumo and rinchan kaihou")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: false,
+        isSelfDraw: true,
+        isReplacementTileFromKan: true,
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.menzenTsumo, Yaku.rinshanKaihou]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
