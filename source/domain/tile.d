@@ -261,3 +261,45 @@ unittest
     [ComparativeTile(Types.wind, Winds.south)]
     .isAllSimples.should.equal(false);
 }
+
+bool isAllOfSameSuit(Range)(Range range)
+    if(isRangeOfTiles!Range)
+{
+    import optional;
+    Optional!Types type = no!Types;
+    foreach(tile; range)
+    {
+        if(tile.isHonour) return false;
+        if(type == none)
+        {
+            type = some(tile.type);
+        }
+        else
+        {
+            if(type != tile.type) return false;
+        }
+    }
+    return true;
+}
+
+@("All of the same suit should return true for simple types")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.eight), ComparativeTile(Types.ball, Numbers.nine)]
+    .isAllOfSameSuit.should.equal(true);
+    [ComparativeTile(Types.bamboo, Numbers.eight), ComparativeTile(Types.bamboo, Numbers.nine)]
+    .isAllOfSameSuit.should.equal(true);
+    [ComparativeTile(Types.character, Numbers.eight), ComparativeTile(Types.character, Numbers.nine)]
+    .isAllOfSameSuit.should.equal(true);
+}
+
+@("All of the same suit should return false for different suits or honours")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.eight), ComparativeTile(Types.bamboo, Numbers.nine)]
+    .isAllOfSameSuit.should.equal(false);
+    [ComparativeTile(Types.wind, Winds.east), ComparativeTile(Types.wind, Winds.east)]
+    .isAllOfSameSuit.should.equal(false);
+}

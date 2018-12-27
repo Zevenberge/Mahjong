@@ -1,6 +1,7 @@
 {
 	"fileVersion": 1,
 	"versions": {
+		"bolts": "0.11.0",
 		"botan": "1.12.10",
 		"botan-math": "1.0.3",
 		"ddmp": "0.0.1-0.dev.3",
@@ -14,6 +15,8 @@
 		"memutils": "0.4.11",
 		"mir-linux-kernel": "1.0.0",
 		"openssl": "1.1.6+1.0.1g",
+		"optional": "0.9.0",
+		"silly": "0.8.0",
 		"stdx-allocator": "2.77.2",
 		"taggedalgebraic": "0.10.11",
 		"vibe-core": "1.4.1",

@@ -282,6 +282,10 @@ private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool is
     {
         yakus ~= Yaku.chiiToitsu;
     }
+    if(mahjongResult.tiles.isAllOfSameSuit)
+    {
+        yakus ~= Yaku.chinitsu;
+    }
     return yakus;
 }
 
@@ -331,6 +335,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.chiiToitsu]);
+}
+
+@("For a full flush, we get chinitsu")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀙🀙🀚🀚🀚🀜🀝🀝🀞🀞🀟🀟🀠🀡"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.chinitsu]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
