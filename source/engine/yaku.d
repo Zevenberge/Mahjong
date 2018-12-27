@@ -274,7 +274,7 @@ unittest
 private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool isClosedHand)
 {
     Yaku[] yakus;
-    if(isClosedHand && mahjongResult.tiles.all!(t => t.isSimple))
+    if(isClosedHand && mahjongResult.tiles.isAllSimples)
     {
         yakus ~= Yaku.tanyao;
     }

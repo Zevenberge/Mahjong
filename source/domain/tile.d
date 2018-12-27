@@ -219,3 +219,45 @@ version(unittest)
         sharedLog.logLevel = LogLevel.warning;
     }
 }
+
+template isRangeOfTiles(Range)
+{
+    import std.range;
+    enum isRangeOfTiles = isInputRange!Range && is(ElementType!Range : ComparativeTile);
+}
+
+unittest
+{
+    import fluent.asserts;
+    isRangeOfTiles!(ComparativeTile[]).should.equal(true);
+    isRangeOfTiles!(Tile[]).should.equal(true);
+    isRangeOfTiles!(PlayerWinds[]).should.equal(false);
+    isRangeOfTiles!Tile.should.equal(false);
+}
+
+bool isAllSimples(Range)(Range range)
+    if(isRangeOfTiles!Range)
+{
+    import std.algorithm : all;
+    return range.all!(t => t.isSimple);
+}
+
+@("All simples should be true")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.eight), 
+        ComparativeTile(Types.bamboo, Numbers.six),
+        ComparativeTile(Types.character, Numbers.two)]
+        .isAllSimples.should.equal(true);
+}
+
+@("All simples should be false")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.one)]
+    .isAllSimples.should.equal(false);
+    [ComparativeTile(Types.wind, Winds.south)]
+    .isAllSimples.should.equal(false);
+}
