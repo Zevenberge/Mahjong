@@ -1,7 +1,9 @@
 module mahjong.engine.yaku;
 
+import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
+import mahjong.domain.tile;
 import mahjong.engine.mahjong;
 
 enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu, 
@@ -12,10 +14,44 @@ enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu,
 			chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii};
 
 const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame) pure
+in
+{
+    assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");
+}
+body
 {
 	auto leadingWind = metagame.leadingWind;
 	auto ownWind = player.wind;
 	return [Yaku.riichi, Yaku.ippatsu, Yaku.menzenTsumo];
+}
+
+private const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Environment environment) pure
+in
+{
+    assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");
+}
+body
+{
+    return null;
+}
+
+@("If the player has no yaku, it should be recognised as such")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: false,
+        isSelfDraw: false,
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.length.should.equal(0);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
@@ -47,6 +83,20 @@ size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
 		case daiSuushii:
 			return 26;
 	}
+}
+
+private struct Environment
+{
+    const PlayerWinds leadingWind;
+    const PlayerWinds ownWind;
+    const bool isRiichi;
+    const bool isDoubleRiichi;
+    const bool isFirstTurnAfterRiichi;
+    const bool isSelfDraw;
+    const bool isReplacementTileFromKan;
+    const bool isKanSteal;
+    const bool isClosedHand;
+    const Tile lastTile;
 }
 
 /+
