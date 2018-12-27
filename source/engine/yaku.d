@@ -32,7 +32,16 @@ in
 }
 body
 {
-    return null;
+    Yaku[] yakus;
+    if(environment.isDoubleRiichi)
+    {
+        yakus ~= Yaku.doubleRiichi;
+    }
+    else if(environment.isRiichi)
+    {
+        yakus ~= Yaku.riichi;
+    }
+    return yakus;
 }
 
 @("If the player has no yaku, it should be recognised as such")
@@ -52,6 +61,45 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.length.should.equal(0);
+}
+
+@("If the player is riichi, the yaku riichi should be granted")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: true,
+        isSelfDraw: false,
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.riichi]);
+}
+
+@("If the player is double riichi, the yaku double riichi should be granted")
+unittest
+{
+    import fluent.asserts;
+    auto opponent = new Ingame(PlayerWinds.east);
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isRiichi: true,
+        isDoubleRiichi: true,
+        isSelfDraw: false,
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.doubleRiichi]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
