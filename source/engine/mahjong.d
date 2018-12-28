@@ -322,6 +322,7 @@ private bool isSevenPairs(const Tile[] hand) pure
 	}
 	return true;
 }
+
 private bool isThirteenOrphans(const Tile[] hand) pure
 {
 
@@ -954,3 +955,141 @@ unittest
     result.allSetsHaveATerminal.should.equal(false);
 }
 
+bool hasOnlyChis(const MahjongResult result)
+{
+    import std.algorithm : all;
+    return result.sets.all!(s => cast(ChiSet)s || cast(PairSet)s);
+}
+
+@("Is a hand with chis and a pair only chis?")
+unittest
+{
+    import fluent.asserts;
+    MahjongResult(true, [new SevenPairsSet(null)]).hasOnlyChis.should.equal(false);
+    MahjongResult(true, [new PairSet(null), new ChiSet(null), 
+            new PonSet(null), new PonSet(null), new PonSet(null)])
+        .hasOnlyChis.should.equal(false);
+     MahjongResult(true, [new PairSet(null), new ChiSet(null), 
+            new ChiSet(null), new ChiSet(null), new ChiSet(null)])
+        .hasOnlyChis.should.equal(true);
+}
+
+bool hasValuelessPair(const MahjongResult result, PlayerWinds leadingWind, PlayerWinds ownWind)
+{
+    auto range = result.sets.filter!(s => cast(PairSet)s);
+    if(range.empty) return false;
+    auto pair = range.front;
+    return pair.miniPoints(leadingWind, ownWind) == 0;
+}
+
+@("A pair of non-honours is a valueless pair")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto result = MahjongResult(true, [new PairSet("🀐🀐"d.convertToTiles)]);
+    result.hasValuelessPair(PlayerWinds.east, PlayerWinds.east).should.equal(true);
+    auto result2 = MahjongResult(true, [new PairSet("🀖🀖"d.convertToTiles)]);
+    result2.hasValuelessPair(PlayerWinds.east, PlayerWinds.east).should.equal(true);
+}
+
+@("Dragons and boosted winds are not a valuesless pair")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto result = MahjongResult(true, [new PairSet("🀀🀀"d.convertToTiles)]);
+    result.hasValuelessPair(PlayerWinds.south, PlayerWinds.west).should.equal(true);
+    auto result2 = MahjongResult(true, [new PairSet("🀁🀁"d.convertToTiles)]);
+    result2.hasValuelessPair(PlayerWinds.south, PlayerWinds.west).should.equal(false);
+    auto result3 = MahjongResult(true, [new PairSet("🀂🀂"d.convertToTiles)]);
+    result3.hasValuelessPair(PlayerWinds.south, PlayerWinds.west).should.equal(false);
+    auto result4 = MahjongResult(true, [new PairSet("🀄🀄"d.convertToTiles)]);
+    result4.hasValuelessPair(PlayerWinds.east, PlayerWinds.east).should.equal(false);
+}
+
+@("A mahjong hand without a pair should not have a valueless pair")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new SevenPairsSet(null)]);
+    result.hasValuelessPair(PlayerWinds.east, PlayerWinds.north).should.equal(false);
+}
+
+bool isTwoSidedWait(const MahjongResult result, const Tile lastTile)
+{
+    auto finalSet = result.sets.filter!(s => s.tiles.any!(t => t == lastTile)).front;
+    if(cast(ChiSet)finalSet)
+    {
+        auto position = finalSet.tiles.countUntil!(t => t == lastTile);
+        bool isClosedWait = position == 1;
+        if(isClosedWait) return false;
+        bool isLowerEdgeWait = position == 2 && lastTile.value == Numbers.three;
+        bool isUpperEdgeWait = position == 0 && lastTile.value == Numbers.seven;
+        bool isEdgeWait = isLowerEdgeWait || isUpperEdgeWait;
+        return !isEdgeWait;
+    }
+    return false;
+}
+
+@("Finishing on a pair is not a two sided wait")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀃🀃"d.convertToTiles);
+    auto lastTile = pair.tiles[0];
+    auto result = MahjongResult(true, [pair]);
+    result.isTwoSidedWait(lastTile).should.equal(false);
+}
+
+@("Finishing on a pon is not a two sided wait")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pon = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto lastTile = pon.tiles[0];
+    auto result = MahjongResult(true, [pon]);
+    result.isTwoSidedWait(lastTile).should.equal(false);
+}
+
+@("Finishing on the outside of the chi is a two-sided wait")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chi = new ChiSet("🀒🀓🀔"d.convertToTiles);
+    auto lastTile1 = chi.tiles[0];
+    auto lastTile2 = chi.tiles[2];
+    auto result = MahjongResult(true, [chi]);
+    result.isTwoSidedWait(lastTile1).should.equal(true);
+    result.isTwoSidedWait(lastTile2).should.equal(true);
+}
+
+@("Finishing with a closed wait is not a two-sided wait")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chi = new ChiSet("🀒🀓🀔"d.convertToTiles);
+    auto lastTile = chi.tiles[1];
+    auto result = MahjongResult(true, [chi]);
+    result.isTwoSidedWait(lastTile).should.equal(false);
+}
+
+@("Edge waits are not considered pair waits")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chiLeft = new ChiSet("🀐🀑🀒"d.convertToTiles);
+    auto lastTileLeft = chiLeft.tiles[2];
+    auto resultLeft = MahjongResult(true, [chiLeft]);
+    resultLeft.isTwoSidedWait(lastTileLeft).should.equal(false);
+
+    auto chiRight = new ChiSet("🀖🀗🀘"d.convertToTiles);
+    auto lastTileRight = chiRight.tiles[0];
+    auto resultRight = MahjongResult(true, [chiRight]);
+    resultRight.isTwoSidedWait(lastTileRight).should.equal(false);
+}

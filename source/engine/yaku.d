@@ -40,7 +40,7 @@ body
     Yaku[] yakus;
     yakus ~= determineRiichiRelatedYakus(environment);
     yakus ~= determineSituationalYaku(environment);
-    yakus ~= determineWholeHandYaku(mahjongResult, environment.isClosedHand);
+    yakus ~= determineWholeHandYaku(mahjongResult, environment);
     return yakus;
 }
 
@@ -271,10 +271,10 @@ unittest
     yaku.should.equal([Yaku.haitei]);
 }
 
-private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool isClosedHand)
+private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, Environment environment)
 {
     Yaku[] yakus;
-    if(isClosedHand && mahjongResult.tiles.isAllSimples)
+    if(environment.isClosedHand && mahjongResult.tiles.isAllSimples)
     {
         yakus ~= Yaku.tanyao;
     }
@@ -297,6 +297,12 @@ private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool is
     if(mahjongResult.hasAtLeastOneChi && mahjongResult.allSetsHaveATerminal)
     {
         yakus ~= Yaku.junchan;
+    }
+    if(environment.isClosedHand && mahjongResult.hasOnlyChis 
+        && mahjongResult.hasValuelessPair(environment.leadingWind, environment.ownWind)
+        && mahjongResult.isTwoSidedWait(environment.lastTile))
+    {
+        yakus ~= Yaku.pinfu;
     }
     return yakus;
 }
@@ -427,6 +433,70 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.not.contain([Yaku.junchan]);
+}
+
+@("No minipoints is a pinfu on a closed hand")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀇🀇"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.pinfu]);
+}
+
+@("An open hand is no pinfu")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀇🀇"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.length.should.equal(0);
+}
+
+@("A pair with value is no pinfu")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀀🀀"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.length.should.equal(0);
+}
+
+@("Not a two-sided wait is no pinfu")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀇🀇"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[1],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.length.should.equal(0);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
