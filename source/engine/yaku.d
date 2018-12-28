@@ -294,6 +294,10 @@ private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool is
     {
         yakus ~= Yaku.honroutou;
     }
+    if(mahjongResult.hasAtLeastOneChi && mahjongResult.allSetsHaveATerminal)
+    {
+        yakus ~= Yaku.junchan;
+    }
     return yakus;
 }
 
@@ -382,7 +386,7 @@ unittest
 {
     import fluent.asserts;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀁🀁🀃🀃🀇🀇🀐🀐🀙🀙🀡🀡"d);
-        auto result = scanHandForMahjong(game);
+    auto result = scanHandForMahjong(game);
     Environment env = {
         leadingWind: PlayerWinds.east, 
         ownWind: PlayerWinds.west,
@@ -391,6 +395,38 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.containOnly([Yaku.honroutou, Yaku.chiiToitsu]);
+}
+
+@("If we have at least one chi and terminals in all sets, it is junchan taiyai")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀟🀠🀡🀇🀇🀏🀏🀏"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.junchan]);
+}
+
+@("If we have only terminals (no chi), then it is not junchan")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀇🀇🀏🀏🀏🀐🀐🀐🀙🀙🀙🀡🀡🀡"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.not.contain([Yaku.junchan]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure

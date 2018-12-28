@@ -403,3 +403,48 @@ unittest
     [ComparativeTile(Types.ball, Numbers.two)]
         .isAllHonourOrTerminal.should.equal(false);
 }
+
+bool hasTerminal(Range)(Range range)
+    if(isRangeOfTiles!Range)
+{
+    import std.algorithm : any;
+    return range.any!(t => t.isTerminal);
+}
+
+@("A range with at least one terminal has a terminal")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.one), 
+        ComparativeTile(Types.ball, Numbers.one),
+        ComparativeTile(Types.ball, Numbers.one)]
+        .hasTerminal.should.equal(true);
+    [ComparativeTile(Types.ball, Numbers.one), 
+        ComparativeTile(Types.ball, Numbers.two),
+        ComparativeTile(Types.ball, Numbers.three)]
+        .hasTerminal.should.equal(true);
+    [ComparativeTile(Types.ball, Numbers.seven), 
+        ComparativeTile(Types.ball, Numbers.eight),
+        ComparativeTile(Types.ball, Numbers.nine)]
+        .hasTerminal.should.equal(true);
+}
+
+@("A range with only simples has no terminal")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.four), 
+        ComparativeTile(Types.ball, Numbers.five),
+        ComparativeTile(Types.ball, Numbers.six)]
+        .hasTerminal.should.equal(false);
+}
+
+@("Honours are no terminals")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.wind, Winds.east), 
+        ComparativeTile(Types.wind, Winds.east),
+        ComparativeTile(Types.wind, Winds.east)]
+        .hasTerminal.should.equal(false);
+}

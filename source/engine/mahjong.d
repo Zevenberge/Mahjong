@@ -831,16 +831,126 @@ struct MahjongResult
     {
         return sets.sum!(s => s.miniPoints(ownWind, leadingWind));
     }
-    auto tiles() @property pure const
-    {
-        return sets.flatMap!(s => s.tiles);
-    }
-    bool isSevenPairs() @property pure const
-    {
-        return sets.length == 1 && cast(SevenPairsSet)sets[0];
-    }
-    bool isNagashiMangan() @property pure const
-    {
-        return sets.length == 1 && cast(NagashiManganSet)sets[0];
-    }
 }
+
+auto tiles(const MahjongResult result) @property pure
+{
+    return result.sets.flatMap!(s => s.tiles);
+}
+
+bool isSevenPairs(const MahjongResult result) pure
+{
+    return result.sets.length == 1 && cast(SevenPairsSet)result.sets[0];
+}
+
+@("A result with a seven pair set is a seven pair mahjong")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new SevenPairsSet(null)]);
+    result.isSevenPairs.should.equal(true);
+}
+
+@("A thirteen orphan set is not seven pairs")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new ThirteenOrphanSet(null)]);
+    result.isSevenPairs.should.equal(false);
+}
+
+@("A regular mahjong is not seven pairs")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    result.isSevenPairs.should.equal(false);
+}
+
+bool isNagashiMangan(const MahjongResult result) pure
+{
+    return result.sets.length == 1 && cast(NagashiManganSet)result.sets[0];
+}
+
+@("A result with a seven pair set is a seven pair mahjong")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new NagashiManganSet()]);
+    result.isNagashiMangan.should.equal(true);
+}
+
+@("A thirteen orphan set is not nagashi mangan")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new ThirteenOrphanSet(null)]);
+    result.isNagashiMangan.should.equal(false);
+}
+
+@("A regular mahjong is not nagashi mangan")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    result.isNagashiMangan.should.equal(false);
+}
+
+bool hasAtLeastOneChi(const MahjongResult result)
+{
+    import std.algorithm : any;
+    return result.sets.any!(s => cast(ChiSet)s);
+}
+
+@("A mahjong with one or more chis has at least one chi")
+unittest
+{
+    import fluent.asserts;
+    auto result1 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    result1.hasAtLeastOneChi.should.equal(true);
+    auto result2 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new ChiSet(null), new PonSet(null), new PonSet(null)]);
+    result2.hasAtLeastOneChi.should.equal(true);
+    auto result3 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new ChiSet(null), new ChiSet(null), new PonSet(null)]);
+    result3.hasAtLeastOneChi.should.equal(true);
+    auto result4 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new ChiSet(null), new ChiSet(null), new ChiSet(null)]);
+    result4.hasAtLeastOneChi.should.equal(true);
+}
+
+@("A mahjong with only pons has no chis")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    result.hasAtLeastOneChi.should.equal(false);
+}
+
+bool allSetsHaveATerminal(const MahjongResult result)
+{
+    import std.algorithm : all;
+    return result.sets.all!(s => s.tiles.hasTerminal);
+}
+
+@("Does every set have a terminal")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀇🀇"d.convertToTiles);
+    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
+    auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, chi, pon]);
+    result.allSetsHaveATerminal.should.equal(true);
+}
+
+@("If a set has no terminals, not all sets have a terminal")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀁🀁"d.convertToTiles);
+    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
+    auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, chi, pon]);
+    result.allSetsHaveATerminal.should.equal(false);
+}
+
