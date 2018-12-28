@@ -234,7 +234,7 @@ unittest
         isClosedHand: true
     };
     auto yaku = determineYaku(result, env);
-    yaku.should.equal([Yaku.menzenTsumo, Yaku.rinshanKaihou]);
+    yaku.should.containOnly([Yaku.menzenTsumo, Yaku.rinshanKaihou]);
 }
 
 @("Robbing a kong results in chan kan")
@@ -289,6 +289,10 @@ private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, bool is
     if(mahjongResult.tiles.isHalfFlush)
     {
         yakus ~= Yaku.honitsu;
+    }
+    if(mahjongResult.tiles.isAllHonourOrTerminal)
+    {
+        yakus ~= Yaku.honroutou;
     }
     return yakus;
 }
@@ -371,6 +375,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.honitsu]);
+}
+
+@("If we only have terminals and honours, it is honroutou")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀁🀁🀃🀃🀇🀇🀐🀐🀙🀙🀡🀡"d);
+        auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.honroutou, Yaku.chiiToitsu]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure

@@ -373,3 +373,33 @@ unittest
         ComparativeTile(Types.dragon, Dragons.green)]
         .isHalfFlush.should.equal(false);
 }
+
+bool isAllHonourOrTerminal(Range)(Range range)
+    if(isRangeOfTiles!Range)
+{
+    import std.algorithm : all;
+    return range.all!(t => t.isHonourOrTerminal);
+}
+
+@("Is all honours and terminal recognised")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.dragon, Dragons.green),
+        ComparativeTile(Types.character, Numbers.one)]
+        .isAllHonourOrTerminal.should.equal(true);
+    [ComparativeTile(Types.dragon, Dragons.green),
+        ComparativeTile(Types.wind, Winds.east)]
+        .isAllHonourOrTerminal.should.equal(true);
+    [ComparativeTile(Types.character, Numbers.one),
+        ComparativeTile(Types.bamboo, Numbers.nine)]
+        .isAllHonourOrTerminal.should.equal(true);
+}
+
+@("Non terminals make the set non all honours or terminals")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.two)]
+        .isAllHonourOrTerminal.should.equal(false);
+}
