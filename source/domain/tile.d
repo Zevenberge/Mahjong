@@ -303,3 +303,73 @@ unittest
     [ComparativeTile(Types.wind, Winds.east), ComparativeTile(Types.wind, Winds.east)]
     .isAllOfSameSuit.should.equal(false);
 }
+
+bool isHalfFlush(Range)(Range range)
+    if(isRangeOfTiles!Range)
+{
+    import optional;
+    Optional!Types type = no!Types;
+    bool hasHonour;
+    foreach(tile; range)
+    {
+        if(tile.isHonour)
+        {
+            hasHonour = true;
+            continue;
+        }
+        if(type == none)
+        {
+            type = some(tile.type);
+        }
+        else
+        {
+            if(type != tile.type) return false;
+        }
+    }
+    return hasHonour && type != none;
+}
+
+@("Is half flush should return true if both honours and one suit")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.dragon, Dragons.green), 
+        ComparativeTile(Types.bamboo, Numbers.eight),
+        ComparativeTile(Types.bamboo, Numbers.eight)]
+        .isHalfFlush.should.equal(true);
+    [ComparativeTile(Types.dragon, Dragons.green), 
+        ComparativeTile(Types.ball, Numbers.eight)]
+        .isHalfFlush.should.equal(true);
+    [ComparativeTile(Types.dragon, Dragons.green), 
+        ComparativeTile(Types.character, Numbers.eight)]
+        .isHalfFlush.should.equal(true);
+}
+
+@("A honour and different suits is no half flush")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.dragon, Dragons.green), 
+        ComparativeTile(Types.bamboo, Numbers.eight),
+        ComparativeTile(Types.ball, Numbers.eight)]
+        .isHalfFlush.should.equal(false);
+}
+
+@("A honour is required for a half flush")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.bamboo, Numbers.eight), 
+        ComparativeTile(Types.bamboo, Numbers.eight),
+        ComparativeTile(Types.bamboo, Numbers.eight)]
+        .isHalfFlush.should.equal(false);
+}
+
+@("Only honours is no half flush")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.dragon, Dragons.green), 
+        ComparativeTile(Types.dragon, Dragons.green)]
+        .isHalfFlush.should.equal(false);
+}
