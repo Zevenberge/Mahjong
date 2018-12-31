@@ -601,7 +601,7 @@ private size_t countFanpai(const MahjongResult result, PlayerWinds leadingWind, 
     size_t fanpai = 0;
     foreach(set; result.sets)
     {
-        if(!cast(PonSet)set) continue;
+        if(!set.isPon) continue;
         auto tile = set.tiles[0];
         if(tile.type == Types.dragon) ++fanpai;
         if(tile.type == Types.wind)

@@ -31,6 +31,21 @@ abstract class Set
 	}
 }
 
+bool isPon(const Set s)
+{
+    return cast(PonSet)s !is null;
+}
+
+bool isChi(const Set s)
+{
+    return cast(ChiSet)s !is null;
+}
+
+bool isPair(const Set s)
+{
+    return cast(PairSet)s !is null;
+}
+
 class ThirteenOrphanSet : Set
 {
 	this(const Tile[] tiles) pure
@@ -900,7 +915,7 @@ unittest
 bool hasAtLeastOneChi(const MahjongResult result)
 {
     import std.algorithm : any;
-    return result.sets.any!(s => cast(ChiSet)s);
+    return result.sets.any!(s => s.isChi);
 }
 
 @("A mahjong with one or more chis has at least one chi")
@@ -958,7 +973,7 @@ unittest
 bool hasOnlyChis(const MahjongResult result)
 {
     import std.algorithm : all;
-    return result.sets.all!(s => cast(ChiSet)s || cast(PairSet)s);
+    return result.sets.all!(s => s.isChi || s.isPair);
 }
 
 @("Is a hand with chis and a pair only chis?")
@@ -976,7 +991,7 @@ unittest
 
 bool hasValuelessPair(const MahjongResult result, PlayerWinds leadingWind, PlayerWinds ownWind)
 {
-    auto range = result.sets.filter!(s => cast(PairSet)s);
+    auto range = result.sets.filter!(s => s.isPair);
     if(range.empty) return false;
     auto pair = range.front;
     return pair.miniPoints(leadingWind, ownWind) == 0;
@@ -1019,7 +1034,7 @@ unittest
 bool isTwoSidedWait(const MahjongResult result, const Tile lastTile)
 {
     auto finalSet = result.sets.filter!(s => s.tiles.any!(t => t == lastTile)).front;
-    if(cast(ChiSet)finalSet)
+    if(finalSet.isChi)
     {
         auto position = finalSet.tiles.countUntil!(t => t == lastTile);
         bool isClosedWait = position == 1;
@@ -1097,7 +1112,7 @@ unittest
 bool hasOnlyPons(const MahjongResult result)
 {
     import std.algorithm : all;
-    return result.sets.all!(s => cast(PonSet)s || cast(PairSet)s);
+    return result.sets.all!(s => s.isPon || s.isPair);
 }
 
 @("A hand of four pons and a pair should have only pons")
