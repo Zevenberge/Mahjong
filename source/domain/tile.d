@@ -19,6 +19,14 @@ class Tile
     {
         return origin is null;
     }
+
+    version(unittest)
+    {
+        void isNotOwn()
+        {
+            origin = new Ingame(PlayerWinds.autumn);
+        }
+    }
     
     this(Types type, int value)
     {

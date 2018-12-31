@@ -1078,7 +1078,7 @@ unittest
     result.isTwoSidedWait(lastTile).should.equal(false);
 }
 
-@("Edge waits are not considered pair waits")
+@("Edge waits are not considered two-sided waits")
 unittest
 {
     import fluent.asserts;
@@ -1092,4 +1092,26 @@ unittest
     auto lastTileRight = chiRight.tiles[0];
     auto resultRight = MahjongResult(true, [chiRight]);
     resultRight.isTwoSidedWait(lastTileRight).should.equal(false);
+}
+
+bool hasOnlyPons(const MahjongResult result)
+{
+    import std.algorithm : all;
+    return result.sets.all!(s => cast(PonSet)s || cast(PairSet)s);
+}
+
+@("A hand of four pons and a pair should have only pons")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PairSet(null)]);
+    result.hasOnlyPons.should.equal(true);
+}
+
+@("A hand with chis is not only pons")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new ChiSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PairSet(null)]);
+    result.hasOnlyPons.should.equal(false);
 }

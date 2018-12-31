@@ -504,7 +504,14 @@ private Yaku[] determinePonBasedYaku(const MahjongResult result, Environment env
 {
     Yaku[] yakus;
     auto amountOfFanpai = result.countFanpai(environment.leadingWind, environment.ownWind);
-    for(int i = 0; i < amountOfFanpai; ++i) yakus ~= Yaku.fanpai;
+    for(int i = 0; i < amountOfFanpai; ++i) 
+    {
+        yakus ~= Yaku.fanpai;
+    }
+    if(result.hasOnlyPons) 
+    {
+        yakus ~= Yaku.toiToiHou;
+    }
     return yakus;
 }
 
@@ -522,6 +529,25 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.fanpai, Yaku.fanpai, Yaku.fanpai]);
+}
+
+@("Only pons is toi toi hou")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀙🀙🀙🀠🀠🀡🀡🀡"d);
+    game.closedHand.tiles[0].isNotOwn;
+    game.closedHand.tiles[4].isNotOwn;
+    game.closedHand.tiles[7].isNotOwn;
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.toiToiHou]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
