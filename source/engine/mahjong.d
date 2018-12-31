@@ -31,19 +31,24 @@ abstract class Set
 	}
 }
 
-bool isPon(const Set s)
+bool isPon(const Set s) pure
 {
     return cast(PonSet)s !is null;
 }
 
-bool isChi(const Set s)
+bool isChi(const Set s) pure
 {
     return cast(ChiSet)s !is null;
 }
 
-bool isPair(const Set s)
+bool isPair(const Set s) pure
 {
     return cast(PairSet)s !is null;
+}
+
+bool isKan(const Set s) pure
+{
+    return s.isPon && s.tiles.length == 4;
 }
 
 class ThirteenOrphanSet : Set
@@ -108,14 +113,9 @@ class PonSet : Set
 	{
 		size_t points = 4;
 		if(isOpen) points /= 2;
-		if(isKan) points *= 4;
+		if(this.isKan) points *= 4;
 		if(isSetOfHonoursOrTerminals) points *= 2;
 		return points;
-	}
-
-	private bool isKan() pure const
-	{
-		return tiles.length == 4;
 	}
 
 	private bool isSetOfHonoursOrTerminals() pure const

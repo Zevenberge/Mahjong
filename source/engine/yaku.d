@@ -516,6 +516,10 @@ private Yaku[] determinePonBasedYaku(const MahjongResult result, Environment env
     {
         yakus ~= Yaku.sanAnkou;
     }
+    if(result.amountOfKans == 3)
+    {
+        yakus ~= Yaku.sanKanTsu;
+    }
     return yakus;
 }
 
@@ -570,6 +574,44 @@ unittest
     yaku.should.equal([Yaku.sanAnkou]);
 }
 
+@("Three kans is san kan tsu")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto game = new Ingame(PlayerWinds.east, "🀖🀗🀘🀙🀙"d);
+    game.openHand.addKan("🀄🀄🀄🀄"d.convertToTiles);
+    game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
+    game.openHand.addKan("🀌🀌🀌🀌"d.convertToTiles);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.sanKanTsu, Yaku.sanAnkou, Yaku.fanpai]);
+}
+
+@("Two kans is no san kan tsu")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto game = new Ingame(PlayerWinds.east, "🀖🀗🀘🀙🀙🀚🀚🀚"d);
+    game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
+    game.openHand.addKan("🀌🀌🀌🀌"d.convertToTiles);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.sanAnkou]);
+}
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
 {
 	final switch(yaku) with(Yaku)
@@ -742,4 +784,51 @@ unittest
     auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi]);
     result.amountOfConsealedPons.should.equal(0);
+}
+
+private size_t amountOfKans(const MahjongResult result)
+{
+    import std.algorithm : count;
+    return result.sets.count!(s => s.isKan);
+}
+
+@("A kan is counted as one")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto kan = new PonSet("🀡🀡🀡🀡"d.convertToTiles);
+    auto result = MahjongResult(true, [kan]);
+    result.amountOfKans.should.equal(1);
+}
+
+@("Multiple kans are all counted")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto kan = new PonSet("🀡🀡🀡🀡"d.convertToTiles);
+    auto result = MahjongResult(true, [kan, kan, kan]);
+    result.amountOfKans.should.equal(3);
+}
+
+@("A simple pon is not counted as a kan")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto result = MahjongResult(true, [pon]);
+    result.amountOfKans.should.equal(0);
+}
+
+@("A pair or a chi is not counted as a kan")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀀🀀"d.convertToTiles);
+    auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, chi]);
+    result.amountOfKans.should.equal(0);
 }
