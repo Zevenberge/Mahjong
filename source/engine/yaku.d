@@ -524,6 +524,10 @@ private Yaku[] determinePonBasedYaku(const MahjongResult result, Environment env
     {
         yakus ~= Yaku.shouSangen;
     }
+    if(result.hasPonInAllThreeSuits)
+    {
+        yakus ~= Yaku.sanShokuDokou;
+    }
     return yakus;
 }
 
@@ -631,6 +635,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.containOnly([Yaku.fanpai, Yaku.fanpai, Yaku.shouSangen]);
+}
+
+@("Three times the same pon is san shoku dokou")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀇🀇🀇🀉🀊🀋🀐🀐🀐🀒🀒🀙🀙🀙"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.sanShokuDokou, Yaku.sanAnkou]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
@@ -913,3 +933,84 @@ unittest
     auto result = MahjongResult(true, [pair, pon1, pon2]);
     result.isThreeLittleDragons.should.equal(false);
 }
+
+bool hasPonInAllThreeSuits(const MahjongResult result)
+{
+    import std.algorithm : any;
+    import std.conv : to;
+    bool[Types][Numbers] stats;
+    foreach(set; result.sets)
+    {
+        if(!set.isPon) continue;
+        if(set.isSetOf(Types.dragon)) continue;
+        if(set.isSetOf(Types.wind)) continue;
+        auto number = set.tiles[0].value.to!Numbers;
+        if(number !in stats)
+        {
+            stats[number] = (bool[Types]).init;
+        }
+        stats[number][set.tiles[0].type] = true;
+    }
+    return stats.byValue.any!(s => s.length == 3);
+}
+
+@("If I have the same pon in three suits, it should be recognized as such")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
+    auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto balls = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto result = MahjongResult(true, [chars, bamboo, balls]);
+    result.hasPonInAllThreeSuits.should.equal(true);
+}
+
+@("If I have a double, it still doesn't matter")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
+    auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto balls = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto result = MahjongResult(true, [chars, bamboo, balls, chars]);
+    result.hasPonInAllThreeSuits.should.equal(true);
+}
+
+@("Pons with different values don't count")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chars = new PonSet("🀈🀈🀈"d.convertToTiles);
+    auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto balls = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto result = MahjongResult(true, [chars, bamboo, balls]);
+    result.hasPonInAllThreeSuits.should.equal(false);
+}
+
+@("Chis don't count towards the different pons")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
+    auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto balls = new ChiSet("🀙🀚🀛"d.convertToTiles);
+    auto result = MahjongResult(true, [chars, bamboo, balls]);
+    result.hasPonInAllThreeSuits.should.equal(false);
+}
+
+@("Dragons and winds don't count towards the different types")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
+    auto dragons = new PonSet("🀅🀅🀅"d.convertToTiles);
+    auto winds = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto result = MahjongResult(true, [chars, dragons, winds]);
+    result.hasPonInAllThreeSuits.should.equal(false);
+}
+
