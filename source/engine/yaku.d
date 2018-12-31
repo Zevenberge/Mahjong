@@ -512,6 +512,10 @@ private Yaku[] determinePonBasedYaku(const MahjongResult result, Environment env
     {
         yakus ~= Yaku.toiToiHou;
     }
+    if(result.amountOfConsealedPons == 3)
+    {
+        yakus ~= Yaku.sanAnkou;
+    }
     return yakus;
 }
 
@@ -548,6 +552,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.toiToiHou]);
+}
+
+@("Three consealed pons is san ankou")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀙🀠🀠"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.sanAnkou]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
@@ -674,4 +694,52 @@ unittest
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PonSet("🀀🀀🀀"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.east).should.equal(2);
+}
+
+private size_t amountOfConsealedPons(const MahjongResult result)
+{
+    import std.algorithm : count;
+    return result.sets.count!(s => s.isPon && !s.isOpen);
+}
+
+@("A consealed pon is counted as one")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto result = MahjongResult(true, [pon]);
+    result.amountOfConsealedPons.should.equal(1);
+}
+
+@("Multiple consealed pons are all counted")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto result = MahjongResult(true, [pon, pon, pon]);
+    result.amountOfConsealedPons.should.equal(3);
+}
+
+@("An open pon is not counted as a consealed pon")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto tiles = "🀀🀀🀀"d.convertToTiles;
+    tiles[0].isNotOwn;
+    auto result = MahjongResult(true, [new PonSet(tiles)]);
+    result.amountOfConsealedPons.should.equal(0);
+}
+
+@("A pair or a chi are not counted as consealed pons")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀀🀀"d.convertToTiles);
+    auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, chi]);
+    result.amountOfConsealedPons.should.equal(0);
 }
