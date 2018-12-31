@@ -51,6 +51,21 @@ bool isKan(const Set s) pure
     return s.isPon && s.tiles.length == 4;
 }
 
+bool isSetOf(const Set s, Types type) pure
+{
+    return s.tiles[0].type == type;
+}
+
+@("A set of dragons should be seen as such")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto set = new PonSet("🀄🀄🀄"d.convertToTiles);
+    set.isSetOf(Types.dragon).should.equal(true);
+    set.isSetOf(Types.wind).should.equal(false);
+}
+
 class ThirteenOrphanSet : Set
 {
 	this(const Tile[] tiles) pure

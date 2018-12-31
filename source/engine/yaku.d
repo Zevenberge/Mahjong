@@ -520,6 +520,10 @@ private Yaku[] determinePonBasedYaku(const MahjongResult result, Environment env
     {
         yakus ~= Yaku.sanKanTsu;
     }
+    if(result.isThreeLittleDragons)
+    {
+        yakus ~= Yaku.shouSangen;
+    }
     return yakus;
 }
 
@@ -612,6 +616,23 @@ unittest
     auto yaku = determineYaku(result, env);
     yaku.should.containOnly([Yaku.sanAnkou]);
 }
+
+@("Three little dragons is shou sangen")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀅🀅🀅🀄🀄🀄🀆🀆🀖🀗🀘🀜🀝🀞"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.fanpai, Yaku.fanpai, Yaku.shouSangen]);
+}
+
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
 {
 	final switch(yaku) with(Yaku)
@@ -664,10 +685,10 @@ private size_t countFanpai(const MahjongResult result, PlayerWinds leadingWind, 
     foreach(set; result.sets)
     {
         if(!set.isPon) continue;
-        auto tile = set.tiles[0];
-        if(tile.type == Types.dragon) ++fanpai;
-        if(tile.type == Types.wind)
+        if(set.isSetOf(Types.dragon)) ++fanpai;
+        if(set.isSetOf(Types.wind))
         {
+            auto tile = set.tiles[0];
             if(tile.value == leadingWind) ++fanpai;
             if(tile.value == ownWind) ++fanpai;
         }
@@ -831,4 +852,64 @@ unittest
     auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi]);
     result.amountOfKans.should.equal(0);
+}
+
+private bool isThreeLittleDragons(const MahjongResult result)
+{
+    bool pair;
+    size_t pons;
+    foreach(set; result.sets)
+    {
+        if(!set.isSetOf(Types.dragon)) continue;
+        if(set.isPair) pair = true;
+        else ++pons;
+    }
+    return pair && pons == 2;
+}
+
+@("A pair and two pons of dragons is three little dragons")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀄🀄"d.convertToTiles);
+    auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
+    auto pon2 = new PonSet("🀆🀆🀆"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, pon1, pon2]);
+    result.isThreeLittleDragons.should.equal(true);
+}
+
+@("Three pons of dragons is not three little dragons")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pon = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
+    auto pon2 = new PonSet("🀆🀆🀆"d.convertToTiles);
+    auto result = MahjongResult(true, [pon, pon1, pon2]);
+    result.isThreeLittleDragons.should.equal(false);
+}
+
+@("One pon of dragons and a pair is not enough for three little dragons")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀄🀄"d.convertToTiles);
+    auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, pon1]);
+    result.isThreeLittleDragons.should.equal(false);
+}
+
+@("Tiles other than dragons don't count for the three little dragons")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀇🀇"d.convertToTiles);
+    auto pon1 = new PonSet("🀌🀌🀌"d.convertToTiles);
+    auto pon2 = new PonSet("🀗🀗🀗"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, pon1, pon2]);
+    result.isThreeLittleDragons.should.equal(false);
 }
