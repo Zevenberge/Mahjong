@@ -965,7 +965,8 @@ bool hasPonInAllThreeSuits(const MahjongResult result)
 {
     import std.algorithm : any;
     import std.conv : to;
-    bool[Types][Numbers] stats;
+    import mahjong.share.collections : Set;
+    Set!Types[Numbers] stats;
     foreach(set; result.sets)
     {
         if(!set.isPon) continue;
@@ -974,9 +975,9 @@ bool hasPonInAllThreeSuits(const MahjongResult result)
         auto number = set.tiles[0].value.to!Numbers;
         if(number !in stats)
         {
-            stats[number] = (bool[Types]).init;
+            stats[number] = Set!Types.init;
         }
-        stats[number][set.tiles[0].type] = true;
+        stats[number] ~= set.tiles[0].type;
     }
     return stats.byValue.any!(s => s.length == 3);
 }
