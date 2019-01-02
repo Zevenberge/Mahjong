@@ -42,6 +42,7 @@ body
     yakus ~= determineSituationalYaku(environment);
     yakus ~= determineWholeHandYaku(mahjongResult, environment);
     yakus ~= determinePonBasedYaku(mahjongResult, environment);
+    yakus ~= determineChiBasedYaku(mahjongResult, environment.isClosedHand);
     return yakus;
 }
 
@@ -653,6 +654,32 @@ unittest
     yaku.should.containOnly([Yaku.sanShokuDokou, Yaku.sanAnkou]);
 }
 
+Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHand)
+{
+    Yaku[] yakus;
+    if(result.isStraightFlush)
+    {
+        yakus ~= Yaku.itsu;
+    }
+    return yakus;
+}
+
+@("A straight flush is an itsu")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀇🀇🀔🀔🀔🀙🀚🀛🀜🀝🀞🀟🀠🀡"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.itsu]);
+}
+
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
 {
 	final switch(yaku) with(Yaku)
@@ -1014,3 +1041,90 @@ unittest
     result.hasPonInAllThreeSuits.should.equal(false);
 }
 
+private bool isStraightFlush(const MahjongResult result)
+{
+    import std.algorithm : any, filter;
+    import std.typecons : Tuple;
+    alias Straight = Tuple!(bool, "first", bool, "second", bool, "third");
+    Straight[Types] straights;
+    foreach(set; result.sets.filter!(s => s.isChi))
+    {
+        auto tile = set.tiles[0];
+        auto straight = tile.type in straights ? straights[tile.type] : Straight();
+        if(tile.value == Numbers.one)
+        {
+            straight.first = true;
+        }
+        if(tile.value == Numbers.four)
+        {
+            straight.second = true;
+        }
+        if(tile.value == Numbers.seven)
+        {
+            straight.third = true;
+        }
+        straights[tile.type] = straight;
+    }
+    return straights.values.any!(s => s.first && s.second && s.third);
+}
+
+@("One to nine in the same suit is a straight flush")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third]);
+    result.isStraightFlush.should.equal(true);
+}
+
+@("Having pons doesn't count towards a straight flush")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new PonSet("🀇🀇🀇"d.convertToTiles);
+    auto second = new PonSet("🀊🀊🀊"d.convertToTiles);
+    auto third = new PonSet("🀍🀍🀍"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third]);
+    result.isStraightFlush.should.equal(false);
+}
+
+@("Having three non-constructive chis in the same suit is no straight flush")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀈🀉🀊"d.convertToTiles);
+    auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third]);
+    result.isStraightFlush.should.equal(false);
+}
+
+@("One to nine in the same suit is a straight flush even with a fourth chi")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto other = new ChiSet("🀈🀉🀊"d.convertToTiles);
+    auto result = MahjongResult(true, [first, other, second, third]);
+    result.isStraightFlush.should.equal(true);
+}
+
+@("All constructive chis should be in the same suit for a straight flush")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀜🀝🀞"d.convertToTiles);
+    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third]);
+    result.isStraightFlush.should.equal(false);
+}
