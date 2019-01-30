@@ -29,9 +29,10 @@ class ClaimFlow : Flow
 
 		void initialiseClaimEvents()
 		{
-			_claimEvents = _metagame.otherPlayers
-						.map!(p => createEventAndNotifyHandler(p))
-						.array;
+            foreach(player; _metagame.otherPlayers)
+            {
+                _claimEvents ~= createEventAndNotifyHandler(player);
+            }
 		}
 
 		ClaimEvent createEventAndNotifyHandler(Player player)
