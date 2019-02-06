@@ -66,6 +66,100 @@ unittest
     set.isSetOf(Types.wind).should.equal(false);
 }
 
+bool isSameAs(const Set one, const Set another)
+{
+    return one.tiles[0].hasEqualValue(another.tiles[0])
+        && typeid(one) == typeid(another);
+}
+
+@("Are equal chis the same")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    first.isSameAs(second).should.equal(true);
+    second.isSameAs(first).should.equal(true);
+}
+
+@("Are different chis not the same")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀌🀍🀎"d.convertToTiles);
+    auto third = new ChiSet("🀐🀑🀒"d.convertToTiles);
+    first.isSameAs(second).should.equal(false);
+    second.isSameAs(first).should.equal(false);
+    first.isSameAs(third).should.equal(false);
+    third.isSameAs(first).should.equal(false);
+}
+
+@("Are equal pairs the same")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new PairSet("🀙🀙"d.convertToTiles);
+    auto second = new PairSet("🀙🀙"d.convertToTiles);
+    first.isSameAs(second).should.equal(true);
+    second.isSameAs(first).should.equal(true);
+}
+
+@("Are different pairs not the same")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new PairSet("🀙🀙"d.convertToTiles);
+    auto second = new PairSet("🀐🀐"d.convertToTiles);
+    auto third = new PairSet("🀠🀠"d.convertToTiles);
+    first.isSameAs(second).should.equal(false);
+    second.isSameAs(first).should.equal(false);
+    first.isSameAs(third).should.equal(false);
+    third.isSameAs(first).should.equal(false);
+}
+
+@("Are equal pons the same")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto second = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto kan = new PonSet("🀙🀙🀙🀙"d.convertToTiles);
+    first.isSameAs(second).should.equal(true);
+    second.isSameAs(first).should.equal(true);
+    first.isSameAs(kan).should.equal(true);
+    kan.isSameAs(first).should.equal(true);
+}
+
+@("Are different pons not the same")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto second = new PonSet("🀀🀀🀀"d.convertToTiles);
+    first.isSameAs(second).should.equal(false);
+    second.isSameAs(first).should.equal(false);
+}
+
+@("Are different kind of sets not the same")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀙🀙"d.convertToTiles);
+    auto pon = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto chi = new ChiSet("🀙🀚🀛"d.convertToTiles);
+    pair.isSameAs(pon).should.equal(false);
+    pair.isSameAs(chi).should.equal(false);
+    pon.isSameAs(chi).should.equal(false);
+}
+
 class ThirteenOrphanSet : Set
 {
 	this(const Tile[] tiles) pure
