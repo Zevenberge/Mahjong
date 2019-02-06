@@ -3,12 +3,10 @@ module mahjong.domain.player;
 import std.algorithm : map;
 import std.array : array;
 import std.experimental.logger;
-import std.string;
 import std.uuid;
 
 import mahjong.domain.enums;
 import mahjong.domain;
-import mahjong.engine.chi;
 import mahjong.engine.flow;
 import mahjong.engine.opts;
 import mahjong.engine.scoring;
@@ -188,11 +186,6 @@ class Player
 		auto p = cast(Player)o;
 		if(p is null) return false;
 		return p.id == id;
-	}
-
-	override string toString() const
-	{
-		return(format("%s (%s)", id, name));
 	}
 }
 
