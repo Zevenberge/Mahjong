@@ -654,12 +654,16 @@ unittest
     yaku.should.containOnly([Yaku.sanShokuDokou, Yaku.sanAnkou]);
 }
 
-Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHand)
+private Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHand)
 {
     Yaku[] yakus;
     if(result.isStraightFlush)
     {
         yakus ~= Yaku.itsu;
+    }
+    if(result.hasJustTwoEqualChis)
+    {
+        yakus ~= Yaku.iipeikou;
     }
     return yakus;
 }
@@ -678,6 +682,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.containOnly([Yaku.itsu]);
+}
+
+@("Two equal chis in a closed hand is an iipeikou")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀛🀛🀛🀓🀔🀕"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.iipeikou]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
@@ -961,7 +981,7 @@ unittest
     result.isThreeLittleDragons.should.equal(false);
 }
 
-bool hasPonInAllThreeSuits(const MahjongResult result)
+private bool hasPonInAllThreeSuits(const MahjongResult result)
 {
     import std.algorithm : any;
     import std.conv : to;
@@ -1128,4 +1148,81 @@ unittest
     auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.isStraightFlush.should.equal(false);
+}
+
+private bool hasJustTwoEqualChis(const MahjongResult mahjongResult)
+{
+    import std.range : drop;
+    // Until otherwise proven, assume that the result is reasonably sorted.
+    bool hasTwoEqualChis = false;
+    for(size_t i = 0; i < mahjongResult.sets.length - 1; ++i)
+    {
+        auto set = mahjongResult.sets[i];
+        auto secondSet = mahjongResult.sets[i+1];
+        if(set.isChi && set.isSameAs(secondSet))
+        {
+            if(hasTwoEqualChis) return false;
+            hasTwoEqualChis = true;
+            ++i; //
+        }
+    }
+    return hasTwoEqualChis;
+}
+
+@("If a hand contains two equal chis, it is recognised as such")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second]);
+    result.hasJustTwoEqualChis.should.equal(true);
+}
+
+@("If a hand does not contain two equal chis, it is not a false positive")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second]);
+    result.hasJustTwoEqualChis.should.equal(false);
+}
+
+@("If a hand contains two equal pons, that is still no two equal chis")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto second = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second]);
+    result.hasJustTwoEqualChis.should.equal(false);
+}
+
+@("If a hand contains two times two equal chis, that does not mean just two equal chis")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto third = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto fourth = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third, fourth]);
+    result.hasJustTwoEqualChis.should.equal(false);
+}
+
+@("Three equal chis are rounded down to two.")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto third = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third]);
+    result.hasJustTwoEqualChis.should.equal(true);
 }
