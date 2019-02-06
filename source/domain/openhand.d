@@ -4,9 +4,9 @@ import std.algorithm;
 import std.array;
 import std.uuid;
 
-import mahjong.domain;
 import mahjong.domain.exceptions;
-import mahjong.engine.mahjong;
+import mahjong.domain.set;
+import mahjong.domain.tile;
 import mahjong.engine.opts;
 import mahjong.share.range;
 

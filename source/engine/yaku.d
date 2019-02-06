@@ -68,6 +68,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     auto result = MahjongResult(true, [new NagashiManganSet]); 
     Environment env = {
         leadingWind: PlayerWinds.east, 
@@ -748,6 +749,7 @@ private struct Environment
 
 private size_t countFanpai(const MahjongResult result, PlayerWinds leadingWind, PlayerWinds ownWind)
 {
+    import mahjong.domain.set;
     size_t fanpai = 0;
     foreach(set; result.sets)
     {
@@ -767,6 +769,7 @@ private size_t countFanpai(const MahjongResult result, PlayerWinds leadingWind, 
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PonSet("🀄🀄🀄"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(1);
@@ -776,6 +779,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PairSet("🀄🀄"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(0);
@@ -785,6 +789,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PonSet("🀐🀐🀐"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(0);
@@ -794,6 +799,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PonSet("🀂🀂🀂"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(1);
@@ -803,6 +809,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PonSet("🀀🀀🀀"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(1);
@@ -812,6 +819,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PonSet("🀁🀁🀁"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(0);
@@ -821,6 +829,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto result = MahjongResult(true, [new PonSet("🀀🀀🀀"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.east).should.equal(2);
@@ -829,6 +838,7 @@ unittest
 private size_t amountOfConsealedPons(const MahjongResult result)
 {
     import std.algorithm : count;
+    import mahjong.domain.set;
     return result.sets.count!(s => s.isPon && !s.isOpen);
 }
 
@@ -836,6 +846,7 @@ private size_t amountOfConsealedPons(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto result = MahjongResult(true, [pon]);
@@ -846,6 +857,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto result = MahjongResult(true, [pon, pon, pon]);
@@ -856,6 +868,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto tiles = "🀀🀀🀀"d.convertToTiles;
     tiles[0].isNotOwn;
@@ -867,6 +880,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pair = new PairSet("🀀🀀"d.convertToTiles);
     auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
@@ -877,6 +891,7 @@ unittest
 private size_t amountOfKans(const MahjongResult result)
 {
     import std.algorithm : count;
+    import mahjong.domain.set;
     return result.sets.count!(s => s.isKan);
 }
 
@@ -884,6 +899,7 @@ private size_t amountOfKans(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto kan = new PonSet("🀡🀡🀡🀡"d.convertToTiles);
     auto result = MahjongResult(true, [kan]);
@@ -894,6 +910,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto kan = new PonSet("🀡🀡🀡🀡"d.convertToTiles);
     auto result = MahjongResult(true, [kan, kan, kan]);
@@ -904,6 +921,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto result = MahjongResult(true, [pon]);
@@ -914,6 +932,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pair = new PairSet("🀀🀀"d.convertToTiles);
     auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
@@ -923,6 +942,7 @@ unittest
 
 private bool isThreeLittleDragons(const MahjongResult result)
 {
+    import mahjong.domain.set;
     bool pair;
     size_t pons;
     foreach(set; result.sets)
@@ -938,6 +958,7 @@ private bool isThreeLittleDragons(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pair = new PairSet("🀄🀄"d.convertToTiles);
     auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
@@ -950,6 +971,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pon = new PonSet("🀄🀄🀄"d.convertToTiles);
     auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
@@ -962,6 +984,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pair = new PairSet("🀄🀄"d.convertToTiles);
     auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
@@ -973,6 +996,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto pair = new PairSet("🀇🀇"d.convertToTiles);
     auto pon1 = new PonSet("🀌🀌🀌"d.convertToTiles);
@@ -985,6 +1009,7 @@ private bool hasPonInAllThreeSuits(const MahjongResult result)
 {
     import std.algorithm : any;
     import std.conv : to;
+    import mahjong.domain.set;
     import mahjong.share.collections : Set;
     Set!Types[Numbers] stats;
     foreach(set; result.sets)
@@ -1006,6 +1031,7 @@ private bool hasPonInAllThreeSuits(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
@@ -1018,6 +1044,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
@@ -1030,6 +1057,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto chars = new PonSet("🀈🀈🀈"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
@@ -1042,6 +1070,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
@@ -1054,6 +1083,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto dragons = new PonSet("🀅🀅🀅"d.convertToTiles);
@@ -1066,6 +1096,7 @@ private bool isStraightFlush(const MahjongResult result)
 {
     import std.algorithm : any, filter;
     import std.typecons : Tuple;
+    import mahjong.domain.set;
     alias Straight = Tuple!(bool, "first", bool, "second", bool, "third");
     Straight[Types] straights;
     foreach(set; result.sets.filter!(s => s.isChi))
@@ -1093,6 +1124,7 @@ private bool isStraightFlush(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
@@ -1105,6 +1137,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto second = new PonSet("🀊🀊🀊"d.convertToTiles);
@@ -1117,6 +1150,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀈🀉🀊"d.convertToTiles);
     auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
@@ -1129,6 +1163,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
@@ -1142,6 +1177,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀜🀝🀞"d.convertToTiles);
@@ -1153,6 +1189,7 @@ unittest
 private bool hasJustTwoEqualChis(const MahjongResult mahjongResult)
 {
     import std.range : drop;
+    import mahjong.domain.set;
     // Until otherwise proven, assume that the result is reasonably sorted.
     bool hasTwoEqualChis = false;
     for(size_t i = 0; i < mahjongResult.sets.length - 1; ++i)
@@ -1173,6 +1210,7 @@ private bool hasJustTwoEqualChis(const MahjongResult mahjongResult)
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
@@ -1184,6 +1222,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀔🀕🀖"d.convertToTiles);
@@ -1195,6 +1234,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto second = new PonSet("🀙🀙🀙"d.convertToTiles);
@@ -1206,6 +1246,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
@@ -1219,6 +1260,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);

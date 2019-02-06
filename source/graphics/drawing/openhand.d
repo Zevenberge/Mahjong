@@ -7,6 +7,7 @@ import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.ingame;
 import mahjong.domain.openhand;
+import mahjong.domain.set;
 import mahjong.domain.tile;
 import mahjong.domain.wrappers;
 import mahjong.engine.mahjong;

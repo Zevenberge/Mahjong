@@ -193,6 +193,7 @@ Transaction[] toTransactions(const(MahjongData)[] data, const Metagame metagame)
 
 unittest
 {
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     import mahjong.engine.flow;
     auto wall = new MockWall(new Tile(Types.dragon, Dragons.red));
@@ -211,6 +212,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     import mahjong.engine.flow;
     auto player1 = new Player();
@@ -233,6 +235,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     import mahjong.engine.flow;
     auto player1 = new Player();
@@ -651,6 +654,7 @@ private size_t countAmountOfDoras(const MahjongData mahjongResult, const Wall wa
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.eight);
     auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
@@ -664,6 +668,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
@@ -677,6 +682,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
         [new PonSet([
@@ -691,6 +697,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
