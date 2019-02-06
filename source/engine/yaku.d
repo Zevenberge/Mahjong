@@ -662,7 +662,7 @@ private Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHa
     {
         yakus ~= Yaku.itsu;
     }
-    if(result.hasJustTwoEqualChis)
+    if(isClosedHand && result.hasJustTwoEqualChis)
     {
         yakus ~= Yaku.iipeikou;
     }
@@ -699,6 +699,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.containOnly([Yaku.iipeikou]);
+}
+
+@("Two equal chis in an open hand is nothing")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀛🀛🀛🀓🀔🀕"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.not.contain([Yaku.iipeikou]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
