@@ -91,7 +91,7 @@ class Metagame
 
 	private void startPlayersGame()
 	{
-		foreach(int i, player; players)
+		foreach(i, player; players)
 		{ 
 			auto wind = ((_round.roundStartingPosition + i) % players.length).to!PlayerWinds;
 			player.startGame(wind);
