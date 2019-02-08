@@ -363,3 +363,66 @@ unittest
     auto pairSet = new PairSet(pairOfDragons);
     assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 2, "A dragon pair is always 2 points");
 }
+
+bool isSameInDifferentType(alias typeCriterion)(const Set one, const Set two, const Set three)
+{
+    import std.algorithm : isPermutation, all;
+    if(one.tiles[0].value == two.tiles[0].value &&
+        two.tiles[0].value == three.tiles[0].value)
+    {
+        return isPermutation([Types.ball, Types.bamboo, Types.character], 
+            [one.tiles[0].type, two.tiles[0].type, three.tiles[0].type]) &&
+            [one, two, three].all!typeCriterion;
+    }
+    return false;
+}
+
+alias isSameChiInDifferentType = isSameInDifferentType!(s => s.isChi);
+alias isSamePonInDifferentType = isSameInDifferentType!(s => s.isPon);
+
+@("Is the same chi in three different types a triplet")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    auto three = new ChiSet("🀜🀝🀞"d.convertToTiles);
+    isSameChiInDifferentType(one, two, three).should.equal(true);
+    isSameChiInDifferentType(two, three, one).should.equal(true);
+    isSameChiInDifferentType(three, two, one).should.equal(true);
+}
+
+@("Are different chis no triplet")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    auto three = new ChiSet("🀟🀠🀡"d.convertToTiles);
+    isSameChiInDifferentType(one, two, three).should.equal(false);
+    isSameChiInDifferentType(two, three, one).should.equal(false);
+}
+
+@("Are chis in not all three suits no triplet")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    auto three = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    isSameChiInDifferentType(one, two, three).should.equal(false);
+}
+
+@("Is a pon not counted in a chi triplet")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    auto three = new PonSet("🀜🀜🀜"d.convertToTiles);
+    isSameChiInDifferentType(one, two, three).should.equal(false);
+}

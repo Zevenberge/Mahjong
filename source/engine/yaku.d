@@ -666,6 +666,10 @@ private Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHa
     {
         yakus ~= Yaku.iipeikou;
     }
+    if(result.hasTripletChis)
+    {
+        yakus ~= Yaku.sanShoukuDoujun;
+    }
     return yakus;
 }
 
@@ -715,6 +719,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.not.contain([Yaku.iipeikou]);
+}
+
+@("A triplet chi is an san shoku doujun")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀇🀈🀉🀊🀊🀐🀑🀒🀙🀚🀛🀠🀠🀠"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.sanShoukuDoujun]);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
@@ -1283,4 +1303,41 @@ unittest
     auto third = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.hasJustTwoEqualChis.should.equal(true);
+}
+
+private bool hasTripletChis(const MahjongResult mahjongResult)
+{
+    import mahjong.domain.set : isSameChiInDifferentType;
+    if(mahjongResult.sets.length < 3) return false;
+    foreach(first; mahjongResult.sets[0 .. $ - 2])
+        foreach(second; mahjongResult.sets[1 .. $ - 1])
+            foreach(third; mahjongResult.sets[2 .. $])
+    {
+            if(isSameChiInDifferentType(first, second, third)) return true;
+    }
+    return false;
+}
+
+@("A mahjong with three different but equally high chis has a triplet")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.set;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀊🀋🀌"d.convertToTiles);
+    auto second = new ChiSet("🀓🀔🀕"d.convertToTiles);
+    auto third = new ChiSet("🀜🀝🀞"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third]);
+    result.hasTripletChis.should.equal(true);
+}
+
+@("When attempting to check the triplets with seven pairs we should not go out of range")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.set; 
+    import mahjong.engine.creation;
+    auto first = new SevenPairsSet("🀑🀑🀕🀕🀒🀒🀠🀠🀀🀀🀐🀐🀅🀅"d.convertToTiles);
+    auto result = MahjongResult(true, [first]);
+    result.hasTripletChis.should.equal(false);
 }
