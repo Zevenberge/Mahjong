@@ -297,9 +297,16 @@ private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, Environ
     {
         yakus ~= Yaku.honroutou;
     }
-    if(mahjongResult.hasAtLeastOneChi && mahjongResult.allSetsHaveATerminal)
+    if(mahjongResult.hasAtLeastOneChi)
     {
-        yakus ~= Yaku.junchan;
+        if(mahjongResult.allSetsHaveATerminal)
+        {
+            yakus ~= Yaku.junchan;
+        }
+        else if(mahjongResult.allSetsHaveHonoursOrATerminal)
+        {
+            yakus ~= Yaku.chanta;
+        }
     }
     if(environment.isClosedHand && mahjongResult.hasOnlyChis 
         && mahjongResult.hasValuelessPair(environment.leadingWind, environment.ownWind)
@@ -500,6 +507,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.length.should.equal(0);
+}
+
+@("If the all sets contain a terminal or honour, and at least one chi is present, it is chanta")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀆🀆🀇🀈🀉🀍🀎🀏🀐🀑🀒🀙🀙🀙"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.east, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[1],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.chanta]);
 }
 
 private Yaku[] determinePonBasedYaku(const MahjongResult result, Environment environment)

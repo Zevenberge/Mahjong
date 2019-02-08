@@ -412,6 +412,30 @@ unittest
         .isAllHonourOrTerminal.should.equal(false);
 }
 
+bool isAllHonour(Range)(Range range)
+    if(isRangeOfTiles!Range)
+{
+    import std.algorithm : all;
+    return range.all!(t => t.isHonour);
+}
+
+@("Is all honours recognised")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.dragon, Dragons.green),
+        ComparativeTile(Types.wind, Winds.east)]
+        .isAllHonourOrTerminal.should.equal(true);
+}
+
+@("Non honours make the set not have only honours")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.ball, Numbers.one)]
+        .isAllHonour.should.equal(false);
+}
+
 bool hasTerminal(Range)(Range range)
     if(isRangeOfTiles!Range)
 {

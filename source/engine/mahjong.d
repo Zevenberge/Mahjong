@@ -736,6 +736,47 @@ unittest
     result.allSetsHaveATerminal.should.equal(false);
 }
 
+bool allSetsHaveHonoursOrATerminal(const MahjongResult result)
+{
+    return result.sets.all!(s => s.tiles.isAllHonour || s.tiles.hasTerminal);
+}
+
+@("If the hand only contains terminal sets, is does not count for honours or terminals")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀇🀇"d.convertToTiles);
+    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
+    auto pon = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, chi, pon]);
+    result.allSetsHaveHonoursOrATerminal.should.equal(true);
+}
+
+@("If the hand only contains terminal sets, is does still count for honours or terminals")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀇🀇"d.convertToTiles);
+    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
+    auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, chi, pon]);
+    result.allSetsHaveHonoursOrATerminal.should.equal(true);
+}
+
+@("If the hand contains a non terminal set, it is not only honours or terminals")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pair = new PairSet("🀇🀇"d.convertToTiles);
+    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
+    auto pon = new PonSet("🀠🀠🀠"d.convertToTiles);
+    auto result = MahjongResult(true, [pair, chi, pon]);
+    result.allSetsHaveHonoursOrATerminal.should.equal(false);
+}
+
 bool hasOnlyChis(const MahjongResult result)
 {
     import std.algorithm : all;
