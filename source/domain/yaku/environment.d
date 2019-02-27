@@ -15,5 +15,6 @@ package struct Environment
     const bool isKanSteal;
     const bool isClosedHand;
     const bool isLastTileBeforeExhaustiveDraw;
+    const bool isFirstRound;
     const Tile lastTile;
 }
