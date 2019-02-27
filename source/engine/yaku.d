@@ -5,7 +5,7 @@ import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
 import mahjong.domain.tile;
-import mahjong.engine.mahjong;
+import mahjong.domain.result;
 
 enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu, 
 			iipeikou, sanShoukuDoujun, itsu, fanpai, chanta, rinshanKaihou, chanKan, haitei, 
@@ -50,6 +50,7 @@ body
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -110,6 +111,7 @@ private Yaku[] determineRiichiRelatedYakus(const Environment environment) pure
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -128,6 +130,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -147,6 +150,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -188,6 +192,7 @@ private Yaku[] determineSituationalYaku(const Environment environment) pure
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -206,6 +211,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -225,6 +231,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -244,6 +251,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -261,6 +269,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -321,6 +330,7 @@ private Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, Environ
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀚🀚🀚🀜🀝🀝🀞🀞🀟🀓🀔🀕🀖🀖"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -337,6 +347,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀚🀚🀚🀜🀝🀝🀞🀞🀟🀓🀔🀕🀖🀖"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -353,6 +364,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -369,6 +381,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀙🀙🀚🀚🀚🀜🀝🀝🀞🀞🀟🀟🀠🀡"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -385,6 +398,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀙🀙🀜🀝🀝🀞🀞🀟🀟🀠🀡"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -401,6 +415,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀁🀁🀃🀃🀇🀇🀐🀐🀙🀙🀡🀡"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -417,6 +432,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀟🀠🀡🀇🀇🀏🀏🀏"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -433,6 +449,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀇🀇🀏🀏🀏🀐🀐🀐🀙🀙🀙🀡🀡🀡"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -449,6 +466,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀇🀇"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -465,6 +483,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀇🀇"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -481,6 +500,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀀🀀"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -497,6 +517,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀐🀑🀒🀖🀗🀘🀜🀝🀞🀟🀠🀡🀇🀇"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -513,6 +534,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀆🀆🀇🀈🀉🀍🀎🀏🀐🀑🀒🀙🀙🀙"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -560,6 +582,7 @@ private Yaku[] determinePonBasedYaku(const MahjongResult result, Environment env
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀄🀄🀄🀒🀒🀖🀗🀘🀜🀝🀞"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -576,6 +599,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀙🀙🀙🀠🀠🀡🀡🀡"d);
     game.closedHand.tiles[0].isNotOwn;
     game.closedHand.tiles[4].isNotOwn;
@@ -595,6 +619,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀙🀠🀠"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -612,6 +637,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.engine.creation;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀖🀗🀘🀙🀙"d);
     game.openHand.addKan("🀄🀄🀄🀄"d.convertToTiles);
     game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
@@ -632,6 +658,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.engine.creation;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀖🀗🀘🀙🀙🀚🀚🀚"d);
     game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
     game.openHand.addKan("🀌🀌🀌🀌"d.convertToTiles);
@@ -650,6 +677,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀅🀅🀅🀄🀄🀄🀆🀆🀖🀗🀘🀜🀝🀞"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -666,6 +694,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀇🀇🀇🀉🀊🀋🀐🀐🀐🀒🀒🀙🀙🀙"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -704,6 +733,7 @@ private Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHa
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀇🀇🀔🀔🀔🀙🀚🀛🀜🀝🀞🀟🀠🀡"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -720,6 +750,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀛🀛🀛🀓🀔🀕"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -736,6 +767,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀛🀛🀛🀓🀔🀕"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -752,6 +784,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀇🀈🀉🀊🀊🀐🀑🀒🀙🀚🀛🀠🀠🀠"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -768,6 +801,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀓🀓🀔🀔🀕🀕"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -784,6 +818,7 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀓🀓🀔🀔🀕🀕"d);
     auto result = scanHandForMahjong(game);
     Environment env = {

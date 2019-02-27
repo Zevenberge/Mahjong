@@ -69,6 +69,7 @@ class ResultScreen
 
 	private void placeTiles()
 	{
+        import mahjong.domain.result;
 		_tiles = _mahjongData.result.tiles.array;
 		float initialLeftBound = innerMargin.x;
 		float leftBound = initialLeftBound;

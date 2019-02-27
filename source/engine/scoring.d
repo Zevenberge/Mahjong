@@ -9,6 +9,7 @@ import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
+import mahjong.domain.result;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.domain.wrappers;
