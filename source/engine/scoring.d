@@ -13,10 +13,10 @@ import mahjong.domain.result;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.domain.wrappers;
+import mahjong.domain.yaku;
 import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
-import mahjong.engine.yaku;
 import mahjong.share.range;
 
 Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)

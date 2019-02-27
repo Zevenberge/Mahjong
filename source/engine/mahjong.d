@@ -15,7 +15,6 @@ import mahjong.domain.result;
 import mahjong.domain.set;
 import mahjong.domain.tile;
 import mahjong.engine.sort;
-import mahjong.engine.yaku; 
 import mahjong.share.range;
 import mahjong.share.numbers;
 
