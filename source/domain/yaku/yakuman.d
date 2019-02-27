@@ -27,14 +27,7 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     }
     if(environment.isFirstRound)
     {
-        if(environment.ownWind == PlayerWinds.east && environment.isSelfDraw)
-        {
-            yakus ~= Yaku.tenho;
-        }
-        if(environment.ownWind != PlayerWinds.east && environment.isSelfDraw)
-        {
-            yakus ~= Yaku.chiho;
-        }
+        yakus ~= environment.firstRoundYaku;
     }
     return yakus;
 }
@@ -107,6 +100,43 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.chiho]);
+}
+
+@("A mahjong in the first round on a discard is renho")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.south,
+            lastTile: game.closedHand.tiles[0],
+            isRiichi: false,
+            isFirstRound: true,
+            isSelfDraw: false,
+            isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.renho]);
+}
+
+private Yaku firstRoundYaku(const Environment environment)
+{
+    if(environment.isSelfDraw)
+    {
+        if(environment.ownWind == PlayerWinds.east)
+        {
+            return Yaku.tenho;
+        }
+        else
+        {
+            return Yaku.chiho;
+        }
+    }
+    else
+    {
+        return Yaku.renho;
+    }
 }
 
 private bool isNineGates(const MahjongResult result)
