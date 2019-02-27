@@ -30,3 +30,5 @@ Mahjong.*
 dub.userprefs
 
 bin/
+
+*.lst
