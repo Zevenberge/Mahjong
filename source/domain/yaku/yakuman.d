@@ -31,6 +31,10 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
         {
             yakus ~= Yaku.tenho;
         }
+        if(environment.ownWind != PlayerWinds.east && environment.isSelfDraw)
+        {
+            yakus ~= Yaku.chiho;
+        }
     }
     return yakus;
 }
@@ -85,6 +89,24 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.tenho]);
+}
+
+@("A non-east mahjong in the first round on a self-draw is chiho")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.south,
+            lastTile: game.closedHand.tiles[0],
+            isRiichi: false,
+            isFirstRound: true,
+            isSelfDraw: true,
+            isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.chiho]);
 }
 
 private bool isNineGates(const MahjongResult result)
