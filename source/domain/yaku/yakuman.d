@@ -21,7 +21,7 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     {
         yakus ~= Yaku.kokushiMusou;
     }
-    if(mahjongResult.isNineGates)
+    if(environment.isClosedHand && mahjongResult.isNineGates)
     {
         yakus ~= Yaku.chuurenPooto;
     }
@@ -58,12 +58,25 @@ unittest
             leadingWind: PlayerWinds.east, 
             ownWind: PlayerWinds.west,
             lastTile: game.closedHand.tiles[0],
-            isRiichi: false,
-            isSelfDraw: false,
-            isClosedHand: false
+            isClosedHand:true 
     };
     auto yaku = determineYaku(result, env);
     yaku.should.containOnly([Yaku.chuurenPooto]);
+}
+
+@("Nine gates should be closed")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.west, "🀐🀐🀐🀑🀒🀓🀔🀕🀕🀖🀗🀘🀘🀘"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.east, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isClosedHand:false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.not.contain([Yaku.chuurenPooto]);
 }
 
 @("An east mahjong in the first round on a self-draw is tenho")
