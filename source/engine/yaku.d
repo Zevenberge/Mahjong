@@ -689,6 +689,10 @@ private Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHa
     {
         yakus ~= Yaku.iipeikou;
     }
+    if(isClosedHand && result.hasTwoTimesTwoEqualChis)
+    {
+        yakus ~= Yaku.ryanPeikou;
+    }
     if(result.hasTripletChis)
     {
         yakus ~= Yaku.sanShoukuDoujun;
@@ -758,6 +762,38 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.containOnly([Yaku.sanShoukuDoujun]);
+}
+
+@("Two times two identical chis in a closed hand are ryan peikou")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀓🀓🀔🀔🀕🀕"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: true
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.containOnly([Yaku.ryanPeikou]);
+}
+
+@("Two times two identical chis in an open hand are tough luck")
+unittest
+{
+    import fluent.asserts;
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀇🀇🀈🀈🀉🀉🀓🀓🀔🀔🀕🀕"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+        leadingWind: PlayerWinds.south, 
+        ownWind: PlayerWinds.west,
+        lastTile: game.closedHand.tiles[0],
+        isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.length.should.equal(0);
 }
 
 size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
@@ -1245,24 +1281,27 @@ unittest
     result.isStraightFlush.should.equal(false);
 }
 
-private bool hasJustTwoEqualChis(const MahjongResult mahjongResult)
+private size_t countChiPairs(const MahjongResult mahjongResult)
 {
-    import std.range : drop;
     import mahjong.domain.set;
     // Until otherwise proven, assume that the result is reasonably sorted.
-    bool hasTwoEqualChis = false;
+    size_t amountOfPairs;
     for(size_t i = 0; i < mahjongResult.sets.length - 1; ++i)
     {
         auto set = mahjongResult.sets[i];
         auto secondSet = mahjongResult.sets[i+1];
         if(set.isChi && set.isSameAs(secondSet))
         {
-            if(hasTwoEqualChis) return false;
-            hasTwoEqualChis = true;
+            ++amountOfPairs;
             ++i; //
         }
     }
-    return hasTwoEqualChis;
+    return amountOfPairs;
+}
+
+private bool hasJustTwoEqualChis(const MahjongResult mahjongResult)
+{
+    return mahjongResult.countChiPairs == 1;
 }
 
 @("If a hand contains two equal chis, it is recognised as such")
@@ -1326,6 +1365,25 @@ unittest
     auto third = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.hasJustTwoEqualChis.should.equal(true);
+}
+
+private bool hasTwoTimesTwoEqualChis(const MahjongResult mahjongResult)
+{
+    return mahjongResult.countChiPairs == 2;
+}
+
+@("If a hand contains two times two equal chis, it is two chi pairs")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.set;
+    import mahjong.engine.creation;
+    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto third = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto fourth = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto result = MahjongResult(true, [first, second, third, fourth]);
+    result.hasTwoTimesTwoEqualChis.should.equal(true);
 }
 
 private bool hasTripletChis(const MahjongResult mahjongResult)

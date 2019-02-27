@@ -62,14 +62,9 @@ body
 	   See if the current hand is a legit mahjong hand.
 	   */
 	auto sortedHand = sortHand(hand);
-	// Run a dedicated scan for the weird hands, like Thirteen Orphans and Seven pairs, 
-	// but only if the hand has exactly 14 tiles.
+	// Run a dedicated scan for thirteen orphans
 	if(hand.length == 14) 
 	{
-		if(isSevenPairs(sortedHand))
-		{
-			return MahjongResult(true, [new SevenPairsSet(sortedHand)]);
-		}
 		if(isThirteenOrphans(sortedHand))
 		{ 
 			return MahjongResult(true, [new ThirteenOrphanSet(sortedHand)]);
@@ -81,7 +76,16 @@ body
 	sets ~= progress.pons;
 	sets ~= progress.chis;
 	sets ~= progress.pairs;
-	return MahjongResult(progress.isMahjong, sets);
+	auto result = MahjongResult(progress.isMahjong, sets);
+
+    if(hand.length == 14 && !progress.isMahjong) 
+    { // If we don't have a mahjong using normal hands, we check whether we have seven pairs
+        if(isSevenPairs(sortedHand))
+        {
+            return MahjongResult(true, [new SevenPairsSet(sortedHand)]);
+        }
+    }
+    return result;
 }
 
 private bool isSevenPairs(const Tile[] hand) pure
