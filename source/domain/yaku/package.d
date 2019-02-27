@@ -11,6 +11,7 @@ import mahjong.domain.yaku.hand;
 import mahjong.domain.yaku.pon;
 import mahjong.domain.yaku.riichi;
 import mahjong.domain.yaku.situational;
+import mahjong.domain.yaku.yakuman;
 
 enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu, 
     iipeikou, sanShoukuDoujun, itsu, fanpai, chanta, rinshanKaihou, chanKan, haitei, 
@@ -40,11 +41,16 @@ package const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Env
 }
 body
 {
+    import std.array : empty;
     if(mahjongResult.isNagashiMangan)
     {
         return [Yaku.nagashiMangan];
     }
-    Yaku[] yakus;
+    Yaku[] yakus = determineYakuman(mahjongResult, environment);
+    if(!yakus.empty) 
+    {
+        return yakus;
+    }
     yakus ~= determineRiichiRelatedYakus(environment);
     yakus ~= determineSituationalYaku(environment);
     yakus ~= determineWholeHandYaku(mahjongResult, environment);

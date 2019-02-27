@@ -49,6 +49,35 @@ unittest
     result.isSevenPairs.should.equal(false);
 }
 
+bool isThirteenOrphans(const MahjongResult result) pure
+{
+    return result.sets.length == 1 && cast(ThirteenOrphanSet)result.sets[0];
+}
+
+@("A thirteen orphans hand is seen as such")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new ThirteenOrphanSet(null)]);
+    result.isThirteenOrphans.should.equal(true);
+}
+
+@("Seven pairs is not thirteen orphans")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new SevenPairsSet(null)]);
+    result.isThirteenOrphans.should.equal(false);
+}
+
+@("A regular mahjong is not thirteen orphans")
+unittest
+{
+    import fluent.asserts;
+    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    result.isThirteenOrphans.should.equal(false);
+}
+
 bool isNagashiMangan(const MahjongResult result) pure
 {
     return result.sets.length == 1 && cast(NagashiManganSet)result.sets[0];
