@@ -1,5 +1,6 @@
 ﻿module mahjong.domain.yaku.pon;
 
+import mahjong.domain.enums;
 import mahjong.domain.result;
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
@@ -7,7 +8,6 @@ import mahjong.domain.yaku.environment;
 version(unittest)
 {
     import fluent.asserts;
-    import mahjong.domain.enums;
     import mahjong.domain.ingame;
     import mahjong.engine.mahjong;
 }

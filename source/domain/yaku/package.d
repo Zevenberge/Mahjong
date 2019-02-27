@@ -18,14 +18,14 @@ enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu,
     chiiToitsu, sanShokuDokou, sanAnkou, sanKanTsu, toiToiHou, honitsu, shouSangen, 
     honroutou, junchan, ryanPeikou, chinitsu, nagashiMangan,
     kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, suuKanTsu, ryuuIisou, 
-    chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii};
+    chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii}
 
 const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
-    in
+in
 {
     assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");
 }
-body
+do
 {
     auto leadingWind = metagame.leadingWind;
     auto ownWind = player.wind;
