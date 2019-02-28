@@ -260,7 +260,7 @@ unittest
     result.countFanpai(PlayerWinds.east, PlayerWinds.east).should.equal(2);
 }
 
-private size_t amountOfConsealedPons(const MahjongResult result)
+package size_t amountOfConsealedPons(const MahjongResult result)
 {
     import std.algorithm : count;
     import mahjong.domain.set;

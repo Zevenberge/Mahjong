@@ -6,6 +6,7 @@ import mahjong.domain.set;
 import mahjong.domain.tile;
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
+import mahjong.domain.yaku.pon;
 
 version(unittest)
 {
@@ -28,6 +29,10 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     if(environment.isFirstRound)
     {
         yakus ~= environment.firstRoundYaku;
+    }
+    if(mahjongResult.amountOfConsealedPons == 4)
+    {
+        yakus ~= Yaku.suuAnkou;
     }
     return yakus;
 }
@@ -131,6 +136,22 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.renho]);
+}
+
+@("Four consealed pons is suu ankou")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀔🀔🀔🀙🀙🀙🀠🀠"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+    leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isSelfDraw: true,
+            isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.suuAnkou]);
 }
 
 private Yaku firstRoundYaku(const Environment environment)
