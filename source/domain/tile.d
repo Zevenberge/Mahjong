@@ -183,6 +183,56 @@ unittest
     dragon.isWind.should.equal(false);
 }
 
+bool isGreen(const ComparativeTile tile) @property pure
+{
+    static immutable theGreens = [
+        ComparativeTile(Types.dragon, Dragons.green),
+        ComparativeTile(Types.bamboo, Numbers.two),
+        ComparativeTile(Types.bamboo, Numbers.three),
+        ComparativeTile(Types.bamboo, Numbers.four),
+        ComparativeTile(Types.bamboo, Numbers.six),
+        ComparativeTile(Types.bamboo, Numbers.eight)];
+    static foreach(greenTile; theGreens)
+    {
+        if(greenTile == tile) return true;
+    }
+    return false;
+}
+
+@("Are green tiles green")
+unittest
+{
+    import fluent.asserts;
+    auto greenDragon = ComparativeTile(Types.dragon, Dragons.green);
+    greenDragon.isGreen.should.equal(true);
+    auto bambooTwo = ComparativeTile(Types.bamboo, Numbers.two);
+    bambooTwo.isGreen.should.equal(true);
+    auto bambooThree = ComparativeTile(Types.bamboo, Numbers.three);
+    bambooThree.isGreen.should.equal(true);
+    auto bambooFour = ComparativeTile(Types.bamboo, Numbers.four);
+    bambooFour.isGreen.should.equal(true);
+    auto bambooSix = ComparativeTile(Types.bamboo, Numbers.six);
+    bambooSix.isGreen.should.equal(true);
+    auto bambooEight = ComparativeTile(Types.bamboo, Numbers.eight);
+    bambooEight.isGreen.should.equal(true);
+}
+
+@("Are not green tiles not green")
+unittest
+{
+    import fluent.asserts;
+    auto redDragon = ComparativeTile(Types.dragon, Dragons.red);
+    redDragon.isGreen.should.equal(false);
+    auto bambooOne = ComparativeTile(Types.bamboo, Numbers.one);
+    bambooOne.isGreen.should.equal(false);
+    auto bambooFive = ComparativeTile(Types.bamboo, Numbers.five);
+    bambooFive.isGreen.should.equal(false);
+    auto bambooSeven = ComparativeTile(Types.bamboo, Numbers.seven);
+    bambooSeven.isGreen.should.equal(false);
+    auto characterTwo = ComparativeTile(Types.character, Numbers.two);
+    characterTwo.isGreen.should.equal(false);
+}
+
 bool isDora(const Tile tile) @property pure
 {
     return tile.dora > 0;
@@ -480,3 +530,29 @@ unittest
         ComparativeTile(Types.wind, Winds.east)]
         .hasTerminal.should.equal(false);
 }
+
+bool isAllGreens(Range)(Range range) pure
+    if(isRangeOfTiles!Range)
+{
+    import std.algorithm : all;
+    return range.all!(t => t.isGreen);
+}
+
+@("Is all greens recognised")
+unittest
+{
+    import fluent.asserts;
+    auto greens = [ComparativeTile(Types.dragon, Dragons.green),
+        ComparativeTile(Types.bamboo, Numbers.two)];
+    greens.isAllGreens.should.equal(true);
+}
+
+@("Does not all greens not give a false positive")
+unittest
+{
+    import fluent.asserts;
+    auto greens = [ComparativeTile(Types.dragon, Dragons.red),
+        ComparativeTile(Types.bamboo, Numbers.two)];
+    greens.isAllGreens.should.equal(false);
+}
+
