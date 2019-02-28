@@ -54,6 +54,10 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     {
         yakus ~= Yaku.daiSangen;
     }
+    if(mahjongResult.isFourSmallWinds)
+    {
+        yakus ~= Yaku.shouSuushii;
+    }
     return yakus;
 }
 
@@ -263,6 +267,21 @@ unittest
     yaku.should.equal([Yaku.daiSangen]);
 }
 
+@("Small winds is shou suushii ")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.shouSuushii]);
+}
+
 private Yaku firstRoundYaku(const Environment environment)
 {
     if(environment.isSelfDraw)
@@ -425,4 +444,64 @@ unittest
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
     auto result = MahjongResult(true, [greens, reds, bamboo]);
     result.isThreeBigDragons.should.equal(false);
+}
+
+private bool isFourSmallWinds(const MahjongResult result)
+{
+    bool hasPair = false;
+    size_t amountOfPons;
+    foreach(set; result.sets)
+    {
+        if(!set.isSetOf(Types.wind)) continue;
+        if(set.isPair) hasPair = true;
+        else amountOfPons++;
+    }
+    return hasPair && amountOfPons == 3;
+}
+
+@("Three pons and a pair of winds is small winds")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
+    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
+    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto result = MahjongResult(true, [easts, souths, wests, norths]);
+    result.isFourSmallWinds.should.equal(true);
+}
+
+@("Four pons of winds is not small winds")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
+    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
+    auto norths = new PonSet("🀃🀃🀃"d.convertToTiles);
+    auto result = MahjongResult(true, [easts, souths, wests, norths]);
+    result.isFourSmallWinds.should.equal(false);
+}
+
+@("Two pons and a pair of winds is not small winds")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
+    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto result = MahjongResult(true, [easts, souths, norths]);
+    result.isFourSmallWinds.should.equal(false);
+}
+
+@("Non-winds do not count towards small winds")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
+    auto dragons = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto result = MahjongResult(true, [easts, souths, dragons, norths]);
+    result.isFourSmallWinds.should.equal(false);
 }
