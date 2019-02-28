@@ -475,7 +475,7 @@ unittest
     import fluent.asserts;
     [ComparativeTile(Types.dragon, Dragons.green),
         ComparativeTile(Types.wind, Winds.east)]
-        .isAllHonourOrTerminal.should.equal(true);
+        .isAllHonour.should.equal(true);
 }
 
 @("Non honours make the set not have only honours")
@@ -484,6 +484,30 @@ unittest
     import fluent.asserts;
     [ComparativeTile(Types.ball, Numbers.one)]
         .isAllHonour.should.equal(false);
+}
+
+bool isAllTerminal(Range)(Range range)
+    if(isRangeOfTiles!Range)
+{
+    import std.algorithm : all;
+    return range.all!(t => t.isTerminal);
+}
+
+@("Is all terminals recognised")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.bamboo, Numbers.one),
+        ComparativeTile(Types.character, Numbers.nine)]
+        .isAllTerminal.should.equal(true);
+}
+
+@("Non terminals make the set not have only terminals")
+unittest
+{
+    import fluent.asserts;
+    [ComparativeTile(Types.wind, Winds.east)]
+        .isAllTerminal.should.equal(false);
 }
 
 bool hasTerminal(Range)(Range range)

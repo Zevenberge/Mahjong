@@ -42,6 +42,10 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     {
         yakus ~= Yaku.ryuuIisou;
     }
+    if(mahjongResult.tiles.isAllTerminal)
+    {
+        yakus ~= Yaku.chinrouto;
+    }
     return yakus;
 }
 
@@ -198,6 +202,24 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.ryuuIisou]);
+}
+
+@("All terminals is chinrouto")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.east, "🀇🀇🀇🀏🀏🀏🀙🀙🀙🀡🀡🀐🀐"d);
+    auto tile = new Tile(Types.bamboo, Numbers.one);
+    tile.origin = new Ingame(PlayerWinds.west);
+    game.pon(tile);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.chinrouto]);
 }
 
 private Yaku firstRoundYaku(const Environment environment)
