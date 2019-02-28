@@ -58,6 +58,10 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     {
         yakus ~= Yaku.shouSuushii;
     }
+    if(mahjongResult.isFourBigWinds)
+    {
+        yakus ~= Yaku.daiSuushii;
+    }
     return yakus;
 }
 
@@ -282,6 +286,24 @@ unittest
     yaku.should.equal([Yaku.shouSuushii]);
 }
 
+@("Big winds is dai suushii ")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀙🀙"d);
+    auto tile = new Tile(Types.wind, Winds.north);
+    tile.origin = new Ingame(PlayerWinds.south);
+    game.pon(tile);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.daiSuushii]);
+}
+
 private Yaku firstRoundYaku(const Environment environment)
 {
     if(environment.isSelfDraw)
@@ -504,4 +526,46 @@ unittest
     auto norths = new PairSet("🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, dragons, norths]);
     result.isFourSmallWinds.should.equal(false);
+}
+
+private bool isFourBigWinds(const MahjongResult result)
+{
+    import std.algorithm : count;
+    return result.sets.count!(t => t.isSetOf(Types.wind) && t.isPon) == 4;
+}
+
+@("Four pons of winds is big winds")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
+    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
+    auto norths = new PonSet("🀃🀃🀃"d.convertToTiles);
+    auto result = MahjongResult(true, [easts, souths, wests, norths]);
+    result.isFourBigWinds.should.equal(true);
+}
+
+@("Three pons and a pair of winds is not big winds")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
+    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
+    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto result = MahjongResult(true, [easts, souths, wests, norths]);
+    result.isFourBigWinds.should.equal(false);
+}
+
+@("Other pons do not make for big winds")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
+    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
+    auto dragons = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto norths = new PonSet("🀃🀃🀃"d.convertToTiles);
+    auto result = MahjongResult(true, [easts, souths, dragons, norths]);
+    result.isFourBigWinds.should.equal(false);
 }
