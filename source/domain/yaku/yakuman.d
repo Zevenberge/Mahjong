@@ -50,6 +50,10 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     {
         yakus ~= Yaku.tsuuIisou;
     }
+    if(mahjongResult.isThreeBigDragons)
+    {
+        yakus ~= Yaku.daiSangen;
+    }
     return yakus;
 }
 
@@ -244,6 +248,21 @@ unittest
     yaku.should.equal([Yaku.tsuuIisou]);
 }
 
+@("Three pons of dragon is dai sangen")
+unittest
+{
+    auto game = new Ingame(PlayerWinds.east, "🀅🀅🀅🀄🀄🀄🀆🀆🀆🀖🀗🀘🀜🀜"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.daiSangen]);
+}
+
 private Yaku firstRoundYaku(const Environment environment)
 {
     if(environment.isSelfDraw)
@@ -367,4 +386,43 @@ unittest
     auto nines = new PonSet("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [ones, twoThreeFour, fives, sixSevenEight, nines]);
     result.isNineGates.should.equal(false);
+}
+
+private bool isThreeBigDragons(const MahjongResult result)
+{
+    import std.algorithm : count;
+    return result.sets.count!(s => s.isSetOf(Types.dragon) && s.isPon) == 3;
+}
+
+@("A mahjong with three dragons pons is three big dragons")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
+    auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto whites = new PonSet("🀆🀆🀆"d.convertToTiles);
+    auto result = MahjongResult(true, [greens, reds, whites]);
+    result.isThreeBigDragons.should.equal(true);
+}
+
+@("A mahjong with less than three dragon pons is not three big dragons")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
+    auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto whites = new PairSet("🀆🀆"d.convertToTiles);
+    auto result = MahjongResult(true, [greens, reds, whites]);
+    result.isThreeBigDragons.should.equal(false);
+}
+
+@("A mahjong with pons other than dragon is not three big dragons")
+unittest
+{
+    import mahjong.engine.creation : convertToTiles;
+    auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
+    auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto result = MahjongResult(true, [greens, reds, bamboo]);
+    result.isThreeBigDragons.should.equal(false);
 }
