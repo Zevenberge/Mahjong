@@ -71,7 +71,7 @@ unittest
     game.closedHand.tiles[7].isNotOwn;
     auto result = scanHandForMahjong(game);
     Environment env = {
-    leadingWind: PlayerWinds.south, 
+            leadingWind: PlayerWinds.south, 
             ownWind: PlayerWinds.west,
             lastTile: game.closedHand.tiles[0],
             isClosedHand: false
@@ -88,7 +88,7 @@ unittest
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀙🀠🀠"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
-    leadingWind: PlayerWinds.south, 
+            leadingWind: PlayerWinds.south, 
             ownWind: PlayerWinds.west,
             lastTile: game.closedHand.tiles[0],
             isClosedHand: false
@@ -109,7 +109,7 @@ unittest
     game.openHand.addKan("🀌🀌🀌🀌"d.convertToTiles);
     auto result = scanHandForMahjong(game);
     Environment env = {
-    leadingWind: PlayerWinds.south, 
+            leadingWind: PlayerWinds.south, 
             ownWind: PlayerWinds.west,
             lastTile: game.closedHand.tiles[0],
             isClosedHand: false
@@ -313,7 +313,7 @@ unittest
     result.amountOfConsealedPons.should.equal(0);
 }
 
-private size_t amountOfKans(const MahjongResult result)
+package size_t amountOfKans(const MahjongResult result)
 {
     import std.algorithm : count;
     import mahjong.domain.set;

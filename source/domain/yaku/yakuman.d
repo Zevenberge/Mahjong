@@ -34,6 +34,10 @@ package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environ
     {
         yakus ~= Yaku.suuAnkou;
     }
+    if(mahjongResult.amountOfKans == 4)
+    {
+        yakus ~= Yaku.suuKanTsu;
+    }
     return yakus;
 }
 
@@ -144,7 +148,7 @@ unittest
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀔🀔🀔🀙🀙🀙🀠🀠"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
-    leadingWind: PlayerWinds.south, 
+            leadingWind: PlayerWinds.south, 
             ownWind: PlayerWinds.west,
             lastTile: game.closedHand.tiles[0],
             isSelfDraw: true,
@@ -152,6 +156,29 @@ unittest
     };
     auto yaku = determineYaku(result, env);
     yaku.should.equal([Yaku.suuAnkou]);
+}
+
+@("Four kans is suu kan tsu")
+unittest
+{
+    import mahjong.engine.creation;
+    auto game = new Ingame(PlayerWinds.east, "🀠🀠"d);
+    auto claimedTile = new Tile(Types.dragon, Dragons.red);
+    claimedTile.origin = new Ingame(PlayerWinds.west, ""d);
+    game.openHand.addKan("🀄🀄🀄"d.convertToTiles ~ claimedTile);
+    game.openHand.addKan("🀙🀙🀙🀙"d.convertToTiles);
+    game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
+    game.openHand.addKan("🀌🀌🀌🀌"d.convertToTiles);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.south, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isSelfDraw: true,
+            isClosedHand: false
+    };
+    auto yaku = determineYaku(result, env);
+    yaku.should.equal([Yaku.suuKanTsu]);
 }
 
 private Yaku firstRoundYaku(const Environment environment)
