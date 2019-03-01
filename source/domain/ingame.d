@@ -93,6 +93,22 @@ class Ingame
         _claimedDiscards ~= tile;
     }
 
+    void aTileHasBeenClaimed() pure
+    {
+        _isFirstTurnAfterRiichi = false;
+    }
+
+    @("When someone claims a tile, it is no longer the first turn after riichi")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.declareRiichi(toBeDiscardedTile, false);
+        ingame.aTileHasBeenClaimed;
+        ingame.isFirstTurnAfterRiichi.should.equal(false);
+    }
+
     bool isNagashiMangan() @property pure const
     {
         return openHand.isClosedHand && allDiscards.all!(t => t.isHonour || t.isTerminal);
@@ -658,9 +674,12 @@ class Ingame
     {
         _isRiichi = true;
         _isDoubleRiichi = isFirstTurn;
-        return this.discard(discard);
+        auto discardedTile = this.discard(discard);
+        _isFirstTurnAfterRiichi = true;
+        return discardedTile;
     }
 
+    @("Can I declare riichi")
     unittest
     {
         import fluent.asserts;
@@ -675,6 +694,7 @@ class Ingame
         ingame.discards.should.equal([toBeDiscardedTile]);
     }
 
+    @("Is a riichi declaration in the first turn double riichi")
     unittest
     {
         import fluent.asserts;
@@ -685,8 +705,19 @@ class Ingame
         ingame.isDoubleRiichi.should.equal(true);
     }
 
+    @("If I declare riichi, is it the first turn after riichi")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.declareRiichi(toBeDiscardedTile, false);
+        ingame.isFirstTurnAfterRiichi.should.equal(true);
+    }
+
     private bool _isRiichi;
     private bool _isDoubleRiichi;
+    private bool _isFirstTurnAfterRiichi;
 
     bool isRiichi() @property pure const
     {
@@ -698,6 +729,19 @@ class Ingame
         return _isDoubleRiichi;
     }
 
+    bool isFirstTurnAfterRiichi() @property pure const
+    {
+        return _isFirstTurnAfterRiichi;
+    }
+
+    @("Is first turn after riichi is by default false until a riichi is declared")
+    unittest
+    {
+        import fluent.asserts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        ingame.isFirstTurnAfterRiichi.should.equal(false);
+    }
+
     bool isMahjong() pure const
     {
         return scanHandForMahjong(this).isMahjong;
@@ -705,11 +749,28 @@ class Ingame
 
     Tile discard(const Tile discardedTile)
     {
+        _isFirstTurnAfterRiichi = false;
         auto tile = closedHand.removeTile(discardedTile);
         _discards ~= tile;
         tile.origin = this;
         tile.open;
         return tile;
+    }
+
+    @("After a discard after a riichi, it is no longer considered the first turn after riichi")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.declareRiichi(toBeDiscardedTile, false);
+        auto wall = new Wall(new DefaultGameOpts);
+        wall.setUp;
+        wall.dice;
+        ingame.drawTile(wall);
+        ingame.discard(ingame.lastTile);
+        ingame.isFirstTurnAfterRiichi.should.equal(false);
     }
 
     private Tile _lastTile; 
@@ -735,6 +796,7 @@ class Ingame
         startTurn;
     }
 
+    @("If I draw a tile, does my temporary furiten resolve?")
     unittest
     {
         import fluent.asserts;
@@ -752,6 +814,7 @@ class Ingame
             .because("after drawing a tile, the temporary furiten should resolve");
     }
 
+    @("A temporary furiten should not resolve when I am riichi")
     unittest
     {
         import fluent.asserts;
@@ -769,6 +832,21 @@ class Ingame
         ingame.drawTile(wall);
         ingame.isFuriten.should.equal(true)
             .because("when sitting riichi, a furiten does no longer resolve"); 
+    }
+
+    @("If I draw a tile from the wall, it is still the first turn after riichi")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.declareRiichi(toBeDiscardedTile, false);
+        auto wall = new Wall(new DefaultGameOpts);
+        wall.setUp;
+        wall.dice;
+        ingame.drawTile(wall);
+        ingame.isFirstTurnAfterRiichi.should.equal(true);
     }
 
     private void startTurn()

@@ -369,8 +369,13 @@ class Metagame
     void aTileHasBeenClaimed()
     {
         _isFirstTurn = false;
+        foreach(player; players)
+        {
+            player.aTileHasBeenClaimed;
+        }
     }
 
+    @("When a tile has been claimed, the first round is over")
     unittest
     {
         import fluent.asserts;
@@ -382,6 +387,23 @@ class Metagame
         metagame.aTileHasBeenClaimed;
         metagame.isFirstTurn.should.equal(false)
             .because("all players already had a turn");
+    }
+
+    @("When a tile has been claimed, players are no longer in their first turn after riichi")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        player.game = ingame;
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.declareRiichi(toBeDiscardedTile, metagame);
+        metagame.aTileHasBeenClaimed;
+        ingame.isFirstTurnAfterRiichi.should.equal(false);
     }
 
 	bool isAbortiveDraw() @property
