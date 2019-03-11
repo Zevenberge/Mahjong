@@ -224,7 +224,8 @@ unittest
     auto player3 = new Player();
     player3.game = new Ingame(PlayerWinds.west);
     auto tile = new Tile(Types.dragon, Dragons.red);
-    tile.origin = player2;
+    tile.isDrawnBy(player2);
+    tile.isDiscarded;
     player1.ron(tile);
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
@@ -248,7 +249,8 @@ unittest
     player3.game = new Ingame(PlayerWinds.west);
     player3.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
     auto tile = new Tile(Types.dragon, Dragons.red);
-    tile.origin = player2;
+    tile.isDrawnBy(player2);
+    tile.isDiscarded;
     player1.ron(tile);
     player3.ron(tile);
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
@@ -275,7 +277,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     }
     else
     {
-        auto payingPlayer = metagame.players.first!(p => p.game == data.player.lastTile.origin);
+        auto payingPlayer = metagame.players.first!(p => data.player.lastTile.isOwnedBy(p));
         transactions ~= new Transaction(payingPlayer, -payment.ron);
     }
     transactions ~= new Transaction(data.player, payment.ron);

@@ -78,7 +78,7 @@ class OpenHandVisuals
 	{
 		foreach(i, set; _sets)
 		{
-			set.update(_hand.sets[i]);
+			set.update(_hand.sets[i], _ingame);
 		}
 	}
 
@@ -106,10 +106,10 @@ class SetVisual
 		_set.each!(t => t.drawTile(view));
 	}
 
-	void update(const(Set) set)
+	void update(const(Set) set, const Ingame ingame)
 	{
 		if(set.tiles.length == _set.length) return;
-		placeAdditionalKanTile(set.tiles.back);
+		placeAdditionalKanTile(set.tiles.back, ingame);
 	}
 
     private const size_t _amountOfPlayers;
@@ -122,7 +122,7 @@ class SetVisual
 		foreach(tile; _set)
 		{
 			tile.display;
-			rightBound = placeTileAndReturnItsLeftBound(tile, rightBound);
+			rightBound = placeTileAndReturnItsLeftBound(tile, ingame, rightBound);
 		}
 		flipTilesfaceDownIfTheSetIsAClosedKan;
 	}
@@ -131,9 +131,9 @@ class SetVisual
 	{
 		if(isClosedKan) return;
 		auto isKan = _set.length == 4;
-		auto tileFromOtherPlayer = _set.first!(t => t.origin !is null);
+		auto tileFromOtherPlayer = _set.first!(t => !t.isOwnedBy(ingame));
 		_set.remove!((a, b) => a == b)(tileFromOtherPlayer);
-		auto differenceInWinds = (tileFromOtherPlayer.origin.wind - ingame.wind + _amountOfPlayers) 
+		auto differenceInWinds = (tileFromOtherPlayer.owningWind - ingame.wind + _amountOfPlayers) 
 			% _amountOfPlayers;
 		auto location = differenceInWinds - 1;
 		info("Location is ", location);
@@ -153,9 +153,10 @@ class SetVisual
 		}
 	}
 
-	private float placeTileAndReturnItsLeftBound(const Tile tile, float rightBound)
+	private float placeTileAndReturnItsLeftBound(const Tile tile, 
+		const Ingame ingame, float rightBound)
 	{
-		return tile.origin is null ?
+		return tile.isOwnedBy(ingame) ?
 			placeTileVertically(tile, rightBound) :
 			placeTileHorizontally(tile, rightBound);
 	}
@@ -177,11 +178,11 @@ class SetVisual
 		return rightBound - size.y;
 	}
 
-	private void placeAdditionalKanTile(const Tile tile)
+	private void placeAdditionalKanTile(const Tile tile, const Ingame ingame)
 	{
 		_set ~= tile;
 		tile.display;
-		auto horizontalTile = _set.first!(t => t.origin !is null);
+		auto horizontalTile = _set.first!(t => !t.isOwnedBy(ingame));
 		auto coordsOfHorizontalTile = horizontalTile.getCoords;
 		auto topLeft = Vector2f(coordsOfHorizontalTile.x,
 			coordsOfHorizontalTile.y - drawingOpts.tileWidth);
@@ -198,7 +199,7 @@ class SetVisual
 
 	private bool isClosedKan()
 	{
-		return _set.length == 4 && !_set.any!(t => t.origin !is null);
+		return _set.length == 4 && _set.all!(t => t.isSelfDraw);
 	}
 
 	private FloatRect getGlobalBounds()
@@ -216,7 +217,10 @@ unittest
 	auto firstIngame = new Ingame(PlayerWinds.south);
 	auto secondIngame = new Ingame(PlayerWinds.west);
 	auto tiles = "🀡🀡🀡"d.convertToTiles;
-	tiles[0].origin = secondIngame;
+	tiles[0].isDrawnBy(secondIngame);
+	tiles[0].isDiscarded;
+	tiles[1].isDrawnBy(firstIngame);
+	tiles[2].isDrawnBy(firstIngame);
 	firstIngame.openHand.addPon(tiles);
 	draw(firstIngame.openHand, firstIngame, AmountOfPlayers(4), new RenderTexture);
 	assert(_hands.length == 1, "One open hand visual should have been created");
@@ -234,7 +238,10 @@ unittest
 	auto firstIngame = new Ingame(PlayerWinds.south);
 	auto secondIngame = new Ingame(PlayerWinds.west);
 	auto tiles = "🀡🀡🀡"d.convertToTiles;
-	tiles[0].origin = secondIngame;
+	tiles[0].isDrawnBy(secondIngame);
+	tiles[0].isDiscarded;
+	tiles[1].isDrawnBy(firstIngame);
+	tiles[2].isDrawnBy(firstIngame);
 	firstIngame.openHand.addPon(tiles);
 	draw(firstIngame.openHand, firstIngame, AmountOfPlayers(4),new RenderTexture);
 	draw(firstIngame.openHand, firstIngame, AmountOfPlayers(4), new RenderTexture);
@@ -254,10 +261,13 @@ unittest
 	auto firstIngame = new Ingame(PlayerWinds.south);
 	auto secondIngame = new Ingame(PlayerWinds.west);
 	auto tiles = "🀡🀡🀡"d.convertToTiles;
-	auto kanTile = "🀡"d.convertToTiles[0];
-	tiles[0].origin = secondIngame;
+	tiles[0].isDrawnBy(secondIngame);
+	tiles[0].isDiscarded;
+	tiles[1].isDrawnBy(firstIngame);
+	tiles[2].isDrawnBy(firstIngame);
 	firstIngame.openHand.addPon(tiles);
 	draw(firstIngame.openHand, firstIngame, AmountOfPlayers(2), new RenderTexture);
+	auto kanTile = "🀡"d.convertToTiles[0];
 	firstIngame.openHand.promoteToKan(kanTile);
 	draw(firstIngame.openHand, firstIngame, AmountOfPlayers(2), new RenderTexture);
 	// Drawing a second time should update the set.
@@ -276,6 +286,7 @@ unittest
 	styleOpts = new DefaultStyleOpts;
 	auto firstIngame = new Ingame(PlayerWinds.south);
 	auto tiles = "🀡🀡🀡🀡"d.convertToTiles;
+	tiles.each!(t => t.isDrawnBy(firstIngame));
 	firstIngame.openHand.addKan(tiles);
 	draw(firstIngame.openHand, firstIngame, AmountOfPlayers(4), new RenderTexture);
 	assert(_hands.length == 1, "One open hand visual should have been created");

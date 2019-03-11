@@ -459,7 +459,7 @@ class Metagame
         {
             player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
             auto kannableTile = "🀕"d.convertToTiles[0];
-            kannableTile.origin = new Ingame(PlayerWinds.north);
+            kannableTile.isNotOwn;
             player.kan(kannableTile, metagame.wall);
         }
         metagame.initializeRound;

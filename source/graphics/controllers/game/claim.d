@@ -108,7 +108,8 @@ unittest
 	{
 		claimingPlayer.game.closedHand.tiles = tilesOfClaimingPlayer.convertToTiles;
 		auto discardedTile = discard.convertToTiles[0];
-		discardedTile.origin = discardingPlayer.game;
+		discardedTile.isDrawnBy(discardingPlayer);
+		discardedTile.isDiscarded;
 		return new ClaimOptionFactory(claimingPlayer, discardedTile, metagame, 
 			new ClaimEvent(discardedTile, claimingPlayer, metagame));
 	}

@@ -14,7 +14,7 @@ abstract class Set
     bool isOpen() @property pure const
     {
         import std.algorithm : any;
-        return tiles.any!(t => t.origin !is null);
+        return tiles.any!(t => t.isObtainedFromADiscard);
     }
 }
 
@@ -228,7 +228,7 @@ unittest
     auto normalPon = "🀝🀝🀝"d.convertToTiles;
     auto ponSet = new PonSet(normalPon);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 4, "A closed normal is 4 points");
-    normalPon[0].origin = new Ingame(PlayerWinds.east);
+    normalPon[0].isDiscarded;
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 2, "An open normal pon is 2");
 }
 
@@ -240,7 +240,7 @@ unittest
     auto terminalPon = "🀡🀡🀡"d.convertToTiles;
     auto ponSet = new PonSet(terminalPon);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 8, "A closed terminal is 8 points");
-    terminalPon[0].origin = new Ingame(PlayerWinds.east);
+    terminalPon[0].isDiscarded;
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 4, "An open terminal pon is 4");
 }
 
@@ -252,7 +252,7 @@ unittest
     auto honourPon = "🀃🀃🀃"d.convertToTiles;
     auto ponSet = new PonSet(honourPon);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 8, "A closed honour is 8 points");
-    honourPon[0].origin = new Ingame(PlayerWinds.east);
+    honourPon[0].isDiscarded;
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 4, "An open honour pon is 4");
 }
 
@@ -264,7 +264,7 @@ unittest
     auto normalKan = "🀝🀝🀝🀝"d.convertToTiles;
     auto ponSet = new PonSet(normalKan);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 16, "A closed normal kan is 16 points");
-    normalKan[0].origin = new Ingame(PlayerWinds.east);
+    normalKan[0].isDiscarded;
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 8, "An open normal kan is 8");
 }
 
@@ -276,7 +276,7 @@ unittest
     auto terminalKan = "🀡🀡🀡🀡"d.convertToTiles;
     auto ponSet = new PonSet(terminalKan);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 32, "A closed terminal is 32 points");
-    terminalKan[0].origin = new Ingame(PlayerWinds.east);
+    terminalKan[0].isDiscarded;
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 16, "An open terminal pon is 16");
 }
 
@@ -288,7 +288,7 @@ unittest
     auto honourKan = "🀃🀃🀃🀃"d.convertToTiles;
     auto ponSet = new PonSet(honourKan);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 32, "A closed honour is 32 points");
-    honourKan[0].origin = new Ingame(PlayerWinds.east);
+    honourKan[0].isDiscarded;
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 16, "An open honour pon is 16");
 }
 

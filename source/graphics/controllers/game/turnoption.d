@@ -122,14 +122,19 @@ version(unittest)
         Player player, Metagame metagame, bool canCancel = true)
     {
         player.closedHand.tiles = tilesOfTurnPlayer.convertToTiles;
-        auto discardedTile = player.closedHand.tiles[indexOfDiscard];
-        writeln("Discarding ", discardedTile);
-        return new TurnOptionFactory(discardedTile,
+        foreach(tile; player.closedHand.tiles) 
+        {
+            tile.isDrawnBy(player);
+        }
+        auto selectedTile = player.closedHand.tiles[indexOfDiscard];
+        writeln("Selecting ", selectedTile);
+        return new TurnOptionFactory(selectedTile,
             new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService),
-                metagame, player, discardedTile), canCancel);
+                metagame, player, selectedTile), canCancel);
     }
 }
 
+@("When all other fails, the discard and cancel options are still present")
 unittest
 {
     import std.array;
@@ -152,6 +157,7 @@ unittest
     factory.isDiscardTheOnlyOption.should.equal(true);
 }
 
+@("When being mahjong with a closed hand, one can tsumo and declare riichi")
 unittest
 {
     import std.array;

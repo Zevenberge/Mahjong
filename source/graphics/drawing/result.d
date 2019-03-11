@@ -83,7 +83,7 @@ class ResultScreen
 			}
 			foreach(tile; set.tiles)
 			{
-				if(tile.origin is null)
+				if(tile.isOwnedBy(_mahjongData.player))
 				{
 					tile.move(FloatCoords(Vector2f(leftBound, topBound), 0));
 					leftBound += drawingOpts.tileWidth;

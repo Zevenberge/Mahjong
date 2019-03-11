@@ -8,23 +8,29 @@ import mahjong.domain.enums;
 import mahjong.domain.ingame;
 
 class Tile
-{ 
+{
+    private enum Origin
+    {
+        drawn,
+        kanReplacement,
+        discard,
+        kanSteal
+    }
     const ComparativeTile _;
     alias _ this;
     const UUID id;
 
     int dora = 0;
-    Ingame origin = null;
-    bool isOwn() @property pure const
-    {
-        return origin is null;
-    }
+
+    private Origin _origin;
+    private Ingame _originalOwner;
 
     version(unittest)
     {
         void isNotOwn()
         {
-            origin = new Ingame(PlayerWinds.autumn);
+            _origin = Origin.discard;
+            _originalOwner = new Ingame(PlayerWinds.autumn);
         }
     }
     
@@ -61,9 +67,33 @@ class Tile
         return id == other.id;
     }
 
+    void isDrawnBy(Ingame player) pure
+    {
+        _origin = Origin.drawn;
+        _originalOwner = player;
+    }
+
+    void isKanReplacementFor(Ingame player) pure
+    {
+        _origin = Origin.kanReplacement;
+        _originalOwner = player;
+    }
+
+    void isDiscarded() pure
+    {
+        _origin = Origin.discard;
+        _isOpen = true;
+    }
+
+    void isStolenFromKan() pure
+    {
+        _origin = Origin.kanSteal;
+        _isOpen = true;
+    }
+
     void claim()
     {
-        origin.discardIsClaimed(this);
+        _originalOwner.discardIsClaimed(this);
     }
 }
 
@@ -73,6 +103,128 @@ unittest
     assert(tile.isIdentical(tile), "Tile was not identical with itself");
     auto anotherTile = new Tile(Types.wind, 4);
     assert(!tile.isIdentical(anotherTile), "Tile was a different tile");
+}
+
+bool isOwnedBy(const Tile tile, const Ingame player) pure
+{
+    return tile._originalOwner is player;
+}
+
+@("If a player draws a tile, are they the owner")
+unittest
+{
+    import fluent.asserts;
+    auto player = new Ingame(PlayerWinds.east);
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isDrawnBy(player);
+    tile.isOwnedBy(player).should.equal(true);
+}
+
+PlayerWinds owningWind(const Tile tile) pure
+{
+    return tile._originalOwner.wind;
+}
+
+bool isSelfDraw(const Tile tile) pure
+{
+    return !tile.isObtainedFromADiscard;
+}
+
+@("A tile that was drawn is a self draw")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isDrawnBy(new Ingame(PlayerWinds.east));
+    tile.isSelfDraw.should.equal(true);
+}
+
+@("A discarded tile is not a self draw")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isDiscarded;
+    tile.isSelfDraw.should.equal(false);
+}
+
+@("A kan replacement is a self draw")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isKanReplacementFor(new Ingame(PlayerWinds.east));
+    tile.isSelfDraw.should.equal(true);
+}
+
+bool isObtainedFromADiscard(const Tile tile) pure
+{
+    return tile._origin == Tile.Origin.discard
+        || tile._origin == Tile.Origin.kanSteal;
+}
+
+@("A discard is obtained from a discard")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isDiscarded;
+    tile.isObtainedFromADiscard.should.equal(true);
+}
+
+@("A tile from the wall is not obtained from a discard")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isDrawnBy(new Ingame(PlayerWinds.east));
+    tile.isObtainedFromADiscard.should.equal(false);
+}
+
+bool isReplacementTileForKan(const Tile tile) pure
+{
+    return tile._origin == Tile.Origin.kanReplacement;
+}
+
+@("A kan replacement is exposed as such")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isKanReplacementFor(new Ingame(PlayerWinds.east));
+    tile.isReplacementTileForKan.should.equal(true);
+}
+
+@("A simply drawn tile is not a replacement tile for kan")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isDrawnBy(new Ingame(PlayerWinds.east));
+    tile.isReplacementTileForKan.should.equal(false);
+}
+
+bool isKanSteal(const Tile tile) pure
+{
+    return tile._origin == Tile.Origin.kanSteal;
+}
+
+@("A kan steal is exposed as such")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isStolenFromKan;
+    tile.isKanSteal.should.equal(true);
+}
+
+@("A regular draw is no kan steal")
+unittest
+{
+    import fluent.asserts;
+    auto tile = new Tile(Types.wind, Winds.east);
+    tile.isDrawnBy(new Ingame(PlayerWinds.east));
+    tile.isKanSteal.should.equal(false);
 }
 
 bool isHonour(const ComparativeTile tile) @property pure

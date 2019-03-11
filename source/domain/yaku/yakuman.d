@@ -188,7 +188,8 @@ unittest
     import mahjong.engine.creation;
     auto game = new Ingame(PlayerWinds.east, "🀠🀠"d);
     auto claimedTile = new Tile(Types.dragon, Dragons.red);
-    claimedTile.origin = new Ingame(PlayerWinds.west, ""d);
+    claimedTile.isNotOwn;
+    claimedTile.isDiscarded;
     game.openHand.addKan("🀄🀄🀄"d.convertToTiles ~ claimedTile);
     game.openHand.addKan("🀙🀙🀙🀙"d.convertToTiles);
     game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
@@ -225,7 +226,8 @@ unittest
 {
     auto game = new Ingame(PlayerWinds.east, "🀇🀇🀇🀏🀏🀏🀙🀙🀙🀡🀡🀐🀐"d);
     auto tile = new Tile(Types.bamboo, Numbers.one);
-    tile.origin = new Ingame(PlayerWinds.west);
+    tile.isNotOwn;
+    tile.isDiscarded;
     game.pon(tile);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -243,7 +245,8 @@ unittest
 {
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d);
     auto tile = new Tile(Types.wind, Winds.east);
-    tile.origin = new Ingame(PlayerWinds.west);
+    tile.isNotOwn;
+    tile.isDiscarded;
     game.pon(tile);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -291,7 +294,8 @@ unittest
 {
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀙🀙"d);
     auto tile = new Tile(Types.wind, Winds.north);
-    tile.origin = new Ingame(PlayerWinds.south);
+    tile.isNotOwn;
+    tile.isDiscarded;
     game.pon(tile);
     auto result = scanHandForMahjong(game);
     Environment env = {

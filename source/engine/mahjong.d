@@ -553,7 +553,7 @@ struct MahjongData
 
     bool isTsumo() @property pure const
     {
-        return player.lastTile.isOwn;
+        return player.lastTile.isSelfDraw;
     }
 }
 
@@ -583,7 +583,8 @@ unittest
     player.game = new Ingame(PlayerWinds.east);
     player.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗"d.convertToTiles;
     auto tile = new Tile(Types.bamboo, Numbers.eight);
-    tile.origin = new Ingame(PlayerWinds.south);
+    tile.isNotOwn;
+	tile.isDiscarded;
     player.ron(tile);
     auto mahjongResult = player.scanHandForMahjong;
     auto data = MahjongData(player, mahjongResult);
@@ -602,7 +603,8 @@ unittest
     player.game = new Ingame(PlayerWinds.east);
     player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d.convertToTiles;
     auto tile = new Tile(Types.wind, Winds.east);
-    tile.origin = new Ingame(PlayerWinds.south);
+    tile.isNotOwn;
+	tile.isDiscarded;
     player.kan(tile, wall);
     auto mahjongResult = player.scanHandForMahjong;
     auto data = MahjongData(player, mahjongResult);

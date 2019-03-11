@@ -58,10 +58,11 @@ class Player
 
 	bool isChiable(const Tile discard, const Metagame metagame) pure const
 	{
-		if(metagame.nextPlayer.id != this.id) return false;
+		if(metagame.nextPlayer !is this) return false;
 		return game.isChiable(discard);
 	}
 
+    @("Can I chi if and only if I'm the next player")
     unittest
     {
         import fluent.asserts;
@@ -76,10 +77,10 @@ class Player
         auto metagame = new Metagame([player, player2, player3], new DefaultGameOpts);
         metagame.currentPlayer = player3;
         auto chiableTile = "🀕"d.convertToTiles[0];
-        chiableTile.origin = player3;
+        chiableTile.isDrawnBy(player3);
         player.isChiable(chiableTile, metagame).should.equal(true);
         metagame.currentPlayer = player2;
-        chiableTile.origin = player2;
+        chiableTile.isDrawnBy(player2);
         player.isChiable(chiableTile, metagame).should.equal(false)
             .because("a player cannot chi a tile when they are not the next player");
     }
@@ -160,7 +161,7 @@ class Player
         auto player = new Player(new TestEventHandler, 30_000);
         auto transaction = new Transaction(player, 5000);
         player.applyTransaction(transaction);
-        assert(player.score == 35000, "The amount should have been added to the player's score.");
+        assert(player.score == 35_000, "The amount should have been added to the player's score.");
     }
 
     unittest
@@ -168,7 +169,7 @@ class Player
         auto player = new Player(new TestEventHandler, 30_000);
         auto transaction = new Transaction(player, -5000);
         player.applyTransaction(transaction);
-        assert(player.score == 25000, "The amount should have been subtracted from the player's score.");
+        assert(player.score == 25_000, "The amount should have been subtracted from the player's score.");
     }
 
     unittest

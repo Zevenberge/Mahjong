@@ -161,7 +161,8 @@ unittest
 	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = player1.game;
+	ponnableTile.isDrawnBy(player1);
+	ponnableTile.isDiscarded;
 	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new PonRequest(player2, ponnableTile));
@@ -183,7 +184,8 @@ unittest
 	player3.startGame(PlayerWinds.east);
 	player3.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(PlayerWinds.south);
+	ponnableTile.isNotOwn;
+	ponnableTile.isDiscarded;
 	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
@@ -210,7 +212,8 @@ unittest
 	player3.startGame(PlayerWinds.east);
 	player3.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(PlayerWinds.south);
+	ponnableTile.isNotOwn;
+	ponnableTile.isDiscarded;
 	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest); 
@@ -232,7 +235,8 @@ unittest
     player2.startGame(PlayerWinds.east);
     player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
     auto ronTile = "🀡"d.convertToTiles[0];
-    ronTile.origin = player1.game;
+    ronTile.isDrawnBy(player1);
+	ronTile.isDiscarded;
     auto claimFlow = new ClaimFlow(ronTile, game, new NullNotificationService);
     switchFlow(claimFlow);
     claimFlow._claimEvents[0].handle(new NoRequest());
@@ -253,7 +257,8 @@ unittest
     player2.startGame(PlayerWinds.east);
     player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
     auto ronTile = "🀡"d.convertToTiles[0];
-    ronTile.origin = player1.game;
+    ronTile.isDrawnBy(player1);
+	ronTile.isDiscarded;
     auto claimFlow = new ClaimFlow(ronTile, game, new NullNotificationService);
     switchFlow(claimFlow);
     claimFlow._claimEvents[0].handle(new RonRequest(player2, ronTile));
@@ -275,7 +280,8 @@ unittest
     auto player2 = game.players[1];
     player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
     auto ponTile = "🀡"d.convertToTiles[0];
-    ponTile.origin = player1.game;
+    ponTile.isDrawnBy(player1);
+	ponTile.isDiscarded;
     auto claimFlow = new ClaimFlow(ponTile, game, new NullNotificationService);
     switchFlow(claimFlow);
     claimFlow._claimEvents[0].handle(new PonRequest(player2, ponTile));

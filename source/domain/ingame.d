@@ -29,6 +29,7 @@ class Ingame
             import mahjong.engine.creation;
             this(wind);
             closedHand.tiles = tiles.convertToTiles;
+            closedHand.tiles.each!(t => t.isDrawnBy(this));
         }
 
         void setDiscards(Tile[] discs)
@@ -36,13 +37,15 @@ class Ingame
             _discards = discs;
             foreach(tile; _discards)
             {
-                tile.origin = this;
+                tile.isDrawnBy(this);
+                tile.isDiscarded;
             }
         }
 
         void hasDrawnTheirLastTile() pure
         {
             _lastTile = closedHand.tiles[0];
+            _lastTile.isDrawnBy(this);
         }
 
         void isNotNagashiMangan()
@@ -156,7 +159,7 @@ class Ingame
         import fluent.asserts;
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
         auto tile = new Tile(Types.wind, Winds.east);
-        tile.origin = new Ingame(PlayerWinds.west);
+        tile.isNotOwn;
         ingame.pon(tile);
         ingame.isNagashiMangan.should.equal(false);
     }
@@ -176,7 +179,7 @@ class Ingame
 
     private bool isOwn(const Tile tile) pure const
     {
-        return tile.origin is null;
+        return tile.isOwnedBy(this);
     }
 
     bool isChiable(const Tile discard) pure const
@@ -185,6 +188,7 @@ class Ingame
         return closedHand.isChiable(discard);
     }
 
+    @("Can I chi a tile")
     unittest
     {
         import fluent.asserts;
@@ -192,19 +196,19 @@ class Ingame
         auto game = new Ingame(PlayerWinds.east);
         game.closedHand.tiles = "🀓🀔"d.convertToTiles;
         auto chiableTile = "🀕"d.convertToTiles[0];
-        chiableTile.origin = new Ingame(PlayerWinds.south);
+        chiableTile.isNotOwn;
         game.isChiable(chiableTile).should.equal(true);
         game.closedHand.tiles = "🀓🀕"d.convertToTiles;
         chiableTile = "🀔"d.convertToTiles[0];
-        chiableTile.origin = new Ingame(PlayerWinds.south);
+        chiableTile.isNotOwn;
         game.isChiable(chiableTile).should.equal(true);
         game.closedHand.tiles = "🀔🀕"d.convertToTiles;
         chiableTile = "🀓"d.convertToTiles[0];
-        chiableTile.origin = new Ingame(PlayerWinds.south);
+        chiableTile.isNotOwn;
         game.isChiable(chiableTile).should.equal(true);
         game.closedHand.tiles = "🀓🀔"d.convertToTiles;
         auto nonChiableTile = "🀔"d.convertToTiles[0];
-        nonChiableTile.origin = new Ingame(PlayerWinds.south);
+        nonChiableTile.isNotOwn;
         game.isChiable(nonChiableTile).should.equal(false);
     }
 
@@ -214,11 +218,11 @@ class Ingame
         import mahjong.engine.creation;
         auto game = new Ingame(PlayerWinds.east, "🀀🀁"d);
         auto nonChiableTile = "🀂"d.convertToTiles[0];
-        nonChiableTile.origin = new Ingame(PlayerWinds.south);
+        nonChiableTile.isNotOwn;
         game.isChiable(nonChiableTile).should.equal(false);
         game = new Ingame(PlayerWinds.east, "🀄🀅"d);
         nonChiableTile = "🀆"d.convertToTiles[0];
-        nonChiableTile.origin = new Ingame(PlayerWinds.south);
+        nonChiableTile.isNotOwn;
         game.isChiable(nonChiableTile).should.equal(false);
     }
 
@@ -233,7 +237,7 @@ class Ingame
         ingame.declareRiichi(ingame.closedHand.tiles.front, 
             new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
-        tile.origin = new Ingame(PlayerWinds.north);
+        tile.isNotOwn;
         ingame.isChiable(tile).should.equal(false);
     }
 
@@ -259,7 +263,7 @@ class Ingame
         auto tiles = game.closedHand.tiles;
         auto candidate = ChiCandidate(tiles[0], tiles[1]);
         auto chiableTile = "🀕"d.convertToTiles[0];
-        chiableTile.origin = new Ingame(PlayerWinds.south);
+        chiableTile.isNotOwn;
         game.chi(chiableTile, candidate);
         game.closedHand.length.should.equal(0)
             .because("the tiles should have been removed from the hand");
@@ -281,7 +285,7 @@ class Ingame
         auto game = new Ingame(PlayerWinds.east);
         game.closedHand.tiles = "🀕🀕"d.convertToTiles;
         auto ponnableTile = "🀕"d.convertToTiles[0];
-        ponnableTile.origin = new Ingame(PlayerWinds.south);
+        ponnableTile.isNotOwn;
         game.isPonnable(ponnableTile).should.equal(true);
         auto nonPonnableTile = "🀃"d.convertToTiles[0];
         game.isPonnable(nonPonnableTile).should.equal(false);
@@ -298,7 +302,7 @@ class Ingame
         ingame.declareRiichi(ingame.closedHand.tiles.front, 
             new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
-        tile.origin = new Ingame(PlayerWinds.north);
+        tile.isNotOwn;
         ingame.isPonnable(tile).should.equal(false);
     }
 
@@ -337,7 +341,7 @@ class Ingame
         }
         auto ingame = new Ingame(PlayerWinds.east);
         auto tile = new Tile(Types.ball, Numbers.eight);
-        tile.origin = new Ingame(PlayerWinds.north);
+        tile.isNotOwn;
         ingame.closedHand.tiles = [tile, tile, tile];
         auto wall = new MaybeKanWall(false);
         ingame.isKannable(tile, wall).should.equal(true)
@@ -358,7 +362,7 @@ class Ingame
         ingame.declareRiichi(ingame.closedHand.tiles.front, 
             new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
-        tile.origin = new Ingame(PlayerWinds.north);
+        tile.isNotOwn;
         ingame.isKannable(tile, new Wall(new DefaultGameOpts)).should.equal(false);
     }
 
@@ -383,7 +387,7 @@ class Ingame
         wall.dice;
         auto game = new Ingame(PlayerWinds.east, "🀕🀕🀕"d);
         auto kannableTile = "🀕"d.convertToTiles[0];
-        kannableTile.origin = new Ingame(PlayerWinds.south);
+        kannableTile.isNotOwn;
         game.kan(kannableTile, wall);
         game.closedHand.length.should.equal(1)
             .because("all of the tiles should have been moved and a new one drawn");
@@ -411,7 +415,7 @@ class Ingame
         import mahjong.engine.creation;
         auto game = new Ingame(PlayerWinds.east, "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
         auto ronnableTile = "🀐"d.convertToTiles[0];
-        ronnableTile.origin = new Ingame(PlayerWinds.south);
+        ronnableTile.isNotOwn;
         game.isRonnable(ronnableTile).should.equal(true);
         addTileToDiscard(game, "🀐"d.convertToTiles[0]);
         game.isRonnable(ronnableTile).should.equal(false)
@@ -439,7 +443,7 @@ class Ingame
         import mahjong.engine.creation;
         auto game = new Ingame(PlayerWinds.east, "🀕🀕"d);
         auto ponnableTile = "🀕"d.convertToTiles[0];
-        ponnableTile.origin = new Ingame(PlayerWinds.south);
+        ponnableTile.isNotOwn;
         game.pon(ponnableTile);
         game.closedHand.length.should.equal(0)
             .because("the tiles should have been removed from the hand");
@@ -454,7 +458,7 @@ class Ingame
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
-        ronTile.origin = new Ingame(PlayerWinds.south);
+        ronTile.isNotOwn;
         ingame.ron(ronTile);
         assert(ingame.isMahjong, "After ronning, the player should have mahjong");
         assert(ingame.lastTile == ronTile, "The player should confess they claimed the last tile");
@@ -462,7 +466,7 @@ class Ingame
 
     void couldHaveClaimed(const Tile tile)
     {
-        if(tile.origin is this) return;
+        if(isOwn(tile)) return;
         _isTemporaryFuriten = _isTemporaryFuriten 
             || .scanHandForMahjong(this, tile).isMahjong;
     }
@@ -534,6 +538,24 @@ class Ingame
         ingame.openHand.amountOfKans.should.equal(1);
     }
 
+    @("When I declare a kan, the last tile is a kan replacement")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.opts;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+        auto tile = ingame.closedHand.tiles.back;
+        auto initialLength = ingame.closedHand.tiles.length;
+        auto wall = new Wall(new DefaultGameOpts);
+        wall.setUp;
+        wall.dice;
+        ingame.declareClosedKan(tile, wall);
+        ingame.lastTile.isOwnedBy(ingame).should.equal(true);
+        ingame.lastTile.isReplacementTileForKan.should.equal(true);
+    }
+
     bool canPromoteToKan(const Tile tile) pure const
     {
         return openHand.canPromoteToKan(tile);
@@ -554,7 +576,7 @@ class Ingame
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
         auto tile = ingame.closedHand.tiles.back;
-        tile.origin = new Ingame(PlayerWinds.south);
+        tile.isNotOwn;
         ingame.pon(tile);
         auto initialLength = ingame.closedHand.tiles.length;
         auto wall = new Wall(new DefaultGameOpts);
@@ -570,6 +592,7 @@ class Ingame
     {
         closedHand.drawKanTile(wall);
         _lastTile = closedHand.lastTile;
+        _lastTile.isKanReplacementFor(this);
     }
 
     /*
@@ -607,7 +630,7 @@ class Ingame
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ponTile = "🀟"d.convertToTiles[0];
-        ponTile.origin = new Ingame(PlayerWinds.south);
+        ponTile.isNotOwn;
         ingame.pon(ponTile);
         assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
     }
@@ -619,7 +642,7 @@ class Ingame
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto chiTile = "🀡"d.convertToTiles[0];
-        chiTile.origin = new Ingame(PlayerWinds.south);
+        chiTile.isNotOwn;
         ingame.chi(chiTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
         assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
     }
@@ -659,7 +682,7 @@ class Ingame
         import fluent.asserts;
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto discard = new Tile(Types.wind, Winds.east);
-        discard.origin = new Ingame(PlayerWinds.south);
+        discard.isNotOwn;
         ingame.pon(discard);
         auto toBeDiscardedTile = ingame.closedHand.tiles[0];
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
@@ -752,8 +775,7 @@ class Ingame
         _isFirstTurnAfterRiichi = false;
         auto tile = closedHand.removeTile(discardedTile);
         _discards ~= tile;
-        tile.origin = this;
-        tile.open;
+        tile.isDiscarded;
         return tile;
     }
 
@@ -793,6 +815,7 @@ class Ingame
     {
         closedHand.drawTile(wall);
         _lastTile = closedHand.lastTile;
+        _lastTile.isDrawnBy(this);
         startTurn;
     }
 
@@ -847,6 +870,20 @@ class Ingame
         wall.dice;
         ingame.drawTile(wall);
         ingame.isFirstTurnAfterRiichi.should.equal(true);
+    }
+
+    @("If I draw a tile from the wall, is it my own")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        auto wall = new Wall(new DefaultGameOpts);
+        wall.setUp;
+        wall.dice;
+        ingame.drawTile(wall);
+        ingame.lastTile.isOwnedBy(ingame).should.equal(true);
+        ingame.lastTile.isSelfDraw.should.equal(true);
     }
 
     private void startTurn()

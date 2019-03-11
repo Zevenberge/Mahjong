@@ -48,7 +48,7 @@ unittest
 	scope(exit) clearIngameCache;
 	auto ingame = new Ingame(PlayerWinds.east, "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀗🀗"d);
 	auto tileToClaim = new Tile(Types.wind, Winds.south);
-	tileToClaim.origin = new Ingame(PlayerWinds.south);
+	tileToClaim.isNotOwn;
 	ingame.pon(tileToClaim);
 	auto renderMock = new BlackHole!RenderTarget;
 	auto amountOfPlayers = AmountOfPlayers(4);
