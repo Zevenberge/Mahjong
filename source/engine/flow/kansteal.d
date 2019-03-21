@@ -283,12 +283,10 @@ final class KanStealEvent
 
     private const Tile _kanTile;
 
-/+
     const(Player) player() @property pure const 
     {
         return _player;
     }
-+/
 
     private Player _player;
 

@@ -144,7 +144,55 @@ class UiEventHandler : GameEventHandler
 
     override void handle(KanStealEvent event)
     {
-        // TODO
+        if(event.canSteal)
+        {
+            auto factory = new KanStealOptionsFactory(event);
+            Controller.instance.substitute(
+                new KanStealOptionController(Controller.instance.getWindow, 
+                    event.metagame, Controller.instance, factory));
+        }
+        else
+        {
+            event.pass;
+        }
+    }
+
+    @("If I cannot steal the tile, the event gets automatically handled")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.player;
+        import mahjong.domain.metagame;
+        import mahjong.domain.tile;
+        import mahjong.engine.opts;
+        auto tile = new Tile(Types.wind, Winds.east);
+        auto player = new Player("🀀🀀🀁🀁🀁"d);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        auto event = new KanStealEvent(tile, player, metagame);
+        auto eventHandler = new UiEventHandler();
+        eventHandler.handle(event);
+        event.isHandled.should.equal(true);
+    }
+
+    @("If I can steal the tile, I get a special menu")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.player;
+        import mahjong.domain.metagame;
+        import mahjong.domain.tile;
+        import mahjong.engine.opts;
+        scope(exit) Controller.cleanUp;
+        auto tile = new Tile(Types.wind, Winds.east);
+        auto player = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        auto event = new KanStealEvent(tile, player, metagame);
+        auto eventHandler = new UiEventHandler();
+        eventHandler.handle(event);
+        event.isHandled.should.equal(false);
+        Controller.instance.should.be.instanceOf!KanStealOptionController;
     }
 
 	override void handle(MahjongEvent event)

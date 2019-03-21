@@ -10,6 +10,7 @@ interface AI
 {
 	void playTurn(TurnEvent event);
 	void claim(ClaimEvent event);
+	void steal(KanStealEvent event);
 }
 
 class SimpleAI : AI
@@ -36,5 +37,10 @@ class SimpleAI : AI
 	void claim(ClaimEvent event)
 	{
 		event.handle(new NoRequest);
+	}
+
+	void steal(KanStealEvent event)
+	{
+		event.pass;
 	}
 }
