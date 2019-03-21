@@ -73,9 +73,7 @@ class TurnFlow : Flow
         }
         do
 		{
-			_player.promoteToKan(tile, _metagame.wall);
-			_notificationService.notify(Notification.Kan, _player);
-			_flow = new TurnFlow(_player, _metagame, _notificationService);
+			_flow = new KanStealFlow(tile, _metagame, _notificationService);
 		}
 
 		void declareClosedKan(const Tile tile)
@@ -212,9 +210,8 @@ class TurnEvent
         auto kanTile = player.closedHand.tiles[0];
         flow._event.promoteToKan(kanTile);
         flow.advanceIfDone;
-        .flow.should.be.instanceOf!TurnFlow.because("the turn restarts");
-        .flow.should.not.equal(flow).because("it is a new turn");
-        player.openHand.amountOfKans.should.equal(1);
+        .flow.should.be.instanceOf!KanStealFlow.because("the tile can still be claimed");
+        player.openHand.amountOfKans.should.equal(0).because("it can still be cancelled");
     }
 
 	void declareClosedKan(const Tile tile)

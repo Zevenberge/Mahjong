@@ -9,7 +9,7 @@ import mahjong.engine.notifications;
 
 final class KanStealFlow : Flow 
 {
-    this(Tile kanTile, Metagame game, INotificationService notificationService)
+    this(const Tile kanTile, Metagame game, INotificationService notificationService)
     {
         trace("Constructing kan steal flow");
         super(game, notificationService);
@@ -142,6 +142,7 @@ final class KanStealFlow : Flow
         kanPlayer.openHand.amountOfKans.should.equal(0);
         otherPlayer.isMahjong.should.equal(true);
         .flow.should.be.instanceOf!MahjongFlow;
+        kanPlayer.closedHand.tiles.should.not.contain(tile);
     }
 
     private bool done() @property pure const 
@@ -166,10 +167,11 @@ final class KanStealFlow : Flow
 
     private void stealKanTile(Range)(Range stealingPlayers)
     {
+        auto tile = _metagame.currentPlayer.closedHand.removeTile(_kanTile);
         foreach(evt; stealingPlayers)
         {
             auto player = evt._player;
-            player.stealKanTile(_kanTile);
+            player.stealKanTile(tile);
             _notificationService.notify(Notification.Ron, player);
         }
         switchFlow(new MahjongFlow(_metagame, _notificationService));
@@ -184,7 +186,7 @@ final class KanStealFlow : Flow
         switchFlow(new TurnFlow(player, _metagame, _notificationService));
     }
 
-    private Tile _kanTile;
+    private const Tile _kanTile;
 }
 
 final class KanStealEvent
@@ -192,7 +194,7 @@ final class KanStealEvent
     import optional.optional;
     private enum Action { pass, steal}
     
-    this(Tile kanTile, Player player, Metagame metagame)
+    this(const Tile kanTile, Player player, Metagame metagame)
     {
         _action = none;
         _kanTile = kanTile;
@@ -279,7 +281,7 @@ final class KanStealEvent
         return _kanTile;
     }
 
-    private Tile _kanTile;
+    private const Tile _kanTile;
 
 /+
     const(Player) player() @property pure const 
