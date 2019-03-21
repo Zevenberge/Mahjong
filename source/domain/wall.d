@@ -278,7 +278,7 @@ version(unittest)
         this(bool isExhaustiveDraw)
         {
             _isExhaustiveDraw = isExhaustiveDraw;
-            this(null);
+            this(new Tile(Types.wind, Winds.north));
         }
 
 		this(Tile tileToDraw)

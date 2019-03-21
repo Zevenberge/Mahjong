@@ -9,6 +9,7 @@ class GameEventHandler
 	abstract void handle(GameStartEvent event);
 	abstract void handle(RoundStartEvent event);
 	abstract void handle(ClaimEvent event);
+	abstract void handle(KanStealEvent event);
 	abstract void handle(MahjongEvent event);
 	abstract void handle(ExhaustiveDrawEvent event);
     abstract void handle(AbortiveDrawEvent event);
@@ -47,6 +48,13 @@ version(unittest)
 		{
 			trace("Handling claim event");
 			claimEvent = event;
+		}
+
+		KanStealEvent kanStealEvent;
+		override void handle(KanStealEvent event)
+		{
+			trace("Handling kan steal event");
+			kanStealEvent = event;
 		}
 
 		MahjongEvent mahjongEvent;

@@ -142,6 +142,11 @@ class UiEventHandler : GameEventHandler
 		}
 	}
 
+    override void handle(KanStealEvent event)
+    {
+        // TODO
+    }
+
 	override void handle(MahjongEvent event)
 	{
 		Controller.instance.substitute(new MahjongController(Controller.instance.getWindow, event.metagame, event));

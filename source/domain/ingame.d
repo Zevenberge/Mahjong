@@ -464,6 +464,27 @@ class Ingame
         assert(ingame.lastTile == ronTile, "The player should confess they claimed the last tile");
     }
 
+    void stealKanTile(Tile kanTile)
+    {
+        ron(kanTile);
+        kanTile.isStolenFromKan;
+    }
+
+    @("After a kan steal the player is mahjong")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        auto ingame = new Ingame(PlayerWinds.east);
+        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        auto kanTile = "🀡"d.convertToTiles[0];
+        kanTile.isNotOwn;
+        ingame.stealKanTile(kanTile);
+        ingame.isMahjong.should.equal(true).because("the player stole the kan");
+        ingame.lastTile.should.equal(kanTile);
+        kanTile.isKanSteal.should.equal(true);
+    }
+
     void couldHaveClaimed(const Tile tile)
     {
         if(isOwn(tile)) return;

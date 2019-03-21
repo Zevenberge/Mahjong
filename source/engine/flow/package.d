@@ -9,6 +9,7 @@ public
 	import mahjong.engine.flow.exhaustive;
 	import mahjong.engine.flow.gameend;
 	import mahjong.engine.flow.gamestart;
+    import mahjong.engine.flow.kansteal;
 	import mahjong.engine.flow.mahjong;
 	import mahjong.engine.flow.roundstart;
 	import mahjong.engine.flow.turn;

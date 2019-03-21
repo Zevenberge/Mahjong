@@ -52,7 +52,7 @@ class ClaimFlow : Flow
 		{
 			assert(_claimEvents.all!(ce => ce.isAllowed), "There should be no illegal claims");
 		}
-		body
+		do
 		{
 			if(applyRons) return;
             notifyPlayersAboutMissedTile();
