@@ -32,7 +32,7 @@ final class KanStealFlow : Flow
         return new KanStealEvent(_kanTile, player, _metagame);
     }
 
-    private const(KanStealEvent)[] _events;
+    private KanStealEvent[] _events;
 
     override void advanceIfDone()
     {
@@ -117,6 +117,33 @@ final class KanStealFlow : Flow
         otherPlayer.isFuriten.should.equal(true);
     }
 
+    @("If someone steals the tile, they are mahjong")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.wall;
+        import mahjong.engine.opts;
+        scope(exit) switchFlow(null);
+        auto kanPlayer = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀠🀠"d);
+        auto ponTile = new Tile(Types.wind, Winds.east);
+        ponTile.isNotOwn;
+        kanPlayer.pon(ponTile);
+        auto tile = kanPlayer.closedHand.tiles[0];
+        auto otherPlayer = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
+        auto eventHandler = cast(TestEventHandler)otherPlayer.eventHandler;
+        auto metagame = new Metagame([kanPlayer, otherPlayer], new DefaultGameOpts);
+        metagame.currentPlayer = kanPlayer;
+        metagame.wall = new MockWall(false);
+        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService);
+        switchFlow(flow);
+        eventHandler.kanStealEvent.steal;
+        flow.advanceIfDone;
+        kanPlayer.openHand.amountOfKans.should.equal(0);
+        otherPlayer.isMahjong.should.equal(true);
+        .flow.should.be.instanceOf!MahjongFlow;
+    }
+
     private bool done() @property pure const 
     {
         import std.algorithm : all;
@@ -124,6 +151,31 @@ final class KanStealFlow : Flow
     }
 
     private void advance()
+    {
+        import std.algorithm : filter;
+        auto steals = _events.filter!(e => e.isSteal);
+        if(!steals.empty)
+        {
+            stealKanTile(steals);
+        }
+        else
+        {
+            completeKanDeclaration;
+        }       
+    }
+
+    private void stealKanTile(Range)(Range stealingPlayers)
+    {
+        foreach(evt; stealingPlayers)
+        {
+            auto player = evt._player;
+            player.stealKanTile(_kanTile);
+            _notificationService.notify(Notification.Ron, player);
+        }
+        switchFlow(new MahjongFlow(_metagame, _notificationService));
+    }
+
+    private void completeKanDeclaration()
     {
         auto player = _metagame.currentPlayer;
         player.promoteToKan(_kanTile, _metagame.wall);
@@ -133,8 +185,6 @@ final class KanStealFlow : Flow
     }
 
     private Tile _kanTile;
-
-    
 }
 
 final class KanStealEvent
@@ -198,6 +248,11 @@ final class KanStealEvent
         return _player.scanHandForMahjong(_kanTile).isMahjong;
     }
 
+    private bool isSteal() @property pure const
+    {
+        return _action == Action.steal;
+    }
+
     void pass() pure
     {
         _action = some(Action.pass);
@@ -226,10 +281,12 @@ final class KanStealEvent
 
     private Tile _kanTile;
 
+/+
     const(Player) player() @property pure const 
     {
         return _player;
     }
++/
 
     private Player _player;
 
