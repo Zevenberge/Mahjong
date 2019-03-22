@@ -36,8 +36,13 @@ class Player
 
         this(dstring tiles)
         {
+            this(tiles, PlayerWinds.autumn);
+        }
+
+        this(dstring tiles, PlayerWinds wind)
+        {
             this(new TestEventHandler, 30_000);
-            game = new Ingame(PlayerWinds.autumn, tiles);
+            game = new Ingame(wind, tiles);
             game.hasDrawnTheirLastTile;
         }
     }
