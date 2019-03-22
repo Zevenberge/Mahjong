@@ -241,8 +241,8 @@ unittest
 
 bool isTwoSidedWait(const MahjongResult result, const Tile lastTile)
 {
-    import std.algorithm : filter, any, countUntil;
-    auto finalSet = result.sets.filter!(s => s.tiles.any!(t => t == lastTile)).front;
+    import std.algorithm : any, countUntil;
+    auto finalSet = result.finalSet(lastTile);
     if(finalSet.isChi)
     {
         auto position = finalSet.tiles.countUntil!(t => t == lastTile);
@@ -316,6 +316,39 @@ unittest
     auto lastTileRight = chiRight.tiles[0];
     auto resultRight = MahjongResult(true, [chiRight]);
     resultRight.isTwoSidedWait(lastTileRight).should.equal(false);
+}
+
+bool isPonWait(const MahjongResult result, const Tile lastTile)
+{
+    return result.finalSet(lastTile).isPon;
+}
+
+@("If the final tile is in a chi, it is not a pon wait")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto chi= new ChiSet("🀐🀑🀒"d.convertToTiles);
+    auto lastTile = chi.tiles[0];
+    auto result = MahjongResult(true, [chi]);
+    result.isPonWait(lastTile).should.equal(false);
+}
+
+@("If the final tile is in a pon, it is a pon wait")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.creation;
+    auto pon= new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto lastTile = pon.tiles[0];
+    auto result = MahjongResult(true, [pon]);
+    result.isPonWait(lastTile).should.equal(true);
+}
+
+private const(Set) finalSet(const MahjongResult result, const Tile lastTile)
+{
+    import std.algorithm : any, filter;
+    return result.sets.filter!(s => s.tiles.any!(t => t == lastTile)).front;
 }
 
 bool hasOnlyPons(const MahjongResult result)

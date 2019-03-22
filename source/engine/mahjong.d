@@ -586,15 +586,23 @@ struct MahjongData
 	size_t calculateMiniPoints(PlayerWinds leadingWind) const
 	{
 		alias isSevenPairHand = mahjong.domain.result.isSevenPairs;
-		if(result.isNagashiMangan)
+		alias isThirteenOrphansHand = mahjong.domain.result.isThirteenOrphans;
+		if (result.isNagashiMangan || isThirteenOrphansHand(result))
 			return 30;
 		if (isSevenPairHand(result))
 			return 25;
 		auto miniPointsFromWinning = player.isClosedHand && !isTsumo ? 30 : 20;
 		auto miniPointsFromSets = result.calculateMiniPoints(player.wind.to!PlayerWinds,
 				leadingWind);
-		auto miniPointsFromWait = result.isTwoSidedWait(player.lastTile) ? 0 : 2;
-		return miniPointsFromSets + miniPointsFromWinning + miniPointsFromWait;
+		auto miniPointsFromWait = result.isTwoSidedWait(player.lastTile)
+			|| result.isPonWait(player.lastTile) ? 0 : 2;
+		size_t miniPointsFromDrawing = 0;
+		if (miniPointsFromSets + miniPointsFromWait != 0)
+		{
+			miniPointsFromDrawing = isTsumo ? 2 : 0;
+		}
+		return miniPointsFromSets + miniPointsFromWinning + miniPointsFromWait
+			+ miniPointsFromDrawing;
 	}
 
 	@("A self draw on a concealed hand with only chis result in 20 minipoints")
@@ -611,66 +619,6 @@ struct MahjongData
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(20);
 	}
 
-	@("A pair of own winds is worth 2 points")
-	unittest
-	{
-		import fluent.asserts;
-		import mahjong.domain.wall;
-
-		auto wall = new MockWall(new Tile(Types.ball, Numbers.one));
-		auto player = new Player("🀁🀁🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
-				PlayerWinds.south);
-		player.drawTile(wall);
-		auto result = player.scanHandForMahjong;
-		auto data = MahjongData(player, result);
-		data.calculateMiniPoints(PlayerWinds.east).should.equal(22);
-	}
-
-	@("A pair of leading winds is worth 2 points")
-	unittest
-	{
-		import fluent.asserts;
-		import mahjong.domain.wall;
-
-		auto wall = new MockWall(new Tile(Types.ball, Numbers.one));
-		auto player = new Player("🀀🀀🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
-				PlayerWinds.south);
-		player.drawTile(wall);
-		auto result = player.scanHandForMahjong;
-		auto data = MahjongData(player, result);
-		data.calculateMiniPoints(PlayerWinds.east).should.equal(22);
-	}
-
-	@("A pair that is both leading and own wind is still worth 2 points")
-	unittest
-	{
-		import fluent.asserts;
-		import mahjong.domain.wall;
-
-		auto wall = new MockWall(new Tile(Types.ball, Numbers.one));
-		auto player = new Player("🀀🀀🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
-				PlayerWinds.east);
-		player.drawTile(wall);
-		auto result = player.scanHandForMahjong;
-		auto data = MahjongData(player, result);
-		data.calculateMiniPoints(PlayerWinds.east).should.equal(22);
-	}
-
-	@("A pair of dragons is worth 2 points")
-	unittest
-	{
-		import fluent.asserts;
-		import mahjong.domain.wall;
-
-		auto wall = new MockWall(new Tile(Types.ball, Numbers.one));
-		auto player = new Player("🀆🀆🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
-				PlayerWinds.east);
-		player.drawTile(wall);
-		auto result = player.scanHandForMahjong;
-		auto data = MahjongData(player, result);
-		data.calculateMiniPoints(PlayerWinds.east).should.equal(22);
-	}
-
 	@("A ron on a concealed hand is worth 30 points")
 	unittest
 	{
@@ -684,6 +632,85 @@ struct MahjongData
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(30);
+	}
+
+	@("Pons get awarded minipoints")
+	unittest
+	{
+		import fluent.asserts;
+
+		auto tile = new Tile(Types.ball, Numbers.one);
+		tile.isNotOwn;
+		tile.isDiscarded;
+		auto player = new Player("🀚🀛🀜🀜🀝🀝🀞🀞🀟🀟🀠🀠🀠"d);
+		player.ron(tile);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(34);
+	}
+
+	@("A pair of own winds is worth 2 points")
+	unittest
+	{
+		import fluent.asserts;
+
+		auto tile = new Tile(Types.ball, Numbers.one);
+		tile.isNotOwn;
+		tile.isDiscarded;
+		auto player = new Player("🀁🀁🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
+				PlayerWinds.south);
+		player.ron(tile);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
+	}
+
+	@("A pair of leading winds is worth 2 points")
+	unittest
+	{
+		import fluent.asserts;
+
+		auto tile = new Tile(Types.ball, Numbers.one);
+		tile.isNotOwn;
+		tile.isDiscarded;
+		auto player = new Player("🀀🀀🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
+				PlayerWinds.south);
+		player.ron(tile);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
+	}
+
+	@("A pair that is both leading and own wind is still worth 2 points")
+	unittest
+	{
+		import fluent.asserts;
+
+		auto tile = new Tile(Types.ball, Numbers.one);
+		tile.isNotOwn;
+		tile.isDiscarded;
+		auto player = new Player("🀀🀀🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
+				PlayerWinds.east);
+		player.ron(tile);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
+	}
+
+	@("A pair of dragons is worth 2 points")
+	unittest
+	{
+		import fluent.asserts;
+
+		auto tile = new Tile(Types.ball, Numbers.one);
+		tile.isNotOwn;
+		tile.isDiscarded;
+		auto player = new Player("🀆🀆🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
+				PlayerWinds.east);
+		player.ron(tile);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
 	}
 
 	@("A ron on an open hand is worth 20 points")
@@ -792,14 +819,61 @@ struct MahjongData
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
 	}
 
+	@("A pon wait is not worth two extra minipoints")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.domain.wall;
+
+		auto tile = new Tile(Types.ball, Numbers.eight);
+		tile.isNotOwn;
+		tile.isDiscarded;
+		auto player = new Player("🀙🀙🀙🀜🀜🀝🀝🀞🀞🀟🀟🀠🀠"d);
+		player.ron(tile);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(40);
+	}
+
 	@("Nagashi mangan is 30 minipoints")
 	unittest
 	{
 		import fluent.asserts;
+
 		auto player = new Player("🀙🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀠🀡"d);
 		auto result = MahjongResult(true, [new NagashiManganSet()]);
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(30);
+	}
+
+	@("Set values are counted in the minipoints")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.domain.wall;
+
+		auto tile = new Tile(Types.character, Numbers.one);
+		tile.isNotOwn;
+		tile.isDiscarded;
+		auto player = new Player("🀇🀇🀉🀊🀋🀐🀐🀐🀒🀒🀙🀙🀙"d);
+		player.ron(tile);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(50);
+	}
+
+	@("A self draw is 2 extra minipoints")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.domain.wall;
+
+		auto wall = new MockWall(new Tile(Types.character, Numbers.one));
+		auto player = new Player("🀇🀇🀉🀊🀋🀐🀐🀐🀒🀒🀙🀙🀙"d);
+		player.drawTile(wall);
+		auto result = player.scanHandForMahjong;
+		auto data = MahjongData(player, result);
+		data.calculateMiniPoints(PlayerWinds.east).should.equal(46);
 	}
 
 	bool isTsumo() @property pure const
