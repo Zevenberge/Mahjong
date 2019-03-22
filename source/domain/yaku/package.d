@@ -27,9 +27,8 @@ in
 }
 do
 {
-    auto leadingWind = metagame.leadingWind;
-    auto ownWind = player.wind;
-    return [Yaku.riichi, Yaku.ippatsu, Yaku.menzenTsumo];
+    auto environment = destillEnvironment(player, metagame);
+    return determineYaku(mahjongResult, environment); 
 }
 
 // This function should be private. But to have a unittest for each yaku serve as 
