@@ -598,6 +598,7 @@ unittest
 	metagame.beginRound;
 	auto eastPlayer = metagame.eastPlayer;
 	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    eastPlayer.hasDrawnTheirLastTile;
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
@@ -619,6 +620,7 @@ unittest
     eastPlayer.isNotNagashiMangan;
 	auto nonEastPlayer = metagame.otherPlayers.front;
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    nonEastPlayer.hasDrawnTheirLastTile;
     nonEastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
@@ -643,6 +645,7 @@ unittest
         metagame.eastPlayer.isNotNagashiMangan;
 		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        nonEastPlayer.hasDrawnTheirLastTile;
         nonEastPlayer.isNotNagashiMangan;
 		metagame.finishRound;
 		metagame.initializeRound;
@@ -708,6 +711,7 @@ unittest
 	metagame.beginRound;
 	auto eastPlayer = metagame.eastPlayer;
 	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    eastPlayer.hasDrawnTheirLastTile;
     eastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
@@ -736,6 +740,7 @@ unittest
         metagame.eastPlayer.isNotNagashiMangan;
 		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        nonEastPlayer.hasDrawnTheirLastTile;
         nonEastPlayer.isNotNagashiMangan;
 		metagame.finishRound;
 		assert(!metagame.isGameOver, "There are still turns left to play!");
@@ -745,6 +750,7 @@ unittest
     metagame.eastPlayer.isNotNagashiMangan;
 	auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    nonEastPlayer.hasDrawnTheirLastTile;
     nonEastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	assert(metagame.isGameOver, "The game should have been finished after 2x 4 rounds of non-east wins.");
