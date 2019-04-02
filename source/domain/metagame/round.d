@@ -113,12 +113,13 @@ private :
 
 package Round finishRoundWithMahjong(Metagame metagame, Round round)
 {
-    auto transactions = metagame.constructMahjongData.toTransactions(metagame);
+    auto data = metagame.constructMahjongData;
+    auto transactions = data.toTransactions(metagame);
     metagame.applyTransactions(transactions);
     round.increment;
     round.removeRiichiSticks;
     auto eastPlayer = metagame.eastPlayer;
-    bool needToMoveWinds = !((metagame.isExhaustiveDraw && eastPlayer.isNagashiMangan) || eastPlayer.isMahjong);
+    bool needToMoveWinds = !data.any!(d => d.player.isEast); 
     if(needToMoveWinds)
     {
         round.resetCounter;
