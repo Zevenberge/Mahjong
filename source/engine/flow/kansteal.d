@@ -220,7 +220,7 @@ final class KanStealEvent
         event.isHandled.should.equal(false);
     }
 
-    void steal() pure
+    void steal()
     in
     {
         assert(canSteal, "The player is not allowed to steal");
@@ -244,10 +244,9 @@ final class KanStealEvent
         event.isHandled.should.equal(true);
     }
 
-    bool canSteal() pure const 
+    bool canSteal() const 
     {
-        import mahjong.engine.mahjong : scanHandForMahjong;
-        return _player.scanHandForMahjong(_kanTile).isMahjong;
+        return _player.canKanSteal(_kanTile, _metagame);
     }
 
     private bool isSteal() @property pure const
