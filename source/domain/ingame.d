@@ -468,10 +468,10 @@ class Ingame
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
                 "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
-        auto kanSteal = "🀐"d.convertToTiles[0];
-        kanSteal.isNotOwn;
-        kanSteal.isDiscarded;
-        game.isRonnable(kanSteal, metagame).should.equal(true);
+        auto ronTile = "🀐"d.convertToTiles[0];
+        ronTile.isNotOwn;
+        ronTile.isDiscarded;
+        game.isRonnable(ronTile, metagame).should.equal(true);
     }
 
     @("Can a player not ron if they are furiten")
@@ -490,15 +490,15 @@ class Ingame
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
                 "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
-        auto kanSteal = "🀐"d.convertToTiles[0];
-        kanSteal.isNotOwn;
-        kanSteal.isDiscarded;
+        auto ronTile = "🀐"d.convertToTiles[0];
+        ronTile.isNotOwn;
+        ronTile.isDiscarded;
         addTileToDiscard(game, "🀐"d.convertToTiles[0]);
-        game.isRonnable(kanSteal, metagame).should.equal(false)
+        game.isRonnable(ronTile, metagame).should.equal(false)
             .because("the player is furiten on the same tile");
         game = new Ingame(PlayerWinds.east, "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
         addTileToDiscard(game, "🀖"d.convertToTiles[0]);
-        game.isRonnable(kanSteal, metagame).should.equal(false)
+        game.isRonnable(ronTile, metagame).should.equal(false)
             .because("the player is furiten on another out");
     }
 
@@ -515,10 +515,10 @@ class Ingame
         ponTile.isNotOwn;
         ponTile.isDiscarded;
         game.pon(ponTile);
-        auto kanSteal = new Tile(Types.bamboo, Numbers.one);
-        kanSteal.isNotOwn;
-        kanSteal.isDiscarded;
-        game.isRonnable(kanSteal, metagame).should.equal(false);
+        auto ronTile = new Tile(Types.bamboo, Numbers.one);
+        ronTile.isNotOwn;
+        ronTile.isDiscarded;
+        game.isRonnable(ronTile, metagame).should.equal(false);
     }
 
     void ron(Tile discard, const Metagame metagame)
@@ -816,38 +816,89 @@ class Ingame
 
     private bool _isTemporaryFuriten;
 
-    bool canTsumo() pure const
+    bool canTsumo(const Metagame metagame) const
     {
-        return isOwn(_lastTile) && isMahjong;
+        import mahjong.domain.yaku : determineYaku;
+
+        if(!isOwn(_lastTile)) return false;
+        auto result = .scanHandForMahjong(this);
+        if(!result.isMahjong) return false;
+        auto yaku = result.determineYaku(this, metagame);
+        return yaku.length > 0;
     }
 
+    @("A player can claim tsumo if they drawn their last tile")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d);
+        ingame.hasDrawnTheirLastTile;
+        ingame.canTsumo(metagame).should.equal(true);
+    }
+
+    @("A player cannot claim tsumo if they are not mahjong")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto ingame = new Ingame(PlayerWinds.east, "🀅🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑"d);
+        ingame.hasDrawnTheirLastTile;
+        ingame.canTsumo(metagame).should.equal(false);
+    }
+
+    @("A player cannot claim tsumo if they have no yaku")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto game = new Ingame(PlayerWinds.east,
+                "🀐🀐🀐🀑🀒🀓🀔🀕🀇🀇🀜🀝🀞"d);
+        auto ponTile = new Tile(Types.character, Numbers.one);
+        ponTile.isNotOwn;
+        ponTile.isDiscarded;
+        game.pon(ponTile);
+        game.hasDrawnTheirLastTile;
+        game.canTsumo(metagame).should.equal(false);
+    }
+
+    @("A player cannot tsumo after they claimed a tile")
     unittest
     {
         import mahjong.engine.creation;
         import mahjong.engine.opts;
 
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
             = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ponTile = "🀟"d.convertToTiles[0];
         ponTile.isNotOwn;
         ingame.pon(ponTile);
-        assert(!ingame.canTsumo,
+        assert(!ingame.canTsumo(metagame),
                 "After a claiming a tile, the player should no longer be able to tsumo.");
     }
 
+    @("A player cannot tsumo after a chi")
     unittest
     {
         import mahjong.engine.creation;
         import mahjong.engine.opts;
 
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
             = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
         ronTile.isNotOwn;
         ingame.chi(ronTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
-        assert(!ingame.canTsumo,
+        assert(!ingame.canTsumo(metagame),
                 "After a claiming a tile, the player should no longer be able to tsumo.");
     }
 

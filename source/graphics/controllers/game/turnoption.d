@@ -30,7 +30,7 @@ class TurnOptionFactory
 
     private void addTsumoOption(const Player player, TurnEvent turnEvent)
     {
-        if(!player.canTsumo) return;
+        if(!player.canTsumo(turnEvent.metagame)) return;
         auto tsumoOption = new TsumoOption(player, turnEvent);
         _options ~= tsumoOption;
         _defaultOption = tsumoOption;
