@@ -605,7 +605,6 @@ struct MahjongData
 			+ miniPointsFromDrawing;
 	}
 
-/+
 	@("A self draw on a concealed hand with only chis result in 20 minipoints")
 	unittest
 	{
@@ -624,12 +623,14 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀠🀠🀡"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(30);
@@ -639,12 +640,14 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀚🀛🀜🀜🀝🀝🀞🀞🀟🀟🀠🀠🀠"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(34);
@@ -654,13 +657,15 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀁🀁🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
 				PlayerWinds.south);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
@@ -670,13 +675,15 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀀🀀🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
 				PlayerWinds.south);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
@@ -686,13 +693,15 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀀🀀🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
 				PlayerWinds.east);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
@@ -702,13 +711,15 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀆🀆🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀡"d,
 				PlayerWinds.east);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
@@ -719,7 +730,9 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.engine.chi;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
@@ -729,7 +742,7 @@ struct MahjongData
 		chiTile.isDiscarded;
 		player.chi(chiTile, ChiCandidate(player.closedHand.tiles[$ - 4],
 				player.closedHand.tiles[$ - 3]));
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(20);
@@ -739,12 +752,14 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀈🀈🀍🀍🀑🀑🀖🀖🀙🀚🀚🀟🀟"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(25);
@@ -777,12 +792,14 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.two);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀙🀛🀜🀜🀝🀝🀞🀞🀟🀠🀠🀠🀡"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
@@ -793,12 +810,14 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.three);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀙🀚🀜🀜🀝🀝🀞🀞🀟🀠🀠🀠🀡"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
@@ -809,12 +828,14 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.eight);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀙🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀠🀡"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(32);
@@ -825,12 +846,14 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.eight);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀙🀙🀙🀜🀜🀝🀝🀞🀞🀟🀟🀠🀠"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(40);
@@ -852,12 +875,14 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.character, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀇🀇🀉🀊🀋🀐🀐🀐🀒🀒🀙🀙🀙"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(50);
@@ -876,7 +901,7 @@ struct MahjongData
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(46);
 	}
-+/
+
 	bool isTsumo() @property pure const
 	{
 		return player.lastTile.isSelfDraw;
@@ -895,19 +920,21 @@ struct MahjongData
 		auto data = MahjongData(player, result);
 		data.isTsumo.should.equal(true);
 	}
-/+
+
 	@("A win on a ronned tile is not a tsumo")
 	unittest
 	{
 		import fluent.asserts;
+		import mahjong.engine.opts;
 
+		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
 		tile.isNotOwn;
 		tile.isDiscarded;
 		auto player = new Player("🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀠🀠🀡"d);
-		player.ron(tile);
+		player.ron(tile, metagame);
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.isTsumo.should.equal(false);
-	}+/
+	}
 }
