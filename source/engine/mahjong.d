@@ -474,10 +474,21 @@ unittest
 }
 
 auto constructMahjongData(Metagame metagame)
+in
 {
-	bool isExhaustiveDraw = metagame.isExhaustiveDraw;
+	assert(metagame.players.any!(p => p.isMahjong) ||
+		(metagame.isExhaustiveDraw && metagame.players.any!(p => p.isNagashiMangan)), 
+		"Can only construct mahjong data if at least one of the players is eligible for mahjong");
+}
+do
+{
+	auto regularMahjong = metagame.playersByTurnOrder
+		.map!(p => p.calculateMahjongData())
+		.filter!(data => data.result.isMahjong)
+		.array;
+	if(regularMahjong.length != 0) return regularMahjong;
 	return metagame.playersByTurnOrder
-		.map!(p => p.calculateMahjongData(isExhaustiveDraw))
+		.map!(p => p.calculateNagashiMangan)
 		.filter!(data => data.result.isMahjong)
 		.array;
 }
@@ -509,17 +520,58 @@ unittest
 	mahjongData[1].player.should.equal(player1);
 }
 
-private MahjongData calculateMahjongData(const Player player, bool isExhaustiveDraw)
+@("When I claim the last tile before exhaustive draw, I should get my regular data")
+unittest
 {
-	if (isExhaustiveDraw)
-	{
-		return MahjongData(player, MahjongResult(player.isNagashiMangan, [new NagashiManganSet]));
-	}
-	else
-	{
-		auto mahjongResult = scanHandForMahjong(player);
-		return MahjongData(player, mahjongResult);
-	}
+	import fluent.asserts;
+	import mahjong.domain.wall;
+	import mahjong.engine.opts;
+
+	auto winningGame = new Ingame(PlayerWinds.east,
+			"🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+	auto losingGame = new Ingame(PlayerWinds.west,
+			"🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+	auto player1 = new Player;
+	auto player2 = new Player;
+	auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+	metagame.wall = new MockWall(true);
+	player1.game = winningGame;
+	player1.isNotNagashiMangan;
+	player2.game = losingGame;
+	player2.isNotNagashiMangan;
+	auto mahjongData = metagame.constructMahjongData.array;
+	mahjongData.length.should.equal(1);
+	mahjongData[0].player.should.equal(player1);
+}
+
+@("If a regular mahjong happens while someone has nagashi mangan, the regular mahjong has preference")
+unittest
+{
+	import fluent.asserts;
+	import mahjong.domain.wall;
+	import mahjong.engine.opts;
+
+	auto winningGame = new Ingame(PlayerWinds.east,
+			"🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+	auto losingGame = new Ingame(PlayerWinds.west,
+			"🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+	auto player1 = new Player;
+	auto player2 = new Player;
+	auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
+	metagame.wall = new MockWall(true);
+	player1.game = winningGame;
+	player1.isNotNagashiMangan;
+	player2.game = losingGame;
+	//player2.isNagashiMangan;
+	auto mahjongData = metagame.constructMahjongData.array;
+	mahjongData.length.should.equal(1);
+	mahjongData[0].player.should.equal(player1);
+}
+
+private MahjongData calculateMahjongData(const Player player)
+{
+	auto mahjongResult = scanHandForMahjong(player);
+	return MahjongData(player, mahjongResult);
 }
 
 @("If a player is mahjong, it should be concluded as such")
@@ -531,7 +583,7 @@ unittest
 			"🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
 	auto player = new Player;
 	player.game = winningGame;
-	auto result = player.calculateMahjongData(false);
+	auto result = player.calculateMahjongData();
 	result.isMahjong.should.equal(true);
 }
 
@@ -544,8 +596,13 @@ unittest
 			"🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
 	auto player = new Player;
 	player.game = losingGame;
-	auto result = player.calculateMahjongData(false);
+	auto result = player.calculateMahjongData();
 	result.isMahjong.should.equal(false);
+}
+
+private MahjongData calculateNagashiMangan(const Player player)
+{
+	return MahjongData(player, MahjongResult(player.isNagashiMangan, [new NagashiManganSet]));
 }
 
 @("If the game is an exhaustive draw, a nagashi mangan is counted as a mahjong")
@@ -557,7 +614,7 @@ unittest
 			"🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
 	auto player = new Player;
 	player.game = losingGame;
-	auto result = player.calculateMahjongData(true);
+	auto result = player.calculateNagashiMangan;
 	result.isMahjong.should.equal(true);
 	result.isNagashiMangan.should.equal(true);
 }

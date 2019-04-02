@@ -118,7 +118,7 @@ package Round finishRoundWithMahjong(Metagame metagame, Round round)
     round.increment;
     round.removeRiichiSticks;
     auto eastPlayer = metagame.eastPlayer;
-    bool needToMoveWinds = !(eastPlayer.isNagashiMangan || eastPlayer.isMahjong);
+    bool needToMoveWinds = !((metagame.isExhaustiveDraw && eastPlayer.isNagashiMangan) || eastPlayer.isMahjong);
     if(needToMoveWinds)
     {
         round.resetCounter;
@@ -153,7 +153,7 @@ unittest
 
 package Round finishRoundWithExhaustiveDraw(Metagame metagame, Round round)
 {
-    if(metagame.isAnyPlayerNagashiMangan)
+    if(metagame.isAnyPlayerNagashiMangan || metagame.isAnyPlayerMahjong)
     {
         return finishRoundWithMahjong(metagame, round);
     }
