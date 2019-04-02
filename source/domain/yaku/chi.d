@@ -125,7 +125,7 @@ unittest
     yaku.length.should.equal(0);
 }
 
-private bool isStraightFlush(const MahjongResult result)
+private bool isStraightFlush(const MahjongResult result) pure
 {
     import std.algorithm : any, filter;
     import std.typecons : Tuple;

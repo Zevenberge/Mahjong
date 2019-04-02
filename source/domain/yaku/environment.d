@@ -21,7 +21,7 @@ package struct Environment
     const Tile lastTile;
 }
 
-package const(Environment) destillEnvironment(const Ingame player, const Metagame metagame)
+package const(Environment) destillEnvironment(const Ingame player, const Metagame metagame) pure
 {
     Environment env = {
         leadingWind: metagame.leadingWind,
@@ -36,6 +36,46 @@ package const(Environment) destillEnvironment(const Ingame player, const Metagam
         isLastTileBeforeExhaustiveDraw: metagame.isExhaustiveDraw && !player.isNagashiMangan,
         isFirstRound: metagame.isFirstTurn,
         lastTile: player.lastTile
+    };
+    return env;
+}
+
+const(Environment) destillEnvironmentForPotentialRon(const Ingame player, const Tile discardedTile,
+    PlayerWinds leadingWind, bool isFirstRound, bool isLastTileBeforeExhaustiveDraw) pure
+{
+    Environment env = {
+        leadingWind: leadingWind,
+        ownWind: player.wind,
+        isRiichi: player.isRiichi,
+        isDoubleRiichi: player.isDoubleRiichi,
+        isFirstTurnAfterRiichi: player.isFirstTurnAfterRiichi,
+        isSelfDraw: false,
+        isReplacementTileFromKan: false,
+        isKanSteal: false,
+        isClosedHand: player.isClosedHand,
+        isLastTileBeforeExhaustiveDraw: isLastTileBeforeExhaustiveDraw,
+        isFirstRound: isFirstRound,
+        lastTile: discardedTile
+    };
+    return env;
+}
+
+const(Environment) destillEnvironmentForPotentialKanSteal(const Ingame player, const Tile kanTile,
+    PlayerWinds leadingWind, bool isFirstRound, bool isLastTileBeforeExhaustiveDraw) pure
+{
+    Environment env = {
+        leadingWind: leadingWind,
+        ownWind: player.wind,
+        isRiichi: player.isRiichi,
+        isDoubleRiichi: player.isDoubleRiichi,
+        isFirstTurnAfterRiichi: player.isFirstTurnAfterRiichi,
+        isSelfDraw: false,
+        isReplacementTileFromKan: false,
+        isKanSteal: true,
+        isClosedHand: player.isClosedHand,
+        isLastTileBeforeExhaustiveDraw: isLastTileBeforeExhaustiveDraw,
+        isFirstRound: isFirstRound,
+        lastTile: kanTile
     };
     return env;
 }

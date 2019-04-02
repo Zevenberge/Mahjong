@@ -13,7 +13,7 @@ import mahjong.engine.sort;
 import mahjong.share.range;
 
 class Ingame
-{ 
+{
     this(PlayerWinds wind)
     {
         this.wind = wind;
@@ -22,11 +22,12 @@ class Ingame
         id = randomUUID;
     }
 
-    version(unittest)
+    version (unittest)
     {
         this(PlayerWinds wind, dstring tiles)
         {
             import mahjong.engine.creation;
+
             this(wind);
             closedHand.tiles = tiles.convertToTiles;
             closedHand.tiles.each!(t => t.isDrawnBy(this));
@@ -35,7 +36,7 @@ class Ingame
         void setDiscards(Tile[] discs)
         {
             _discards = discs;
-            foreach(tile; _discards)
+            foreach (tile; _discards)
             {
                 tile.isDrawnBy(this);
                 tile.isDiscarded;
@@ -56,13 +57,17 @@ class Ingame
         void willBeTenpai()
         {
             import mahjong.engine.creation;
-            closedHand.tiles = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+
+            closedHand.tiles
+                = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
         }
 
         void willNotBeTenpai()
         {
             import mahjong.engine.creation;
-            closedHand.tiles = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
+
+            closedHand.tiles
+                = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
         }
     }
 
@@ -87,7 +92,7 @@ class Ingame
     private Tile[] _claimedDiscards;
     private const(Tile)[] allDiscards() @property pure const
     {
-        return discards ~_claimedDiscards;
+        return discards ~ _claimedDiscards;
     }
 
     void discardIsClaimed(Tile tile)
@@ -105,7 +110,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.declareRiichi(toBeDiscardedTile, false);
         ingame.aTileHasBeenClaimed;
@@ -121,6 +128,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
+
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.isNagashiMangan.should.equal(true);
     }
@@ -129,7 +137,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
         ingame.discard(ingame.closedHand.tiles[0]);
         ingame.isNagashiMangan.should.equal(true);
     }
@@ -138,7 +148,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
         ingame.discard(ingame.closedHand.tiles[11]);
         ingame.isNagashiMangan.should.equal(true);
     }
@@ -147,7 +159,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
         ingame.discard(ingame.closedHand.tiles[11]);
         ingame.isNagashiMangan.should.equal(false);
     }
@@ -157,7 +171,9 @@ class Ingame
     {
         import fluent.asserts;
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀟"d);
         auto tile = new Tile(Types.wind, Winds.east);
         tile.isNotOwn;
         ingame.pon(tile);
@@ -184,7 +200,8 @@ class Ingame
 
     bool isChiable(const Tile discard) pure const
     {
-        if(!canClaim(discard)) return false;
+        if (!canClaim(discard))
+            return false;
         return closedHand.isChiable(discard);
     }
 
@@ -193,6 +210,7 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+
         auto game = new Ingame(PlayerWinds.east);
         game.closedHand.tiles = "🀓🀔"d.convertToTiles;
         auto chiableTile = "🀕"d.convertToTiles[0];
@@ -216,6 +234,7 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+
         auto game = new Ingame(PlayerWinds.east, "🀀🀁"d);
         auto nonChiableTile = "🀂"d.convertToTiles[0];
         nonChiableTile.isNotOwn;
@@ -232,10 +251,12 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        ingame.declareRiichi(ingame.closedHand.tiles.front, 
-            new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.declareRiichi(ingame.closedHand.tiles.front,
+                new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.isNotOwn;
         ingame.isChiable(tile).should.equal(false);
@@ -243,7 +264,7 @@ class Ingame
 
     void chi(Tile discard, ChiCandidate otherTiles)
     {
-        if(!isChiable(discard) || !otherTiles.isChi(discard)) 
+        if (!isChiable(discard) || !otherTiles.isChi(discard))
         {
             throw new IllegalClaimException(discard, "Chi not allowed");
         }
@@ -259,6 +280,7 @@ class Ingame
         import fluent.asserts;
         import mahjong.domain.exceptions;
         import mahjong.engine.creation;
+
         auto game = new Ingame(PlayerWinds.east, "🀓🀔"d);
         auto tiles = game.closedHand.tiles;
         auto candidate = ChiCandidate(tiles[0], tiles[1]);
@@ -274,7 +296,8 @@ class Ingame
 
     bool isPonnable(const Tile discard) pure
     {
-        if(!canClaim(discard)) return false;
+        if (!canClaim(discard))
+            return false;
         return closedHand.isPonnable(discard);
     }
 
@@ -282,6 +305,7 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+
         auto game = new Ingame(PlayerWinds.east);
         game.closedHand.tiles = "🀕🀕"d.convertToTiles;
         auto ponnableTile = "🀕"d.convertToTiles[0];
@@ -297,10 +321,12 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        ingame.declareRiichi(ingame.closedHand.tiles.front, 
-            new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.declareRiichi(ingame.closedHand.tiles.front,
+                new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.isNotOwn;
         ingame.isPonnable(tile).should.equal(false);
@@ -308,7 +334,8 @@ class Ingame
 
     void pon(Tile discard)
     {
-        if(!isPonnable(discard)) throw new IllegalClaimException(discard, "Pon not allowed");
+        if (!isPonnable(discard))
+            throw new IllegalClaimException(discard, "Pon not allowed");
         discard.claim;
         auto ponTiles = closedHand.removePonTiles(discard) ~ discard;
         openHand.addPon(ponTiles);
@@ -316,9 +343,28 @@ class Ingame
         startTurn;
     }
 
+    @("Can I declare a pon")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.exceptions;
+        import mahjong.engine.creation;
+
+        auto game = new Ingame(PlayerWinds.east, "🀕🀕"d);
+        auto ponnableTile = "🀕"d.convertToTiles[0];
+        ponnableTile.isNotOwn;
+        game.pon(ponnableTile);
+        game.closedHand.length.should.equal(0)
+            .because("the tiles should have been removed from the hand");
+        game.openHand.amountOfPons.should.equal(1);
+        game.openHand.sets.length.should.equal(1);
+        (() => game.pon(ponnableTile)).should.throwException!IllegalClaimException;
+    }
+
     bool isKannable(const Tile discard, const Wall wall)
     {
-        if(!canClaim(discard) || wall.isMaxAmountOfKansReached) return false;
+        if (!canClaim(discard) || wall.isMaxAmountOfKansReached)
+            return false;
         return closedHand.isKannable(discard);
     }
 
@@ -326,6 +372,7 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.opts;
+
         class MaybeKanWall : Wall
         {
             this(bool isMaxAmountOfKansReached)
@@ -333,12 +380,14 @@ class Ingame
                 super(new DefaultGameOpts);
                 _isMaxAmountOfKansReached = isMaxAmountOfKansReached;
             }
+
             private const bool _isMaxAmountOfKansReached;
-            override bool isMaxAmountOfKansReached() const 
+            override bool isMaxAmountOfKansReached() const
             {
                 return _isMaxAmountOfKansReached;
             }
         }
+
         auto ingame = new Ingame(PlayerWinds.east);
         auto tile = new Tile(Types.ball, Numbers.eight);
         tile.isNotOwn;
@@ -357,10 +406,12 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        ingame.declareRiichi(ingame.closedHand.tiles.front, 
-            new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.declareRiichi(ingame.closedHand.tiles.front,
+                new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.isNotOwn;
         ingame.isKannable(tile, new Wall(new DefaultGameOpts)).should.equal(false);
@@ -368,7 +419,8 @@ class Ingame
 
     void kan(Tile discard, Wall wall)
     {
-        if(!isKannable(discard, wall)) throw new IllegalClaimException(discard, "Kan not allowed");
+        if (!isKannable(discard, wall))
+            throw new IllegalClaimException(discard, "Kan not allowed");
         discard.claim;
         auto kanTiles = closedHand.removeKanTiles(discard) ~ discard;
         openHand.addKan(kanTiles);
@@ -382,6 +434,7 @@ class Ingame
         import mahjong.domain.exceptions;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
+
         auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
         wall.dice;
@@ -391,19 +444,45 @@ class Ingame
         game.kan(kannableTile, wall);
         game.closedHand.length.should.equal(1)
             .because("all of the tiles should have been moved and a new one drawn");
-        game.openHand.amountOfPons.should.equal(1)
-            .because("the kan counts as a pon");
+        game.openHand.amountOfPons.should.equal(1).because("the kan counts as a pon");
         game.openHand.amountOfKans.should.equal(1);
         game.openHand.sets.length.should.equal(1);
         (() => game.kan(kannableTile, wall)).should.throwException!IllegalClaimException;
     }
 
-    bool isRonnable(const Tile discard) pure
+    bool isRonnable(const Tile discard, const Metagame metagame)
     {
-        return !isFuriten &&
-            scanHandForMahjong(this, discard).isMahjong;
+        import mahjong.domain.yaku;
+        import mahjong.domain.yaku.environment;
+
+        if (isFuriten)
+            return false;
+        auto result = scanHandForMahjong(this, discard);
+        if (!result.isMahjong)
+            return false;
+        auto environment = destillEnvironmentForPotentialRon(this, discard,
+                metagame.leadingWind, metagame.isFirstTurn, metagame.isExhaustiveDraw);
+        auto yaku = determineYaku(result, environment);
+        return yaku.length > 0;
     }
 
+    @("Can a player ron a tile if they have a yaku")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto game = new Ingame(PlayerWinds.east,
+                "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
+        auto kanSteal = "🀐"d.convertToTiles[0];
+        kanSteal.isNotOwn;
+        kanSteal.isDiscarded;
+        game.isRonnable(kanSteal, metagame).should.equal(true);
+    }
+
+    @("Can a player not ron if they are furiten")
     unittest
     {
         void addTileToDiscard(Ingame game, Tile tile)
@@ -411,24 +490,48 @@ class Ingame
             game.closedHand.tiles ~= tile;
             game.discard(tile);
         }
+
         import fluent.asserts;
         import mahjong.engine.creation;
-        auto game = new Ingame(PlayerWinds.east, "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
-        auto ronnableTile = "🀐"d.convertToTiles[0];
-        ronnableTile.isNotOwn;
-        game.isRonnable(ronnableTile).should.equal(true);
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto game = new Ingame(PlayerWinds.east,
+                "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
+        auto kanSteal = "🀐"d.convertToTiles[0];
+        kanSteal.isNotOwn;
+        kanSteal.isDiscarded;
         addTileToDiscard(game, "🀐"d.convertToTiles[0]);
-        game.isRonnable(ronnableTile).should.equal(false)
+        game.isRonnable(kanSteal, metagame).should.equal(false)
             .because("the player is furiten on the same tile");
         game = new Ingame(PlayerWinds.east, "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
         addTileToDiscard(game, "🀖"d.convertToTiles[0]);
-        game.isRonnable(ronnableTile).should.equal(false)
+        game.isRonnable(kanSteal, metagame).should.equal(false)
             .because("the player is furiten on another out");
     }
 
-    void ron(Tile discard)
+    @("Can a player not ron if they have no yaku")
+    unittest
     {
-        if(!isRonnable(discard)) 
+        import fluent.asserts;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto game = new Ingame(PlayerWinds.east,
+                "🀐🀐🀑🀒🀓🀔🀕🀇🀇🀜🀝🀞"d);
+        auto ponTile = new Tile(Types.character, Numbers.one);
+        ponTile.isNotOwn;
+        ponTile.isDiscarded;
+        game.pon(ponTile);
+        auto kanSteal = new Tile(Types.bamboo, Numbers.one);
+        kanSteal.isNotOwn;
+        kanSteal.isDiscarded;
+        game.isRonnable(kanSteal, metagame).should.equal(false);
+    }
+
+    void ron(Tile discard, const Metagame metagame)
+    {
+        if (!isRonnable(discard, metagame))
         {
             throw new IllegalClaimException(discard, "The tile could not have been ronned.");
         }
@@ -436,38 +539,111 @@ class Ingame
         closedHand.tiles ~= discard;
     }
 
+    @("Can the player ron")
     unittest
     {
-        import fluent.asserts;
-        import mahjong.domain.exceptions;
         import mahjong.engine.creation;
-        auto game = new Ingame(PlayerWinds.east, "🀕🀕"d);
-        auto ponnableTile = "🀕"d.convertToTiles[0];
-        ponnableTile.isNotOwn;
-        game.pon(ponnableTile);
-        game.closedHand.length.should.equal(0)
-            .because("the tiles should have been removed from the hand");
-        game.openHand.amountOfPons.should.equal(1);
-        game.openHand.sets.length.should.equal(1);
-        (() => game.pon(ponnableTile)).should.throwException!IllegalClaimException;
-    }
+        import mahjong.engine.opts;
 
-    unittest
-    {
-        import mahjong.engine.creation;
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
         ronTile.isNotOwn;
-        ingame.ron(ronTile);
+        ingame.ron(ronTile, metagame);
         assert(ingame.isMahjong, "After ronning, the player should have mahjong");
         assert(ingame.lastTile == ronTile, "The player should confess they claimed the last tile");
     }
 
-    void stealKanTile(Tile kanTile)
+    bool canKanSteal(const Tile kanTile, const Metagame metagame) const
     {
-        ron(kanTile);
+        import mahjong.domain.yaku;
+        import mahjong.domain.yaku.environment;
+
+        if (isFuriten)
+            return false;
+        auto result = scanHandForMahjong(this, kanTile);
+        if (!result.isMahjong)
+            return false;
+        auto environment = destillEnvironmentForPotentialKanSteal(this, kanTile,
+                metagame.leadingWind, metagame.isFirstTurn, metagame.isExhaustiveDraw);
+        auto yaku = determineYaku(result, environment);
+        return yaku.length > 0;
+    }
+
+    @("Can a player steal a kan tile if they have a yaku")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto game = new Ingame(PlayerWinds.east,
+                "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
+        auto kanTile = "🀐"d.convertToTiles[0];
+        kanTile.isNotOwn;
+        kanTile.isDiscarded;
+        game.canKanSteal(kanTile, metagame).should.equal(true);
+    }
+
+    @("Can a player not kan steal if they are furiten")
+    unittest
+    {
+        void addTileToDiscard(Ingame game, Tile tile)
+        {
+            game.closedHand.tiles ~= tile;
+            game.discard(tile);
+        }
+
+        import fluent.asserts;
+        import mahjong.engine.creation;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto game = new Ingame(PlayerWinds.east,
+                "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
+        auto kanTile = "🀐"d.convertToTiles[0];
+        kanTile.isNotOwn;
+        kanTile.isDiscarded;
+        addTileToDiscard(game, "🀐"d.convertToTiles[0]);
+        game.canKanSteal(kanTile, metagame).should.equal(false)
+            .because("the player is furiten on the same tile");
+        game = new Ingame(PlayerWinds.east, "🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d);
+        addTileToDiscard(game, "🀖"d.convertToTiles[0]);
+        game.canKanSteal(kanTile, metagame).should.equal(false)
+            .because("the player is furiten on another out");
+    }
+
+    @("Can a player still kan steal if they have no yaku")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto game = new Ingame(PlayerWinds.east,
+                "🀐🀐🀑🀒🀓🀔🀕🀇🀇🀜🀝🀞"d);
+        auto ponTile = new Tile(Types.character, Numbers.one);
+        ponTile.isNotOwn;
+        ponTile.isDiscarded;
+        game.pon(ponTile);
+        auto kanSteal = new Tile(Types.bamboo, Numbers.one);
+        kanSteal.isNotOwn;
+        kanSteal.isDiscarded;
+        game.canKanSteal(kanSteal, metagame).should.equal(true);
+    }
+
+    void stealKanTile(Tile kanTile, const Metagame metagame)
+    {
+        if (!canKanSteal(kanTile, metagame))
+        {
+            throw new IllegalClaimException(kanTile, "The tile could not have been stolen");
+        }
         kanTile.isStolenFromKan;
+        _lastTile = kanTile;
+        closedHand.tiles ~= kanTile;
     }
 
     @("After a kan steal the player is mahjong")
@@ -475,11 +651,15 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+        import mahjong.engine.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto kanTile = "🀡"d.convertToTiles[0];
         kanTile.isNotOwn;
-        ingame.stealKanTile(kanTile);
+        ingame.stealKanTile(kanTile, metagame);
         ingame.isMahjong.should.equal(true).because("the player stole the kan");
         ingame.lastTile.should.equal(kanTile);
         kanTile.isKanSteal.should.equal(true);
@@ -487,17 +667,19 @@ class Ingame
 
     void couldHaveClaimed(const Tile tile)
     {
-        if(isOwn(tile)) return;
-        _isTemporaryFuriten = _isTemporaryFuriten 
-            || .scanHandForMahjong(this, tile).isMahjong;
+        if (isOwn(tile))
+            return;
+        _isTemporaryFuriten = _isTemporaryFuriten || .scanHandForMahjong(this, tile).isMahjong;
     }
 
     unittest
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
         ingame.couldHaveClaimed(ronTile);
         ingame.isFuriten.should.equal(true);
@@ -507,8 +689,10 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto randomTile = "🀀"d.convertToTiles[0];
         ingame.couldHaveClaimed(randomTile);
         ingame.isFuriten.should.equal(false);
@@ -518,8 +702,10 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.creation;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
         ingame.couldHaveClaimed(ronTile);
         ingame.isFuriten.should.equal(true);
@@ -527,7 +713,7 @@ class Ingame
         ingame.couldHaveClaimed(randomTile);
         ingame.isFuriten.should.equal(true);
     }
-    
+
     bool canDeclareClosedKan(const Tile tile) pure const
     {
         return closedHand.canDeclareClosedKan(tile);
@@ -545,8 +731,10 @@ class Ingame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
         auto tile = ingame.closedHand.tiles.back;
         auto initialLength = ingame.closedHand.tiles.length;
         auto wall = new Wall(new DefaultGameOpts);
@@ -565,8 +753,10 @@ class Ingame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
         auto tile = ingame.closedHand.tiles.back;
         auto initialLength = ingame.closedHand.tiles.length;
         auto wall = new Wall(new DefaultGameOpts);
@@ -594,8 +784,10 @@ class Ingame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
         auto tile = ingame.closedHand.tiles.back;
         tile.isNotOwn;
         ingame.pon(tile);
@@ -625,18 +817,20 @@ class Ingame
         return .isPlayerTenpai(closedHand.tiles, openHand);
     }
 
-    bool isFuriten() @property pure
+    bool isFuriten() @property pure const
     {
-        if(_isTemporaryFuriten) return true;
-        foreach(tile; allDiscards)
+        if (_isTemporaryFuriten)
+            return true;
+        foreach (tile; allDiscards)
         {
-            if(.scanHandForMahjong(this, tile).isMahjong)
+            if (.scanHandForMahjong(this, tile).isMahjong)
             {
                 return true;
             }
         }
         return false;
     }
+
     private bool _isTemporaryFuriten;
 
     bool canTsumo() pure const
@@ -648,31 +842,39 @@ class Ingame
     {
         import mahjong.engine.creation;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ponTile = "🀟"d.convertToTiles[0];
         ponTile.isNotOwn;
         ingame.pon(ponTile);
-        assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
+        assert(!ingame.canTsumo,
+                "After a claiming a tile, the player should no longer be able to tsumo.");
     }
 
     unittest
     {
         import mahjong.engine.creation;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
-        auto chiTile = "🀡"d.convertToTiles[0];
-        chiTile.isNotOwn;
-        ingame.chi(chiTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
-        assert(!ingame.canTsumo, "After a claiming a tile, the player should no longer be able to tsumo.");
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        auto ronTile = "🀡"d.convertToTiles[0];
+        ronTile.isNotOwn;
+        ingame.chi(ronTile, ChiCandidate(ingame.closedHand.tiles[6], ingame.closedHand.tiles[8]));
+        assert(!ingame.canTsumo,
+                "After a claiming a tile, the player should no longer be able to tsumo.");
     }
 
     bool canDeclareRiichi(const Tile potentialDiscard) const
     {
-        if(_isRiichi) return false;
-        if(!openHand.isClosedHand) return false;
-        auto remainingTiles = closedHand.tiles.without!((a,b) => a is b)([potentialDiscard]);
+        if (_isRiichi)
+            return false;
+        if (!openHand.isClosedHand)
+            return false;
+        auto remainingTiles = closedHand.tiles.without!((a, b) => a is b)([potentialDiscard]);
         return isPlayerTenpai(remainingTiles, openHand);
     }
 
@@ -680,7 +882,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(true);
         auto toNotBeDiscardedTile = ingame.closedHand.tiles[2];
@@ -691,7 +895,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         ingame._isRiichi = true;
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
@@ -701,7 +907,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto discard = new Tile(Types.wind, Winds.east);
         discard.isNotOwn;
         ingame.pon(discard);
@@ -728,7 +936,9 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.opts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.isRiichi.should.equal(false);
         ingame.declareRiichi(toBeDiscardedTile, false);
@@ -742,7 +952,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.declareRiichi(toBeDiscardedTile, true);
         ingame.isRiichi.should.equal(true);
@@ -753,7 +965,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.declareRiichi(toBeDiscardedTile, false);
         ingame.isFirstTurnAfterRiichi.should.equal(true);
@@ -782,7 +996,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         ingame.isFirstTurnAfterRiichi.should.equal(false);
     }
 
@@ -805,7 +1021,9 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.opts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.declareRiichi(toBeDiscardedTile, false);
         auto wall = new Wall(new DefaultGameOpts);
@@ -816,7 +1034,7 @@ class Ingame
         ingame.isFirstTurnAfterRiichi.should.equal(false);
     }
 
-    private Tile _lastTile; 
+    private Tile _lastTile;
     const(Tile) lastTile() @property pure const
     {
         return _lastTile;
@@ -831,7 +1049,7 @@ class Ingame
     {
         closedHand.showHand;
     }
-    
+
     void drawTile(Wall wall)
     {
         closedHand.drawTile(wall);
@@ -846,8 +1064,10 @@ class Ingame
         import fluent.asserts;
         import mahjong.engine.creation;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         auto ronTile = "🀡"d.convertToTiles[0];
         ingame.couldHaveClaimed(ronTile);
         auto wall = new Wall(new DefaultGameOpts);
@@ -865,8 +1085,10 @@ class Ingame
         import mahjong.engine.creation;
         import mahjong.engine.flow;
         import mahjong.engine.opts;
+
         auto ingame = new Ingame(PlayerWinds.east);
-        ingame.closedHand.tiles = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
+        ingame.closedHand.tiles
+            = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         ingame.declareRiichi(ingame.closedHand.tiles.front, false);
         auto ronTile = "🀡"d.convertToTiles[0];
         ingame.couldHaveClaimed(ronTile);
@@ -875,7 +1097,7 @@ class Ingame
         wall.dice;
         ingame.drawTile(wall);
         ingame.isFuriten.should.equal(true)
-            .because("when sitting riichi, a furiten does no longer resolve"); 
+            .because("when sitting riichi, a furiten does no longer resolve");
     }
 
     @("If I draw a tile from the wall, it is still the first turn after riichi")
@@ -883,7 +1105,9 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.opts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         ingame.declareRiichi(toBeDiscardedTile, false);
         auto wall = new Wall(new DefaultGameOpts);
@@ -898,7 +1122,9 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.engine.opts;
-        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+
+        auto ingame = new Ingame(PlayerWinds.east,
+                "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
         wall.dice;
@@ -909,7 +1135,7 @@ class Ingame
 
     private void startTurn()
     {
-        if(!_isRiichi)
+        if (!_isRiichi)
         {
             _isTemporaryFuriten = false;
         }
@@ -918,20 +1144,18 @@ class Ingame
 
 bool doesDiscardsOnlyContain(Ingame game, const ComparativeTile discard)
 {
-    return game.discards.length == 1 &&
-        game.discards[0].hasEqualValue(discard);
+    return game.discards.length == 1 && game.discards[0].hasEqualValue(discard);
 }
 
 unittest
 {
     import fluent.asserts;
+
     auto ingame = new Ingame(PlayerWinds.east);
     auto discard = ComparativeTile(Types.wind, Winds.east);
-    ingame.doesDiscardsOnlyContain(discard).should.equal(false)
-        .because("there are no discards");
+    ingame.doesDiscardsOnlyContain(discard).should.equal(false).because("there are no discards");
     ingame.setDiscards([new Tile(Types.wind, Winds.east)]);
-    ingame.doesDiscardsOnlyContain(discard).should.equal(true)
-        .because("the only discard matches");
+    ingame.doesDiscardsOnlyContain(discard).should.equal(true).because("the only discard matches");
     auto otherDiscard = ComparativeTile(Types.wind, Winds.west);
     ingame.doesDiscardsOnlyContain(otherDiscard).should.equal(false)
         .because("the discard does not match");
@@ -947,7 +1171,7 @@ bool hasAllTheKans(const Ingame game, int maxAmountOfKans)
 
 bool canDiscard(const Ingame game, const Tile potentialDiscard) pure
 {
-    if(game.isRiichi)
+    if (game.isRiichi)
     {
         return game.lastTile is potentialDiscard;
     }
@@ -958,8 +1182,10 @@ bool canDiscard(const Ingame game, const Tile potentialDiscard) pure
 unittest
 {
     import fluent.asserts;
-    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d);
-    foreach(tile; ingame.closedHand.tiles)
+
+    auto ingame = new Ingame(PlayerWinds.east,
+            "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d);
+    foreach (tile; ingame.closedHand.tiles)
     {
         ingame.canDiscard(tile).should.equal(true);
     }
@@ -969,11 +1195,13 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d);
+
+    auto ingame = new Ingame(PlayerWinds.east,
+            "🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙🀡"d);
     ingame._isRiichi = true;
-    ingame._lastTile = ingame.closedHand.tiles[$-1];
+    ingame._lastTile = ingame.closedHand.tiles[$ - 1];
     ingame.canDiscard(ingame.lastTile).should.equal(true);
-    foreach(tile; ingame.closedHand.tiles[0..$-1])
+    foreach (tile; ingame.closedHand.tiles[0 .. $ - 1])
     {
         ingame.canDiscard(tile).should.equal(false);
     }
@@ -993,7 +1221,9 @@ private bool isEligibleForRedraw(const Ingame game, bool isFirstTurn)
 unittest
 {
     import fluent.asserts;
-    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d);
+
+    auto ingame = new Ingame(PlayerWinds.east,
+            "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d);
     isEligibleForRedraw(ingame, true).should.equal(true);
 }
 
@@ -1001,7 +1231,9 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto ingame = new Ingame(PlayerWinds.east, "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d);
+
+    auto ingame = new Ingame(PlayerWinds.east,
+            "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d);
     isEligibleForRedraw(ingame, false).should.equal(false);
 }
 
@@ -1009,6 +1241,8 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+
+    auto ingame = new Ingame(PlayerWinds.east,
+            "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     isEligibleForRedraw(ingame, true).should.equal(false);
 }

@@ -53,10 +53,10 @@ unittest
     set.isSetOf(Types.wind).should.equal(false);
 }
 
-bool isSameAs(const Set one, const Set another)
+bool isSameAs(const Set one, const Set another) pure
 {
     return one.tiles[0].hasEqualValue(another.tiles[0])
-        && typeid(one) == typeid(another);
+        && typeid(one) is typeid(another);
 }
 
 @("Are equal chis the same")

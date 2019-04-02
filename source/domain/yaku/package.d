@@ -31,9 +31,7 @@ do
     return determineYaku(mahjongResult, environment); 
 }
 
-// This function should be private. But to have a unittest for each yaku serve as 
-// the negative for the other yakus, we make this function package-private.
-package const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Environment environment)
+const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Environment environment)
     in
 {
     assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");

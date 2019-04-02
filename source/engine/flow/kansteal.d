@@ -171,7 +171,7 @@ final class KanStealFlow : Flow
         foreach(evt; stealingPlayers)
         {
             auto player = evt._player;
-            player.stealKanTile(tile);
+            player.stealKanTile(tile, _metagame);
             _notificationService.notify(Notification.Ron, player);
         }
         switchFlow(new MahjongFlow(_metagame, _notificationService));

@@ -261,7 +261,7 @@ unittest
 	ronTile.isDiscarded;
     auto claimFlow = new ClaimFlow(ronTile, game, new NullNotificationService);
     switchFlow(claimFlow);
-    claimFlow._claimEvents[0].handle(new RonRequest(player2, ronTile));
+    claimFlow._claimEvents[0].handle(new RonRequest(player2, ronTile, game));
     claimFlow.advanceIfDone;
     player2.isFuriten.should.equal(false)
         .because("player 2 claimed a ron tile and should not become furiten");
@@ -445,24 +445,26 @@ class ChiRequest : ClaimRequest
 
 class RonRequest : ClaimRequest
 {
-	this(Player player, Tile discard)
+	this(Player player, Tile discard, const Metagame metagame)
 	{
 		_player = player;
 		_discard = discard;
+		_metagame = metagame;
 	}
 
 	private Player _player;
 	private Tile _discard;
+	private const Metagame _metagame;
 
 	void apply(INotificationService notificationService)
 	{
-		_player.ron(_discard);
+		_player.ron(_discard, _metagame);
 		notificationService.notify(Notification.Ron, _player);
 	}
 
-	bool isAllowed() pure
+	bool isAllowed()
 	{
-		return _player.isRonnable(_discard);
+		return _player.isRonnable(_discard, _metagame);
 	}
 
 	Request request() @property pure const

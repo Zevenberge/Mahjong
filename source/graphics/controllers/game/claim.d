@@ -24,7 +24,7 @@ class ClaimOptionFactory
 	this(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
 	{
 		player.closedHand.displayHand;
-		addRonOption(player, discard, claimEvent);
+		addRonOption(player, discard, metagame, claimEvent);
 		addKanOption(player, discard, metagame.wall, claimEvent);
 		addPonOption(player, discard, claimEvent);
 		addChiOptions(player, discard, metagame, claimEvent);
@@ -32,9 +32,9 @@ class ClaimOptionFactory
 		addDefaultOption(claimEvent);
 	}
 
-	private void addRonOption(Player player, Tile discard, ClaimEvent claimEvent)
+	private void addRonOption(Player player, Tile discard, const Metagame metagame, ClaimEvent claimEvent)
 	{
-		if(player.isRonnable(discard)) _options ~= new RonClaimOption(player, discard, claimEvent);
+		if(player.isRonnable(discard, metagame)) _options ~= new RonClaimOption(player, discard, metagame, claimEvent);
 	}
 
 	private void addKanOption(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
@@ -229,19 +229,21 @@ unittest
 
 class RonClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, ClaimEvent claimEvent)
+	this(Player player, Tile discard, const Metagame metagame, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
+		_metagame = metagame;
 		super("Ron", claimEvent);
 	}
 
 	private Player _player;
 	private Tile _discard;
+	private const Metagame _metagame;
 
 	override ClaimRequest constructRequest() 
 	{
-		return new RonRequest(_player, _discard);
+		return new RonRequest(_player, _discard, _metagame);
 	}
 
 	override const(Tile)[] relevantTiles() @property
@@ -259,7 +261,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
-	auto ronOption = new RonClaimOption(player, discard, null);
+	auto ronOption = new RonClaimOption(player, discard, null, null);
 	assert(ronOption.relevantTiles.length == 13, "All of the player's on hand tiles should be relevant");
 	assert(!ronOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
 }

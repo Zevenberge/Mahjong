@@ -191,7 +191,7 @@ Transaction[] toTransactions(const(MahjongData)[] data, const Metagame metagame)
     auto allTransactions = chain(mahjongTransactions, riichiTransactions);
     return allTransactions.mergeTransactions;
 }
-
+/+
 unittest
 {
     import mahjong.domain.set;
@@ -260,7 +260,7 @@ unittest
     auto transactions = [mahjongData1, mahjongData2].toTransactions(metagame);
     assert(transactions.length == 3, "Expected two plus and a minus transaction because of a possible double ron");
     // TODO assert that the scoring is ok.
-}
+}+/
 
 private Transaction[] extractTransactions(const MahjongData data, const Metagame metagame)
 {

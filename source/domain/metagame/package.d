@@ -528,7 +528,7 @@ class Metagame
         return wall.canRiichiBeDeclared;
     }
 
-	bool isExhaustiveDraw() @property const
+	bool isExhaustiveDraw() @property pure const
 	{
         return wall && wall.isExhaustiveDraw;
 	}

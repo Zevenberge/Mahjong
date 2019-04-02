@@ -605,6 +605,7 @@ struct MahjongData
 			+ miniPointsFromDrawing;
 	}
 
+/+
 	@("A self draw on a concealed hand with only chis result in 20 minipoints")
 	unittest
 	{
@@ -875,7 +876,7 @@ struct MahjongData
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(46);
 	}
-
++/
 	bool isTsumo() @property pure const
 	{
 		return player.lastTile.isSelfDraw;
@@ -894,7 +895,7 @@ struct MahjongData
 		auto data = MahjongData(player, result);
 		data.isTsumo.should.equal(true);
 	}
-
+/+
 	@("A win on a ronned tile is not a tsumo")
 	unittest
 	{
@@ -908,5 +909,5 @@ struct MahjongData
 		auto result = player.scanHandForMahjong;
 		auto data = MahjongData(player, result);
 		data.isTsumo.should.equal(false);
-	}
+	}+/
 }
