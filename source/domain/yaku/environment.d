@@ -5,7 +5,7 @@ import mahjong.domain.ingame;
 import mahjong.domain.metagame;
 import mahjong.domain.tile;
 
-package struct Environment
+struct Environment
 {
     const PlayerWinds leadingWind;
     const PlayerWinds ownWind;

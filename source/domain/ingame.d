@@ -7,6 +7,7 @@ import std.uuid;
 import mahjong.domain;
 import mahjong.domain.enums;
 import mahjong.domain.exceptions;
+import mahjong.domain.yaku.environment;
 import mahjong.engine.chi;
 import mahjong.engine.mahjong;
 import mahjong.engine.sort;
@@ -450,20 +451,11 @@ class Ingame
         (() => game.kan(kannableTile, wall)).should.throwException!IllegalClaimException;
     }
 
-    bool isRonnable(const Tile discard, const Metagame metagame)
+    bool isRonnable(const Tile discard, const Metagame metagame) const
     {
-        import mahjong.domain.yaku;
-        import mahjong.domain.yaku.environment;
-
-        if (isFuriten)
-            return false;
-        auto result = scanHandForMahjong(this, discard);
-        if (!result.isMahjong)
-            return false;
         auto environment = destillEnvironmentForPotentialRon(this, discard,
                 metagame.leadingWind, metagame.isFirstTurn, metagame.isExhaustiveDraw);
-        auto yaku = determineYaku(result, environment);
-        return yaku.length > 0;
+        return isLegitMahjongClaim(discard, environment);        
     }
 
     @("Can a player ron a tile if they have a yaku")
@@ -558,18 +550,9 @@ class Ingame
 
     bool canKanSteal(const Tile kanTile, const Metagame metagame) const
     {
-        import mahjong.domain.yaku;
-        import mahjong.domain.yaku.environment;
-
-        if (isFuriten)
-            return false;
-        auto result = scanHandForMahjong(this, kanTile);
-        if (!result.isMahjong)
-            return false;
         auto environment = destillEnvironmentForPotentialKanSteal(this, kanTile,
                 metagame.leadingWind, metagame.isFirstTurn, metagame.isExhaustiveDraw);
-        auto yaku = determineYaku(result, environment);
-        return yaku.length > 0;
+        return isLegitMahjongClaim(kanTile, environment);        
     }
 
     @("Can a player steal a kan tile if they have a yaku")
@@ -1139,6 +1122,16 @@ class Ingame
         {
             _isTemporaryFuriten = false;
         }
+    }
+
+    private bool isLegitMahjongClaim(const Tile tile, const Environment environment) const
+    {
+        import mahjong.domain.result : isMahjongWithYaku;
+
+        if (isFuriten)
+            return false;
+        auto result = scanHandForMahjong(this, tile);
+        return result.isMahjongWithYaku(environment);
     }
 }
 
