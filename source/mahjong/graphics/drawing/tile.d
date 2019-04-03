@@ -78,17 +78,6 @@ bool isRotated(const Tile tile) @property
     return visual.isRotated;
 }
 
-deprecated void setPosition(Tile tile, Vector2f pos)
-{
-	trace("Setting the position of the tile");
-	auto coords = getCoords(tile);
-	trace("Retreived the old coordinates");
-	coords.x = pos.x;
-	coords.y = pos.y;
-	setCoords(tile, coords);
-	trace("Set the new coords.");
-}
-
 private class TileVisuals
 {
 	private Sprite _sprite;

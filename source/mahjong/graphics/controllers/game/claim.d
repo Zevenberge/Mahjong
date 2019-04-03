@@ -221,8 +221,12 @@ class NoClaimOption : ClaimOption
 	}
 }
 
+@("No claim option has no relevant tiles")
 unittest
 {
+	import mahjong.graphics.opts;
+
+    styleOpts = new DefaultStyleOpts;
 	auto noClaim = new NoClaimOption(null);
 	assert(noClaim.relevantTiles.empty, "When not claiming anything, there should be no relevant tiles");
 }
