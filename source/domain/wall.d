@@ -139,12 +139,12 @@ class Wall
 		return kanTile;
 	}
 
-    bool canRiichiBeDeclared() @property const
+    bool canRiichiBeDeclared() @property pure const
     {
         return (_tiles.length - _opts.deadWallLength) > _opts.riichiBuffer;
     }
 
-	bool isExhaustiveDraw() @property const
+	bool isExhaustiveDraw() @property pure const
 	{
 		return _tiles.length <= _opts.deadWallLength;
 	}

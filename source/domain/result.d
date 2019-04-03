@@ -3,6 +3,7 @@
 import mahjong.domain.set;
 import mahjong.domain.enums;
 import mahjong.domain.tile;
+import mahjong.domain.yaku.environment;
 import mahjong.share.range;
 
 struct MahjongResult
@@ -401,4 +402,58 @@ unittest
     auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi, pon]);
     result.allSetsHaveATerminal.should.equal(false);
+}
+
+bool isMahjongWithYaku(const MahjongResult result, const Environment env)
+{
+    import mahjong.domain.yaku : determineYaku;
+
+    if(!result.isMahjong) return false;
+    auto yaku = determineYaku(result, env);
+    return yaku.length > 0;
+}
+
+@("Thirteen orphans is a mahjong with yaku")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.ingame;
+    import mahjong.engine.mahjong;
+
+    auto game = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀄🀅🀆🀇🀏🀐🀘🀙🀡"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.east, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0]
+    };
+    result.isMahjongWithYaku(env).should.equal(true);
+}
+
+@("A hand that is not mahjong has no mahjong with yaku")
+unittest
+{
+    import fluent.asserts;
+
+    auto result = MahjongResult(false, null);
+    result.isMahjongWithYaku(Environment.init).should.equal(false);
+}
+
+@("A hand without yaku is not a mahjong with yaku")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.ingame;
+    import mahjong.engine.mahjong;
+
+    auto game = new Ingame(PlayerWinds.west, "🀁🀁🀁🀇🀈🀉🀚🀛🀜🀞🀞🀔🀕🀖"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+            leadingWind: PlayerWinds.east, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0]
+    };
+    game.closedHand.tiles[0].isNotOwn;
+    game.closedHand.tiles[0].isDiscarded;
+    result.isMahjongWithYaku(env).should.equal(false);
 }

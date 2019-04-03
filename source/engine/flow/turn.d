@@ -91,7 +91,7 @@ class TurnFlow : Flow
 		void claimTsumo()
         in
         {
-            assert(_player.canTsumo(), "The move should be legal.");
+            assert(_player.canTsumo(_metagame), "The move should be legal.");
         }
         do
 		{
