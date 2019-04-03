@@ -10,7 +10,10 @@
         "optional": "~>0.12.0"
 	},
  "configurations": [
-   { "name": "executable" },
+   { 
+	   "name": "executable",
+     "targetType": "executable"
+   },
    {
      "name": "unittest",
      "targetType": "executable",
