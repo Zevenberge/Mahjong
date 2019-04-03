@@ -236,7 +236,7 @@ unittest
     transactions.length.should.equal(2);
 }
 
-@("In the case of a double ron, the losing player's transactions get compounded")
+@("In the case of a double ron, the losing player's transactions get combined")
 unittest
 {
     import fluent.asserts;
