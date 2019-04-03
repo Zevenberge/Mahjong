@@ -7,7 +7,7 @@
 		"ddmp": "0.0.1-0.dev.3",
 		"diet-ng": "1.5.0",
 		"dsfml": "2.1.1",
-		"eventcore": "0.8.41",
+		"eventcore": "0.8.42",
 		"fluent-asserts": "0.12.4",
 		"libasync": "0.8.4",
 		"libdparse": "0.8.8",
@@ -15,11 +15,12 @@
 		"memutils": "0.4.13",
 		"mir-linux-kernel": "1.0.1",
 		"openssl": "1.1.6+1.0.1g",
-		"optional": "0.9.0",
+		"optional": "0.12.0",
 		"silly": "0.8.2",
 		"stdx-allocator": "2.77.5",
 		"taggedalgebraic": "0.11.3",
-		"vibe-core": "1.6.1",
-		"vibe-d": "0.8.4"
+		"unit-threaded": "0.7.55",
+		"vibe-core": "1.6.2",
+		"vibe-d": "0.8.5"
 	}
 }
