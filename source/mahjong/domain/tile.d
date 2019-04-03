@@ -40,12 +40,12 @@ class Tile
         this._ = ComparativeTile(type, value);
     }
 
-    void close() 
+    void close() pure 
     {
         _isOpen = false;
     }
     
-    void open() 
+    void open() pure
     {
         _isOpen = true;
     }

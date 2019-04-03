@@ -34,19 +34,19 @@ class Wall
 
 	void dice()
 	{
-		info("Rolling the dice for the wall");
+		debug info("Rolling the dice for the wall");
 		diceToStartPoint();
 		flipFirstDoraIndicator();
-		info("Wall is ready to go.");
+		debug info("Wall is ready to go.");
 	}
 
 	void setUp()
 	{
-		trace("Resetting the wall");
+		debug trace("Resetting the wall");
 		initialise();
-		trace("Initialized the wall");
+		debug trace("Initialized the wall");
 		shuffle();
-		trace("Shuffled the wall");
+		debug trace("Shuffled the wall");
 	}
 
 	protected void initialise()
@@ -88,7 +88,7 @@ class Wall
 		}
 		return result;
 	}
-	private int calculateWallShift(int diceRoll)
+	private int calculateWallShift(int diceRoll) pure
 	{
 		auto plyrs = _opts.amountOfPlayers;
 		int wallSide = (diceRoll-1)%plyrs;
@@ -101,12 +101,12 @@ class Wall
 		this._tiles = twall;
 	}
 	
-	protected void flipFirstDoraIndicator()
+	protected void flipFirstDoraIndicator() pure
 	{
 		_tiles[$-5].open;
 	}   
 	
-	protected void flipDoraIndicator()
+	protected void flipDoraIndicator() pure
 	{
 		auto indexOfLastOpenedDoraIndicator = _tiles.countUntil!(t => t.isOpen);
 		_tiles[indexOfLastOpenedDoraIndicator-2].open;
@@ -117,7 +117,7 @@ class Wall
 		return _tiles.filter!(t => t.isOpen).array;
 	}
 
-	Tile drawTile()
+	Tile drawTile() pure
 	{ 
 		Tile drawnTile = _tiles[0];
 		_tiles = _tiles[1 .. $];
@@ -125,13 +125,13 @@ class Wall
 	}
 
     private ubyte _amountOfKans;
-	Tile drawKanTile()
+	Tile drawKanTile() pure
 	{ 
 		flipDoraIndicator;
 		return getKanTile;      
 	}
 	
-	protected Tile getKanTile()
+	protected Tile getKanTile() pure
 	{
         _amountOfKans++;
 		Tile kanTile = _tiles[$-1];
@@ -149,7 +149,7 @@ class Wall
 		return _tiles.length <= _opts.deadWallLength;
 	}
 
-    bool isMaxAmountOfKansReached() const
+    bool isMaxAmountOfKansReached() @property pure const
     {
         return _amountOfKans == _opts.maxAmountOfKans;
     }

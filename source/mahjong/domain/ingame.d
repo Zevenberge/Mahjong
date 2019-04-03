@@ -1074,12 +1074,12 @@ class Ingame
         return _lastTile;
     }
 
-    void closeHand()
+    void closeHand() pure
     {
         closedHand.closeHand;
     }
 
-    void showHand()
+    void showHand() pure
     {
         closedHand.showHand;
     }
