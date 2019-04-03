@@ -444,7 +444,7 @@ version (unittest)
 
 bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
 {
-	import mahjong.engine.creation;
+	import mahjong.engine.creation : allTiles;
 
 	return allTiles.any!(tile => scanHandForMahjong(closedHand ~ tile, openHand.sets).isMahjong);
 }

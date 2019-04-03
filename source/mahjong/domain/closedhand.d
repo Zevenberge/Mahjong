@@ -92,7 +92,7 @@ class ClosedHand
 		return countTilesWithEqualValue(discard) >= 3;
 	}
 
-	Tile[] removeKanTiles(const Tile discard)
+	Tile[] removeKanTiles(const Tile discard) pure
 	in
 	{
 		assert(isKannable(discard));

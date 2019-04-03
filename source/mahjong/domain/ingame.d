@@ -951,12 +951,12 @@ class Ingame
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
     }
 
-    Tile declareRiichi(const Tile discard, const Metagame metagame)
+    Tile declareRiichi(const Tile discard, const Metagame metagame) pure
     {
         return declareRiichi(discard, metagame.isFirstTurn);
     }
 
-    private Tile declareRiichi(const Tile discard, bool isFirstTurn)
+    private Tile declareRiichi(const Tile discard, bool isFirstTurn) pure
     {
         _isRiichi = true;
         _isDoubleRiichi = isFirstTurn;
@@ -1041,7 +1041,7 @@ class Ingame
         return scanHandForMahjong(this).isMahjong;
     }
 
-    Tile discard(const Tile discardedTile)
+    Tile discard(const Tile discardedTile) pure
     {
         _isFirstTurnAfterRiichi = false;
         auto tile = closedHand.removeTile(discardedTile);
@@ -1084,7 +1084,7 @@ class Ingame
         closedHand.showHand;
     }
 
-    void drawTile(Wall wall)
+    void drawTile(Wall wall) pure
     {
         closedHand.drawTile(wall);
         _lastTile = closedHand.lastTile;
@@ -1167,7 +1167,7 @@ class Ingame
         ingame.lastTile.isSelfDraw.should.equal(true);
     }
 
-    private void startTurn()
+    private void startTurn() pure
     {
         if (!_isRiichi)
         {
@@ -1186,7 +1186,7 @@ class Ingame
     }
 }
 
-bool doesDiscardsOnlyContain(Ingame game, const ComparativeTile discard)
+bool doesDiscardsOnlyContain(Ingame game, const ComparativeTile discard) pure
 {
     return game.discards.length == 1 && game.discards[0].hasEqualValue(discard);
 }
@@ -1208,7 +1208,7 @@ unittest
         .because("there are multiple discards");
 }
 
-bool hasAllTheKans(const Ingame game, int maxAmountOfKans)
+bool hasAllTheKans(const Ingame game, int maxAmountOfKans) pure
 {
     return game.openHand.hasAllKans(maxAmountOfKans);
 }

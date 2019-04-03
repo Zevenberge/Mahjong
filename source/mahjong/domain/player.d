@@ -14,7 +14,7 @@ import mahjong.engine.scoring;
 class Player
 { // General variables.
 	const UUID id;
-	dstring name = "Cal"d;
+	const dstring name = "Cal"d;
 
 	int playLoc = -10;
 	private int _score;
@@ -100,7 +100,7 @@ class Player
         return metagame.canRiichiBeDeclared && game.canDeclareRiichi(potentialDiscard);
     }
 
-    Tile declareRiichi(const Tile discard, Metagame metagame)
+    Tile declareRiichi(const Tile discard, Metagame metagame) pure
     {
         _score -= metagame.riichiFare;
         metagame.riichiIsDeclared;

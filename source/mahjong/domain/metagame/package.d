@@ -461,7 +461,7 @@ class Metagame
             .because("the first round has been interrupted");
     }
 
-    private bool areAllKansDeclaredAndNotByOnePlayer()
+    private bool areAllKansDeclaredAndNotByOnePlayer() pure
     {
         if(!wall.isMaxAmountOfKansReached) return false;
         return !players.any!(player => player.hasAllTheKans(_opts.maxAmountOfKans));
@@ -500,7 +500,7 @@ class Metagame
             .because("one player claimed all available kans");
     }
 
-    private bool isEveryPlayerRiichi()
+    private bool isEveryPlayerRiichi() pure
     {
         return players.all!(player => player.isRiichi);
     }
@@ -523,7 +523,7 @@ class Metagame
         metagame.isAbortiveDraw.should.equal(true);
     }
 
-    void declareRedraw()
+    void declareRedraw() pure
     {
         _isRedrawDeclared = true;
     }
@@ -542,7 +542,7 @@ class Metagame
         metagame.isAbortiveDraw.should.equal(true);
     }
 
-    bool canRiichiBeDeclared() @property const
+    bool canRiichiBeDeclared() @property pure const
     {
         return wall.canRiichiBeDeclared;
     }
