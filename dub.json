@@ -21,7 +21,7 @@
      "mainSourceFile": "bin/ut.d",
      "excludedSourceFiles": ["source/app.d"],
      "dependencies": {
-        "unit-threaded": "~>0.7.53",
+        "unit-threaded": "~>0.9.2",
         "fluent-asserts": "~>0.12.3"
      }
    }
