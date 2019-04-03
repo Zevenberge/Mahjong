@@ -29,9 +29,10 @@ class ClaimFlow : Flow
 
 		void initialiseClaimEvents()
 		{
-			_claimEvents = _metagame.otherPlayers
-						.map!(p => createEventAndNotifyHandler(p))
-						.array;
+            foreach(player; _metagame.otherPlayers)
+            {
+                _claimEvents ~= createEventAndNotifyHandler(player);
+            }
 		}
 
 		ClaimEvent createEventAndNotifyHandler(Player player)
@@ -51,7 +52,7 @@ class ClaimFlow : Flow
 		{
 			assert(_claimEvents.all!(ce => ce.isAllowed), "There should be no illegal claims");
 		}
-		body
+		do
 		{
 			if(applyRons) return;
             notifyPlayersAboutMissedTile();
@@ -160,7 +161,8 @@ unittest
 	player2.startGame(PlayerWinds.east);
 	player2.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = player1.game;
+	ponnableTile.isDrawnBy(player1);
+	ponnableTile.isDiscarded;
 	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new PonRequest(player2, ponnableTile));
@@ -182,7 +184,8 @@ unittest
 	player3.startGame(PlayerWinds.east);
 	player3.game.closedHand.tiles = "🀕🀕"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(PlayerWinds.south);
+	ponnableTile.isNotOwn;
+	ponnableTile.isDiscarded;
 	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new ChiRequest(player2, ponnableTile, 
@@ -209,7 +212,8 @@ unittest
 	player3.startGame(PlayerWinds.east);
 	player3.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
 	auto ponnableTile = "🀕"d.convertToTiles[0];
-	ponnableTile.origin = new Ingame(PlayerWinds.south);
+	ponnableTile.isNotOwn;
+	ponnableTile.isDiscarded;
 	auto claimFlow = new ClaimFlow(ponnableTile, game, new NullNotificationService);
 	switchFlow(claimFlow);
 	claimFlow._claimEvents[0].handle(new NoRequest); 
@@ -231,7 +235,8 @@ unittest
     player2.startGame(PlayerWinds.east);
     player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
     auto ronTile = "🀡"d.convertToTiles[0];
-    ronTile.origin = player1.game;
+    ronTile.isDrawnBy(player1);
+	ronTile.isDiscarded;
     auto claimFlow = new ClaimFlow(ronTile, game, new NullNotificationService);
     switchFlow(claimFlow);
     claimFlow._claimEvents[0].handle(new NoRequest());
@@ -252,10 +257,11 @@ unittest
     player2.startGame(PlayerWinds.east);
     player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
     auto ronTile = "🀡"d.convertToTiles[0];
-    ronTile.origin = player1.game;
+    ronTile.isDrawnBy(player1);
+	ronTile.isDiscarded;
     auto claimFlow = new ClaimFlow(ronTile, game, new NullNotificationService);
     switchFlow(claimFlow);
-    claimFlow._claimEvents[0].handle(new RonRequest(player2, ronTile));
+    claimFlow._claimEvents[0].handle(new RonRequest(player2, ronTile, game));
     claimFlow.advanceIfDone;
     player2.isFuriten.should.equal(false)
         .because("player 2 claimed a ron tile and should not become furiten");
@@ -274,7 +280,8 @@ unittest
     auto player2 = game.players[1];
     player2.game.closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
     auto ponTile = "🀡"d.convertToTiles[0];
-    ponTile.origin = player1.game;
+    ponTile.isDrawnBy(player1);
+	ponTile.isDiscarded;
     auto claimFlow = new ClaimFlow(ponTile, game, new NullNotificationService);
     switchFlow(claimFlow);
     claimFlow._claimEvents[0].handle(new PonRequest(player2, ponTile));
@@ -438,24 +445,26 @@ class ChiRequest : ClaimRequest
 
 class RonRequest : ClaimRequest
 {
-	this(Player player, Tile discard)
+	this(Player player, Tile discard, const Metagame metagame)
 	{
 		_player = player;
 		_discard = discard;
+		_metagame = metagame;
 	}
 
 	private Player _player;
 	private Tile _discard;
+	private const Metagame _metagame;
 
 	void apply(INotificationService notificationService)
 	{
-		_player.ron(_discard);
+		_player.ron(_discard, _metagame);
 		notificationService.notify(Notification.Ron, _player);
 	}
 
-	bool isAllowed() pure
+	bool isAllowed()
 	{
-		return _player.isRonnable(_discard);
+		return _player.isRonnable(_discard, _metagame);
 	}
 
 	Request request() @property pure const

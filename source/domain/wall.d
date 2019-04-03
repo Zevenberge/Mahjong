@@ -139,12 +139,12 @@ class Wall
 		return kanTile;
 	}
 
-    bool canRiichiBeDeclared() @property const
+    bool canRiichiBeDeclared() @property pure const
     {
         return (_tiles.length - _opts.deadWallLength) > _opts.riichiBuffer;
     }
 
-	bool isExhaustiveDraw() @property const
+	bool isExhaustiveDraw() @property pure const
 	{
 		return _tiles.length <= _opts.deadWallLength;
 	}
@@ -180,7 +180,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
-	kannableTile.origin = new Ingame(PlayerWinds.south);
+	kannableTile.isNotOwn;
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.tiles.front == lastTile, "The last tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
@@ -265,7 +265,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
 	auto kannableTile = "🀕"d.convertToTiles[0];
-	kannableTile.origin = new Ingame(PlayerWinds.south);
+	kannableTile.isNotOwn;
 	player.kan(kannableTile, wall);
 	assert(player.game.closedHand.tiles.front == firstTile, "The first tile of the wall should have been drawn");
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
@@ -278,7 +278,7 @@ version(unittest)
         this(bool isExhaustiveDraw)
         {
             _isExhaustiveDraw = isExhaustiveDraw;
-            this(null);
+            this(new Tile(Types.wind, Winds.north));
         }
 
 		this(Tile tileToDraw)

@@ -28,6 +28,10 @@ class AiEventHandler : GameEventHandler
 	{
 		_ai.claim(event);
 	}
+	override void handle(KanStealEvent event)
+	{
+		_ai.steal(event);
+	}
 	override void handle(MahjongEvent event)
 	{
 		event.handle;

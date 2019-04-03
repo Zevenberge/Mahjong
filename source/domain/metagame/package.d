@@ -91,7 +91,7 @@ class Metagame
 
 	private void startPlayersGame()
 	{
-		foreach(int i, player; players)
+		foreach(i, player; players)
 		{ 
 			auto wind = ((_round.roundStartingPosition + i) % players.length).to!PlayerWinds;
 			player.startGame(wind);
@@ -171,7 +171,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
+        auto nonTenpaiGame = new Ingame(PlayerWinds.east, "🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑"d);
         auto player = new Player;
         player.game = nonTenpaiGame;
         player.isNotNagashiMangan;
@@ -185,12 +185,12 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        auto nonTenpaiGame = new Ingame(PlayerWinds.east, ""d);
+        auto nonTenpaiGame = new Ingame(PlayerWinds.east, "🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑"d);
         auto player1 = new Player;
         player1.game = nonTenpaiGame;
         player1.isNotNagashiMangan;
         auto player2 = new Player;
-        player2.game = new Ingame(PlayerWinds.south, ""d);
+        player2.game = new Ingame(PlayerWinds.south, "🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑"d);
         player2.isNotNagashiMangan;
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
         metagame._round = Round(0); // Force the first player to be east.
@@ -210,7 +210,7 @@ class Metagame
         player1.game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d);
         player1.isNotNagashiMangan;
         auto player2 = new Player;
-        player2.game = new Ingame(PlayerWinds.south, ""d);
+        player2.game = new Ingame(PlayerWinds.south, "🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑"d);
         player2.isNotNagashiMangan;
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
         metagame._round = Round(0); // Force the first player to be east.
@@ -220,6 +220,25 @@ class Metagame
         metagame.beginRound;
         player1.isEast.should.equal(true);
         player2.isEast.should.equal(false);
+    }
+
+    @("A mahjong on the last round counts as a mahjong")
+    unittest
+    {
+        import fluent.asserts;
+        auto winningGame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+        auto losingGame = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀆🀅🀇🀏🀐🀘🀙🀡🀊"d);
+        auto player1 = new Player;
+        player1.game = winningGame;
+        player1.hasDrawnTheirLastTile;
+        player1.isNotNagashiMangan;
+        auto metagame = new Metagame([player1], new DefaultGameOpts);
+        metagame.setUpWall;
+        metagame.currentPlayer = player1;
+        metagame.riichiIsDeclared;
+        metagame.exhaust;
+        metagame.finishRound;
+        metagame.amountOfRiichiSticks.should.equal(0); 
     }
 
     void abortRound()
@@ -369,8 +388,13 @@ class Metagame
     void aTileHasBeenClaimed()
     {
         _isFirstTurn = false;
+        foreach(player; players)
+        {
+            player.aTileHasBeenClaimed;
+        }
     }
 
+    @("When a tile has been claimed, the first round is over")
     unittest
     {
         import fluent.asserts;
@@ -382,6 +406,23 @@ class Metagame
         metagame.aTileHasBeenClaimed;
         metagame.isFirstTurn.should.equal(false)
             .because("all players already had a turn");
+    }
+
+    @("When a tile has been claimed, players are no longer in their first turn after riichi")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.engine.flow;
+        auto player = new Player(new TestEventHandler, 30_000);
+        auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
+        player.game = ingame;
+        auto toBeDiscardedTile = ingame.closedHand.tiles[3];
+        ingame.declareRiichi(toBeDiscardedTile, metagame);
+        metagame.aTileHasBeenClaimed;
+        ingame.isFirstTurnAfterRiichi.should.equal(false);
     }
 
 	bool isAbortiveDraw() @property
@@ -437,7 +478,7 @@ class Metagame
         {
             player.game.closedHand.tiles = "🀕🀕🀕"d.convertToTiles;
             auto kannableTile = "🀕"d.convertToTiles[0];
-            kannableTile.origin = new Ingame(PlayerWinds.north);
+            kannableTile.isNotOwn;
             player.kan(kannableTile, metagame.wall);
         }
         metagame.initializeRound;
@@ -506,7 +547,7 @@ class Metagame
         return wall.canRiichiBeDeclared;
     }
 
-	bool isExhaustiveDraw() @property const
+	bool isExhaustiveDraw() @property pure const
 	{
         return wall && wall.isExhaustiveDraw;
 	}
@@ -576,6 +617,7 @@ unittest
 	metagame.beginRound;
 	auto eastPlayer = metagame.eastPlayer;
 	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    eastPlayer.hasDrawnTheirLastTile;
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
@@ -597,6 +639,7 @@ unittest
     eastPlayer.isNotNagashiMangan;
 	auto nonEastPlayer = metagame.otherPlayers.front;
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    nonEastPlayer.hasDrawnTheirLastTile;
     nonEastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
@@ -621,6 +664,7 @@ unittest
         metagame.eastPlayer.isNotNagashiMangan;
 		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        nonEastPlayer.hasDrawnTheirLastTile;
         nonEastPlayer.isNotNagashiMangan;
 		metagame.finishRound;
 		metagame.initializeRound;
@@ -644,6 +688,8 @@ unittest
 	auto eastPlayer = metagame.currentPlayer;
     eastPlayer.isNotNagashiMangan;
 	auto southPlayer = metagame.nextPlayer;
+	southPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    southPlayer.hasDrawnTheirLastTile;
     southPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
@@ -666,7 +712,9 @@ unittest
 	metagame.beginRound;
 	foreach(i; 0..3)
 	{
-        metagame.eastPlayer.isNotNagashiMangan;
+        auto southPlayer = metagame.nextPlayer;
+        southPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        southPlayer.hasDrawnTheirLastTile;
 		metagame.finishRound;
 		metagame.initializeRound;
 		metagame.beginRound;
@@ -677,6 +725,7 @@ unittest
 
 unittest
 {
+    import fluent.asserts;
 	import mahjong.engine.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
@@ -686,14 +735,16 @@ unittest
 	metagame.beginRound;
 	auto eastPlayer = metagame.eastPlayer;
 	eastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    eastPlayer.hasDrawnTheirLastTile;
     eastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	metagame.initializeRound;
 	metagame.beginRound;
-    eastPlayer.isNotNagashiMangan;
-	// East does not win.
+    auto southPlayer = metagame.nextPlayer;
+    southPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    southPlayer.hasDrawnTheirLastTile;
 	metagame.finishRound;
-	assert(metagame.counters == 0, "The amount of counters should have been reset");
+    metagame.counters.should.equal(0).because("they are reset");
 }
 
 unittest
@@ -714,6 +765,7 @@ unittest
         metagame.eastPlayer.isNotNagashiMangan;
 		auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 		nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+        nonEastPlayer.hasDrawnTheirLastTile;
         nonEastPlayer.isNotNagashiMangan;
 		metagame.finishRound;
 		assert(!metagame.isGameOver, "There are still turns left to play!");
@@ -723,6 +775,7 @@ unittest
     metagame.eastPlayer.isNotNagashiMangan;
 	auto nonEastPlayer = players[(metagame._round.roundStartingPosition + 1)%$];
 	nonEastPlayer.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
+    nonEastPlayer.hasDrawnTheirLastTile;
     nonEastPlayer.isNotNagashiMangan;
 	metagame.finishRound;
 	assert(metagame.isGameOver, "The game should have been finished after 2x 4 rounds of non-east wins.");

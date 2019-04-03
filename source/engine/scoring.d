@@ -9,13 +9,14 @@ import mahjong.domain.enums;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
+import mahjong.domain.result;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.domain.wrappers;
+import mahjong.domain.yaku;
 import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.opts;
-import mahjong.engine.yaku;
 import mahjong.share.range;
 
 Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
@@ -191,9 +192,11 @@ Transaction[] toTransactions(const(MahjongData)[] data, const Metagame metagame)
     return allTransactions.mergeTransactions;
 }
 
+@("A win in a two-player game results in a plus and a minus transaction")
 unittest
 {
-    import mahjong.engine.creation;
+    import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.flow;
     auto wall = new MockWall(new Tile(Types.dragon, Dragons.red));
     auto player1 = new Player();
@@ -203,14 +206,16 @@ unittest
     player2.game = new Ingame(PlayerWinds.south);
     auto metagame = new Metagame([player1, player2], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData = MahjongData(player1, true, [new SevenPairsSet(null)]);
+    auto mahjongData = MahjongData(player1, true, [new SevenPairsSet(player1.closedHand.tiles)]);
     auto transactions = [mahjongData].toTransactions(metagame);
-    assert(transactions.length == 2, "Expected a plus and a minus transaction");
-    // TODO assert that the scoring is ok.
+    transactions.length.should.equal(2);
 }
 
+@("When a game is decided by a ron, only the discarding and the winning player have transactions")
 unittest
 {
+    import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     import mahjong.engine.flow;
     auto player1 = new Player();
@@ -221,18 +226,21 @@ unittest
     auto player3 = new Player();
     player3.game = new Ingame(PlayerWinds.west);
     auto tile = new Tile(Types.dragon, Dragons.red);
-    tile.origin = player2;
-    player1.ron(tile);
+    tile.isDrawnBy(player2);
+    tile.isDiscarded;
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(null)]);
+    player1.ron(tile, metagame);
+    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(player1.closedHand.tiles)]);
     auto transactions = [mahjongData1].toTransactions(metagame);
-    assert(transactions.length == 2, "Only the player who discarded and the winning player should be paid");
-    // TODO assert that the scoring is ok.
+    transactions.length.should.equal(2);
 }
 
+@("In the case of a double ron, the losing player's transactions get combined")
 unittest
 {
+    import fluent.asserts;
+    import mahjong.domain.set;
     import mahjong.engine.creation;
     import mahjong.engine.flow;
     auto player1 = new Player();
@@ -244,16 +252,16 @@ unittest
     player3.game = new Ingame(PlayerWinds.west);
     player3.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
     auto tile = new Tile(Types.dragon, Dragons.red);
-    tile.origin = player2;
-    player1.ron(tile);
-    player3.ron(tile);
+    tile.isDrawnBy(player2);
+    tile.isDiscarded;
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(null)]);
-    auto mahjongData2 = MahjongData(player3, true, [new SevenPairsSet(null)]);
+    player1.ron(tile, metagame);
+    player3.ron(tile, metagame);
+    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(player1.closedHand.tiles)]);
+    auto mahjongData2 = MahjongData(player3, true, [new SevenPairsSet(player3.closedHand.tiles)]);
     auto transactions = [mahjongData1, mahjongData2].toTransactions(metagame);
-    assert(transactions.length == 3, "Expected two plus and a minus transaction because of a possible double ron");
-    // TODO assert that the scoring is ok.
+    transactions.length.should.equal(3);
 }
 
 private Transaction[] extractTransactions(const MahjongData data, const Metagame metagame)
@@ -271,7 +279,7 @@ private Transaction[] extractTransactions(const MahjongData data, const Metagame
     }
     else
     {
-        auto payingPlayer = metagame.players.first!(p => p.game == data.player.lastTile.origin);
+        auto payingPlayer = metagame.players.first!(p => data.player.lastTile.isOwnedBy(p));
         transactions ~= new Transaction(payingPlayer, -payment.ron);
     }
     transactions ~= new Transaction(data.player, payment.ron);
@@ -651,6 +659,7 @@ private size_t countAmountOfDoras(const MahjongData mahjongResult, const Wall wa
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.eight);
     auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
@@ -664,6 +673,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([
@@ -677,6 +687,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
         [new PonSet([
@@ -691,6 +702,7 @@ unittest
 
 unittest
 {
+    import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
         [new ChiSet([

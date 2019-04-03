@@ -82,24 +82,6 @@ unittest
     import mahjong.domain.player;
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
-
-	auto eventhandler = new TestEventHandler;
-	auto player1 = new Player(eventhandler, 30_000);
-	player1.game = new Ingame(PlayerWinds.east);
-	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
-	auto metagame = new Metagame([player1], new DefaultGameOpts);
-	auto flow = new MahjongFlow(metagame, new NullNotificationService);
-	assert(eventhandler.mahjongEvent !is null, "A mahjong event should have been distributed.");
-	assert(eventhandler.mahjongEvent.data.empty, "No player has a mahjong, so the data should be empty.");
-}
-unittest
-{
-	import mahjong.domain.closedhand;
-	import mahjong.domain.enums;
-	import mahjong.domain.ingame;
-    import mahjong.domain.player;
-	import mahjong.engine.creation;
-    import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
 	auto player1 = new Player(eventhandler, 30_000);
 	player1.game = new Ingame(PlayerWinds.east);
@@ -161,13 +143,18 @@ unittest
 	import mahjong.engine.creation;
     import mahjong.engine.opts;
 	auto eventhandler = new TestEventHandler;
+	auto eventhandler2 = new TestEventHandler;
 	auto player1 = new Player(eventhandler, 30_000);
-    auto metagame = new Metagame([player1], new DefaultGameOpts);
+	auto player2 = new Player(eventhandler2, 30_000);
+    auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
     metagame.initializeRound;
+	metagame.beginRound;
 	player1.game = new Ingame(PlayerWinds.east);
-	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
+	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀗🀗🀆🀆"d.convertToTiles;
+	player1.hasDrawnTheirLastTile;
 	flow = new MahjongFlow(metagame, new NullNotificationService);
 	eventhandler.mahjongEvent.handle;
+	eventhandler2.mahjongEvent.handle;
 	flow.advanceIfDone;
     .flow.should.be.instanceOf!RoundStartFlow.because("a new round should start");
 }
@@ -187,6 +174,7 @@ unittest
 		{
 			super(players, new DefaultGameOpts);
             initializeRound;
+			beginRound;
             _isGameOver = true;
 		}
 
@@ -199,12 +187,16 @@ unittest
 	}
 
 	auto eventhandler = new TestEventHandler;
+	auto eventhandler2 = new TestEventHandler;
 	auto player1 = new Player(eventhandler, 30_000);
-    auto metagame = new NoMoreGame([player1]);
+	auto player2 = new Player(eventhandler2, 30_000);
+    auto metagame = new NoMoreGame([player1, player2]);
 	player1.game = new Ingame(PlayerWinds.east);
-	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀌🀌🀗🀗"d.convertToTiles;
+	player1.game.closedHand.tiles = "🀡🀡🀁🀁🀕🀕🀚🀚🀌🀌🀗🀗🀆🀆"d.convertToTiles;
+	player1.hasDrawnTheirLastTile;
 	flow = new MahjongFlow(metagame, new NullNotificationService);
 	eventhandler.mahjongEvent.handle;
+	eventhandler2.mahjongEvent.handle;
 	flow.advanceIfDone;
     .flow.should.be.instanceOf!GameEndFlow;
 }

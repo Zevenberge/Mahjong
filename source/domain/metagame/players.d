@@ -94,3 +94,8 @@ bool isAnyPlayerNagashiMangan(const Metagame metagame)
 {
     return metagame.players.any!(p => p.isNagashiMangan);
 }
+
+bool isAnyPlayerMahjong(const Metagame metagame)
+{
+    return metagame.players.any!(p => p.isMahjong);
+}

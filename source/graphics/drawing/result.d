@@ -8,10 +8,10 @@ import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.metagame;
 import mahjong.domain.tile;
+import mahjong.domain.yaku;
 import mahjong.engine.flow.mahjong;
 import mahjong.engine.mahjong;
 import mahjong.engine.scoring;
-import mahjong.engine.yaku;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.anime.story;
@@ -69,6 +69,7 @@ class ResultScreen
 
 	private void placeTiles()
 	{
+        import mahjong.domain.result;
 		_tiles = _mahjongData.result.tiles.array;
 		float initialLeftBound = innerMargin.x;
 		float leftBound = initialLeftBound;
@@ -82,7 +83,7 @@ class ResultScreen
 			}
 			foreach(tile; set.tiles)
 			{
-				if(tile.origin is null)
+				if(tile.isOwnedBy(_mahjongData.player))
 				{
 					tile.move(FloatCoords(Vector2f(leftBound, topBound), 0));
 					leftBound += drawingOpts.tileWidth;
