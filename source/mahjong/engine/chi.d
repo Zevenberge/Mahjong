@@ -14,7 +14,7 @@ struct ChiCandidate
 ChiCandidate[] determineChiCandidates(const(Tile)[] hand, const Tile discard) pure
 {
 	if(discard.isHonour) return null;
-	enum distance = [-2, -1, 1, 2];
+	static immutable distance = [-2, -1, 1, 2];
 	ChiCandidate[] candidates;
 	for(int i = 0; i < 3; ++i)
 	{

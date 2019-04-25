@@ -71,7 +71,7 @@ unittest
     doras.any!(tile => tile.hasEqualValue(redFiveBall)).should.equal(true);
 }
 
-private void defineDoras(ref Tile[] wall)
+private void defineDoras(ref Tile[] wall) pure
 in
 {
 	assert(wall.length == 136, "Wall length was %s".format(wall.length));

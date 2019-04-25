@@ -12,42 +12,37 @@ class ClosedHand
 {
 	Tile[] tiles;
 
-	size_t length() @property
+	size_t length() @property pure
 	{
 		return tiles.length;
 	}
 
-	Tile removeTile(const Tile tile)
+	Tile removeTile(const Tile tile) pure
 	{
-		return tiles.remove!((a,b) => a == b)(tile);
-	}
-	
-	void sortHand()
-	{
-		.sortHand(tiles);
+		return tiles.remove!((a,b) => a is b)(tile);
 	}
 
-	void closeHand()
+	void closeHand() pure
 	{
 		tiles.each!(t => t.close);
 	}
 
-	void showHand()
+	void showHand() pure
 	{
 		tiles.each!(t => t.open);
 	}
 
-	void drawTile(Wall wall)
+	void drawTile(Wall wall) pure
 	{
 		addTile(wall.drawTile);
 	}
 
-	void drawKanTile(Wall wall)
+	void drawKanTile(Wall wall) pure
 	{
 		addTile(wall.drawKanTile);
 	}
 
-	private void addTile(Tile tile)
+	private void addTile(Tile tile) pure
 	{
 		tiles ~= tile;
 		tiles.sortHand;
@@ -55,7 +50,7 @@ class ClosedHand
 	}
 
 	private Tile _lastTile;
-	Tile lastTile() @property
+	Tile lastTile() @property pure
 	{
 		return _lastTile;
 	}
@@ -65,31 +60,44 @@ class ClosedHand
 		return !determineChiCandidates(tiles, discard).empty;
 	}
 
-	Tile[] removeChiTiles(ChiCandidate otherChiTiles)
+	Tile[] removeChiTiles(const ChiCandidate otherChiTiles) pure
+	out(tiles)
 	{
-		auto chiTiles = tiles.filter!(t => 
-			t.id == otherChiTiles.first.id || 
-			t.id == otherChiTiles.second.id).array;
-		chiTiles.each!(t => removeTile(t));
-		return chiTiles;
+		assert(tiles.length == 2, "Two tiles should have been removed");
+		assert(tiles[0] !is null && tiles[1] !is null, "The tiles should have a value");
+	}
+	do
+	{
+		return [removeTile(otherChiTiles.first), 
+			removeTile(otherChiTiles.second)];
 	}
 
 	bool isPonnable(const Tile discard) pure
 	{
-		return tilesWithEqualValue(discard).length >= 2;
+		return countTilesWithEqualValue(discard) >= 2;
 	}
 
-	Tile[] removePonTiles(const Tile discard)
+	Tile[] removePonTiles(const Tile discard) pure
+	in
+	{
+		assert(isPonnable(discard));
+	}
+	do
 	{
 		return removeTilesWithIdenticalValue!2(discard);
 	}
 
 	bool isKannable(const Tile discard) pure
 	{
-		return tilesWithEqualValue(discard).length >= 3;
+		return countTilesWithEqualValue(discard) >= 3;
 	}
 
-	Tile[] removeKanTiles(const Tile discard)
+	Tile[] removeKanTiles(const Tile discard) pure
+	in
+	{
+		assert(isKannable(discard));
+	}
+	do
 	{
 		return removeTilesWithIdenticalValue!3(discard);
 	}
@@ -105,16 +113,23 @@ class ClosedHand
 		return removeTilesWithIdenticalValue!4(tile);
 	}
 
-	private Tile[] tilesWithEqualValue(const Tile other) pure
+	private Tile[] removeTilesWithIdenticalValue(int amount)(const Tile other) pure
 	{
-		return tiles.filter!(tile => tile.hasEqualValue(other)).array;
+		import std.range : take;
+
+		auto removedTiles = getTilesWithEqualValue(other).take(amount).array;
+		tiles = tiles.without!((a,b) => a is b)(removedTiles);
+		return removedTiles;
 	}
 
-	private Tile[] removeTilesWithIdenticalValue(int amount)(const Tile other)
+	private auto getTilesWithEqualValue(const Tile other) pure
 	{
-		auto removedTiles = tilesWithEqualValue(other)[0 .. amount];
-		tiles = tiles.without!((a,b) => a == b)(removedTiles);
-		return removedTiles;
+		return tiles.filter!(tile => tile.hasEqualValue(other));
+	}
+
+	private size_t countTilesWithEqualValue(const Tile other) pure
+	{
+		return tiles.count!(tile => tile.hasEqualValue(other));
 	}
 }
 

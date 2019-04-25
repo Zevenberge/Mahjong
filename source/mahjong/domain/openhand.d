@@ -51,7 +51,7 @@ class OpenHand
 		return _sets.count!(s => cast(ChiSet)s !is null);
 	}
 
-	void addPon(Tile[] tiles)
+	void addPon(Tile[] tiles) pure
 	in
 	{
 		assert(tiles.length == 3, "A pon should consist of three tiles.");
@@ -61,7 +61,7 @@ class OpenHand
 		_sets ~= new PonSet(tiles);
 	}
 
-	void addKan(Tile[] tiles)
+	void addKan(Tile[] tiles) pure
 	in
 	{
 		assert(tiles.length == 4, "A kan should consist of four tiles.");
@@ -72,7 +72,7 @@ class OpenHand
 		++_amountOfKans;
 	}
 
-	void addChi(Tile[] tiles)
+	void addChi(Tile[] tiles) pure
 	in 
 	{
 		assert(tiles.length == 3, "A chi should have the length of three tiles");
@@ -147,7 +147,7 @@ private bool canPromoteSetToKan(const Set set, const Tile kanTile) pure
 {
 	return set.tiles.length == 3 &&
 			kanTile.hasEqualValue(set.tiles[0]) &&
-			cast(PonSet)set;
+			set.isPon;
 }
 
 unittest
@@ -179,7 +179,7 @@ unittest
 	assert(!chi.canPromoteSetToKan(kanTile), "A different chi should not be promotable to kan.");
 }
 
-bool hasAllKans(const OpenHand hand, int maxAmountOfKans)
+bool hasAllKans(const OpenHand hand, int maxAmountOfKans) pure
 {
     return hand.amountOfKans == maxAmountOfKans;
 }
