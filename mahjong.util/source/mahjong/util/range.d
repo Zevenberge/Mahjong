@@ -1,4 +1,4 @@
-module mahjong.share.range;
+module mahjong.util.range;
 
 import std.algorithm;
 import std.array;

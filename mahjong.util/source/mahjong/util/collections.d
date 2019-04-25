@@ -1,4 +1,4 @@
-﻿module mahjong.share.collections;
+﻿module mahjong.util.collections;
 
 struct Set(T)
 {

@@ -7,9 +7,6 @@ import std.uuid;
 
 import mahjong.domain.enums;
 import mahjong.domain;
-import mahjong.engine.flow;
-import mahjong.engine.opts;
-import mahjong.engine.scoring;
 
 class Player
 { // General variables.

@@ -1,22 +1,13 @@
 {
-	"name": "mahjong",
-	"description": "A D mahjong game.",
-	"copyright": "Copyright © 2015, marco",
-	"authors": ["marco"],
-	"lflags" : ["-L/usr/local/lib/dsfml"],
+	"name": "util",
+	"description": "Convenience functions that are not part of any mahjong-specific logic",
+	"copyright": "Copyright © 2019, Marco de Wild",
+	"authors": ["Marco de Wild"],
 	"targetPath":"bin/",
 	"dependencies": {
-    "mahjong:util": "*"
-  },
-  "subPackages": [
-    "./mahjong.util",
-    "./mahjong.domain",
-    "./mahjong.engine",
-    "./mahjong.ai",
-    "./mahjong.graphics",
-    "./mahjong.test"
-  ],
-  "configurations": [
+        "optional": "~>0.12.0"
+	},
+ "configurations": [
    { 
 	   "name": "library",
      "targetType": "library"
@@ -32,5 +23,4 @@
      }
    }
  ]
- 
 }

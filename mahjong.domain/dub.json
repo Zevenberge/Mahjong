@@ -1,0 +1,26 @@
+{
+	"name": "domain",
+	"description": "The game rules of mahjong",
+	"copyright": "Copyright © 2019, Marco de Wild",
+	"authors": ["Marco de Wild"],
+	"targetPath":"bin/",
+	"dependencies": {
+        "optional": "~>0.12.0"
+	},
+ "configurations": [
+   { 
+	   "name": "library",
+     "targetType": "none"
+   },
+   {
+     "name": "unittest",
+     "targetType": "executable",
+     "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
+     "mainSourceFile": "bin/ut.d",
+     "dependencies": {
+        "unit-threaded": "~>0.9.2",
+        "fluent-asserts": "~>0.12.3"
+     }
+   }
+ ]
+}
