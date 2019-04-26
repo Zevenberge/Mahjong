@@ -4,9 +4,6 @@
 	"copyright": "Copyright © 2019, Marco de Wild",
 	"authors": ["Marco de Wild"],
 	"targetPath":"bin/",
-	"dependencies": {
-        "optional": "~>0.12.0"
-	},
  "configurations": [
    { 
 	   "name": "library",
