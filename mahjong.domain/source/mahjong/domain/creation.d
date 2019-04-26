@@ -1,4 +1,4 @@
-﻿module mahjong.engine.creation;
+﻿module mahjong.domain.creation;
 
 import std.experimental.logger;
 import std.range;
@@ -6,13 +6,12 @@ import std.random;
 import std.string;
 import mahjong.domain.enums;
 import mahjong.domain.tile;
-import mahjong.engine.sort;
 
 auto allTiles() pure
 {
     import std.algorithm : map;
     import std.range : iota;
-    import mahjong.share.range : flatMap;
+    import mahjong.util.range : flatMap;
     return iota(Types.wind, Types.ball+1)
         .map!(type => cast(Types)type)
         .flatMap!(type =>
@@ -157,10 +156,11 @@ in
 }
 body
 {
-	for(int i=0; i<500; ++i)
+    wall = randomShuffle(wall);
+	/*for(int i=0; i<500; ++i)
 	{
 		ulong t1 = uniform(0, wall.length);
 		ulong t2 = uniform(0, wall.length);
 		swapTiles(wall[t1],wall[t2]);
-	}
+	}*/
 }

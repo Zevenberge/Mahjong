@@ -4,7 +4,7 @@ import mahjong.domain.set;
 import mahjong.domain.enums;
 import mahjong.domain.tile;
 import mahjong.domain.yaku.environment;
-import mahjong.share.range;
+import mahjong.util.range;
 
 struct MahjongResult
 {
@@ -149,7 +149,7 @@ bool hasValuelessPair(const MahjongResult result, PlayerWinds leadingWind, Playe
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PairSet("🀐🀐"d.convertToTiles)]);
     result.hasValuelessPair(PlayerWinds.east, PlayerWinds.east).should.equal(true);
     auto result2 = MahjongResult(true, [new PairSet("🀖🀖"d.convertToTiles)]);
@@ -160,7 +160,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PairSet("🀀🀀"d.convertToTiles)]);
     result.hasValuelessPair(PlayerWinds.south, PlayerWinds.west).should.equal(true);
     auto result2 = MahjongResult(true, [new PairSet("🀁🀁"d.convertToTiles)]);
@@ -208,7 +208,7 @@ bool allSetsHaveHonoursOrATerminal(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀇🀇"d.convertToTiles);
     auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
     auto pon = new PonSet("🀄🀄🀄"d.convertToTiles);
@@ -220,7 +220,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀇🀇"d.convertToTiles);
     auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
     auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
@@ -232,7 +232,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀇🀇"d.convertToTiles);
     auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
     auto pon = new PonSet("🀠🀠🀠"d.convertToTiles);
@@ -261,7 +261,7 @@ bool isTwoSidedWait(const MahjongResult result, const Tile lastTile)
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀃🀃"d.convertToTiles);
     auto lastTile = pair.tiles[0];
     auto result = MahjongResult(true, [pair]);
@@ -272,7 +272,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pon = new PonSet("🀐🀐🀐"d.convertToTiles);
     auto lastTile = pon.tiles[0];
     auto result = MahjongResult(true, [pon]);
@@ -283,7 +283,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chi = new ChiSet("🀒🀓🀔"d.convertToTiles);
     auto lastTile1 = chi.tiles[0];
     auto lastTile2 = chi.tiles[2];
@@ -296,7 +296,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chi = new ChiSet("🀒🀓🀔"d.convertToTiles);
     auto lastTile = chi.tiles[1];
     auto result = MahjongResult(true, [chi]);
@@ -307,7 +307,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chiLeft = new ChiSet("🀐🀑🀒"d.convertToTiles);
     auto lastTileLeft = chiLeft.tiles[2];
     auto resultLeft = MahjongResult(true, [chiLeft]);
@@ -328,7 +328,7 @@ bool isPonWait(const MahjongResult result, const Tile lastTile)
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chi= new ChiSet("🀐🀑🀒"d.convertToTiles);
     auto lastTile = chi.tiles[0];
     auto result = MahjongResult(true, [chi]);
@@ -339,7 +339,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pon= new PonSet("🀄🀄🀄"d.convertToTiles);
     auto lastTile = pon.tiles[0];
     auto result = MahjongResult(true, [pon]);
@@ -384,7 +384,7 @@ bool allSetsHaveATerminal(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀇🀇"d.convertToTiles);
     auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
     auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
@@ -396,7 +396,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀁🀁"d.convertToTiles);
     auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
     auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
@@ -418,7 +418,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.ingame;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.mahjong;
 
     auto game = new Ingame(PlayerWinds.west, "🀀🀁🀂🀃🀄🀄🀅🀆🀇🀏🀐🀘🀙🀡"d);
     auto result = scanHandForMahjong(game);
@@ -444,7 +444,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.ingame;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.mahjong;
 
     auto game = new Ingame(PlayerWinds.west, "🀁🀁🀁🀇🀈🀉🀚🀛🀜🀞🀞🀔🀕🀖"d);
     auto result = scanHandForMahjong(game);

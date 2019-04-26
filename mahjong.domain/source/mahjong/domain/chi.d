@@ -1,9 +1,9 @@
-﻿module mahjong.engine.chi;
+﻿module mahjong.domain.chi;
 
 import std.algorithm;
 import std.array;
 import mahjong.domain.tile;
-import mahjong.share.range;
+import mahjong.util.range;
 
 struct ChiCandidate
 {

@@ -8,7 +8,7 @@ version(unittest)
     import fluent.asserts;
     import mahjong.domain.enums;
     import mahjong.domain.ingame;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.mahjong;
 }
 
 package Yaku[] determineSituationalYaku(const Environment environment) pure

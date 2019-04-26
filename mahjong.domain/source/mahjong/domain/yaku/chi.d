@@ -10,7 +10,7 @@ version(unittest)
 {
     import fluent.asserts;
     import mahjong.domain.ingame;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.mahjong;
 }
 
 package Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHand)
@@ -157,7 +157,7 @@ private bool isStraightFlush(const MahjongResult result) pure
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
@@ -169,7 +169,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto second = new PonSet("🀊🀊🀊"d.convertToTiles);
     auto third = new PonSet("🀍🀍🀍"d.convertToTiles);
@@ -181,7 +181,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀈🀉🀊"d.convertToTiles);
     auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
@@ -193,7 +193,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
@@ -206,7 +206,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀜🀝🀞"d.convertToTiles);
     auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
@@ -241,7 +241,7 @@ private bool hasJustTwoEqualChis(const MahjongResult mahjongResult)
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto result = MahjongResult(true, [first, second]);
@@ -252,7 +252,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀔🀕🀖"d.convertToTiles);
     auto result = MahjongResult(true, [first, second]);
@@ -263,7 +263,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto second = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto result = MahjongResult(true, [first, second]);
@@ -274,7 +274,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto third = new ChiSet("🀔🀕🀖"d.convertToTiles);
@@ -287,7 +287,7 @@ unittest
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto third = new ChiSet("🀇🀈🀉"d.convertToTiles);
@@ -304,7 +304,7 @@ private bool hasTwoTimesTwoEqualChis(const MahjongResult mahjongResult)
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto third = new ChiSet("🀔🀕🀖"d.convertToTiles);
@@ -330,7 +330,7 @@ private bool hasTripletChis(const MahjongResult mahjongResult)
 unittest
 {
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto second = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto third = new ChiSet("🀜🀝🀞"d.convertToTiles);
@@ -342,7 +342,7 @@ unittest
 unittest
 {
     import mahjong.domain.set; 
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new SevenPairsSet("🀑🀑🀕🀕🀒🀒🀠🀠🀀🀀🀐🀐🀅🀅"d.convertToTiles);
     auto result = MahjongResult(true, [first]);
     result.hasTripletChis.should.equal(false);

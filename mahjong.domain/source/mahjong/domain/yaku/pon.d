@@ -9,7 +9,7 @@ version(unittest)
 {
     import fluent.asserts;
     import mahjong.domain.ingame;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.mahjong;
 }
 
 package Yaku[] determinePonBasedYaku(const MahjongResult result, Environment environment)
@@ -47,7 +47,6 @@ package Yaku[] determinePonBasedYaku(const MahjongResult result, Environment env
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀄🀄🀄🀒🀒🀖🀗🀘🀜🀝🀞"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -64,7 +63,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀙🀙🀙🀠🀠🀡🀡🀡"d);
     game.closedHand.tiles[0].isNotOwn;
     game.closedHand.tiles[4].isNotOwn;
@@ -84,7 +82,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀙🀠🀠"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -101,8 +98,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.creation;
     auto game = new Ingame(PlayerWinds.east, "🀖🀗🀘🀙🀙"d);
     game.openHand.addKan("🀄🀄🀄🀄"d.convertToTiles);
     game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
@@ -122,8 +118,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.creation;
     auto game = new Ingame(PlayerWinds.east, "🀖🀗🀘🀙🀙🀚🀚🀚"d);
     game.openHand.addKan("🀡🀡🀡🀡"d.convertToTiles);
     game.openHand.addKan("🀌🀌🀌🀌"d.convertToTiles);
@@ -142,7 +137,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀅🀅🀅🀄🀄🀄🀆🀆🀖🀗🀘🀜🀝🀞"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -159,7 +153,6 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.mahjong;
     auto game = new Ingame(PlayerWinds.east, "🀇🀇🀇🀉🀊🀋🀐🀐🀐🀒🀒🀙🀙🀙"d);
     auto result = scanHandForMahjong(game);
     Environment env = {
@@ -195,7 +188,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PonSet("🀄🀄🀄"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(1);
 }
@@ -205,7 +198,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PairSet("🀄🀄"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(0);
 }
@@ -215,7 +208,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PonSet("🀐🀐🀐"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(0);
 }
@@ -225,7 +218,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PonSet("🀂🀂🀂"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(1);
 }
@@ -235,7 +228,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PonSet("🀀🀀🀀"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(1);
 }
@@ -245,7 +238,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PonSet("🀁🀁🀁"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.west).should.equal(0);
 }
@@ -255,7 +248,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto result = MahjongResult(true, [new PonSet("🀀🀀🀀"d.convertToTiles)]);
     result.countFanpai(PlayerWinds.east, PlayerWinds.east).should.equal(2);
 }
@@ -272,7 +265,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto result = MahjongResult(true, [pon]);
     result.amountOfConsealedPons.should.equal(1);
@@ -283,7 +276,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto result = MahjongResult(true, [pon, pon, pon]);
     result.amountOfConsealedPons.should.equal(3);
@@ -294,7 +287,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto tiles = "🀀🀀🀀"d.convertToTiles;
     tiles[0].isNotOwn;
     auto result = MahjongResult(true, [new PonSet(tiles)]);
@@ -306,7 +299,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀀🀀"d.convertToTiles);
     auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi]);
@@ -325,7 +318,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto kan = new PonSet("🀡🀡🀡🀡"d.convertToTiles);
     auto result = MahjongResult(true, [kan]);
     result.amountOfKans.should.equal(1);
@@ -336,7 +329,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto kan = new PonSet("🀡🀡🀡🀡"d.convertToTiles);
     auto result = MahjongResult(true, [kan, kan, kan]);
     result.amountOfKans.should.equal(3);
@@ -347,7 +340,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto result = MahjongResult(true, [pon]);
     result.amountOfKans.should.equal(0);
@@ -358,7 +351,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀀🀀"d.convertToTiles);
     auto chi = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi]);
@@ -384,7 +377,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀄🀄"d.convertToTiles);
     auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
     auto pon2 = new PonSet("🀆🀆🀆"d.convertToTiles);
@@ -397,7 +390,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pon = new PonSet("🀄🀄🀄"d.convertToTiles);
     auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
     auto pon2 = new PonSet("🀆🀆🀆"d.convertToTiles);
@@ -410,7 +403,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀄🀄"d.convertToTiles);
     auto pon1 = new PonSet("🀅🀅🀅"d.convertToTiles);
     auto result = MahjongResult(true, [pair, pon1]);
@@ -422,7 +415,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀇🀇"d.convertToTiles);
     auto pon1 = new PonSet("🀌🀌🀌"d.convertToTiles);
     auto pon2 = new PonSet("🀗🀗🀗"d.convertToTiles);
@@ -435,7 +428,7 @@ private bool hasPonInAllThreeSuits(const MahjongResult result)
     import std.algorithm : any;
     import std.conv : to;
     import mahjong.domain.set;
-    import mahjong.share.collections : Set;
+    import mahjong.util.collections : Set;
     Set!Types[Numbers] stats;
     foreach(set; result.sets)
     {
@@ -457,7 +450,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
     auto balls = new PonSet("🀙🀙🀙"d.convertToTiles);
@@ -470,7 +463,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
     auto balls = new PonSet("🀙🀙🀙"d.convertToTiles);
@@ -483,7 +476,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chars = new PonSet("🀈🀈🀈"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
     auto balls = new PonSet("🀙🀙🀙"d.convertToTiles);
@@ -496,7 +489,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
     auto balls = new ChiSet("🀙🀚🀛"d.convertToTiles);
@@ -509,7 +502,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto chars = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto dragons = new PonSet("🀅🀅🀅"d.convertToTiles);
     auto winds = new PonSet("🀀🀀🀀"d.convertToTiles);

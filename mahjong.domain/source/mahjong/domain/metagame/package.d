@@ -10,8 +10,8 @@ import std.conv;
 import mahjong.domain.enums;
 import mahjong.domain;
 import mahjong.domain.metagame.round;
+import mahjong.domain.opts;
 import mahjong.domain.wrappers;
-import mahjong.engine.opts;
 
 class Metagame
 {
@@ -77,8 +77,6 @@ class Metagame
     unittest
     { 
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.flow;
         auto player1 = new Player();
         auto player2 = new Player();
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
@@ -254,9 +252,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow.eventhandler;
-        auto players = [new Player(new TestEventHandler, 30_000), 
-            new Player(new TestEventHandler, 30_000)];
+        auto players = [new Player(30_000), new Player(30_000)];
         auto metagame = new Metagame(players, new DefaultGameOpts);
         metagame.initializeRound;
         metagame._round = Round.withCounters(5);
@@ -271,9 +267,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow.eventhandler;
-        auto players = [new Player(new TestEventHandler, 30_000), 
-            new Player(new TestEventHandler, 30_000)];
+        auto players = [new Player(30_000), new Player(30_000)];
         auto metagame = new Metagame(players, new DefaultGameOpts);
         metagame.initializeRound;
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
@@ -290,9 +284,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow.eventhandler;
-        auto players = [new Player(new TestEventHandler, 30_000), 
-            new Player(new TestEventHandler, 30_000)];
+        auto players = [new Player, new Player];
         auto metagame = new Metagame(players, new DefaultGameOpts);
         metagame.initializeRound;
         foreach(_; 0..5)
@@ -364,8 +356,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow;
-        auto player = new Player(new TestEventHandler, 30_000);
+        auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
@@ -375,8 +366,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow;
-        auto player = new Player(new TestEventHandler, 30_000);
+        auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
@@ -398,8 +388,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow;
-        auto player = new Player(new TestEventHandler, 30_000);
+        auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
@@ -412,8 +401,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.flow;
-        auto player = new Player(new TestEventHandler, 30_000);
+        auto player = new Player(30_000);
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
@@ -470,7 +458,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
         auto player1 = new Player();
         auto player2 = new Player();
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
@@ -508,8 +496,7 @@ class Metagame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.flow;
+        import mahjong.domain.creation;
         auto player1 = new Player();
         auto player2 = new Player();
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
@@ -533,8 +520,7 @@ class Metagame
     unittest
     { 
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.flow;
+        import mahjong.domain.creation;
         auto player1 = new Player();
         auto player2 = new Player();
         auto metagame = new Metagame([player1, player2], new DefaultGameOpts);
@@ -591,7 +577,6 @@ class Metagame
 
 unittest
 {
-	import mahjong.engine.flow;
 	auto player = new Player();
 	auto player2 = new Player();
 	auto player3 = new Player();
@@ -607,8 +592,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-	import mahjong.engine.creation;
-	import mahjong.engine.flow;
+	import mahjong.domain.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
 	auto players = [player1, player2];
@@ -628,7 +612,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
 	auto players = [player1, player2];
@@ -652,7 +636,7 @@ unittest
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
 	auto players = [player1, player2];
@@ -676,7 +660,7 @@ unittest
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
 	auto player3 = new Player();
@@ -701,7 +685,7 @@ unittest
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
 	auto player3 = new Player();
@@ -726,7 +710,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
 	auto players = [player1, player2];
@@ -751,7 +735,7 @@ unittest
 {
 	import core.exception;
 	import std.exception;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto player1 = new Player();
 	auto player2 = new Player();
 	auto player3 = new Player();
@@ -803,7 +787,7 @@ GameMode gameMode(const Metagame metagame) @property pure
 
 size_t amountOfRiichiSticksAtTheBeginningOfTheRound(const Metagame metagame) @property pure
 {
-    import mahjong.share.range : sum;
+    import mahjong.util.range : sum;
     return metagame.amountOfRiichiSticks - metagame.players.sum!((p) {
             if(p.game && p.isRiichi) return 1; return 0;
         });

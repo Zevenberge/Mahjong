@@ -1,4 +1,4 @@
-﻿module mahjong.engine.scoring;
+﻿module mahjong.domain.scoring;
 
 import std.algorithm;
 import std.array;
@@ -14,10 +14,9 @@ import mahjong.domain.tile;
 import mahjong.domain.wall;
 import mahjong.domain.wrappers;
 import mahjong.domain.yaku;
-import mahjong.engine.flow.mahjong;
-import mahjong.engine.mahjong;
-import mahjong.engine.opts;
-import mahjong.share.range;
+import mahjong.domain.mahjong;
+import mahjong.domain.opts;
+import mahjong.util.range;
 
 Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
 {
@@ -197,7 +196,6 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    import mahjong.engine.flow;
     auto wall = new MockWall(new Tile(Types.dragon, Dragons.red));
     auto player1 = new Player();
     player1.game = new Ingame(PlayerWinds.east);
@@ -215,9 +213,8 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.creation;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
-    import mahjong.engine.flow;
     auto player1 = new Player();
     player1.game = new Ingame(PlayerWinds.east);
     player1.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
@@ -240,9 +237,8 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.creation;
     import mahjong.domain.set;
-    import mahjong.engine.creation;
-    import mahjong.engine.flow;
     auto player1 = new Player();
     player1.game = new Ingame(PlayerWinds.east);
     player1.closedHand.tiles = "🀃🀃🀃🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
@@ -526,7 +522,6 @@ class Transaction
 
 unittest
 {
-    import mahjong.engine.flow;
     auto player = new Player();
     auto transactionA = new Transaction(player, 1234);
     auto transactionB = new Transaction(player, 5678);
@@ -540,7 +535,6 @@ unittest
 {
     import std.exception;
     import core.exception;
-    import mahjong.engine.flow;
     auto player = new Player();
     auto player2 = new Player();
     auto transactionA = new Transaction(player, 123);

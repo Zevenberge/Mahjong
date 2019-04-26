@@ -12,7 +12,7 @@ version(unittest)
 {
     import fluent.asserts;
     import mahjong.domain.ingame;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.mahjong;
 }
 
 package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environment environment)
@@ -185,7 +185,7 @@ unittest
 @("Four kans is suu kan tsu")
 unittest
 {
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto game = new Ingame(PlayerWinds.east, "🀠🀠"d);
     auto claimedTile = new Tile(Types.dragon, Dragons.red);
     claimedTile.isNotOwn;
@@ -359,7 +359,7 @@ unittest
 @("1-1-1-2-3-4-5-6-7-8-9-9-9 with a double 5 is nine gates")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto ones = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
     auto fives = new PairSet("🀋🀋"d.convertToTiles);
@@ -372,7 +372,7 @@ unittest
 @("1-1-1-2-3-4-5-6-7-8-9-9-9 with a double 8 is nine gates")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto ones = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
     auto fiveSixSeven = new ChiSet("🀋🀌🀍"d.convertToTiles);
@@ -385,7 +385,7 @@ unittest
 @("1-1-1-2-3-4-5-6-7-8-9-7-8-9 is not nine gates")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto ones = new PairSet("🀇🀇"d.convertToTiles);
     auto oneTwoThree = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto fourFiveSix = new ChiSet("🀊🀋🀌"d.convertToTiles);
@@ -397,7 +397,7 @@ unittest
 @("1-1-1-3-4-5-6-7-7-8-8-9-9-9 is not nine gates")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto ones = new PonSet("🀇🀇🀇"d.convertToTiles);
     auto threeFourFive = new ChiSet("🀉🀊🀋"d.convertToTiles);
     auto sixSevenEight = new ChiSet("🀌🀍🀎"d.convertToTiles);
@@ -410,7 +410,7 @@ unittest
 @("Nine gates with a kan is not nine gates")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto ones = new PonSet("🀇🀇🀇🀇"d.convertToTiles);
     auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
     auto fiveSixSeven = new ChiSet("🀋🀌🀍"d.convertToTiles);
@@ -423,7 +423,7 @@ unittest
 @("Nine gates should be of one colour")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto ones = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
     auto fives = new PairSet("🀋🀋"d.convertToTiles);
@@ -442,7 +442,7 @@ private bool isThreeBigDragons(const MahjongResult result)
 @("A mahjong with three dragons pons is three big dragons")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
     auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
     auto whites = new PonSet("🀆🀆🀆"d.convertToTiles);
@@ -453,7 +453,7 @@ unittest
 @("A mahjong with less than three dragon pons is not three big dragons")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
     auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
     auto whites = new PairSet("🀆🀆"d.convertToTiles);
@@ -464,7 +464,7 @@ unittest
 @("A mahjong with pons other than dragon is not three big dragons")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
     auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
     auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
@@ -488,7 +488,7 @@ private bool isFourSmallWinds(const MahjongResult result)
 @("Three pons and a pair of winds is small winds")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
     auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
@@ -500,7 +500,7 @@ unittest
 @("Four pons of winds is not small winds")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
     auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
@@ -512,7 +512,7 @@ unittest
 @("Two pons and a pair of winds is not small winds")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
     auto norths = new PairSet("🀃🀃"d.convertToTiles);
@@ -523,7 +523,7 @@ unittest
 @("Non-winds do not count towards small winds")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
     auto dragons = new PonSet("🀄🀄🀄"d.convertToTiles);
@@ -541,7 +541,7 @@ private bool isFourBigWinds(const MahjongResult result)
 @("Four pons of winds is big winds")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
     auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
@@ -553,7 +553,7 @@ unittest
 @("Three pons and a pair of winds is not big winds")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
     auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
@@ -565,7 +565,7 @@ unittest
 @("Other pons do not make for big winds")
 unittest
 {
-    import mahjong.engine.creation : convertToTiles;
+    import mahjong.domain.creation : convertToTiles;
     auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
     auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
     auto dragons = new PonSet("🀄🀄🀄"d.convertToTiles);

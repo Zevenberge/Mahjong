@@ -6,7 +6,8 @@
 	"lflags" : ["-L/usr/local/lib/dsfml"],
 	"targetPath":"bin/",
 	"dependencies": {
-    "mahjong:util": "*"
+    "mahjong:util": "*",
+    "mahjong:domain": "*"
   },
   "subPackages": [
     "./mahjong.util",

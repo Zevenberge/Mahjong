@@ -1,4 +1,4 @@
-module mahjong.engine.mahjong;
+module mahjong.domain.mahjong;
 
 import std.experimental.logger;
 import std.algorithm;
@@ -13,10 +13,9 @@ import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.result;
 import mahjong.domain.set;
+import mahjong.domain.sort;
 import mahjong.domain.tile;
-import mahjong.engine.sort;
-import mahjong.share.range;
-import mahjong.share.numbers;
+import mahjong.util.range;
 
 MahjongResult scanHandForMahjong(const Ingame player) pure
 {
@@ -31,7 +30,7 @@ MahjongResult scanHandForMahjong(const Ingame player, const Tile discard) pure
 @("Does an open pon count towards a mahjong")
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 
 	auto closedHand = new ClosedHand;
 	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
@@ -46,7 +45,7 @@ unittest
 @("Does an open chi count towards a mahjong")
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 
 	auto closedHand = new ClosedHand;
 	closedHand.tiles = "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡"d.convertToTiles;
@@ -138,14 +137,23 @@ private bool isThirteenOrphans(const Tile[] hand) pure
 		case 4: .. case 6: // Dragons
 			honour = ComparativeTile(Types.dragon, i % (Winds.max + 1));
 			break;
-		case 7, 8: // Characters
-			honour = ComparativeTile(Types.character, i.isOdd ? Numbers.one : Numbers.nine);
+		case 7: // Characters
+			honour = ComparativeTile(Types.character, Numbers.one);
 			break;
-		case 9, 10: // Bamboos
-			honour = ComparativeTile(Types.bamboo, i.isOdd ? Numbers.one : Numbers.nine);
+		case 8: // Characters
+			honour = ComparativeTile(Types.character, Numbers.nine);
 			break;
-		case 11, 12: // Balls
-			honour = ComparativeTile(Types.ball, i.isOdd ? Numbers.one : Numbers.nine);
+		case 9: // Bamboos
+			honour = ComparativeTile(Types.bamboo, Numbers.one);
+			break;
+		case 10: // Bamboos
+			honour = ComparativeTile(Types.bamboo, Numbers.nine);
+			break;
+		case 11: // Balls
+			honour = ComparativeTile(Types.ball, Numbers.one);
+			break;
+		case 12: // Balls
+			honour = ComparativeTile(Types.ball, Numbers.nine);
 			break;
 		default:
 			assert(false);
@@ -414,7 +422,7 @@ version (unittest)
 	import std.range;
 	import std.stdio;
 	import std.string;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 
 	/// Read the given file into dstring lines
 	dstring[] readLines(string filename)
@@ -444,7 +452,7 @@ version (unittest)
 
 bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
 {
-	import mahjong.engine.creation : allTiles;
+	import mahjong.domain.creation : allTiles;
 
 	return allTiles.any!(tile => scanHandForMahjong(closedHand ~ tile, openHand.sets).isMahjong);
 }
@@ -453,7 +461,7 @@ bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
 unittest
 {
 	import fluent.asserts;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 
 	auto tenpaiHand = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
 	auto emptyOpenHand = new OpenHand;
@@ -466,7 +474,7 @@ unittest
 unittest
 {
 	import fluent.asserts;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 
 	auto tenpaiHand = "🀀🀁🀂🀃🀄🀆🀆🀇🀏🀐🀘🀙🀡"d.convertToTiles;
 	auto emptyOpenHand = new OpenHand;
@@ -498,7 +506,7 @@ unittest
 {
 	import std.range;
 	import fluent.asserts;
-	import mahjong.engine.opts;
+	import mahjong.domain.opts;
 
 	auto winningGame = new Ingame(PlayerWinds.east,
 			"🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
@@ -525,7 +533,7 @@ unittest
 {
 	import fluent.asserts;
 	import mahjong.domain.wall;
-	import mahjong.engine.opts;
+	import mahjong.domain.opts;
 
 	auto winningGame = new Ingame(PlayerWinds.east,
 			"🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
@@ -549,7 +557,7 @@ unittest
 {
 	import fluent.asserts;
 	import mahjong.domain.wall;
-	import mahjong.engine.opts;
+	import mahjong.domain.opts;
 
 	auto winningGame = new Ingame(PlayerWinds.east,
 			"🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
@@ -680,7 +688,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -697,7 +705,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -714,7 +722,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -732,7 +740,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -750,7 +758,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -768,7 +776,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -786,8 +794,8 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.chi;
-		import mahjong.engine.opts;
+		import mahjong.domain.chi;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -809,7 +817,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);
@@ -849,7 +857,7 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.two);
@@ -867,7 +875,7 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.three);
@@ -885,7 +893,7 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.eight);
@@ -903,7 +911,7 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.eight);
@@ -932,7 +940,7 @@ struct MahjongData
 	{
 		import fluent.asserts;
 		import mahjong.domain.wall;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.character, Numbers.one);
@@ -982,7 +990,7 @@ struct MahjongData
 	unittest
 	{
 		import fluent.asserts;
-		import mahjong.engine.opts;
+		import mahjong.domain.opts;
 
 		auto metagame = new Metagame([new Player], new DefaultGameOpts);
 		auto tile = new Tile(Types.ball, Numbers.one);

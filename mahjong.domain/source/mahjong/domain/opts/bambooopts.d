@@ -1,9 +1,8 @@
-module mahjong.engine.opts.bambooopts;
+module mahjong.domain.opts.bambooopts;
 
 import mahjong.domain;
 import mahjong.domain.enums;
-import mahjong.engine.flow;
-import mahjong.engine.opts;
+import mahjong.domain.opts;
 
 class DefaultBambooOpts : DefaultGameOpts
 {

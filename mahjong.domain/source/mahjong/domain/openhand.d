@@ -5,10 +5,10 @@ import std.array;
 import std.uuid;
 
 import mahjong.domain.exceptions;
+import mahjong.domain.opts;
 import mahjong.domain.set;
 import mahjong.domain.tile;
-import mahjong.engine.opts;
-import mahjong.share.range;
+import mahjong.util.range;
 
 class OpenHand
 {
@@ -113,7 +113,7 @@ class OpenHand
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto openHand = new OpenHand;
 	auto pon = "🀀🀀🀀"d.convertToTiles;
 	openHand.addPon(pon);
@@ -123,7 +123,7 @@ unittest
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto openHand = new OpenHand;
 	auto kan = "🀀🀀🀀🀀"d.convertToTiles;
 	openHand.addKan(kan);
@@ -133,7 +133,7 @@ unittest
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto openHand = new OpenHand;
 	auto pon = "🀀🀀🀀"d.convertToTiles;
 	auto kanTile = "🀀"d.convertToTiles[0];
@@ -152,28 +152,28 @@ private bool canPromoteSetToKan(const Set set, const Tile kanTile) pure
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
 	auto kanTile = "🀀"d.convertToTiles[0];
 	assert(pon.canPromoteSetToKan(kanTile), "Pon should be promotable to kan.");
 }
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto pon = new PonSet("🀀🀀🀀🀀"d.convertToTiles);
 	auto kanTile = "🀀"d.convertToTiles[0];
 	assert(!pon.canPromoteSetToKan(kanTile), "Kan should not be promotable to kan.");
 }
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto pon = new PonSet("🀟🀟🀟"d.convertToTiles);
 	auto kanTile = "🀀"d.convertToTiles[0];
 	assert(!pon.canPromoteSetToKan(kanTile), "A different pon should not be promotable to kan.");
 }
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
 	auto kanTile = "🀟"d.convertToTiles[0];
 	assert(!chi.canPromoteSetToKan(kanTile), "A different chi should not be promotable to kan.");

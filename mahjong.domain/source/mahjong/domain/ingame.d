@@ -5,13 +5,13 @@ import std.array;
 import std.experimental.logger;
 import std.uuid;
 import mahjong.domain;
+import mahjong.domain.chi;
 import mahjong.domain.enums;
 import mahjong.domain.exceptions;
+import mahjong.domain.mahjong;
+import mahjong.domain.sort;
 import mahjong.domain.yaku.environment;
-import mahjong.engine.chi;
-import mahjong.engine.mahjong;
-import mahjong.engine.sort;
-import mahjong.share.range;
+import mahjong.util.range;
 
 class Ingame
 {
@@ -27,7 +27,7 @@ class Ingame
     {
         this(PlayerWinds wind, dstring tiles)
         {
-            import mahjong.engine.creation;
+            import mahjong.domain.creation;
 
             this(wind);
             closedHand.tiles = tiles.convertToTiles;
@@ -57,7 +57,7 @@ class Ingame
 
         void willBeTenpai()
         {
-            import mahjong.engine.creation;
+            import mahjong.domain.creation;
 
             closedHand.tiles
                 = "🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
@@ -65,7 +65,7 @@ class Ingame
 
         void willNotBeTenpai()
         {
-            import mahjong.engine.creation;
+            import mahjong.domain.creation;
 
             closedHand.tiles
                 = "🀇🀇🀇🀈🀈🀈🀈🀌🀌🀊🀊🀆🀆"d.convertToTiles;
@@ -210,7 +210,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
 
         auto game = new Ingame(PlayerWinds.east);
         game.closedHand.tiles = "🀓🀔"d.convertToTiles;
@@ -234,7 +234,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
 
         auto game = new Ingame(PlayerWinds.east, "🀀🀁"d);
         auto nonChiableTile = "🀂"d.convertToTiles[0];
@@ -249,15 +249,14 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.flow;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
             = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         ingame.declareRiichi(ingame.closedHand.tiles.front,
-                new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
+                new Metagame([new Player(30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.isNotOwn;
         ingame.isChiable(tile).should.equal(false);
@@ -280,7 +279,7 @@ class Ingame
     {
         import fluent.asserts;
         import mahjong.domain.exceptions;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
 
         auto game = new Ingame(PlayerWinds.east, "🀓🀔"d);
         auto tiles = game.closedHand.tiles;
@@ -305,7 +304,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
 
         auto game = new Ingame(PlayerWinds.east);
         game.closedHand.tiles = "🀕🀕"d.convertToTiles;
@@ -319,15 +318,14 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.flow;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
             = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         ingame.declareRiichi(ingame.closedHand.tiles.front,
-                new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
+                new Metagame([new Player(30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.isNotOwn;
         ingame.isPonnable(tile).should.equal(false);
@@ -348,8 +346,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
+        import mahjong.domain.creation;
         import mahjong.domain.exceptions;
-        import mahjong.engine.creation;
 
         auto game = new Ingame(PlayerWinds.east, "🀕🀕"d);
         auto ponnableTile = "🀕"d.convertToTiles[0];
@@ -372,7 +370,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         class MaybeKanWall : Wall
         {
@@ -404,15 +402,14 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.flow;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
             = "🀀🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d.convertToTiles;
         ingame.declareRiichi(ingame.closedHand.tiles.front,
-                new Metagame([new Player(new TestEventHandler, 30_000)], new DefaultGameOpts));
+                new Metagame([new Player(30_000)], new DefaultGameOpts));
         auto tile = "🀡"d.convertToTiles[0];
         tile.isNotOwn;
         ingame.isKannable(tile, new Wall(new DefaultGameOpts)).should.equal(false);
@@ -432,9 +429,9 @@ class Ingame
     unittest
     {
         import fluent.asserts;
+        import mahjong.domain.creation;
         import mahjong.domain.exceptions;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto wall = new Wall(new DefaultGameOpts);
         wall.setUp;
@@ -462,8 +459,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
@@ -484,8 +481,8 @@ class Ingame
         }
 
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
@@ -506,7 +503,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
@@ -534,8 +531,8 @@ class Ingame
     @("Can the player ron")
     unittest
     {
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
@@ -559,8 +556,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
@@ -581,8 +578,8 @@ class Ingame
         }
 
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
@@ -603,7 +600,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
@@ -633,8 +630,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
@@ -658,7 +655,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -671,7 +668,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -684,7 +681,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -712,8 +709,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -734,8 +731,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -765,8 +762,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -831,7 +828,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d);
@@ -843,7 +840,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east, "🀅🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑"d);
@@ -855,7 +852,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto game = new Ingame(PlayerWinds.east,
@@ -871,8 +868,8 @@ class Ingame
     @("A player cannot tsumo after they claimed a tile")
     unittest
     {
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
@@ -888,8 +885,8 @@ class Ingame
     @("A player cannot tsumo after a chi")
     unittest
     {
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east);
@@ -969,7 +966,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east,
                 "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
@@ -1054,7 +1051,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east,
                 "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
@@ -1096,8 +1093,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -1116,9 +1113,8 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
-        import mahjong.engine.flow;
-        import mahjong.engine.opts;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east);
         ingame.closedHand.tiles
@@ -1138,7 +1134,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east,
                 "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
@@ -1155,7 +1151,7 @@ class Ingame
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
 
         auto ingame = new Ingame(PlayerWinds.east,
                 "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);

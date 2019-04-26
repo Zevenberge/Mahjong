@@ -5,7 +5,7 @@ import std.range;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.wrappers;
-import mahjong.share.range;
+import mahjong.util.range;
 
 inout(Player) currentPlayer(inout(Metagame) metagame) @property pure
 {
@@ -37,7 +37,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.enums;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto metagame = new Metagame([new Player, new Player], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
@@ -78,7 +78,7 @@ auto playersByTurnOrder(Metagame metagame) @property
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player1 = new Player;
     auto player2 = new Player;
     auto player3 = new Player;

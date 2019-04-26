@@ -4,11 +4,11 @@ import std.algorithm;
 import std.conv;
 import std.random;
 import mahjong.domain.enums;
+import mahjong.domain.mahjong;
 import mahjong.domain.metagame;
+import mahjong.domain.scoring;
 import mahjong.domain.wrappers;
-import mahjong.engine.mahjong;
-import mahjong.engine.scoring;
-import mahjong.share.range;
+import mahjong.util.range;
 
 package struct Round
 {
@@ -138,7 +138,7 @@ unittest
     import fluent.asserts;
     import mahjong.domain.player;
     import mahjong.domain.wall;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto metagame = new Metagame([new Player(), new Player()], new DefaultGameOpts);
     metagame.initializeRound;
     metagame.beginRound;
@@ -173,7 +173,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.player;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player1 = new Player;
     auto player2 = new Player;
     auto player3 = new Player;

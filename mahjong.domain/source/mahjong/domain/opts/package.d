@@ -1,11 +1,10 @@
-module mahjong.engine.opts;
+module mahjong.domain.opts;
 
-public import mahjong.engine.opts.bambooopts;
-public import mahjong.engine.opts.defaultopts;
+public import mahjong.domain.opts.bambooopts;
+public import mahjong.domain.opts.defaultopts;
 
 import mahjong.domain;
 import mahjong.domain.enums;
-import mahjong.engine.flow;
 
 interface Opts
 {

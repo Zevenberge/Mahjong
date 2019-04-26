@@ -6,10 +6,10 @@ import std.conv;
 import std.experimental.logger;
 import std.random;
 
+import mahjong.domain.creation;
 import mahjong.domain.enums;
+import mahjong.domain.opts;
 import mahjong.domain.tile;
-import mahjong.engine.creation;
-import mahjong.engine.opts;
 
 class Wall
 {
@@ -169,8 +169,7 @@ unittest
 	import mahjong.domain.exceptions;
 	import mahjong.domain.ingame;
 	import mahjong.domain.player;
-	import mahjong.engine.creation;
-	import mahjong.engine.flow;
+	import mahjong.domain.creation;
 	auto wall = new Wall(new DefaultGameOpts);
 	wall.setUp;
 	wall.dice;
@@ -251,11 +250,10 @@ class BambooWall : Wall
 unittest
 {
 	import std.exception;
+	import mahjong.domain.creation;
 	import mahjong.domain.exceptions;
 	import mahjong.domain.ingame;
 	import mahjong.domain.player;
-	import mahjong.engine.creation;
-	import mahjong.engine.flow;
 	auto wall = new BambooWall(new DefaultGameOpts);
 	wall.setUp;
 	wall.dice;

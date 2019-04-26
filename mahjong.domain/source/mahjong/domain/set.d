@@ -47,7 +47,7 @@ bool isSetOf(const Set s, Types type) pure
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto set = new PonSet("🀄🀄🀄"d.convertToTiles);
     set.isSetOf(Types.dragon).should.equal(true);
     set.isSetOf(Types.wind).should.equal(false);
@@ -63,7 +63,7 @@ bool isSameAs(const Set one, const Set another) pure
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
     first.isSameAs(second).should.equal(true);
@@ -74,7 +74,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
     auto second = new ChiSet("🀌🀍🀎"d.convertToTiles);
     auto third = new ChiSet("🀐🀑🀒"d.convertToTiles);
@@ -88,7 +88,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new PairSet("🀙🀙"d.convertToTiles);
     auto second = new PairSet("🀙🀙"d.convertToTiles);
     first.isSameAs(second).should.equal(true);
@@ -99,7 +99,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new PairSet("🀙🀙"d.convertToTiles);
     auto second = new PairSet("🀐🀐"d.convertToTiles);
     auto third = new PairSet("🀠🀠"d.convertToTiles);
@@ -113,7 +113,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto second = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto kan = new PonSet("🀙🀙🀙🀙"d.convertToTiles);
@@ -127,7 +127,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto second = new PonSet("🀀🀀🀀"d.convertToTiles);
     first.isSameAs(second).should.equal(false);
@@ -138,7 +138,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pair = new PairSet("🀙🀙"d.convertToTiles);
     auto pon = new PonSet("🀙🀙🀙"d.convertToTiles);
     auto chi = new ChiSet("🀙🀚🀛"d.convertToTiles);
@@ -224,7 +224,7 @@ class PonSet : Set
 unittest
 {
     import mahjong.domain.ingame;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto normalPon = "🀝🀝🀝"d.convertToTiles;
     auto ponSet = new PonSet(normalPon);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 4, "A closed normal is 4 points");
@@ -236,7 +236,7 @@ unittest
 unittest
 {
     import mahjong.domain.ingame;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto terminalPon = "🀡🀡🀡"d.convertToTiles;
     auto ponSet = new PonSet(terminalPon);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 8, "A closed terminal is 8 points");
@@ -248,7 +248,7 @@ unittest
 unittest
 {
     import mahjong.domain.ingame;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto honourPon = "🀃🀃🀃"d.convertToTiles;
     auto ponSet = new PonSet(honourPon);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 8, "A closed honour is 8 points");
@@ -260,7 +260,7 @@ unittest
 unittest
 {
     import mahjong.domain.ingame;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto normalKan = "🀝🀝🀝🀝"d.convertToTiles;
     auto ponSet = new PonSet(normalKan);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 16, "A closed normal kan is 16 points");
@@ -272,7 +272,7 @@ unittest
 unittest
 {
     import mahjong.domain.ingame;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto terminalKan = "🀡🀡🀡🀡"d.convertToTiles;
     auto ponSet = new PonSet(terminalKan);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 32, "A closed terminal is 32 points");
@@ -284,7 +284,7 @@ unittest
 unittest
 {
     import mahjong.domain.ingame;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto honourKan = "🀃🀃🀃🀃"d.convertToTiles;
     auto ponSet = new PonSet(honourKan);
     assert(ponSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 32, "A closed honour is 32 points");
@@ -338,7 +338,7 @@ class PairSet : Set
 @("Is a normal pair awarded no points")
 unittest
 {
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto normalPair = "🀡🀡"d.convertToTiles;
     auto pairSet = new PairSet(normalPair);
     assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 0, "A normal pair should have no minipoints");
@@ -347,7 +347,7 @@ unittest
 @("Is a pair of winds awarded points if the wind is seat or leading")
 unittest
 {
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pairOfNorths = "🀃🀃"d.convertToTiles;
     auto pairSet = new PairSet(pairOfNorths);
     assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.south) == 0, "A pair of winds that is not leading nor own does not give minipoints");
@@ -358,7 +358,7 @@ unittest
 @("Is a pair of dragons awarded two points")
 unittest
 {
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto pairOfDragons = "🀄🀄"d.convertToTiles;
     auto pairSet = new PairSet(pairOfDragons);
     assert(pairSet.miniPoints(PlayerWinds.east, PlayerWinds.east) == 2, "A dragon pair is always 2 points");
@@ -384,7 +384,7 @@ alias isSamePonInDifferentType = isSameInDifferentType!(s => s.isPon);
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto three = new ChiSet("🀜🀝🀞"d.convertToTiles);
@@ -397,7 +397,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto three = new ChiSet("🀟🀠🀡"d.convertToTiles);
@@ -409,7 +409,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto three = new ChiSet("🀓🀔🀕"d.convertToTiles);
@@ -420,7 +420,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto one = new ChiSet("🀊🀋🀌"d.convertToTiles);
     auto two = new ChiSet("🀓🀔🀕"d.convertToTiles);
     auto three = new PonSet("🀜🀜🀜"d.convertToTiles);

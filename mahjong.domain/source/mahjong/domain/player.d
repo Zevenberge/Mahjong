@@ -5,8 +5,9 @@ import std.array : array;
 import std.experimental.logger;
 import std.uuid;
 
-import mahjong.domain.enums;
 import mahjong.domain;
+import mahjong.domain.enums;
+import mahjong.domain.scoring;
 
 class Player
 { // General variables.
@@ -22,7 +23,6 @@ class Player
 
 	Ingame game; // Resets after every round.
 	alias game this;
-	GameEventHandler eventHandler; // Allows for distribution of the flow logic
 
     version(unittest)
     {
@@ -38,17 +38,16 @@ class Player
 
         this(dstring tiles, PlayerWinds wind)
         {
-            this(new TestEventHandler, 30_000);
+            this(30_000);
             game = new Ingame(wind, tiles);
             game.hasDrawnTheirLastTile;
         }
     }
 
-	this(GameEventHandler eventHandler, int initialScore)
+	this(int initialScore)
 	{
 		id = randomUUID;
 		_score = initialScore;
-		this.eventHandler = eventHandler;
 	}
 
 	void startGame(PlayerWinds wind)
@@ -73,7 +72,8 @@ class Player
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.creation;
+        import mahjong.domain.creation;
+        import mahjong.domain.opts;
         auto player = new Player();
         player.startGame(PlayerWinds.east);
         player.game.closedHand.tiles = "🀓🀔"d.convertToTiles;
@@ -107,8 +107,8 @@ class Player
     unittest
     {
         import fluent.asserts;
-        import mahjong.engine.opts;
-        auto player = new Player(new TestEventHandler, 30_000);
+        import mahjong.domain.opts;
+        auto player = new Player(30_000);
         auto metagame = new Metagame([player], new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
@@ -132,7 +132,7 @@ class Player
     unittest
     {
         import fluent.asserts;
-        auto player = new Player(new TestEventHandler, 30_000);
+        auto player = new Player(30_000);
         player.game = new Ingame(PlayerWinds.east);
         player.abortGame(null);
         player.score.should.equal(30_000);
@@ -142,7 +142,8 @@ class Player
     unittest
     {
         import fluent.asserts;
-        auto player = new Player(new TestEventHandler, 30_000);
+        import mahjong.domain.opts;
+        auto player = new Player(30_000);
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
@@ -165,7 +166,7 @@ class Player
 
     unittest
     {
-        auto player = new Player(new TestEventHandler, 30_000);
+        auto player = new Player(30_000);
         auto transaction = new Transaction(player, 5000);
         player.applyTransaction(transaction);
         assert(player.score == 35_000, "The amount should have been added to the player's score.");
@@ -173,7 +174,7 @@ class Player
 
     unittest
     {
-        auto player = new Player(new TestEventHandler, 30_000);
+        auto player = new Player(30_000);
         auto transaction = new Transaction(player, -5000);
         player.applyTransaction(transaction);
         assert(player.score == 25_000, "The amount should have been subtracted from the player's score.");
@@ -195,9 +196,4 @@ class Player
 		if(p is null) return false;
 		return p.id == id;
 	}
-}
-
-Player[] createPlayers(GameEventHandler[] eventHandlers, Opts opts)
-{
-    return eventHandlers.map!(d => new Player(d, opts.initialScore)).array;
 }

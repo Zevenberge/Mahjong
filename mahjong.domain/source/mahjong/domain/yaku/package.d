@@ -60,7 +60,7 @@ body
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.mahjong;
+    import mahjong.domain.mahjong;
     auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
     auto result = scanHandForMahjong(game);
     Environment env = {

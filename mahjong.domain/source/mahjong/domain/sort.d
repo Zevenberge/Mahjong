@@ -1,4 +1,4 @@
-﻿module mahjong.engine.sort;
+﻿module mahjong.domain.sort;
 
 import std.stdio;
 import std.algorithm.iteration;
@@ -19,7 +19,7 @@ unittest
 {
     import std.algorithm : map;
     import fluent.asserts;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	enum unsortedString = "🀡🀂🀃🀄🀁🀘🀅🀀🀏🀐🀄🀙🀆🀇"d;
 	Tile[] unsortedTiles = unsortedString.convertToTiles;
 	unsortedTiles.sortHand;
@@ -39,7 +39,7 @@ auto sortHand(const(Tile)[] hand) pure
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
     import fluent.asserts;
 	writeln("Starting the test of the sort");
 	enum unsortedString = "🀡🀂🀃🀄🀁🀘🀅🀀🀏🀐🀄🀙🀆🀇"d;

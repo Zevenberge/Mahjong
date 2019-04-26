@@ -1,11 +1,10 @@
-module mahjong.engine.opts.defaultopts;
+module mahjong.domain.opts.defaultopts;
 
 import std.algorithm.iteration;
 import std.array;
 import mahjong.domain;
 import mahjong.domain.enums;
-import mahjong.engine.flow;
-import mahjong.engine.opts;
+import mahjong.domain.opts;
 
 class DefaultGameOpts : Opts
 {

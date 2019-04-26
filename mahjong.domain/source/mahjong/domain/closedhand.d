@@ -3,10 +3,10 @@ module mahjong.domain.closedhand;
 import std.algorithm;
 import std.array;
 import mahjong.domain;
+import mahjong.domain.chi;
 import mahjong.domain.exceptions;
-import mahjong.engine.chi;
-import mahjong.engine.sort;
-import mahjong.share.range;
+import mahjong.domain.sort;
+import mahjong.util.range;
 
 class ClosedHand
 {
@@ -135,7 +135,7 @@ class ClosedHand
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto closedHand = new ClosedHand;
 	closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
 	assert(!closedHand.canDeclareClosedKan(closedHand.tiles.front), 
@@ -146,7 +146,7 @@ unittest
 
 unittest
 {
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto closedHand = new ClosedHand;
 	closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
 	auto initialLength = closedHand.tiles.length;
@@ -160,7 +160,7 @@ unittest
 unittest
 {
 	import std.exception;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
 	auto closedHand = new ClosedHand;
 	closedHand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
 	assertThrown!IllegalClaimException(closedHand.declareClosedKan(closedHand.tiles.front), 
@@ -178,7 +178,7 @@ bool hasNineOrMoreUniqueHonoursOrTerminals(const ClosedHand hand)
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto hand = new ClosedHand;
     hand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d.convertToTiles;
     hand.hasNineOrMoreUniqueHonoursOrTerminals.should.equal(false);
@@ -188,7 +188,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto hand = new ClosedHand;
     hand.tiles = "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d.convertToTiles;
     hand.hasNineOrMoreUniqueHonoursOrTerminals.should.equal(true);
@@ -198,7 +198,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
     auto hand = new ClosedHand;
     hand.tiles = "🀀🀁🀂🀃🀄🀅🀆🀆🀏🀝🀟🀟🀠🀠"d.convertToTiles;
     hand.hasNineOrMoreUniqueHonoursOrTerminals.should.equal(false);
