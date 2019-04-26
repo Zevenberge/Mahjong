@@ -208,6 +208,10 @@ template atLeastOneUntil()
 
 unittest
 {
-    import fluent.asserts;
-    [4, 5, 4].atLeastOneUntil(4).should.equal([4, 5]);
+	import fluent.asserts;
+
+	[4, 5, 4].atLeastOneUntil(4).should.equal([4, 5]);
 }
+
+import std.typecons : Tuple;
+private Tuple!(int, double) __HACK__;
