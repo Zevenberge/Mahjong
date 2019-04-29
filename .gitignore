@@ -32,3 +32,5 @@ dub.userprefs
 bin/
 
 *.lst
+
+\.vscode/
