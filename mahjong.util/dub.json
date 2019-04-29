@@ -1,5 +1,5 @@
 {
-	"name": "util",
+	"name": "mahjong-util",
 	"description": "Convenience functions that are not part of any mahjong-specific logic",
 	"copyright": "Copyright © 2019, Marco de Wild",
 	"authors": ["Marco de Wild"],

@@ -1,15 +1,15 @@
 {
-	"name": "engine",
+	"name": "mahjong-engine",
 	"description": "The engine of the game taking care of the turn state machine.",
 	"copyright": "Copyright © 2019, Marco de Wild",
 	"authors": ["Marco de Wild"],
 	"targetPath":"bin/",
 	"dependencies": {
-        "domain": {
+        "mahjong-domain": {
           "path": "../mahjong.domain"
         },
         "optional": "~>0.12.0",
-        "util": {
+        "mahjong-util": {
           "path": "../mahjong.util"
         }
 	},
