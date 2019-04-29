@@ -6,15 +6,18 @@
 	"targetPath":"bin/",
 	"dependencies": {
         "optional": "~>0.12.0",
-        "mahjong:util": "*"
+        "util": {
+          "path": "../mahjong.util"
+        }
 	},
  "configurations": [
    { 
 	   "name": "library",
-     "targetType": "none"
+     "targetType": "library"
    },
    {
      "name": "unittest",
+     "versions": ["mahjong_test"],
      "targetType": "executable",
      "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
      "mainSourceFile": "bin/ut.d",

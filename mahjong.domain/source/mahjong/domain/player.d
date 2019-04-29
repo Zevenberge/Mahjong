@@ -24,7 +24,7 @@ class Player
 	Ingame game; // Resets after every round.
 	alias game this;
 
-    version(unittest)
+    version(mahjong_test)
     {
         this()
         {

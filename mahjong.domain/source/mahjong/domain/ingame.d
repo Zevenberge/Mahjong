@@ -23,7 +23,7 @@ class Ingame
         id = randomUUID;
     }
 
-    version (unittest)
+    version (mahjong_test)
     {
         this(PlayerWinds wind, dstring tiles)
         {

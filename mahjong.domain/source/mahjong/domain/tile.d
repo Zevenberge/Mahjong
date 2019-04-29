@@ -25,7 +25,7 @@ class Tile
     private Origin _origin;
     private Ingame _originalOwner;
 
-    version(unittest)
+    version(mahjong_test)
     {
         void isNotOwn()
         {

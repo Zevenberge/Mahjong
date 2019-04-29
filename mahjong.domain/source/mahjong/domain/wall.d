@@ -269,7 +269,7 @@ unittest
 	assert(wall.length == initialWallLength - 1, "The wall should have decreased by 1");
 }
 
-version(unittest)
+version(mahjong_test)
 {
 	class MockWall : Wall
 	{

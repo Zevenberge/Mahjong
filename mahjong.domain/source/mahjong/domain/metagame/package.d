@@ -566,7 +566,7 @@ class Metagame
 
     private const Opts _opts;
 
-    version(unittest)
+    version(mahjong_test)
     {
         void exhaust()
         {

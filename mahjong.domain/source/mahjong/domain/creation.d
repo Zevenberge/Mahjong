@@ -82,7 +82,7 @@ body
 	++wall[29].dora;
 }
 
-version(unittest)
+version(mahjong_test)
 {
     Tile[] convertToTiles(const(dchar)[] faces)
     {
@@ -157,10 +157,4 @@ in
 body
 {
     wall = randomShuffle(wall);
-	/*for(int i=0; i<500; ++i)
-	{
-		ulong t1 = uniform(0, wall.length);
-		ulong t2 = uniform(0, wall.length);
-		swapTiles(wall[t1],wall[t2]);
-	}*/
 }

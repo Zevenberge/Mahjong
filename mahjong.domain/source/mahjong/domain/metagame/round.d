@@ -17,7 +17,7 @@ package struct Round
         return Round(uniform(0, amountOfPlayers));
     }
 
-    version(unittest)
+    version(mahjong_test)
     {
         static Round withCounters(size_t amountOfCounters)
         {
