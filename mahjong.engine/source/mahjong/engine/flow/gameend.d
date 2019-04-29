@@ -3,15 +3,16 @@
 import std.algorithm.searching : all;
 import std.experimental.logger;
 import mahjong.domain.metagame;
+import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
 class GameEndFlow : WaitForEveryPlayer!GameEndEvent
 {
-	this(Metagame metagame, INotificationService notificationService)
+	this(Metagame metagame, INotificationService notificationService, Engine engine)
 	{
 		trace("Constructing game end flow");
-		super(metagame, notificationService);
+		super(metagame, notificationService, engine);
 	}
 
     protected override GameEndEvent createEvent()
@@ -19,10 +20,10 @@ class GameEndFlow : WaitForEveryPlayer!GameEndEvent
         return new GameEndEvent(_metagame);
     }
 
-	protected override void advance()
+	protected override void advance(Engine engine)
     {
 		info("Game ended. Releasing flow.");
-		flow = null;
+		engine.terminateGame;
 	}
 }
 
@@ -50,37 +51,38 @@ class GameEndEvent
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.opts;
     import mahjong.domain.player;
-    import mahjong.engine.opts;
 	auto metagame = new Metagame([new Player], new DefaultGameOpts);
-	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
-	flow = gameEndFlow;
-	flow.advanceIfDone;
-    flow.should.not.beNull;
-    flow.should.equal(gameEndFlow);
+	auto engine = new Engine(metagame);
+	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService, engine);
+	engine.switchFlow(gameEndFlow);
+	engine.advanceIfDone;
+    engine.isTerminated.should.equal(false);
+    engine.flow.should.equal(gameEndFlow);
 }
 
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.opts;
     import mahjong.domain.player;
-    import mahjong.engine.opts;
 	auto eventHandler = new TestEventHandler;
-	auto metagame = new Metagame([new Player(eventHandler, 30_000)], new DefaultGameOpts);
-	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
+	auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+	auto gameEndFlow = new GameEndFlow(engine.metagame, new NullNotificationService, engine);
     eventHandler.gameEndEvent.should.not.beNull;
 }
 
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.opts;
     import mahjong.domain.player;
-    import mahjong.engine.opts;
 	auto eventHandler = new TestEventHandler;
-	auto metagame = new Metagame([new Player(eventHandler, 30_000)], new DefaultGameOpts);
-	auto gameEndFlow = new GameEndFlow(metagame, new NullNotificationService);
-	flow = gameEndFlow;
+	auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+	auto gameEndFlow = new GameEndFlow(engine.metagame, new NullNotificationService, engine);
+	engine.switchFlow(gameEndFlow);
 	eventHandler.gameEndEvent.handle;
-	flow.advanceIfDone;
-    flow.should.beNull;
+	engine.advanceIfDone;
+    engine.isTerminated.should.equal(true);
 }

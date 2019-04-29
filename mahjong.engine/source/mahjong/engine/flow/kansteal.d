@@ -4,25 +4,27 @@ import std.experimental.logger;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
+import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
 final class KanStealFlow : Flow 
 {
-    this(const Tile kanTile, Metagame game, INotificationService notificationService)
+    this(const Tile kanTile, Metagame game, INotificationService notificationService,
+        Engine engine)
     {
         trace("Constructing kan steal flow");
         super(game, notificationService);
         _kanTile = kanTile;
-        notifyPlayers;
+        notifyPlayers(engine);
     }
 
-    private void notifyPlayers()
+    private void notifyPlayers(Engine engine)
     {
         foreach(player; _metagame.otherPlayers) 
         {
             auto event = createEvent(player);
-            player.eventHandler.handle(event);
+            engine.notify(player, event);
             _events ~= event;
         }
     }
@@ -34,11 +36,11 @@ final class KanStealFlow : Flow
 
     private KanStealEvent[] _events;
 
-    override void advanceIfDone()
+    override void advanceIfDone(Engine engine)
     {
         if(done)
         {
-            advance;
+            advance(engine);
         }
     }
 
@@ -47,9 +49,8 @@ final class KanStealFlow : Flow
     {
         import fluent.asserts;
         import mahjong.domain.enums;
+        import mahjong.domain.opts;
         import mahjong.domain.wall;
-        import mahjong.engine.opts;
-        scope(exit) switchFlow(null);
         auto kanPlayer = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀠🀠"d);
         auto ponTile = new Tile(Types.wind, Winds.east);
         ponTile.isNotOwn;
@@ -59,10 +60,11 @@ final class KanStealFlow : Flow
         auto metagame = new Metagame([kanPlayer, otherPlayer], new DefaultGameOpts);
         metagame.currentPlayer = kanPlayer;
         metagame.wall = new MockWall(false);
-        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService);
-        switchFlow(flow);
-        flow.advanceIfDone;
-        flow.should.be.instanceOf!KanStealFlow;
+        auto engine = new Engine(metagame);
+        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService, engine);
+        engine.switchFlow(flow);
+        engine.advanceIfDone;
+        engine.flow.should.be.instanceOf!KanStealFlow;
     }
 
     @("If everyone denies, the player completes their kan and the flow moves to their turn.")
@@ -70,26 +72,26 @@ final class KanStealFlow : Flow
     {
         import fluent.asserts;
         import mahjong.domain.enums;
+        import mahjong.domain.opts;
         import mahjong.domain.wall;
-        import mahjong.engine.opts;
-        scope(exit) switchFlow(null);
         auto kanPlayer = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀠🀠"d);
         auto ponTile = new Tile(Types.wind, Winds.east);
         ponTile.isNotOwn;
         kanPlayer.pon(ponTile);
         auto tile = kanPlayer.closedHand.tiles[0];
         auto otherPlayer = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
-        auto eventHandler = cast(TestEventHandler)otherPlayer.eventHandler;
         auto metagame = new Metagame([kanPlayer, otherPlayer], new DefaultGameOpts);
         metagame.currentPlayer = kanPlayer;
         metagame.wall = new MockWall(false);
-        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService);
-        switchFlow(flow);
+        auto engine = new Engine(metagame);
+        auto eventHandler = engine.getTestEventHandler(otherPlayer); 
+        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService, engine);
+        engine.switchFlow(flow);
         eventHandler.kanStealEvent.pass;
-        flow.advanceIfDone;
+        engine.advanceIfDone;
         kanPlayer.openHand.amountOfKans.should.equal(1);
         kanPlayer.openHand.amountOfPons.should.equal(1);
-        .flow.should.be.instanceOf!TurnFlow;
+        engine.flow.should.be.instanceOf!TurnFlow;
     }
     
     @("If a tenpai player denies, they are furiten.")
@@ -97,23 +99,23 @@ final class KanStealFlow : Flow
     {
         import fluent.asserts;
         import mahjong.domain.enums;
+        import mahjong.domain.opts;
         import mahjong.domain.wall;
-        import mahjong.engine.opts;
-        scope(exit) switchFlow(null);
         auto kanPlayer = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀠🀠"d);
         auto ponTile = new Tile(Types.wind, Winds.east);
         ponTile.isNotOwn;
         kanPlayer.pon(ponTile);
         auto tile = kanPlayer.closedHand.tiles[0];
         auto otherPlayer = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
-        auto eventHandler = cast(TestEventHandler)otherPlayer.eventHandler;
         auto metagame = new Metagame([kanPlayer, otherPlayer], new DefaultGameOpts);
         metagame.currentPlayer = kanPlayer;
         metagame.wall = new MockWall(false);
-        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService);
-        switchFlow(flow);
+        auto engine = new Engine(metagame);
+        auto eventHandler = engine.getTestEventHandler(otherPlayer); 
+        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService, engine);
+        engine.switchFlow(flow);
         eventHandler.kanStealEvent.pass;
-        flow.advanceIfDone;
+        engine.advanceIfDone;
         otherPlayer.isFuriten.should.equal(true);
     }
 
@@ -122,26 +124,26 @@ final class KanStealFlow : Flow
     {
         import fluent.asserts;
         import mahjong.domain.enums;
+        import mahjong.domain.opts;
         import mahjong.domain.wall;
-        import mahjong.engine.opts;
-        scope(exit) switchFlow(null);
         auto kanPlayer = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀠🀠"d);
         auto ponTile = new Tile(Types.wind, Winds.east);
         ponTile.isNotOwn;
         kanPlayer.pon(ponTile);
         auto tile = kanPlayer.closedHand.tiles[0];
         auto otherPlayer = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
-        auto eventHandler = cast(TestEventHandler)otherPlayer.eventHandler;
         auto metagame = new Metagame([kanPlayer, otherPlayer], new DefaultGameOpts);
         metagame.currentPlayer = kanPlayer;
         metagame.wall = new MockWall(false);
-        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService);
-        switchFlow(flow);
+        auto engine = new Engine(metagame);
+        auto eventHandler = engine.getTestEventHandler(otherPlayer); 
+        auto flow = new KanStealFlow(tile, metagame, new NullNotificationService, engine);
+        engine.switchFlow(flow);
         eventHandler.kanStealEvent.steal;
-        flow.advanceIfDone;
+        engine.advanceIfDone;
         kanPlayer.openHand.amountOfKans.should.equal(0);
         otherPlayer.isMahjong.should.equal(true);
-        .flow.should.be.instanceOf!MahjongFlow;
+        engine.flow.should.be.instanceOf!MahjongFlow;
         kanPlayer.closedHand.tiles.should.not.contain(tile);
     }
 
@@ -151,21 +153,21 @@ final class KanStealFlow : Flow
         return _events.all!(e => e.isHandled);
     }
 
-    private void advance()
+    private void advance(Engine engine)
     {
         import std.algorithm : filter;
         auto steals = _events.filter!(e => e.isSteal);
         if(!steals.empty)
         {
-            stealKanTile(steals);
+            stealKanTile(steals, engine);
         }
         else
         {
-            completeKanDeclaration;
+            completeKanDeclaration(engine);
         }       
     }
 
-    private void stealKanTile(Range)(Range stealingPlayers)
+    private void stealKanTile(Range)(Range stealingPlayers, Engine engine)
     {
         auto tile = _metagame.currentPlayer.closedHand.removeTile(_kanTile);
         foreach(evt; stealingPlayers)
@@ -174,16 +176,16 @@ final class KanStealFlow : Flow
             player.stealKanTile(tile, _metagame);
             _notificationService.notify(Notification.Ron, player);
         }
-        switchFlow(new MahjongFlow(_metagame, _notificationService));
+        engine.switchFlow(new MahjongFlow(_metagame, _notificationService, engine));
     }
 
-    private void completeKanDeclaration()
+    private void completeKanDeclaration(Engine engine)
     {
         auto player = _metagame.currentPlayer;
         player.promoteToKan(_kanTile, _metagame.wall);
         _metagame.notifyPlayersAboutMissedTile(_kanTile);
         _notificationService.notify(Notification.Kan, player);
-        switchFlow(new TurnFlow(player, _metagame, _notificationService));
+       engine.switchFlow(new TurnFlow(player, _metagame, _notificationService, engine));
     }
 
     private const Tile _kanTile;
@@ -212,7 +214,7 @@ final class KanStealEvent
     {
         import fluent.asserts;
         import mahjong.domain.enums;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
         auto tile = new Tile(Types.wind, Winds.east);
         auto player = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
         auto metagame = new Metagame([player], new DefaultGameOpts);
@@ -235,7 +237,7 @@ final class KanStealEvent
     {
         import fluent.asserts;
         import mahjong.domain.enums;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
         auto tile = new Tile(Types.wind, Winds.east);
         auto player = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
         auto metagame = new Metagame([player], new DefaultGameOpts);
@@ -264,7 +266,7 @@ final class KanStealEvent
     {
         import fluent.asserts;
         import mahjong.domain.enums;
-        import mahjong.engine.opts;
+        import mahjong.domain.opts;
         auto tile = new Tile(Types.character, Numbers.five);
         auto player = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
         auto metagame = new Metagame([player], new DefaultGameOpts);

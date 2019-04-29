@@ -7,7 +7,8 @@
 	"targetPath":"bin/",
 	"dependencies": {
     "mahjong:util": "*",
-    "mahjong:domain": "*"
+    "mahjong:domain": "*",
+    "mahjong:engine": "*"
   },
   "subPackages": [
     "./mahjong.util",

@@ -1,12 +1,112 @@
 module mahjong.engine;
 
+import mahjong.domain.metagame;
+import mahjong.domain.opts;
+import mahjong.domain.player;
+import mahjong.engine.flow;
+import mahjong.engine.notifications;
+
 class Engine
 {
+    this(GameEventHandler[] eventHandlers, const Opts opts, INotificationService notificationService)
+    {
+        Player[] players = new Player[eventHandlers.length];
+        foreach (i, handler; eventHandlers)
+        {
+            auto player = new Player(opts.initialScore);
+            players[i] = player;
+            _players[player] = handler;
+        }
+        auto metagame = new Metagame(players, opts);
+        version (unittest)
+            this.metagame = metagame;
+        _flow = new GameStartFlow(metagame, notificationService, this);
+    }
 
-}
+    @("When starting the game, the game should be in the GameStartFlow")
+    unittest
+    {
+        import fluent.asserts;
 
+        auto eventHandler = new TestEventHandler;
+        auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+        engine.flow.should.be.instanceOf!GameStartFlow;
+    }
 
-Player[] createPlayers(GameEventHandler[] eventHandlers, Opts opts)
-{
-    return eventHandlers.map!(d => new Player(d, opts.initialScore)).array;
+    @("A metagame has been created")
+    unittest
+    {
+        import fluent.asserts;
+
+        auto eventHandler = new TestEventHandler;
+        auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+        auto flow = engine.flow;
+        flow.metagame.should.not.beNull;
+        flow.metagame.players.length.should.equal(1);
+    }
+
+    private Flow _flow;
+    private GameEventHandler[const(Player)] _players;
+
+    version (unittest)
+    {
+        this(Metagame metagame)
+        {
+            this.metagame = metagame;
+            foreach (player; metagame.players)
+            {
+                _players[player] = new TestEventHandler;
+            }
+        }
+
+        Metagame metagame;
+
+        TestEventHandler getTestEventHandler(const Player player)
+        {
+            return cast(TestEventHandler)_players[player];
+        }
+    }
+
+    package void switchFlow(Flow newFlow) pure
+    in(newFlow !is null, "A new flow should be supplied")
+    {
+        _flow = newFlow;
+    }
+
+    package void terminateGame() pure
+    {
+        _flow = null;
+    }
+
+    package void notify(Event)(const Player player, Event event)
+    {
+        _players[player].handle(event);
+    }
+
+    const(Flow) flow() @property pure const
+    {
+        return _flow;
+    }
+
+    bool isTerminated() @property pure const
+    {
+        return _flow is null;
+    }
+
+    @("Can I terminate the game")
+    unittest
+    {
+        import fluent.asserts;
+
+        auto eventHandler = new TestEventHandler;
+        auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+        engine.isTerminated.should.equal(false);
+        engine.terminateGame;
+        engine.isTerminated.should.equal(true);
+    }
+
+    void advanceIfDone()
+    {
+        _flow.advanceIfDone(this);
+    }
 }

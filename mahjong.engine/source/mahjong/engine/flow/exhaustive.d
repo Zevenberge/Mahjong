@@ -2,17 +2,18 @@ module mahjong.engine.flow.exhaustive;
 
 import std.experimental.logger;
 import mahjong.domain.metagame;
+import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
 class ExhaustiveDrawFlow : WaitForEveryPlayer!ExhaustiveDrawEvent
 {
-    this(Metagame game, INotificationService notificationService)
+    this(Metagame game, INotificationService notificationService, Engine engine)
     {
         trace("Initialising exhaustive draw flow");
         game.exhaustiveDraw;
         notificationService.notify(Notification.ExhaustiveDraw);
-        super(game, notificationService);
+        super(game, notificationService, engine);
     }
 
     protected override ExhaustiveDrawEvent createEvent()
@@ -20,7 +21,7 @@ class ExhaustiveDrawFlow : WaitForEveryPlayer!ExhaustiveDrawEvent
         return new ExhaustiveDrawEvent(_metagame);
     }
 
-    protected override void advance()
+    protected override void advance(Engine engine)
     {
         _metagame.finishRound;
         mixin(switchToNextRoundOrGameOver);

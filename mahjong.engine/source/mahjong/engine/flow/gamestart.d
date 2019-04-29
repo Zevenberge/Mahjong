@@ -4,29 +4,28 @@ import std.algorithm;
 import std.experimental.logger;
 import std.array;
 import mahjong.domain;
+import mahjong.domain.opts;
+import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
-import mahjong.engine.opts;
 
 class GameStartFlow : Flow
 {
-	this(GameEventHandler[] eventHandlers, Opts gameOpts,
-        INotificationService notificationService)
+	this(Metagame metagame, 
+        INotificationService notificationService,
+		Engine engine)
 	in
 	{
-		assert(!eventHandlers.empty, "Expected at least a single event handler");
-        assert(gameOpts !is null, "Options were not supplied");
+		assert(!metagame.players.empty, "Expected at least a single player");
 	}
 	body
 	{
 		info("Starting game.");
-        auto players = eventHandlers.map!(eh => new Player(eh, gameOpts.initialScore)).array;
-        auto game = new Metagame(players, gameOpts);
-		super(game, notificationService);
-		_events = eventHandlers.map!((handler) 
+		super(metagame, notificationService);
+		_events = metagame.players.map!((player) 
 			{
 				auto event = new GameStartEvent(metagame);
-				handler.handle(event);
+				engine.notify(player, event);
 				return event;
 			}).array;
 		trace("Started game and sent out notifications to players.");
@@ -34,12 +33,12 @@ class GameStartFlow : Flow
 
 	private GameStartEvent[] _events;
 
-	override void advanceIfDone() 
+	override void advanceIfDone(Engine engine) 
 	{
 		if(isDone)
 		{
 			info("Started game. Switching to round start flow.");
-			switchFlow(new RoundStartFlow(_metagame, _notificationService));
+			engine.switchFlow(new RoundStartFlow(_metagame, _notificationService, engine));
 		}
 	}
 
@@ -65,14 +64,12 @@ unittest
     import fluent.asserts;
 
 	auto eventHandler = new TestEventHandler;
-	auto flow = new GameStartFlow([eventHandler], new DefaultGameOpts, new NullNotificationService);
-    flow.metagame.should.not.beNull;
-    flow.metagame.players.length.should.equal(1);
-	switchFlow(flow);
-    .flow.should.be.instanceOf!GameStartFlow;
-	flow.advanceIfDone;
-    .flow.should.be.instanceOf!GameStartFlow.because("the players are not ready");
+	auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+	auto flow = new GameStartFlow(engine.metagame, new NullNotificationService, engine);
+	engine.switchFlow(flow);
+	engine.advanceIfDone;
+    engine.flow.should.be.instanceOf!GameStartFlow.because("the players are not ready");
 	eventHandler.gameStartEvent.isReady = true;
-	flow.advanceIfDone;
-    .flow.should.be.instanceOf!RoundStartFlow.because("the players are ready");
+	engine.advanceIfDone;
+    engine.flow.should.be.instanceOf!RoundStartFlow.because("the players are ready");
 }

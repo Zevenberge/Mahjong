@@ -19,6 +19,7 @@ public
 import std.algorithm : all;
 import std.traits;
 import mahjong.domain.metagame;
+import mahjong.engine;
 import mahjong.engine.notifications;
 
 class Flow
@@ -36,32 +37,25 @@ class Flow
 		return _metagame;
 	}
 
-	abstract void advanceIfDone();
-}
-
-Flow flow;
-
-void switchFlow(Flow newFlow)
-{
-	flow = newFlow;
+	abstract void advanceIfDone(Engine engine);
 }
 
 abstract class WaitForEveryPlayer(TEvent) : Flow
     if(canBeHandled!TEvent && canPlayerHandle!TEvent)
 {
-    this(Metagame metagame, INotificationService notificationService)
+    this(Metagame metagame, INotificationService notificationService, Engine engine)
     {
         super(metagame, notificationService);
-        notifyPlayers;
+        notifyPlayers(engine);
     }
 
-    private void notifyPlayers()
+    private void notifyPlayers(Engine engine)
     {
         foreach(player; _metagame.players)
         {
             auto event = createEvent();
             _events ~= event;
-            player.eventHandler.handle(event);
+            engine.notify(player, event);
         }
     }
 
@@ -69,9 +63,9 @@ abstract class WaitForEveryPlayer(TEvent) : Flow
 
     private TEvent[] _events;
 
-    override void advanceIfDone()
+    override void advanceIfDone(Engine engine)
     {
-        if(isDone) advance();
+        if(isDone) advance(engine);
     }
 
     private bool isDone()
@@ -79,7 +73,7 @@ abstract class WaitForEveryPlayer(TEvent) : Flow
         return _events.all!(e => e.isHandled);
     }
 
-    protected abstract void advance();
+    protected abstract void advance(Engine engine);
 }
 
 template canBeHandled(TEvent)
