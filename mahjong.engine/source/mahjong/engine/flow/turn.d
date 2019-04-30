@@ -1,6 +1,7 @@
 module mahjong.engine.flow.turn;
 
 import std.experimental.logger;
+import std.typecons;
 import std.uuid;
 import mahjong.domain.ingame;
 import mahjong.domain.metagame;
@@ -12,23 +13,21 @@ import mahjong.engine.notifications;
 
 class TurnFlow : Flow
 {
-	this(Player player, Metagame meta, 
-    INotificationService notificationService, Engine engine)
-	{
-		_player = player;
-		super(meta, notificationService);
-		_event = new TurnEvent(this, meta, player, player.lastTile, engine);
+    this(Player player, Metagame meta, INotificationService notificationService, Engine engine)
+    {
+        _player = player;
+        super(meta, notificationService);
+        _event = new TurnEvent(meta, player, player.lastTile);
         engine.notify(player, _event);
-	}
-	
-	override void advanceIfDone(Engine engine)
-	{
-		if(_event.isHandled)
-		{
-			assert(_flow !is null, "When the event is handled, the flow should not be null");
-			advance(engine);
-		}
-	}
+    }
+
+    override void advanceIfDone(Engine engine)
+    {
+        if (_event.isHandled)
+        {
+            advance(engine);
+        }
+    }
 
     unittest
     {
@@ -48,115 +47,113 @@ class TurnFlow : Flow
         engine.flow.should.be.instanceOf!TurnFlow.because("the player is not ready");
     }
 
-	private: 
-		TurnEvent _event;
-		Player _player;
-		Flow _flow;
+private:
+    TurnEvent _event;
+    Player _player;
 
-		void advance(Engine engine)
-		{
-			engine.switchFlow(_flow);
-		}
-		
-		void discard(const Tile tile, Engine engine)
-        in
+    void advance(Engine engine)
+    {
+        final switch (_event._chosenAction)
         {
-            assert(_player.canDiscard(tile), "The move should be legal.");
+        case Action.unknown:
+            assert(false, "Cannot advance when the action is not known");
+        case Action.discard:
+            discard(_event._selectedTile, engine);
+            break;
+        case Action.promoteToKan:
+            promoteToKan(_event._selectedTile, engine);
+            break;
+        case Action.declareClosedKan:
+            declareClosedKan(_event._selectedTile, engine);
+            break;
+        case Action.tsumo:
+            claimTsumo(engine);
+            break;
+        case Action.declareRiichi:
+            declareRiichi(_event._selectedTile, engine);
+            break;
+        case Action.declareRedraw:
+            declareRedraw(engine);
+            break;
         }
-        do
-		{
-			auto discard = _player.discard(tile);
-			_flow = new ClaimFlow(discard, _metagame, _notificationService, engine);
-		}
+    }
 
-		void promoteToKan(const Tile tile, Engine engine)
-        in
-        {
-            assert(_player.canPromoteToKan(tile), "The move should be legal.");
-        }
-        do
-		{
-			_flow = new KanStealFlow(tile, _metagame, _notificationService, engine);
-		}
+    void discard(const Tile tile, Engine engine)
+    in(_player.canDiscard(tile), "The move should be legal.")
+    {
+        auto discard = _player.discard(tile);
+        engine.switchFlow(new ClaimFlow(discard, _metagame, _notificationService, engine));
+    }
 
-		void declareClosedKan(const Tile tile, Engine engine)
-        in
-        {
-            assert(_player.canDeclareClosedKan(tile), "The move should be legal.");
-        }
-        do
-		{
-			_player.declareClosedKan(tile, _metagame.wall);
-			_notificationService.notify(Notification.Kan, _player);
-			_flow = new TurnFlow(_player, _metagame, _notificationService, engine);
-		}
+    void promoteToKan(const Tile tile, Engine engine)
+    in(_player.canPromoteToKan(tile), "The move should be legal.")
+    {
+        engine.switchFlow(new KanStealFlow(tile, _metagame, _notificationService, engine));
+    }
 
-		void claimTsumo(Engine engine)
-        in
-        {
-            assert(_player.canTsumo(_metagame), "The move should be legal.");
-        }
-        do
-		{
-			info("Tsumo claimed by ", _player.name);
-			_metagame.tsumo;
-			_notificationService.notify(Notification.Tsumo, _player);
-			_flow = new MahjongFlow(_metagame, _notificationService, engine);
-		}
+    void declareClosedKan(const Tile tile, Engine engine)
+    in(_player.canDeclareClosedKan(tile), "The move should be legal.")
+    {
+        _player.declareClosedKan(tile, _metagame.wall);
+        _notificationService.notify(Notification.Kan, _player);
+        engine.switchFlow(new TurnFlow(_player, _metagame, _notificationService, engine));
+    }
 
-        void declareRiichi(const Tile tile, Engine engine)
-        in
-        {
-            assert(_player.canDeclareRiichi(tile, _metagame), "The move should be legal.");
-        }
-        do
-        {
-            info("Riichi declared by ", _player);
-            auto discard = _player.declareRiichi(tile, _metagame);
-            _notificationService.notify(Notification.Riichi, _player);
-            _flow = new ClaimFlow(discard, _metagame, _notificationService, engine);
-        }
+    void claimTsumo(Engine engine)
+    in(_player.canTsumo(_metagame), "The move should be legal.")
+    {
+        info("Tsumo claimed by ", _player.name);
+        _metagame.tsumo;
+        _notificationService.notify(Notification.Tsumo, _player);
+        engine.switchFlow(new MahjongFlow(_metagame, _notificationService, engine));
+    }
 
-        void declareRedraw(Engine engine)
-        in
-        {
-            assert(_player.isEligibleForRedraw(_metagame), "A player should be allowed to force a redraw.");
-        }
-        do
-        {
-            info("Redraw forced by ", _player);
-            _metagame.declareRedraw;
-            _notificationService.notify(Notification.AbortiveDraw, _player);
-            _flow = new AbortiveDrawFlow(_metagame, _notificationService, engine);
-        }
+    void declareRiichi(const Tile tile, Engine engine)
+    in(_player.canDeclareRiichi(tile, _metagame), "The move should be legal.")
+    {
+        info("Riichi declared by ", _player);
+        auto discard = _player.declareRiichi(tile, _metagame);
+        _notificationService.notify(Notification.Riichi, _player);
+        engine.switchFlow(new ClaimFlow(discard, _metagame, _notificationService, engine));
+    }
+
+    void declareRedraw(Engine engine)
+    in(_player.isEligibleForRedraw(_metagame), "A player should be allowed to force a redraw.")
+    {
+        info("Redraw forced by ", _player);
+        _metagame.declareRedraw;
+        _notificationService.notify(Notification.AbortiveDraw, _player);
+        engine.switchFlow(new AbortiveDrawFlow(_metagame, _notificationService, engine));
+    }
 }
 
 class TurnEvent
 {
-	this(TurnFlow flow, const Metagame metagame, 
-        const Player player, const Tile drawnTile,
-        Engine engine)
-	{
-		_flow = flow;
-		this.player = player;
-		this.metagame = metagame;
-		this.drawnTile = drawnTile;
-        _engine = engine;
-	}	
-	private TurnFlow _flow;
-    private deprecated("Refactor the turn such that engine is not required here") Engine _engine;
-	
-	private bool isHandled = false;
-	
-	const Player player;
-	const Metagame metagame;
-	const Tile drawnTile;
-	
-	void discard(const Tile tile)
-	{
-        handle;
-        _flow.discard(tile, _engine);
-	}
+    this(const Metagame metagame, const Player player, const Tile drawnTile)
+    {
+        this.player = player;
+        this.metagame = metagame;
+        this.drawnTile = drawnTile;
+    }
+
+    const Player player;
+    const Metagame metagame;
+    const Tile drawnTile;
+
+    private bool isHandled() @property pure const
+    {
+        return _chosenAction != Action.unknown;
+    }
+
+    private Action _chosenAction = Action.unknown;
+    private Rebindable!(const(Tile)) _selectedTile;
+
+    void discard(const Tile tile)
+    in(!isHandled, "The event can't be handled twice")
+    {
+        _chosenAction = Action.discard;
+        _selectedTile = tile;
+    }
 
     unittest
     {
@@ -173,6 +170,7 @@ class TurnEvent
                 super(new DefaultGameOpts);
                 _tileToDraw = tileToDraw;
             }
+
             private Tile _tileToDraw;
             override Tile drawTile()
             {
@@ -194,11 +192,12 @@ class TurnEvent
         engine.flow.should.be.instanceOf!ClaimFlow.because("a tile is discarded");
     }
 
-	void promoteToKan(const Tile tile)
-	{
-        handle;
-		_flow.promoteToKan(tile, _engine);
-	}
+    void promoteToKan(const Tile tile)
+    in(!isHandled, "The event can't be handled twice")
+    {
+        _chosenAction = Action.promoteToKan;
+        _selectedTile = tile;
+    }
 
     unittest
     {
@@ -206,6 +205,7 @@ class TurnEvent
         import mahjong.domain.creation;
         import mahjong.domain.enums;
         import mahjong.domain.opts;
+
         auto player = new Player();
         player.startGame(PlayerWinds.east);
         auto metagame = new Metagame([player], new DefaultGameOpts);
@@ -223,11 +223,12 @@ class TurnEvent
         player.openHand.amountOfKans.should.equal(0).because("it can still be cancelled");
     }
 
-	void declareClosedKan(const Tile tile)
-	{
-        handle;
-		_flow.declareClosedKan(tile, _engine);
-	}
+    void declareClosedKan(const Tile tile)
+    in(!isHandled, "The event can't be handled twice")
+    {
+        _chosenAction = Action.declareClosedKan;
+        _selectedTile = tile;
+    }
 
     unittest
     {
@@ -235,6 +236,7 @@ class TurnEvent
         import mahjong.domain.creation;
         import mahjong.domain.enums;
         import mahjong.domain.opts;
+
         auto player = new Player();
         player.startGame(PlayerWinds.east);
         auto metagame = new Metagame([player], new DefaultGameOpts);
@@ -247,17 +249,17 @@ class TurnEvent
         auto kanTile = player.closedHand.tiles[0];
         flow._event.declareClosedKan(kanTile);
         engine.advanceIfDone;
-        engine.flow.should.be.instanceOf!TurnFlow
-            .because("the turn starts again if a closed kan is declared");
+        engine.flow.should.be.instanceOf!TurnFlow.because(
+                "the turn starts again if a closed kan is declared");
         engine.flow.should.not.equal(flow).because("it is a new turn");
         player.openHand.amountOfKans.should.equal(1);
     }
 
-	void claimTsumo()
-	{
-        handle;
-		_flow.claimTsumo(_engine);
-	}
+    void claimTsumo()
+    in(!isHandled, "The event can't be handled twice")
+    {
+        _chosenAction = Action.tsumo;
+    }
 
     unittest
     {
@@ -269,7 +271,8 @@ class TurnEvent
 
         auto player = new Player();
         player.startGame(PlayerWinds.east);
-        player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
+        player.game.closedHand.tiles
+            = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
         player.hasDrawnTheirLastTile;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         auto engine = new Engine(metagame);
@@ -277,14 +280,14 @@ class TurnEvent
         engine.switchFlow(flow);
         flow._event.claimTsumo;
         engine.advanceIfDone;
-        engine.flow.should.be.instanceOf!MahjongFlow
-            .because("a tsumo is claimed");
+        engine.flow.should.be.instanceOf!MahjongFlow.because("a tsumo is claimed");
     }
 
     void declareRiichi(const Tile tile)
+    in(!isHandled, "The event can't be handled twice")
     {
-        handle;
-        _flow.declareRiichi(tile, _engine);
+        _chosenAction = Action.declareRiichi;
+        _selectedTile = tile;
     }
 
     unittest
@@ -299,22 +302,23 @@ class TurnEvent
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         player.startGame(PlayerWinds.east);
-        player.game.closedHand.tiles = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
+        player.game.closedHand.tiles
+            = "🀐🀐🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘"d.convertToTiles;
         player.hasDrawnTheirLastTile;
         auto engine = new Engine(metagame);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
         engine.switchFlow(flow);
         flow._event.declareRiichi(player.closedHand.tiles[0]);
         engine.advanceIfDone;
-        engine.flow.should.be.instanceOf!ClaimFlow
-            .because("a riichi results in a regular discard");
+        engine.flow.should.be.instanceOf!ClaimFlow.because(
+                "a riichi results in a regular discard");
         player.isRiichi.should.equal(true);
     }
 
     void declareRedraw()
+    in(!isHandled, "The event can't be handled twice")
     {
-        handle;
-        _flow.declareRedraw(_engine);
+        _chosenAction = Action.declareRedraw;
     }
 
     unittest
@@ -330,25 +334,26 @@ class TurnEvent
         metagame.initializeRound;
         metagame.beginRound;
         player.startGame(PlayerWinds.east);
-        player.game.closedHand.tiles = "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d.convertToTiles;
+        player.game.closedHand.tiles
+            = "🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d.convertToTiles;
         auto engine = new Engine(metagame);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
         engine.switchFlow(flow);
         flow._event.declareRedraw;
         engine.advanceIfDone;
-        engine.flow.should.be.instanceOf!AbortiveDrawFlow
-            .because("the game should be aborted");
+        engine.flow.should.be.instanceOf!AbortiveDrawFlow.because("the game should be aborted");
         metagame.isAbortiveDraw.should.equal(true)
             .because("the metagame itself should also be aborted");
     }
+}
 
-    private void handle()
-    in
-    {
-        assert(!isHandled, "The event cannot be handled twice");
-    }
-    do
-    {
-        isHandled = true;
-    }
+private enum Action
+{
+    unknown,
+    discard,
+    promoteToKan,
+    declareClosedKan,
+    tsumo,
+    declareRiichi,
+    declareRedraw
 }
