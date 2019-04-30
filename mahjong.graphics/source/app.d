@@ -1,5 +1,3 @@
-module main;
-
 import std.experimental.logger;
 import etc.linux.memoryerror;
 import mahjong.graphics.ui;

@@ -3,6 +3,7 @@
 import std.experimental.logger : info;
 import dsfml.graphics;
 import mahjong.domain.metagame;
+import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.game;
@@ -15,9 +16,9 @@ import mahjong.graphics.utils : freeze;
 
 class GameEndController : ResultController
 {
-	this(RenderWindow window, const Metagame metagame, GameEndEvent event)
+	this(RenderWindow window, const Metagame metagame, GameEndEvent event, Engine engine)
 	{
-		super(window, metagame, freezeGameGraphicsOnATexture(metagame));
+		super(window, metagame, freezeGameGraphicsOnATexture(metagame), engine);
 		_screen = new GameEndScreen(metagame, innerScreenBounds);
 		_event = event;
 	}
@@ -49,10 +50,10 @@ unittest
 {
 	// Check no segfaults test.
     import fluent.asserts;
+    import mahjong.domain.opts;
 	import mahjong.domain.player;
     import mahjong.domain.wrappers;
 	import mahjong.engine.flow;
-    import mahjong.engine.opts;
 	import mahjong.graphics.drawing.player;
 	import mahjong.graphics.rendersprite;
     import mahjong.test.key;
@@ -63,8 +64,9 @@ unittest
 	auto metagame = new Metagame([player, player, player, player], new DefaultGameOpts);
 	auto window = new TestWindow;
 	auto event = new GameEndEvent(metagame);
+    auto engine = new Engine(metagame);
     setDefaultTestController;
-	Controller.instance.substitute(new GameEndController(window, metagame, event));
+	Controller.instance.substitute(new GameEndController(window, metagame, event, engine));
 	Controller.instance.draw;
     Controller.instance.handleEvent(returnKeyPressed);
 	assert(event.isHandled, "After pressing enter, the event should have been handled.");

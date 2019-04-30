@@ -5,6 +5,7 @@ import dsfml.graphics.renderwindow;
 import dsfml.window.event;
 import dsfml.window.keyboard;
 import mahjong.domain.metagame;
+import mahjong.engine;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.controllers.menu;
@@ -17,7 +18,7 @@ class PopupController : GameController
 	{
 		_underlying = underlying;
 		_popup = popup;
-		super(underlying.getWindow(), underlying.metagame);
+		super(underlying.getWindow(), underlying.metagame, null);
 	}
 
 	private Popup _popup;
@@ -30,7 +31,13 @@ class PopupController : GameController
 		trace("Finished drawing the pop-up controller");
 	}
 
-	override void yield() {
+	override void roundUp()
+	{
+		_underlying.roundUp;
+	}
+
+	override void yield() 
+	{
 		if(_popup.done) {
 			info("Popup finished displaying. Switching to inner controller ", _underlying);
             instance = _underlying;

@@ -7,7 +7,7 @@ import mahjong.engine.flow;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.menu.menuitem;
-import mahjong.share.range;
+import mahjong.util.range;
 
 alias TurnOptionController = IngameOptionsController!(TurnOptionFactory, "");
 
@@ -105,7 +105,8 @@ version(unittest)
     import std.algorithm;
     import std.stdio;
     import std.string;
-    import mahjong.engine.creation;
+    import mahjong.domain.creation;
+    import mahjong.engine;
     import mahjong.engine.flow;
     import mahjong.engine.notifications;
     void assertIn(T)(TurnOptionFactory factory)
@@ -127,10 +128,11 @@ version(unittest)
             tile.isDrawnBy(player);
         }
         auto selectedTile = player.closedHand.tiles[indexOfDiscard];
+        auto engine = new Engine(metagame);
         writeln("Selecting ", selectedTile);
         return new TurnOptionFactory(selectedTile,
-            new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService),
-                metagame, player, selectedTile), canCancel);
+            new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService, engine),
+                metagame, player, selectedTile, engine), canCancel);
     }
 }
 
@@ -139,7 +141,7 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player = new Player();
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
@@ -162,7 +164,7 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player = new Player();
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
@@ -183,7 +185,7 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player = new Player();
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
@@ -204,7 +206,7 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player = new Player();
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
@@ -227,7 +229,7 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player = new Player();
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
@@ -249,7 +251,7 @@ unittest
 {
     import std.array;
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player = new Player();
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;
@@ -263,7 +265,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
     auto player = new Player();
     auto metagame = new Metagame([player], new DefaultGameOpts);
     metagame.initializeRound;

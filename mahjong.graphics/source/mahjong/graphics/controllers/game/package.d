@@ -18,7 +18,7 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain;
 import mahjong.domain.enums;
-import mahjong.engine.flow;
+import mahjong.engine;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu;
 import mahjong.graphics.drawing.background;
@@ -29,14 +29,17 @@ import mahjong.graphics.menu;
 
 class GameController : Controller
 {
-	protected this(RenderWindow window, const Metagame metagame)
+	protected this(RenderWindow window, const Metagame metagame, Engine engine)
 	{
 		super(window);
 		_metagame = metagame;
+		_engine = engine;
 	}
 
 	const(Metagame) metagame() { return _metagame;} @property pure
 	protected const Metagame _metagame;
+	protected Engine _engine;
+
 
 	override void draw()
 	{
@@ -71,13 +74,13 @@ class GameController : Controller
 	override void roundUp() 
 	{
 		info("Rouding up game comtroller.");
-		.flow = null;
+		_engine.terminateGame;
 		clearCache;
 	}
 
 	override void yield() 
 	{
-		flow.advanceIfDone;
+		_engine.advanceIfDone;
 	}
 
     final GameMode gameMode() @property pure const

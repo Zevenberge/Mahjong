@@ -7,7 +7,6 @@ import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.tile;
 import mahjong.domain.wall;
-import mahjong.engine.opts;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.tile;

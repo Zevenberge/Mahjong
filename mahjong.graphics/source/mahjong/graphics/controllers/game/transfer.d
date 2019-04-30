@@ -2,8 +2,9 @@
 
 import dsfml.graphics;
 import mahjong.domain.metagame;
+import mahjong.domain.scoring;
+import mahjong.engine;
 import mahjong.engine.flow.traits;
-import mahjong.engine.scoring;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.transfer;
@@ -12,9 +13,9 @@ class TransferController(TEvent) : ResultController
     if(isSimpleEvent!TEvent)
 {
     this(RenderWindow window, const Metagame metagame, RenderTexture background, 
-        TEvent event, Transaction[] transactions)
+        TEvent event, Transaction[] transactions, Engine engine)
     {
-        super(window, metagame, background);
+        super(window, metagame, background, engine);
         _event = event;
         _transferScreen = new TransferScreen(transactions);
     }
@@ -48,6 +49,6 @@ class TransferController(TEvent) : ResultController
     private void finishRound()
     {
         _event.handle;
-        Controller.instance.substitute(new IdleController(_window, _metagame));
+        Controller.instance.substitute(new IdleController(_window, _metagame, _engine));
     }
 }

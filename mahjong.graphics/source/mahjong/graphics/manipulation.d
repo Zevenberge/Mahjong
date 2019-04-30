@@ -10,14 +10,14 @@ import std.format;
 import std.math;
 import std.range;
 
+// TODO: prune dependencies
 import mahjong.domain.enums;
+import mahjong.domain.mahjong;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
+import mahjong.domain.opts;
 import mahjong.domain.tile;
 import mahjong.domain.yaku;
-import mahjong.engine.ai;
-import mahjong.engine.mahjong;
-import mahjong.engine.opts;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.enums.geometry;

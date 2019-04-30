@@ -6,7 +6,7 @@ import std.conv;
 import std.uuid;
 import dsfml.graphics;
 import mahjong.domain.player;
-import mahjong.engine.scoring;
+import mahjong.domain.scoring;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.count;
 import mahjong.graphics.anime.fade;

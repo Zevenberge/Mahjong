@@ -39,9 +39,8 @@ unittest
 {
 	// Check no segfaults test.
 	import fluent.asserts;
+    import mahjong.domain.opts;
     import mahjong.domain.wrappers;
-	import mahjong.engine.flow;
-    import mahjong.engine.opts;
 	import mahjong.graphics.drawing.player;
 	import mahjong.test.window;
 	auto player = new Player();

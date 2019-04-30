@@ -39,9 +39,9 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.enums;
-    import mahjong.domain.player;
     import mahjong.domain.metagame;
-    import mahjong.engine.opts;
+    import mahjong.domain.opts;
+    import mahjong.domain.player;
     auto tile = new Tile(Types.wind, Winds.east);
     auto player = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
     auto metagame = new Metagame([player], new DefaultGameOpts);

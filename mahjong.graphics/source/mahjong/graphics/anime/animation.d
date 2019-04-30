@@ -5,7 +5,7 @@ import std.experimental.logger;
 import std.format;
 import std.range;
 import std.uuid;
-import mahjong.share.range;
+import mahjong.util.range;
 
 class Animation
 {

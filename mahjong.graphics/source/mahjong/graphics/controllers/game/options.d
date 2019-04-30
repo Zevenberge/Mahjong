@@ -6,7 +6,8 @@ import std.experimental.logger;
 import std.string;
 import dsfml.graphics;
 import mahjong.domain;
-import mahjong.engine.chi;
+import mahjong.domain.chi;
+import mahjong.engine;
 import mahjong.engine.flow.claim;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
@@ -22,7 +23,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 	this(RenderWindow window, 
 		const Metagame metagame,
 		Controller innerController,
-		Factory factory)
+		Factory factory, Engine engine)
 	{
 		auto menu = new Menu(menuTitle);
 		foreach(option; factory.options)
@@ -33,6 +34,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		selectDefaultOption(menu, factory);
 		super(window, innerController, menu);
 		_metagame = metagame;
+		_engine = engine;
 	}
 
 	private void selectDefaultOption(Menu menu, Factory factory)
@@ -48,6 +50,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 	}
 
 	private const Metagame _metagame;
+	private Engine _engine;
 
 	void finishedSelecting()
 	{
@@ -55,7 +58,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		auto idleController = cast(IdleController)_innerController;
 		if(!idleController)
 		{
-			idleController = new IdleController(_window, _metagame);
+			idleController = new IdleController(_window, _metagame, _engine);
 		}
         instance = idleController;
 	}

@@ -10,13 +10,11 @@ import mahjong.domain.openhand;
 import mahjong.domain.set;
 import mahjong.domain.tile;
 import mahjong.domain.wrappers;
-import mahjong.engine.mahjong;
-import mahjong.engine.opts;
 import mahjong.graphics.coords;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
-import mahjong.share.range;
+import mahjong.util.range;
 
 alias drawOpenHand = draw;
 void draw(const OpenHand hand, const Ingame ingame, 
@@ -210,8 +208,8 @@ class SetVisual
 
 unittest
 {
+	import mahjong.domain.creation;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	auto firstIngame = new Ingame(PlayerWinds.south);
@@ -231,8 +229,8 @@ unittest
 }
 unittest
 {
+	import mahjong.domain.creation;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	auto firstIngame = new Ingame(PlayerWinds.south);
@@ -254,8 +252,8 @@ unittest
 }
 unittest
 {
+	import mahjong.domain.creation;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	auto firstIngame = new Ingame(PlayerWinds.south);
@@ -280,8 +278,8 @@ unittest
 
 unittest
 {
+	import mahjong.domain.creation;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
 	auto firstIngame = new Ingame(PlayerWinds.south);

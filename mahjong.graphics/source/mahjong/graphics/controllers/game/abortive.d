@@ -2,6 +2,7 @@
 
 import dsfml.graphics : RenderWindow, Event, Keyboard;
 import mahjong.domain.metagame;
+import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.flow.traits;
 import mahjong.graphics.controllers.game;
@@ -11,9 +12,9 @@ alias AbortiveDrawController = HandleSimpleEventController!AbortiveDrawEvent;
 class HandleSimpleEventController(TEvent) : GameController
 {
     this(RenderWindow window, const Metagame metagame,
-        TEvent event)
+        TEvent event, Engine engine)
     {
-        super(window, metagame);
+        super(window, metagame, engine);
         _event = event;
     }
 

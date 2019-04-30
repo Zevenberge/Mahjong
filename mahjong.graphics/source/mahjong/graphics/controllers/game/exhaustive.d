@@ -2,8 +2,9 @@
 
 import dsfml.graphics : RenderWindow, Event, Keyboard;
 import mahjong.domain.metagame;
+import mahjong.domain.scoring;
+import mahjong.engine;
 import mahjong.engine.flow;
-import mahjong.engine.scoring;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.game;
@@ -11,9 +12,9 @@ import mahjong.graphics.drawing.game;
 class ExhaustiveDrawController : GameController
 {
     this(RenderWindow window, const Metagame metagame,
-        ExhaustiveDrawEvent event)
+        ExhaustiveDrawEvent event, Engine engine)
     {
-        super(window, metagame);
+        super(window, metagame, engine);
         _event = event;
     }
 
@@ -29,7 +30,7 @@ class ExhaustiveDrawController : GameController
                 Controller.instance.substitute(
                     new TransferController!ExhaustiveDrawEvent(
                         _window, _metagame, freezeGameGraphicsOnATexture(_metagame),
-                        _event, transactions));
+                        _event, transactions, _engine));
             }
             else
             {
@@ -43,8 +44,8 @@ class ExhaustiveDrawController : GameController
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.opts;
     import mahjong.domain.player;
-    import mahjong.engine.opts;
     import mahjong.test.key;
     import mahjong.test.window;
     scope(exit) setDefaultTestController;
@@ -54,7 +55,8 @@ unittest
     auto metagame = new Metagame([player, player, player, player], new DefaultGameOpts);
     auto window = new TestWindow;
     auto event = new ExhaustiveDrawEvent(metagame);
-    Controller.instance.substitute(new ExhaustiveDrawController(window, metagame, event));
+    auto engine = new Engine(metagame);
+    Controller.instance.substitute(new ExhaustiveDrawController(window, metagame, event, engine));
     Controller.instance.handleEvent(returnKeyPressed);
     event.isHandled.should.equal(true);
 }
@@ -63,8 +65,8 @@ unittest
 unittest
 {
     import fluent.asserts;
+    import mahjong.domain.opts;
     import mahjong.domain.player;
-    import mahjong.engine.opts;
     import mahjong.test.key;
     import mahjong.test.window;
     scope(exit) setDefaultTestController;
@@ -76,7 +78,8 @@ unittest
     auto metagame = new Metagame([tenpaiPlayer, player, player, player], new DefaultGameOpts);
     auto window = new TestWindow;
     auto event = new ExhaustiveDrawEvent(metagame);
-    Controller.instance.substitute(new ExhaustiveDrawController(window, metagame, event));
+    auto engine = new Engine(metagame);
+    Controller.instance.substitute(new ExhaustiveDrawController(window, metagame, event, engine));
     Controller.instance.handleEvent(returnKeyPressed);
     event.isHandled.should.equal(false);
     Controller.instance.should.be.instanceOf!(TransferController!ExhaustiveDrawEvent);

@@ -1,20 +1,38 @@
 ﻿module mahjong.graphics.eventhandler;
 
 import std.experimental.logger;
+import mahjong.domain.opts;
+import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers;
 import mahjong.graphics.drawing.ingame;
 import mahjong.graphics.drawing.tile;
+import mahjong.graphics.popup.service;
+
+Engine bootEngine(GameEventHandler[] eventHandlers, const Opts opts)
+in(eventHandlers.length > 0, "Non-player event handlers should be supplied")
+{
+    auto uiEventHandler = new UiEventHandler;
+    auto allEventHandlers = [cast(GameEventHandler)uiEventHandler] ~ eventHandlers;
+    auto engine = new Engine(allEventHandlers, opts, new PopupService);
+    uiEventHandler._engine = engine;
+    engine.boot;
+    return engine;
+}
 
 class UiEventHandler : GameEventHandler
 {
+    private this() {}
+
+    private Engine _engine;
+
 	override void handle(TurnEvent event) 
 	{
 		info("UI: Handling turn event by switching controller");
         if(!event.player.isRiichi)
         {
             Controller.instance.substitute(
-                new TurnController(Controller.instance.getWindow, event.metagame, event)
+                new TurnController(Controller.instance.getWindow, event.metagame, event, _engine)
                 );
         }
         else
@@ -29,7 +47,7 @@ class UiEventHandler : GameEventHandler
                 event.drawnTile.display;
                 Controller.instance.substitute(
                     new TurnOptionController(Controller.instance.getWindow, event.metagame, 
-                        Controller.instance, factory)
+                        Controller.instance, factory, _engine)
                     );
             }
         }
@@ -41,13 +59,14 @@ class UiEventHandler : GameEventHandler
         import fluent.asserts;
         import mahjong.domain.enums;
         import mahjong.domain.metagame;
+        import mahjong.domain.opts;
         import mahjong.domain.player;
         import mahjong.domain.tile;
-        import mahjong.engine.opts;
         scope(exit) Controller.cleanUp;
         auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
-        auto event = new TurnEvent(null, metagame, player, player.lastTile);
+        auto engine = new Engine(metagame);
+        auto event = new TurnEvent(null, metagame, player, player.lastTile, engine);
         auto eventHandler = new UiEventHandler;
         eventHandler.handle(event);
         Controller.instance.should.be.instanceOf!TurnController;
@@ -61,22 +80,22 @@ class UiEventHandler : GameEventHandler
         import mahjong.domain.enums;
         import mahjong.domain.ingame;
         import mahjong.domain.metagame;
+        import mahjong.domain.opts;
         import mahjong.domain.player;
         import mahjong.domain.tile;
         import mahjong.domain.wall;
         import mahjong.engine.notifications;
-        import mahjong.engine.opts;
         scope(exit) Controller.cleanUp;
-        scope(exit) .flow = null;
         auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
         player.game = new Ingame(PlayerWinds.east, "🀀🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
         player.declareRiichi(player.closedHand.tiles[0], metagame);
+        auto engine = new Engine(metagame);
         auto wall = new MockWall(new Tile(Types.ball, Numbers.eight));
         player.drawTile(wall);
-        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
-        auto event = new TurnEvent(flow, metagame, player, player.lastTile);
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
+        auto event = new TurnEvent(flow, metagame, player, player.lastTile, engine);
         auto eventHandler = new UiEventHandler;
         eventHandler.handle(event);
         Controller.instance.should.not.be.instanceOf!TurnController;
@@ -94,22 +113,22 @@ class UiEventHandler : GameEventHandler
         import mahjong.domain.enums;
         import mahjong.domain.ingame;
         import mahjong.domain.metagame;
+        import mahjong.domain.opts;
         import mahjong.domain.player;
         import mahjong.domain.tile;
         import mahjong.domain.wall;
         import mahjong.engine.notifications;
-        import mahjong.engine.opts;
         scope(exit) Controller.cleanUp;
-        scope(exit) .flow = null;
         auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
+        auto engine = new Engine(metagame);
         player.game = new Ingame(PlayerWinds.east, "🀀🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
         player.declareRiichi(player.closedHand.tiles[0], metagame);
         auto wall = new MockWall(new Tile(Types.ball, Numbers.nine));
         player.drawTile(wall);
-        auto flow = new TurnFlow(player, metagame, new NullNotificationService);
-        auto event = new TurnEvent(flow, metagame, player, player.lastTile);
+        auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
+        auto event = new TurnEvent(flow, metagame, player, player.lastTile, engine);
         auto eventHandler = new UiEventHandler;
         eventHandler.handle(event);
         Controller.instance.should.be.instanceOf!TurnOptionController;
@@ -118,7 +137,7 @@ class UiEventHandler : GameEventHandler
 	override void handle(GameStartEvent event)
 	{
 		info("UI: Handling game start event by creating an idle controller");
-		Controller.instance.substitute(new IdleController(Controller.instance.getWindow, event.metagame));
+		Controller.instance.substitute(new IdleController(Controller.instance.getWindow, event.metagame, _engine));
 		event.isReady = true;
 	}
 
@@ -134,7 +153,7 @@ class UiEventHandler : GameEventHandler
 		if(factory.areThereClaimOptions)
 		{
 			info("UI: Handling turn event by switching to the claim controller");
-			Controller.instance.substitute(new ClaimController(Controller.instance.getWindow, event.metagame, Controller.instance, factory));
+			Controller.instance.substitute(new ClaimController(Controller.instance.getWindow, event.metagame, Controller.instance, factory, _engine));
 		}
 		else
 		{
@@ -149,7 +168,7 @@ class UiEventHandler : GameEventHandler
             auto factory = new KanStealOptionsFactory(event);
             Controller.instance.substitute(
                 new KanStealOptionController(Controller.instance.getWindow, 
-                    event.metagame, Controller.instance, factory));
+                    event.metagame, Controller.instance, factory, _engine));
         }
         else
         {
@@ -162,10 +181,10 @@ class UiEventHandler : GameEventHandler
     {
         import fluent.asserts;
         import mahjong.domain.enums;
-        import mahjong.domain.player;
         import mahjong.domain.metagame;
+        import mahjong.domain.opts;
+        import mahjong.domain.player;
         import mahjong.domain.tile;
-        import mahjong.engine.opts;
         auto tile = new Tile(Types.wind, Winds.east);
         auto player = new Player("🀀🀀🀁🀁🀁"d);
         auto metagame = new Metagame([player], new DefaultGameOpts);
@@ -180,10 +199,10 @@ class UiEventHandler : GameEventHandler
     {
         import fluent.asserts;
         import mahjong.domain.enums;
-        import mahjong.domain.player;
         import mahjong.domain.metagame;
+        import mahjong.domain.opts;
+        import mahjong.domain.player;
         import mahjong.domain.tile;
-        import mahjong.engine.opts;
         scope(exit) Controller.cleanUp;
         auto tile = new Tile(Types.wind, Winds.east);
         auto player = new Player("🀀🀀🀁🀁🀁🀂🀂🀂🀃🀃🀐🀑🀒"d);
@@ -197,22 +216,22 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(MahjongEvent event)
 	{
-		Controller.instance.substitute(new MahjongController(Controller.instance.getWindow, event.metagame, event));
+		Controller.instance.substitute(new MahjongController(Controller.instance.getWindow, event.metagame, event, _engine));
 	}
 
     override void handle(ExhaustiveDrawEvent event)
 	{
-		Controller.instance.substitute(new ExhaustiveDrawController(Controller.instance.getWindow, event.metagame, event));
+		Controller.instance.substitute(new ExhaustiveDrawController(Controller.instance.getWindow, event.metagame, event, _engine));
 	}
 
     override void handle(AbortiveDrawEvent event)
     {
-        Controller.instance.substitute(new AbortiveDrawController(Controller.instance.getWindow, event.metagame, event));
+        Controller.instance.substitute(new AbortiveDrawController(Controller.instance.getWindow, event.metagame, event, _engine));
     }
 
 	override void handle(GameEndEvent event) 
 	{
-		Controller.instance.substitute(new GameEndController(Controller.instance.getWindow, event.metagame, event));
+		Controller.instance.substitute(new GameEndController(Controller.instance.getWindow, event.metagame, event, _engine));
 	}
 
 }

@@ -3,10 +3,10 @@ module mahjong.graphics.menu.creation.mainmenu;
 import std.experimental.logger;
 import std.functional;
 import dsfml.graphics;
+import mahjong.ai;
+import mahjong.domain.opts;
 import mahjong.domain.enums;
-import mahjong.engine.ai;
 import mahjong.engine.flow;
-import mahjong.engine.opts;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.placeholdercontroller;
 import mahjong.graphics.enums.geometry;
@@ -15,7 +15,7 @@ import mahjong.graphics.eventhandler;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
 import mahjong.graphics.popup.service;
-alias Opts = mahjong.engine.opts.Opts;
+alias Opts = mahjong.domain.opts.Opts;
 alias DrawingOpts = mahjong.graphics.opts.Opts;
 
 private MainMenu _mainMenu;
@@ -50,7 +50,6 @@ private void startRiichiMahjong()
 	startGame(
         new DefaultGameOpts,
         new DefaultDrawingOpts,
-		new UiEventHandler, 
 		new AiEventHandler(new SimpleAI), 
 		new AiEventHandler(new SimpleAI), 
 		new AiEventHandler(new SimpleAI));
@@ -73,7 +72,6 @@ private void startBambooBattle()
 	startGame(
         new DefaultBambooOpts,
         new BambooDrawingOpts,
-		new UiEventHandler, 
 		new AiEventHandler(new SimpleAI));
 }
 ///
@@ -89,12 +87,12 @@ unittest
 }
 
 private void startGame(
-    Opts gameOpts, DrawingOpts drawingOpts,
+    const Opts gameOpts, DrawingOpts drawingOpts,
     GameEventHandler[] eventHandlers...)
 {
     .drawingOpts = drawingOpts;
-	switchFlow(new GameStartFlow(eventHandlers, gameOpts, new PopupService));
-	trace("Initiated Game Start Flow");
+	bootEngine(eventHandlers, gameOpts);
+	info("Booted game engine");
 }
 
 private void startThunderThrill()

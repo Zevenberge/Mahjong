@@ -6,7 +6,7 @@ import std.experimental.logger;
 import std.string;
 import dsfml.graphics;
 import mahjong.domain;
-import mahjong.engine.chi;
+import mahjong.domain.chi;
 import mahjong.engine.flow.claim;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
@@ -80,9 +80,9 @@ unittest
 	import std.algorithm;
 	import std.string;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
+	import mahjong.domain.creation;
+	import mahjong.domain.opts;
 	import mahjong.engine.flow;
-	import mahjong.engine.opts;
 	import mahjong.graphics.opts;
 	drawingOpts = new DefaultDrawingOpts;
 	styleOpts = new DefaultStyleOpts;
@@ -258,8 +258,8 @@ class RonClaimOption : ClaimOption
 
 unittest
 {
+	import mahjong.domain.creation;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	auto player = new Player();
 	player.startGame(PlayerWinds.east);
@@ -296,8 +296,8 @@ class KanClaimOption : ClaimOption
 
 unittest
 {
+	import mahjong.domain.creation;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	auto player = new Player();
 	player.startGame(PlayerWinds.east);
@@ -334,8 +334,8 @@ class PonClaimOption : ClaimOption
 
 unittest
 {
+	import mahjong.domain.creation;
 	import mahjong.domain.enums;
-	import mahjong.engine.creation;
 	import mahjong.engine.flow;
 	auto player = new Player();
 	player.startGame(PlayerWinds.east);

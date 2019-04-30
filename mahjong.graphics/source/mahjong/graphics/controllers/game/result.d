@@ -2,6 +2,7 @@
 
 import dsfml.graphics;
 import mahjong.domain.metagame;
+import mahjong.engine;
 import mahjong.engine.flow.mahjong;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
@@ -10,9 +11,9 @@ import mahjong.graphics.opts;
 
 abstract class ResultController : GameController
 {
-    this(RenderWindow window, const Metagame metagame, RenderTexture background)
+    this(RenderWindow window, const Metagame metagame, RenderTexture background, Engine engine)
     {
-        super(window, metagame);
+        super(window, metagame, engine);
         _renderTexture = background;
         _game = new Sprite;
         _game.setTexture = background.getTexture;

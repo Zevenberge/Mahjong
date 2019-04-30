@@ -19,7 +19,7 @@ import mahjong.graphics.menu.creation.pausemenu;
 import mahjong.graphics.opts;
 import mahjong.graphics.selections.selectable;
 import mahjong.graphics.text;
-import mahjong.share.range;
+import mahjong.util.range;
 
 class Menu : Selectable!MenuItem
 {

@@ -4,8 +4,9 @@ import std.algorithm.iteration;
 import std.array;
 import dsfml.graphics;
 import mahjong.domain.metagame;
+import mahjong.domain.scoring;
+import mahjong.engine;
 import mahjong.engine.flow.mahjong;
-import mahjong.engine.scoring;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.fade;
 import mahjong.graphics.controllers.controller;
@@ -17,11 +18,11 @@ import mahjong.graphics.opts;
 
 class MahjongController : ResultController
 {
-	this(RenderWindow window, const Metagame metagame, MahjongEvent event)
+	this(RenderWindow window, const Metagame metagame, MahjongEvent event, Engine engine)
 	{
 		auto texture = freezeGameGraphicsOnATexture(metagame);
 		_event = event;
-		super(window, metagame, texture);
+		super(window, metagame, texture, engine);
 		createResultScreens;
 	}
 
@@ -81,7 +82,7 @@ class MahjongController : ResultController
 	{
 		Controller.instance.substitute(
             new TransferController!MahjongEvent(_window, _metagame, _renderTexture, 
-                _event, _event.data.toTransactions(_metagame)));
+                _event, _event.data.toTransactions(_metagame), _engine));
 	}
 }
 

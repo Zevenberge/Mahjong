@@ -4,23 +4,24 @@ import std.conv;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.domain;
+import mahjong.engine;
 import mahjong.engine.flow;
-import mahjong.engine.sort;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.selections;
-import mahjong.share.range;
+import mahjong.util.range;
 
 class TurnController : GameController
 {
-	this(RenderWindow window, const Metagame metagame, TurnEvent event)
+	this(RenderWindow window, const Metagame metagame, 
+	    TurnEvent event, Engine engine)
 	{
 		trace("Instantiating turn controller");
 		_event = event;
-		super(window, metagame);
+		super(window, metagame, engine);
 		initialise;
 	}
 
@@ -56,7 +57,7 @@ class TurnController : GameController
 				selectNext;
 				break;
 			case Return:
-				selectedItem.confirm(_event, true);
+				selectedItem.confirm(_event, true, _engine);
 				break;
 			default:
 				// Do nothing
@@ -67,29 +68,29 @@ class TurnController : GameController
 	mixin Select!(const Tile);
 }
 
-void confirm(const(Tile) selectedItem, TurnEvent event, bool canCancel)
+void confirm(const(Tile) selectedItem, TurnEvent event, bool canCancel, Engine engine)
 {
     auto factory = new TurnOptionFactory(selectedItem, event, canCancel);
     if(factory.isDiscardTheOnlyOption)
     {
-        discardSelectedTile(event, selectedItem);
+        discardSelectedTile(event, selectedItem, engine);
     }   
     else
     {
-        showTurnOptionMenu(factory, event.metagame);
+        showTurnOptionMenu(factory, event.metagame, engine);
     }
 }
 
-private void discardSelectedTile(TurnEvent event, const(Tile) selectedItem)
+private void discardSelectedTile(TurnEvent event, const(Tile) selectedItem, Engine engine)
 {
     info("Discarding tile");
-    Controller.instance.substitute(new IdleController(Controller.instance.getWindow(), event.metagame));
+    Controller.instance.substitute(new IdleController(Controller.instance.getWindow(), event.metagame, engine));
     event.discard(selectedItem);
 }
 
-private void showTurnOptionMenu(TurnOptionFactory factory, const(Metagame) metagame)
+private void showTurnOptionMenu(TurnOptionFactory factory, const(Metagame) metagame, Engine engine)
 {
     Controller.instance.substitute(
         new TurnOptionController(Controller.instance.getWindow(), 
-            metagame, Controller.instance, factory));
+            metagame, Controller.instance, factory, engine));
 }
