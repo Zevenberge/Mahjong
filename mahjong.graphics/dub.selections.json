@@ -1,0 +1,30 @@
+{
+	"fileVersion": 1,
+	"versions": {
+		"bolts": "0.11.1",
+		"botan": "1.12.10",
+		"botan-math": "1.0.3",
+		"ddmp": "0.0.1-0.dev.3",
+		"diet-ng": "1.5.0",
+		"dsfml": "2.1.1",
+		"eventcore": "0.8.42",
+		"fluent-asserts": "0.12.4",
+		"libasync": "0.8.4",
+		"libdparse": "0.8.8",
+		"libevent": "2.0.2+2.0.16",
+		"mahjong-domain": {"path":"../mahjong.domain"},
+		"mahjong-engine": {"path":"../mahjong.engine"},
+		"mahjong-test": {"path":"../mahjong.test"},
+		"mahjong-util": {"path":"../mahjong.util"},
+		"memutils": "0.4.13",
+		"mir-linux-kernel": "1.0.1",
+		"openssl": "1.1.6+1.0.1g",
+		"optional": "0.12.0",
+		"silly": "0.8.2",
+		"stdx-allocator": "2.77.5",
+		"taggedalgebraic": "0.11.4",
+		"unit-threaded": "0.9.3",
+		"vibe-core": "1.6.2",
+		"vibe-d": "0.8.5"
+	}
+}

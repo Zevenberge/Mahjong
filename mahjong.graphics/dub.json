@@ -1,0 +1,44 @@
+{
+	"name": "graphics",
+	"description": "The UI for the game.",
+	"copyright": "Copyright © 2019, Marco de Wild",
+	"authors": ["Marco de Wild"],
+	"targetPath":"bin/",
+	"dependencies": {
+        "optional": "~>0.12.0",
+        "dsfml": "~>2.1.0",
+        "mahjong-ai": {
+          "path": "../mahjong.ai"
+        },
+        "mahjong-domain": {
+          "path": "../mahjong.domain"
+        },
+        "mahjong-engine": {
+          "path": "../mahjong.engine"
+        },
+        "mahjong-util": {
+          "path": "../mahjong.util"
+        }
+	},
+ "configurations": [
+   { 
+	   "name": "executable",
+     "targetType": "executable"
+   },
+   {
+     "name": "unittest",
+     "targetType": "executable",
+     "versions": ["mahjong_test"],
+     "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
+     "mainSourceFile": "bin/ut.d",
+     "excludedSourceFiles": ["source/app.d"],
+     "dependencies": {
+        "unit-threaded": "~>0.9.2",
+        "fluent-asserts": "~>0.12.3",
+        "mahjong-test": {
+          "path": "../mahjong.test"
+        }
+     }
+   }
+ ]
+}
