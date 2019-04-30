@@ -1,16 +1,16 @@
 {
-	"name": "test",
+	"name": "mahjong-test",
 	"description": "Utilities for integration tests",
 	"copyright": "Copyright © 2019, Marco de Wild",
 	"authors": ["Marco de Wild"],
 	"targetPath":"bin/",
 	"dependencies": {
-        "dsfml": "~> 2.1.0"
+        "dsfml": "~>2.1.0"
 	},
  "configurations": [
    { 
 	   "name": "library",
-     "targetType": "none"
+     "targetType": "library"
    },
    {
      "name": "unittest",

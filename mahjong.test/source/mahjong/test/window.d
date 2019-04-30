@@ -1,22 +1,18 @@
 ﻿module mahjong.test.window;
 
-version(unittest)
+import dsfml.graphics;
+
+class TestWindow : RenderWindow
 {
-	import dsfml.graphics;
+	Drawable[] drawnObjects;
 
-	class TestWindow : RenderWindow
+	override void draw(Drawable drawable, RenderStates states = RenderStates.Default)
 	{
-		Drawable[] drawnObjects;
+		drawnObjects ~= drawable;
+	}
 
-		override void draw(Drawable drawable, RenderStates states = RenderStates.Default)
-		{
-			drawnObjects ~= drawable;
-		}
-
-		override void display()
-		{
-			// Do nothing, we are testing!
-		}
+	override void display()
+	{
+		// Do nothing, we are testing!
 	}
 }
-
