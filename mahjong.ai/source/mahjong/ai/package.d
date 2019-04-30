@@ -1,6 +1,6 @@
-module mahjong.engine.ai;
+module mahjong.ai;
 
-public import mahjong.engine.ai.eventhandler;
+public import mahjong.ai.eventhandler;
 
 import std.experimental.logger;
 import std.random;

@@ -1,6 +1,6 @@
-module mahjong.engine.ai.eventhandler;
+module mahjong.ai.eventhandler;
 
-import mahjong.engine.ai;
+import mahjong.ai;
 import mahjong.engine.flow;
 
 class AiEventHandler : GameEventHandler

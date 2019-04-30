@@ -5,12 +5,15 @@
 	"authors": ["Marco de Wild"],
 	"targetPath":"bin/",
 	"dependencies": {
-        "optional": "~>0.12.0"
+    "mahjong-engine" : {
+      "path": "../mahjong.engine"
+    },
+    "optional": "~>0.12.0"
 	},
  "configurations": [
    { 
 	   "name": "library",
-     "targetType": "none"
+     "targetType": "library"
    },
    {
      "name": "unittest",
