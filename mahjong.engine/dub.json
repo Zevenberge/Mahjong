@@ -16,7 +16,7 @@
  "configurations": [
    { 
 	   "name": "library",
-     "targetType": "none"
+     "targetType": "library"
    },
    {
      "name": "unittest",
