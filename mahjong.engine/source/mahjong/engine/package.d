@@ -17,10 +17,13 @@ class Engine
             players[i] = player;
             _players[player] = handler;
         }
-        auto metagame = new Metagame(players, opts);
-        version (unittest)
-            this.metagame = metagame;
-        _flow = new GameStartFlow(metagame, notificationService, this);
+        _metagame = new Metagame(players, opts);
+        _notificationService = notificationService;
+    }
+
+    void boot()
+    {
+        _flow = new GameStartFlow(_metagame, _notificationService, this);
     }
 
     @("When starting the game, the game should be in the GameStartFlow")
@@ -30,6 +33,7 @@ class Engine
 
         auto eventHandler = new TestEventHandler;
         auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+        engine.boot;
         engine.flow.should.be.instanceOf!GameStartFlow;
     }
 
@@ -40,6 +44,7 @@ class Engine
 
         auto eventHandler = new TestEventHandler;
         auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+        engine.boot;
         auto flow = engine.flow;
         flow.metagame.should.not.beNull;
         flow.metagame.players.length.should.equal(1);
@@ -47,19 +52,25 @@ class Engine
 
     private Flow _flow;
     private GameEventHandler[const(Player)] _players;
+    private Metagame _metagame;
+    private INotificationService _notificationService;
 
-    version (unittest)
+    version (mahjong_test)
     {
         this(Metagame metagame)
         {
-            this.metagame = metagame;
+            _metagame = metagame;
+            _notificationService = new NullNotificationService;
             foreach (player; metagame.players)
             {
                 _players[player] = new TestEventHandler;
             }
         }
+    }
 
-        Metagame metagame;
+    version(unittest)
+    {
+        Metagame metagame() { return _metagame; }
 
         TestEventHandler getTestEventHandler(const Player player)
         {
@@ -73,7 +84,7 @@ class Engine
         _flow = newFlow;
     }
 
-    package void terminateGame() pure
+    void terminateGame() pure
     {
         _flow = null;
     }
@@ -100,6 +111,7 @@ class Engine
 
         auto eventHandler = new TestEventHandler;
         auto engine = new Engine([eventHandler], new DefaultGameOpts, new NullNotificationService);
+        engine.boot;
         engine.isTerminated.should.equal(false);
         engine.terminateGame;
         engine.isTerminated.should.equal(true);

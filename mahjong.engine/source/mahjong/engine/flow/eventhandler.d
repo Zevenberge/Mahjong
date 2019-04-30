@@ -16,7 +16,7 @@ class GameEventHandler
 	abstract void handle(GameEndEvent event);	
 }
 
-version(unittest)
+version(mahjong_test)
 {
 	import std.experimental.logger;
 
