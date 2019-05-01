@@ -6,7 +6,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class TurnEndFlow : Flow
+final class TurnEndFlow : Flow
 {
 	this(Metagame game, INotificationService notificationService)
 	{

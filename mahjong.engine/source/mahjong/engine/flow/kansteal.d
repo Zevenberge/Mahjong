@@ -298,3 +298,11 @@ final class KanStealEvent
 
     private Metagame _metagame;
 }
+
+@("A kan steal event is a complex event")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.flow.traits;
+    isSimpleEvent!KanStealEvent.should.equal(false);
+}

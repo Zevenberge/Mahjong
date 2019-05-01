@@ -7,50 +7,28 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class RoundStartFlow : Flow
+final class RoundStartFlow :WaitForEveryPlayer!RoundStartEvent
 {
 	this(Metagame metagame, INotificationService notificationService, Engine engine)
 	{
 		info("Starting round.");
-		super(metagame, notificationService);
 		metagame.initializeRound;
-		foreach(player; metagame.players)
-		{
-			auto event = new RoundStartEvent(metagame);
-			_events ~= event;
-			engine.notify(player, event);
-		}
+		super(metagame, notificationService, engine);
 	}
 
-	private RoundStartEvent[] _events;
-
-	override void advanceIfDone(Engine engine) 
+	protected override RoundStartEvent createEvent()
 	{
-		if(isDone)
-		{
+		return new RoundStartEvent(_metagame);
+	}
+
+	protected override void advance(Engine engine) 
+	{
 			info("All players are ready. Initialising game");
 			_metagame.beginRound;
 			info("Started round. Switching to draw flow");
 			engine.switchFlow(new DrawFlow(_metagame.currentPlayer, _metagame, 
 					_metagame.wall, _notificationService));
-		}
 	}
-
-	private bool isDone() @property
-	{
-		return _events.all!(e => e.isReady);
-	}
-}
-
-class RoundStartEvent
-{
-	this(const Metagame metagame)
-	{
-		this.metagame = metagame;
-	}
-
-	const Metagame metagame;
-	bool isReady;
 }
 
 unittest
@@ -67,9 +45,31 @@ unittest
     engine.flow.should.be.instanceOf!RoundStartFlow;
 	engine.advanceIfDone;
     engine.flow.should.be.instanceOf!RoundStartFlow.because("the players are not yet ready");
-	eventhandler.roundStartEvent.isReady = true;
+	eventhandler.roundStartEvent.handle;
 	engine.advanceIfDone;
     engine.flow.should.be.instanceOf!DrawFlow.because("the players want to move on");
     metagame.currentPlayer.should.equal(player);
     metagame.round.should.equal(1);
+}
+
+final class RoundStartEvent
+{
+	import mahjong.engine.flow.traits : SimpleEvent;
+
+	this(const Metagame metagame)
+	{
+		this.metagame = metagame;
+	}
+
+	const Metagame metagame;
+
+	mixin SimpleEvent!();
+}
+
+@("A round start event is a simple event")
+unittest
+{
+	import fluent.asserts;
+    import mahjong.engine.flow.traits;
+	isSimpleEvent!RoundStartEvent.should.equal(true);
 }

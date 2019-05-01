@@ -9,7 +9,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class ClaimFlow : Flow
+final class ClaimFlow : Flow
 {
 	this(Tile tile, Metagame game, 
 		INotificationService notificationService, Engine engine)
@@ -288,7 +288,7 @@ unittest
     game.isFirstTurn.should.equal(false).because("a tile has been claimed");
 }
 
-class ClaimEvent
+final class ClaimEvent
 {
 	this(Tile tile, Player player, Metagame metagame)
 	{
@@ -317,6 +317,14 @@ class ClaimEvent
 	}
 
 	alias _claimRequest this;
+}
+
+@("A claim event is not a simple event")
+unittest
+{
+	import fluent.asserts;
+    import mahjong.engine.flow.traits;
+	isSimpleEvent!ClaimEvent.should.equal(false);
 }
 
 enum Request {None, Chi, Pon, Kan, Ron}

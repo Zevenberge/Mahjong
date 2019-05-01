@@ -11,7 +11,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class TurnFlow : Flow
+final class TurnFlow : Flow
 {
     this(Player player, Metagame meta, INotificationService notificationService, Engine engine)
     {
@@ -127,7 +127,7 @@ private:
     }
 }
 
-class TurnEvent
+final class TurnEvent
 {
     this(const Metagame metagame, const Player player, const Tile drawnTile)
     {
@@ -345,6 +345,14 @@ class TurnEvent
         metagame.isAbortiveDraw.should.equal(true)
             .because("the metagame itself should also be aborted");
     }
+}
+
+@("A turn event is not a simple event")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.flow.traits;
+    isSimpleEvent!TurnEvent.should.equal(false);
 }
 
 private enum Action

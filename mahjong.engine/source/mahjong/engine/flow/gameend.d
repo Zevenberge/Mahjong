@@ -29,6 +29,8 @@ class GameEndFlow : WaitForEveryPlayer!GameEndEvent
 
 class GameEndEvent
 {
+	import mahjong.engine.flow.traits : SimpleEvent;
+
 	this(Metagame metagame)
 	{
 		this.metagame = metagame;
@@ -36,16 +38,7 @@ class GameEndEvent
 
 	const Metagame metagame;
 
-	private bool _isHandled;
-	bool isHandled() @property
-	{
-		return _isHandled;
-	}
-
-	void handle()
-	{
-		_isHandled = true;
-	}
+	mixin SimpleEvent!();
 }
 
 unittest
@@ -85,4 +78,12 @@ unittest
 	eventHandler.gameEndEvent.handle;
 	engine.advanceIfDone;
     engine.isTerminated.should.equal(true);
+}
+
+@("A game end event is simple")
+unittest
+{
+	import fluent.asserts;
+    import mahjong.engine.flow.traits;
+	isSimpleEvent!GameEndEvent.should.equal(true);
 }

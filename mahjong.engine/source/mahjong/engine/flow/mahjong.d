@@ -11,7 +11,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class MahjongFlow : WaitForEveryPlayer!MahjongEvent
+final class MahjongFlow : WaitForEveryPlayer!MahjongEvent
 {
 	this(Metagame game, INotificationService notificationService, Engine engine)
 	{
@@ -45,8 +45,10 @@ enum switchToNextRoundOrGameOver = q{
 	engine.switchFlow(new RoundStartFlow(_metagame, _notificationService, engine));
 };
 
-class MahjongEvent
+final class MahjongEvent
 {
+	import mahjong.engine.flow.traits : SimpleEvent;
+
 	this(const Metagame metagame, const(MahjongData)[] data)
 	{
 		_data = data;
@@ -61,16 +63,7 @@ class MahjongEvent
 		return _data;
 	}
 
-	private bool _isHandled;
-	bool isHandled() @property
-	{
-		return _isHandled;
-	}
-
-	void handle()
-	{
-		_isHandled = true;
-	}
+	mixin SimpleEvent!();
 }
 
 unittest
@@ -194,4 +187,12 @@ unittest
 	eventhandler2.mahjongEvent.handle;
 	engine.advanceIfDone;
 	engine.flow.should.be.instanceOf!GameEndFlow;
+}
+
+@("A mahjong event is a simple event")
+unittest
+{
+	import fluent.asserts;
+    import mahjong.engine.flow.traits;
+	isSimpleEvent!MahjongEvent.should.equal(true);
 }
