@@ -131,8 +131,7 @@ version(unittest)
         auto engine = new Engine(metagame);
         writeln("Selecting ", selectedTile);
         return new TurnOptionFactory(selectedTile,
-            new TurnEvent(new TurnFlow(player, metagame, new NullNotificationService, engine),
-                metagame, player, selectedTile, engine), canCancel);
+            new TurnEvent(metagame, player, selectedTile), canCancel);
     }
 }
 

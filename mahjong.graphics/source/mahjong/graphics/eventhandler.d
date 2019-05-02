@@ -1,4 +1,4 @@
-﻿module mahjong.graphics.eventhandler;
+module mahjong.graphics.eventhandler;
 
 import std.experimental.logger;
 import mahjong.domain.opts;
@@ -65,8 +65,7 @@ class UiEventHandler : GameEventHandler
         scope(exit) Controller.cleanUp;
         auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
-        auto engine = new Engine(metagame);
-        auto event = new TurnEvent(null, metagame, player, player.lastTile, engine);
+        auto event = new TurnEvent(metagame, player, player.lastTile);
         auto eventHandler = new UiEventHandler;
         eventHandler.handle(event);
         Controller.instance.should.be.instanceOf!TurnController;
@@ -91,14 +90,15 @@ class UiEventHandler : GameEventHandler
         metagame.initializeRound;
         player.game = new Ingame(PlayerWinds.east, "🀀🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
         player.declareRiichi(player.closedHand.tiles[0], metagame);
-        auto engine = new Engine(metagame);
+        auto eventHandler = new UiEventHandler;
+        auto engine = new Engine(metagame, [eventHandler]);
         auto wall = new MockWall(new Tile(Types.ball, Numbers.eight));
         player.drawTile(wall);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
-        auto event = new TurnEvent(flow, metagame, player, player.lastTile, engine);
-        auto eventHandler = new UiEventHandler;
-        eventHandler.handle(event);
+        engine.switchFlow(flow);
+        //auto event = new TurnEvent(metagame, player, player.lastTile);
         Controller.instance.should.not.be.instanceOf!TurnController;
+        engine.advanceIfDone;
         player.closedHand.tiles.length.should.equal(13);
         player.closedHand.tiles
             .any!(tile => ComparativeTile(Types.ball, Numbers.eight).hasEqualValue(tile))
@@ -122,13 +122,11 @@ class UiEventHandler : GameEventHandler
         auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
-        auto engine = new Engine(metagame);
         player.game = new Ingame(PlayerWinds.east, "🀀🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
         player.declareRiichi(player.closedHand.tiles[0], metagame);
         auto wall = new MockWall(new Tile(Types.ball, Numbers.nine));
         player.drawTile(wall);
-        auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
-        auto event = new TurnEvent(flow, metagame, player, player.lastTile, engine);
+        auto event = new TurnEvent(metagame, player, player.lastTile);
         auto eventHandler = new UiEventHandler;
         eventHandler.handle(event);
         Controller.instance.should.be.instanceOf!TurnOptionController;
@@ -138,13 +136,13 @@ class UiEventHandler : GameEventHandler
 	{
 		info("UI: Handling game start event by creating an idle controller");
 		Controller.instance.substitute(new IdleController(Controller.instance.getWindow, event.metagame, _engine));
-		event.isReady = true;
+		event.handle;
 	}
 
 	override void handle(RoundStartEvent event)
 	{
 		clearIngameCache;
-		event.isReady = true;
+		event.handle;
 	}
 
 	override void handle(ClaimEvent event) 
