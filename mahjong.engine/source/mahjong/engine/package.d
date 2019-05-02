@@ -66,10 +66,19 @@ class Engine
                 _players[player] = new TestEventHandler;
             }
         }
-    }
 
-    version(unittest)
-    {
+        this(Metagame metagame, GameEventHandler[] eventHandlers)
+        in(metagame.players.length == eventHandlers.length, 
+            "Should supply as many handlers as players")
+        {
+            _metagame = metagame;
+            _notificationService = new NullNotificationService;
+            foreach (i, player; metagame.players)
+            {
+                _players[player] = eventHandlers[i];
+            } 
+        }
+    
         Metagame metagame() { return _metagame; }
 
         TestEventHandler getTestEventHandler(const Player player)
@@ -78,7 +87,7 @@ class Engine
         }
     }
 
-    package void switchFlow(Flow newFlow) pure
+    void switchFlow(Flow newFlow) pure
     in(newFlow !is null, "A new flow should be supplied")
     {
         _flow = newFlow;
