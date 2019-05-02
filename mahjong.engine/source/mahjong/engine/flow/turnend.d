@@ -45,6 +45,7 @@ version(unittest)
 {
     import std.algorithm;
     import fluent.asserts;
+	import unit_threaded : DontTest;
     import mahjong.domain.opts;
 	class TestMetagame : Metagame
 	{
@@ -77,6 +78,7 @@ version(unittest)
     	engine.switchFlow(turnEndFlow);
         return engine;
     }
+	@DontTest
 	auto testMetagame(Engine engine)
 	{
 		return cast(TestMetagame)engine.metagame;

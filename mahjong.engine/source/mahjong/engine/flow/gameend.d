@@ -7,7 +7,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class GameEndFlow : WaitForEveryPlayer!GameEndEvent
+final class GameEndFlow : WaitForEveryPlayer!GameEndEvent
 {
 	this(Metagame metagame, INotificationService notificationService, Engine engine)
 	{
@@ -27,7 +27,7 @@ class GameEndFlow : WaitForEveryPlayer!GameEndEvent
 	}
 }
 
-class GameEndEvent
+final class GameEndEvent
 {
 	import mahjong.engine.flow.traits : SimpleEvent;
 
