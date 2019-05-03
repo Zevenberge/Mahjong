@@ -11,9 +11,9 @@ import mahjong.graphics.opts;
 
 abstract class ResultController : GameController
 {
-    this(RenderWindow window, const Metagame metagame, RenderTexture background, Engine engine)
+    this(const Metagame metagame, RenderTexture background, Engine engine)
     {
-        super(window, metagame, engine);
+        super(metagame, engine);
         _renderTexture = background;
         _game = new Sprite;
         _game.setTexture = background.getTexture;
@@ -33,11 +33,11 @@ abstract class ResultController : GameController
     private Sprite _game;
     private RectangleShape _haze;
 
-    override void draw()
+    override void draw(RenderTarget target)
     {
-        drawGameBg(_window);
-        _window.draw(_game);
-        _window.draw(_haze);
+        drawGameBg(target);
+        target.draw(_game);
+        target.draw(_haze);
     }
 
     protected override void handleGameKey(Event.KeyEvent key) 

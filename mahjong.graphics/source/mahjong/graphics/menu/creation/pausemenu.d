@@ -36,10 +36,10 @@ private void continueGame()
 
 private void quitGame()
 {
+	import mahjong.graphics.menu.creation.mainmenu;
 	trace("Quitting game");
 	Controller.instance.roundUp;
-	auto mainMenuController = getMainMenuController(Controller.instance.getWindow, null);
-	mainMenuController.showMenu;
+	Controller.instance.substitute(new MainMenuController(getMainMenu()));
 	trace("Returned to the main menu");
 }
 

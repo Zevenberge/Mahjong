@@ -16,12 +16,12 @@ import mahjong.util.range;
 
 class TurnController : GameController
 {
-	this(RenderWindow window, const Metagame metagame, 
+	this(const Metagame metagame, 
 	    TurnEvent event, Engine engine)
 	{
 		trace("Instantiating turn controller");
 		_event = event;
-		super(window, metagame, engine);
+		super(metagame, engine);
 		initialise;
 	}
 
@@ -37,13 +37,13 @@ class TurnController : GameController
 
 	private TurnEvent _event;
 
-	override void draw()
+	override void draw(RenderTarget target)
 	{
-		_window.clear;
-		drawGameBg(_window);
+		target.clear;
+		drawGameBg(target);
 		selectOpt;
-		selection.draw(_window);
-		_metagame.draw(_window);
+		selection.draw(target);
+		_metagame.draw(target);
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) 
@@ -84,13 +84,12 @@ void confirm(const(Tile) selectedItem, TurnEvent event, bool canCancel, Engine e
 private void discardSelectedTile(TurnEvent event, const(Tile) selectedItem, Engine engine)
 {
     info("Discarding tile");
-    Controller.instance.substitute(new IdleController(Controller.instance.getWindow(), event.metagame, engine));
+    Controller.instance.substitute(new IdleController(event.metagame, engine));
     event.discard(selectedItem);
 }
 
 private void showTurnOptionMenu(TurnOptionFactory factory, const(Metagame) metagame, Engine engine)
 {
     Controller.instance.substitute(
-        new TurnOptionController(Controller.instance.getWindow(), 
-            metagame, Controller.instance, factory, engine));
+        new TurnOptionController(metagame, Controller.instance, factory, engine));
 }

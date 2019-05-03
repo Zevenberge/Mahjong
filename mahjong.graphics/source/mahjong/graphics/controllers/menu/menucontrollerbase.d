@@ -5,16 +5,15 @@ import mahjong.graphics.controllers.controller;
 
 abstract class MenuControllerBase(TMenu) : Controller
 {
-	this(RenderWindow window, TMenu menu)
+	this(TMenu menu)
 	{
-		super(window);
 		_menu = menu;
 	}
 	
-	override void draw()
+	override void draw(RenderTarget target)
 	{
-		_window.clear;
-		_menu.draw(_window);
+		target.clear;
+		_menu.draw(target);
 	}
 	
 	override bool handleKeyEvent(Event.KeyEvent key)

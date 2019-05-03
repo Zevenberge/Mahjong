@@ -6,23 +6,23 @@ import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
 import mahjong.graphics.conv;
 import mahjong.graphics.manipulation;
+import mahjong.graphics.menu.creation.mainmenu;
 import mahjong.graphics.opts;
 import mahjong.graphics.text;
 
 class PlaceholderController : Controller
 {
-	this(RenderWindow window, string message, string file, IntRect area)
+	this(string message, string file, IntRect area)
 	{
 		trace("Constructing placeholder controller with filename ", file);
-		super(window);
 		initialiseBackground(file, area);
 		initialiseMessage(message);
 	}
 	
-	override void draw()
+	override void draw(RenderTarget target)
 	{
-		_window.draw(_background);
-		_window.draw(_message);
+		target.draw(_background);
+		target.draw(_message);
 	}
 	
 	override void roundUp(){}
@@ -31,7 +31,7 @@ class PlaceholderController : Controller
 	
 	protected override bool handleKeyEvent(Event.KeyEvent key)
 	{
-		instance = getMainMenuController(_window, null);
+        Controller.instance.substitute(new MainMenuController(getMainMenu()));
 		return false;
 	}
 	

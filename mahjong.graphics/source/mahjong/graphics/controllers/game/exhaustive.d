@@ -11,10 +11,10 @@ import mahjong.graphics.drawing.game;
 
 class ExhaustiveDrawController : GameController
 {
-    this(RenderWindow window, const Metagame metagame,
+    this(const Metagame metagame,
         ExhaustiveDrawEvent event, Engine engine)
     {
-        super(window, metagame, engine);
+        super(metagame, engine);
         _event = event;
     }
 
@@ -29,7 +29,7 @@ class ExhaustiveDrawController : GameController
             {
                 Controller.instance.substitute(
                     new TransferController!ExhaustiveDrawEvent(
-                        _window, _metagame, freezeGameGraphicsOnATexture(_metagame),
+                        _metagame, freezeGameGraphicsOnATexture(_metagame),
                         _event, transactions, _engine));
             }
             else
@@ -47,16 +47,14 @@ unittest
     import mahjong.domain.opts;
     import mahjong.domain.player;
     import mahjong.test.key;
-    import mahjong.test.window;
     scope(exit) setDefaultTestController;
     setDefaultTestController;
     auto player = new Player;
     player.willNotBeTenpai;
     auto metagame = new Metagame([player, player, player, player], new DefaultGameOpts);
-    auto window = new TestWindow;
     auto event = new ExhaustiveDrawEvent(metagame);
     auto engine = new Engine(metagame);
-    Controller.instance.substitute(new ExhaustiveDrawController(window, metagame, event, engine));
+    Controller.instance.substitute(new ExhaustiveDrawController(metagame, event, engine));
     Controller.instance.handleEvent(returnKeyPressed);
     event.isHandled.should.equal(true);
 }
@@ -68,7 +66,6 @@ unittest
     import mahjong.domain.opts;
     import mahjong.domain.player;
     import mahjong.test.key;
-    import mahjong.test.window;
     scope(exit) setDefaultTestController;
     setDefaultTestController;
     auto player = new Player;
@@ -76,10 +73,9 @@ unittest
     auto tenpaiPlayer = new Player;
     tenpaiPlayer.willBeTenpai;
     auto metagame = new Metagame([tenpaiPlayer, player, player, player], new DefaultGameOpts);
-    auto window = new TestWindow;
     auto event = new ExhaustiveDrawEvent(metagame);
     auto engine = new Engine(metagame);
-    Controller.instance.substitute(new ExhaustiveDrawController(window, metagame, event, engine));
+    Controller.instance.substitute(new ExhaustiveDrawController(metagame, event, engine));
     Controller.instance.handleEvent(returnKeyPressed);
     event.isHandled.should.equal(false);
     Controller.instance.should.be.instanceOf!(TransferController!ExhaustiveDrawEvent);

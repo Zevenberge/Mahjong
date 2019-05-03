@@ -8,31 +8,26 @@ import mahjong.graphics.menu.mainmenu;
 
 class MainMenuController : MenuControllerBase!MainMenu
 {
-	this(RenderWindow window, MainMenu mainMenu)
+	this(MainMenu mainMenu)
 	{
 		trace("Creating Main Menu controller");
-		super(window, mainMenu);
+		super(mainMenu);
 	}
 
-    void showMenu()
-    {
-        info("Showing main menu");
-        instance = this;
-    }
-	
 	protected override bool menuClosed()
 	{
 		return true;
 	}
 }
 
+/+
 import mahjong.graphics.parallelism;
-MainMenuController getMainMenuController(RenderWindow window, BackgroundWorker bg)
+MainMenuController getMainMenuController(BackgroundWorker bg)
 {
 	import mahjong.graphics.menu.creation.mainmenu;
 	trace("Creating main menu");
 	auto mainMenu = composeMainMenu(bg);
-	return new MainMenuController(window, mainMenu);
+	return new MainMenuController(mainMenu);
 }
-
++/
 

@@ -9,10 +9,10 @@ import mahjong.graphics.controllers.game;
 
 class IdleController : GameController
 {
-	this(RenderWindow window, const Metagame metagame, Engine engine)
+	this(const Metagame metagame, Engine engine)
 	{
 		trace("Intantiating idle controller");
-		super(window, metagame, engine);
+		super(metagame, engine);
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) 

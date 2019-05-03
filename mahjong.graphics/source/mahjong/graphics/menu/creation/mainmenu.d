@@ -19,10 +19,15 @@ import mahjong.graphics.popup.service;
 alias Opts = mahjong.domain.opts.Opts;
 alias DrawingOpts = mahjong.graphics.opts.Opts;
 
-private MainMenu _mainMenu;
-MainMenu composeMainMenu(BackgroundWorker bg)
+MainMenu getMainMenu()
+in(_mainMenu !is null, "Main menu not initialised")
 {
-	if(_mainMenu !is null) return _mainMenu;
+	return _mainMenu;
+}
+private MainMenu _mainMenu;
+MainMenu composeMainMenu(RenderWindow window, BackgroundWorker bg)
+in(_mainMenu is null, "Main menu cannot be doubly initialised")
+{
 	info("Composing main menu");
 	_mainMenu = new MainMenu("Main Menu");
 	auto screen = styleOpts.screenSize;
@@ -37,7 +42,7 @@ MainMenu composeMainMenu(BackgroundWorker bg)
 		addOption(new MainMenuItem("Simple Mahjong", 
 				(&startSimpleMahjong).toDelegate, chineseFile, IntRect(314,0,2*screen.x,2*screen.y)));
 		addOption(new MainMenuItem("Quit", 
-				(&quit).toDelegate, quitFile, IntRect(150,0,700,700)));
+				() => quit(window), quitFile, IntRect(150,0,700,700)));
 	}
 	trace("Constructed all options.");
 	_mainMenu.configureGeometry;
@@ -101,8 +106,7 @@ private void startThunderThrill()
 	info("Thunder thrill selected");
 	Controller.instance.roundUp();
 	info("Opening placeholder screen");
-	Controller.instance.substitute(new PlaceholderController(Controller.instance.getWindow, 
-		"Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650)));
+	Controller.instance.substitute(new PlaceholderController("Coming soon.", eightPlayerChaos, IntRect(400, 0, 1050, 650)));
 	trace("Swapped controller");
 }
 
@@ -111,15 +115,14 @@ private void startSimpleMahjong()
 	info("Simple mahjong selected");
 	Controller.instance.roundUp();
 	info("Opening placeholder screen");
-	Controller.instance.substitute(new PlaceholderController(Controller.instance.getWindow, 
-		"Coming soon.", chineseBg, IntRect(0, 0, 900, 1000)));
+	Controller.instance.substitute(new PlaceholderController("Coming soon.", chineseBg, IntRect(0, 0, 900, 1000)));
 	trace("Swapped controller");
 }
 
-private void quit()
+private void quit(RenderWindow window)
 {
 	info("Quit selected");
-	Controller.instance.getWindow.close;
+	window.close;
 }
 
 

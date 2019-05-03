@@ -32,7 +32,7 @@ class UiEventHandler : GameEventHandler
         if(!event.player.isRiichi)
         {
             Controller.instance.substitute(
-                new TurnController(Controller.instance.getWindow, event.metagame, event, _engine)
+                new TurnController(event.metagame, event, _engine)
                 );
         }
         else
@@ -46,7 +46,7 @@ class UiEventHandler : GameEventHandler
             {
                 event.drawnTile.display;
                 Controller.instance.substitute(
-                    new TurnOptionController(Controller.instance.getWindow, event.metagame, 
+                    new TurnOptionController(event.metagame, 
                         Controller.instance, factory, _engine)
                     );
             }
@@ -135,7 +135,7 @@ class UiEventHandler : GameEventHandler
 	override void handle(GameStartEvent event)
 	{
 		info("UI: Handling game start event by creating an idle controller");
-		Controller.instance.substitute(new IdleController(Controller.instance.getWindow, event.metagame, _engine));
+		Controller.instance.substitute(new IdleController(event.metagame, _engine));
 		event.handle;
 	}
 
@@ -151,7 +151,7 @@ class UiEventHandler : GameEventHandler
 		if(factory.areThereClaimOptions)
 		{
 			info("UI: Handling turn event by switching to the claim controller");
-			Controller.instance.substitute(new ClaimController(Controller.instance.getWindow, event.metagame, Controller.instance, factory, _engine));
+			Controller.instance.substitute(new ClaimController(event.metagame, Controller.instance, factory, _engine));
 		}
 		else
 		{
@@ -165,7 +165,7 @@ class UiEventHandler : GameEventHandler
         {
             auto factory = new KanStealOptionsFactory(event);
             Controller.instance.substitute(
-                new KanStealOptionController(Controller.instance.getWindow, 
+                new KanStealOptionController(
                     event.metagame, Controller.instance, factory, _engine));
         }
         else
@@ -214,22 +214,22 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(MahjongEvent event)
 	{
-		Controller.instance.substitute(new MahjongController(Controller.instance.getWindow, event.metagame, event, _engine));
+		Controller.instance.substitute(new MahjongController(event.metagame, event, _engine));
 	}
 
     override void handle(ExhaustiveDrawEvent event)
 	{
-		Controller.instance.substitute(new ExhaustiveDrawController(Controller.instance.getWindow, event.metagame, event, _engine));
+		Controller.instance.substitute(new ExhaustiveDrawController(event.metagame, event, _engine));
 	}
 
     override void handle(AbortiveDrawEvent event)
     {
-        Controller.instance.substitute(new AbortiveDrawController(Controller.instance.getWindow, event.metagame, event, _engine));
+        Controller.instance.substitute(new AbortiveDrawController(event.metagame, event, _engine));
     }
 
 	override void handle(GameEndEvent event) 
 	{
-		Controller.instance.substitute(new GameEndController(Controller.instance.getWindow, event.metagame, event, _engine));
+		Controller.instance.substitute(new GameEndController(event.metagame, event, _engine));
 	}
 
 }

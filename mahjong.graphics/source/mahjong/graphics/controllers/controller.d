@@ -6,18 +6,6 @@ import mahjong.graphics.anime.animation;
 
 abstract class Controller
 {
-	protected RenderWindow _window;
-	
-	protected this(RenderWindow window)
-	{
-		_window = window;
-	}
-	
-	final RenderWindow getWindow()
-	{
-		return _window;
-	}
-	
 	final bool handleEvent(Event event)
 	{
 		switch(event.type) with(event.EventType)
@@ -33,7 +21,7 @@ abstract class Controller
 	
 	protected abstract bool handleKeyEvent(Event.KeyEvent key);
 	
-	abstract void draw();
+	abstract void draw(RenderTarget target);
 	
 	abstract void roundUp();
 	
@@ -82,10 +70,9 @@ class NullController : Controller
     this()
     {
         info("Creating new NullController");
-        super(null);
     }
 
-    override void draw() 
+    override void draw(RenderTarget target) 
     {
     }
 
@@ -107,14 +94,7 @@ version(unittest)
 {
 	class TestController : Controller
 	{
-		import mahjong.test.window;
-
-		this()
-		{
-			super(new TestWindow);
-		}
-
-		override void draw() 
+		override void draw(RenderTarget target) 
 		{
 		}
 

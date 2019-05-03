@@ -1,7 +1,7 @@
 ﻿module mahjong.graphics.controllers.game.popup;
 
 import std.experimental.logger;
-import dsfml.graphics.renderwindow;
+import dsfml.graphics.rendertarget;
 import dsfml.window.event;
 import dsfml.window.keyboard;
 import mahjong.domain.metagame;
@@ -18,16 +18,16 @@ class PopupController : GameController
 	{
 		_underlying = underlying;
 		_popup = popup;
-		super(underlying.getWindow(), underlying.metagame, null);
+		super(underlying.metagame, null);
 	}
 
 	private Popup _popup;
 	private GameController _underlying;
 
-	override void draw() 
+	override void draw(RenderTarget target) 
 	{
-		_underlying.draw;
-		_window.draw(_popup);
+		_underlying.draw(target);
+		target.draw(_popup);
 		trace("Finished drawing the pop-up controller");
 	}
 

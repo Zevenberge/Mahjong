@@ -1,6 +1,6 @@
 ﻿module mahjong.graphics.controllers.game.abortive;
 
-import dsfml.graphics : RenderWindow, Event, Keyboard;
+import dsfml.graphics : Event, Keyboard;
 import mahjong.domain.metagame;
 import mahjong.engine;
 import mahjong.engine.flow;
@@ -11,10 +11,10 @@ alias AbortiveDrawController = HandleSimpleEventController!AbortiveDrawEvent;
 
 class HandleSimpleEventController(TEvent) : GameController
 {
-    this(RenderWindow window, const Metagame metagame,
+    this(const Metagame metagame,
         TEvent event, Engine engine)
     {
-        super(window, metagame, engine);
+        super(metagame, engine);
         _event = event;
     }
 
