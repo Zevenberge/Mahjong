@@ -42,7 +42,7 @@ class GameEndController : ResultController
 	{
 		info("Rounding up game.");
 		_event.handle;
-        Controller.instance.substitute(new MainMenuController(_window, composeMainMenu));
+        Controller.instance.substitute(new MainMenuController(_window, composeMainMenu(null)));
 	}
 }
 

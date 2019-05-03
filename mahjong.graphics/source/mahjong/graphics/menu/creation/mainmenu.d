@@ -14,12 +14,13 @@ import mahjong.graphics.enums.resources;
 import mahjong.graphics.eventhandler;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
+import mahjong.graphics.parallelism;
 import mahjong.graphics.popup.service;
 alias Opts = mahjong.domain.opts.Opts;
 alias DrawingOpts = mahjong.graphics.opts.Opts;
 
 private MainMenu _mainMenu;
-MainMenu composeMainMenu()
+MainMenu composeMainMenu(BackgroundWorker bg)
 {
 	if(_mainMenu !is null) return _mainMenu;
 	info("Composing main menu");
@@ -28,7 +29,7 @@ MainMenu composeMainMenu()
 	with(_mainMenu)
 	{
 		addOption(new MainMenuItem("Riichi Mahjong", 
-				(&startRiichiMahjong).toDelegate, riichiFile, IntRect(314,0,2*screen.x,2*screen.y)));
+				() => startRiichiMahjong(bg), riichiFile, IntRect(314,0,2*screen.x,2*screen.y)));
 		addOption(new MainMenuItem("Bamboo Battle", 
 				(&startBambooBattle).toDelegate, bambooFile, IntRect(314,0,4*screen.x,4*screen.y)));
 		addOption(new MainMenuItem("Thunder Thrill", 
@@ -44,13 +45,13 @@ MainMenu composeMainMenu()
 	return _mainMenu;
 }
 
-private void startRiichiMahjong()
+private void startRiichiMahjong(BackgroundWorker bg)
 {
 	info("Riichi mahjong selected");
 	startGame(
         new DefaultGameOpts,
         new DefaultDrawingOpts,
-		new AiEventHandler(new SimpleAI), 
+		new AiEventHandler(new SimpleAI).inBackground(bg), 
 		new AiEventHandler(new SimpleAI), 
 		new AiEventHandler(new SimpleAI));
 }

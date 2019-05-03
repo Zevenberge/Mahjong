@@ -26,10 +26,12 @@ class MainMenuController : MenuControllerBase!MainMenu
 	}
 }
 
-MainMenuController getMainMenuController(RenderWindow window)
+import mahjong.graphics.parallelism;
+MainMenuController getMainMenuController(RenderWindow window, BackgroundWorker bg)
 {
+	import mahjong.graphics.menu.creation.mainmenu;
 	trace("Creating main menu");
-	auto mainMenu = getMainMenu;
+	auto mainMenu = composeMainMenu(bg);
 	return new MainMenuController(window, mainMenu);
 }
 

@@ -38,7 +38,7 @@ private void quitGame()
 {
 	trace("Quitting game");
 	Controller.instance.roundUp;
-	auto mainMenuController = getMainMenuController(Controller.instance.getWindow);
+	auto mainMenuController = getMainMenuController(Controller.instance.getWindow, null);
 	mainMenuController.showMenu;
 	trace("Returned to the main menu");
 }

@@ -13,16 +13,21 @@ void run()
 	trace("Creating window.");
 	auto window = new RenderWindow(VideoMode(styleOpts.screenSize.x, 
 					styleOpts.screenSize.y), styleOpts.screenHeader);
+	import mahjong.graphics.parallelism;
+	auto worker = new BackgroundWorker(window);
+	scope(exit) worker.stop;
 	window.setFramerateLimit(60);
 	
 	trace("Creating initial controller");
-    auto mainMenuController = getMainMenuController(window);
+    auto mainMenuController = getMainMenuController(window, worker);
     mainMenuController.showMenu;
 	trace("Starting application loop");
 	try
 	{
 		windowLoop: while(window.isOpen)
 		{
+			import std.stdio;
+			worker.poll((int _) {writeln("Received ", _);});
 			Event event;
 			while(window.pollEvent(event))
 			{
