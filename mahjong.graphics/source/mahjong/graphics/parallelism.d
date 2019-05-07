@@ -40,7 +40,33 @@ class BackgroundWorker
         receiveTimeout(-1.msecs, ops);
     }
 }
+/+
+import std.typecons;
+alias DeadEnd = BlackHole!Actor;
+interface Actor
+{
+    void receive(Variant message);
+}
 
+mixin template Handle(T)
+{
+    import std.experimental.logger;
+    import std.traits;
+    alias publicMethods = ...
+    void receive(Variant message)
+    {
+        static foreach(method; publicMethods)
+        {
+            if(message.convertsTo!(Parameters!method[0]))
+            {
+                method(message.get!(Parameters!method[0]));
+                return;
+            }
+        }
+        error("Received unknown message: ", message);
+    }
+}
++/
 void listen(Tid parent)
 {
     import std.concurrency, std.stdio;;
@@ -50,7 +76,7 @@ void listen(Tid parent)
     {
         receive(
             (Kill _) {shouldContinue = false;},
-            (shared const TurnEvent ev) { writeln("Turnevent received"); parent.send(42);},
+            (shared const TurnEvent ev) { writeln("Turnevent received: ", ev.metagame.players[0].closedHand.tiles); parent.send(42);},
             (Variant v) { writeln("Got a surprise: ", v);});
 
     }
