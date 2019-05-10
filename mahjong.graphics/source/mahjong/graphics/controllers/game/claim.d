@@ -21,7 +21,7 @@ alias ClaimController = IngameOptionsController!(ClaimOptionFactory, "Claim tile
 
 class ClaimOptionFactory
 {
-	this(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
+	this(const Player player, const Tile discard, const Metagame metagame, ClaimEvent claimEvent)
 	{
 		player.closedHand.displayHand;
 		addRonOption(player, discard, metagame, claimEvent);
@@ -32,28 +32,28 @@ class ClaimOptionFactory
 		addDefaultOption(claimEvent);
 	}
 
-	private void addRonOption(Player player, Tile discard, const Metagame metagame, ClaimEvent claimEvent)
+	private void addRonOption(const Player player, const Tile discard, const Metagame metagame, ClaimEvent claimEvent)
 	{
-		if(player.isRonnable(discard, metagame)) _options ~= new RonClaimOption(player, discard, metagame, claimEvent);
+		if(player.isRonnable(discard, metagame)) _options ~= new RonClaimOption(player, claimEvent);
 	}
 
-	private void addKanOption(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
+	private void addKanOption(const Player player, const Tile discard, const Wall wall, ClaimEvent claimEvent)
 	{
-		if(player.isKannable(discard, wall)) _options~= new KanClaimOption(player, discard, wall, claimEvent);
+		if(player.isKannable(discard, wall)) _options~= new KanClaimOption(player, discard, claimEvent);
 	}
 
-	private void addPonOption(Player player, Tile discard, ClaimEvent claimEvent)
+	private void addPonOption(const Player player, const Tile discard, ClaimEvent claimEvent)
 	{
 		if(player.isPonnable(discard)) _options ~= new PonClaimOption(player, discard, claimEvent);
 	}
 
-	private void addChiOptions(Player player, Tile discard, Metagame metagame, ClaimEvent claimEvent)
+	private void addChiOptions(const Player player, const Tile discard, const Metagame metagame, ClaimEvent claimEvent)
 	{
 		if(!player.isChiable(discard, metagame)) return;
 		auto candidates = determineChiCandidates(player.game.closedHand.tiles, discard);
 		foreach(candidate; candidates)
 		{
-			_options ~= new ChiClaimOption(player, discard, candidate, metagame, claimEvent);
+			_options ~= new ChiClaimOption(candidate, claimEvent);
 		}
 	}
 
@@ -182,8 +182,6 @@ unittest
 
 class ClaimOption : MenuItem, IRelevantTiles
 {
-	abstract ClaimRequest constructRequest();
-
 	this(string displayName, ClaimEvent event)
 	{
 		super(displayName);
@@ -194,8 +192,10 @@ class ClaimOption : MenuItem, IRelevantTiles
 	{
 		(cast(ClaimController)Controller.instance).finishedSelecting;
 		info("Idle controller swapped");
-		_event.handle(constructRequest);
+		apply();
 	}
+
+	protected abstract void apply();
 
 	private ClaimEvent _event;
 
@@ -210,9 +210,9 @@ class NoClaimOption : ClaimOption
 		super("Pass", claimEvent);
 	}
 
-	override ClaimRequest constructRequest() 
+	protected override void apply()
 	{
-		return new NoRequest;
+		_event.pass();
 	}
 
 	override const(Tile)[] relevantTiles() @property
@@ -233,21 +233,17 @@ unittest
 
 class RonClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, const Metagame metagame, ClaimEvent claimEvent)
+	this(const Player player, ClaimEvent claimEvent)
 	{
 		_player = player;
-		_discard = discard;
-		_metagame = metagame;
 		super("Ron", claimEvent);
 	}
 
-	private Player _player;
-	private Tile _discard;
-	private const Metagame _metagame;
+	private const Player _player;
 
-	override ClaimRequest constructRequest() 
+	protected override void apply()
 	{
-		return new RonRequest(_player, _discard, _metagame);
+		_event.ron();
 	}
 
 	override const(Tile)[] relevantTiles() @property
@@ -264,28 +260,25 @@ unittest
 	auto player = new Player();
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d.convertToTiles;
-	auto discard = "🀟"d.convertToTiles[0];
-	auto ronOption = new RonClaimOption(player, discard, null, null);
+	auto ronOption = new RonClaimOption(player, null);
 	assert(ronOption.relevantTiles.length == 13, "All of the player's on hand tiles should be relevant");
-	assert(!ronOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
 }
 
 class KanClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, Wall wall, ClaimEvent claimEvent)
+	this(const Player player, const Tile discard, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
-		_wall = wall;
 		super("Kan", claimEvent);
 	}
 
-	private Player _player;
-	private Tile _discard;
-	private Wall _wall;
-	override ClaimRequest constructRequest() 
+	private const Player _player;
+	private const Tile _discard;
+
+	protected override void apply()
 	{
-		return new KanRequest(_player, _discard, _wall);
+		_event.kan();
 	}
 
 	override const(Tile)[] relevantTiles() @property
@@ -303,7 +296,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
-	auto kanOption = new KanClaimOption(player, discard, null, null);
+	auto kanOption = new KanClaimOption(player, discard, null);
 	assert(kanOption.relevantTiles.length == 3, "For a kan, only three tiles are relevant");
 	assert(kanOption.relevantTiles.all!(t => discard.hasEqualValue(t)), "The relevant tiles should all have the same value as the discard");
 	assert(!kanOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
@@ -311,19 +304,19 @@ unittest
 
 class PonClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, ClaimEvent claimEvent)
+	this(const Player player, const Tile discard, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
 		super("Pon", claimEvent);
 	}
 
-	private Player _player;
-	private Tile _discard;
+	private const Player _player;
+	private const Tile _discard;
 
-	override ClaimRequest constructRequest() 
+	protected override void apply()
 	{
-		return new PonRequest(_player, _discard);
+		_event.pon();
 	}
 
 	override const(Tile)[] relevantTiles() @property
@@ -349,23 +342,17 @@ unittest
 
 class ChiClaimOption : ClaimOption
 {
-	this(Player player, Tile discard, ChiCandidate chiCandidate, Metagame metagame, ClaimEvent claimEvent)
+	this(const ChiCandidate chiCandidate, ClaimEvent claimEvent)
 	{
-		_player = player;
-		_discard = discard;
 		_chiCandidate = chiCandidate;
-		_metagame = metagame;
 		super("Chi", claimEvent);
 	}
 
-	private Player _player;
-	private Tile _discard;
-	private ChiCandidate _chiCandidate;
-	private Metagame _metagame;
+	private const ChiCandidate _chiCandidate;
 
-	override ClaimRequest constructRequest() 
+	protected override void apply()
 	{
-		return new ChiRequest(_player, _discard, _chiCandidate, _metagame);
+		_event.chi(_chiCandidate);
 	}
 
 	override const(Tile)[] relevantTiles() @property

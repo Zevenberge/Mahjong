@@ -63,6 +63,8 @@ unittest
 	player.draw(AmountOfPlayers(4), new RenderSprite(FloatRect()), 0);
 	auto metagame = new Metagame([player, player, player, player], new DefaultGameOpts);
 	auto window = new TestWindow;
+	composeMainMenu(window, null);
+	scope(exit) cleanupMainMenu;
 	auto event = new GameEndEvent(metagame);
     auto engine = new Engine(metagame);
     setDefaultTestController;

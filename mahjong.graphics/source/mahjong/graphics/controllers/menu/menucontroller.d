@@ -50,7 +50,8 @@ class MenuController : MenuControllerBase!Menu
 	override void substitute(Controller newController)
 	{
 		info("Substituting inner controller to ", newController);
-		_innerController = newController;
+		if(cast(MainMenuController)newController) super.substitute(newController);
+		else _innerController = newController;
 	}
 
 	protected RectangleShape constructHaze()

@@ -13,18 +13,15 @@ class AiEventHandler : GameEventHandler
 
 	private AI _ai;
 
-	override void handle(TurnEvent event)
+	import std.meta : AliasSeq;
+	static foreach(Event; AliasSeq!(TurnEvent, ClaimEvent, KanStealEvent))
 	{
-		_ai.playTurn(event);
+		override void handle(Event event)
+		{
+			event.apply(_ai.decide(event));
+		}
 	}
-	override void handle(ClaimEvent event) 
-	{
-		_ai.claim(event);
-	}
-	override void handle(KanStealEvent event)
-	{
-		_ai.steal(event);
-	}
+	
 	mixin HandleSimpleEvents!();	
 }
 

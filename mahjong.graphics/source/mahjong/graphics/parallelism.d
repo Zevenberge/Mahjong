@@ -1,17 +1,14 @@
 module mahjong.graphics.parallelism;
 
+public import std.concurrency : Tid;
+alias ActorRef = Tid;
+
 import core.time;
 import std.concurrency;
+import std.experimental.logger;
 import std.process;
-import dsfml.system.thread;
-import mahjong.engine.flow;
-import mahjong.engine.flow.traits;
-import std.stdio;
-
-auto inBackground(T)(T eventHandler, BackgroundWorker bg)
-{
-    return new Background!T(eventHandler, bg);
-}
+import std.typecons;
+import std.variant;
 
 class BackgroundWorker
 {
@@ -19,97 +16,179 @@ class BackgroundWorker
     this(RenderWindow window)
     {
         window.setActive(false);
-        _worker = spawn(&listen, thisTid);
+        _worker = spawn(&listen);
+        _listener = new DeadEnd;
     }
 
     void stop()
     {
+        info("Stopping background work");
         _worker.send(Kill());
+        _listener = new DeadEnd;
     }
 
-    Tid _worker;
+    private ActorRef _worker;
+    void changeWorker(const Actor actor)
+    {
+        sendMessage(actor);
+    }
+
+    private Actor _listener;
+    void changeListener(Actor actor)
+    {
+        _listener = actor;
+    }
+
+    ActorRef reference() const
+    {
+        return thisTid;
+    }
 
     void sendMessage(Message)(const Message message)
     {
-        shared const Message shMes = cast(shared)message;
-        send(_worker, shMes);
+        send(_worker, message);
     }
 
-    void poll(T...)(T ops)
+    void poll()
     {
-        receiveTimeout(-1.msecs, ops);
+        receiveTimeout(-1.msecs, 
+            (Variant v) { _listener.receive(v); }
+        );
     }
 }
-/+
-import std.typecons;
+
+void send(Message)(ActorRef actor, const Message message)
+{
+    import std.concurrency : send;
+    shared const Message shMes = cast(shared)message;
+    send(actor, shMes);
+}
+
 alias DeadEnd = BlackHole!Actor;
 interface Actor
 {
     void receive(Variant message);
 }
 
-mixin template Handle(T)
+mixin template Handle()
 {
+    alias T = typeof(this);
     import std.experimental.logger;
     import std.traits;
-    alias publicMethods = ...
+    import std.variant : Variant;
+    alias allMethods = __traits(derivedMembers, T);
     void receive(Variant message)
     {
-        static foreach(method; publicMethods)
+        static foreach(member; allMethods)
+        static if(isInstanceMethod!member)
         {
-            if(message.convertsTo!(Parameters!method[0]))
+            static foreach(method; MemberFunctionsTuple!(T, member))
+            static if(isActorMethod!method)
             {
-                method(message.get!(Parameters!method[0]));
-                return;
+                if(message.convertsTo!(SharedOf!(Parameters!method[0])))
+                {
+                    auto param = message.get!(SharedOf!(Parameters!method[0]));
+                    method(cast(Parameters!method[0])param);
+                    return;
+                }
             }
         }
         error("Received unknown message: ", message);
     }
 }
-+/
-void listen(Tid parent)
+
+@("Is my actor delegated correctly?")
+unittest
 {
-    import std.concurrency, std.stdio;;
-    import std.variant;
+    import fluent.asserts;
+    class TestActor : Actor
+    {
+        private int _message;
+        void listen(int message)
+        {
+            _message = message;
+        }
+
+        mixin Handle!();
+    }
+    auto actor = new TestActor();
+    shared int msg = 42;
+    Variant wrapper = msg;
+    actor.receive(wrapper);
+    actor._message.should.equal(42);
+}
+
+@("Can I handle overloads?")
+unittest
+{
+    import fluent.asserts;
+    class OverloadedActor : Actor
+    {
+        private string receivedType;
+        void foo(int msg)
+        {
+            receivedType = "int";
+        }
+        void foo(double msg)
+        {
+            receivedType = "double";
+        }
+        mixin Handle;
+    }
+    auto actor = new OverloadedActor();
+    shared int number = 42;
+    Variant w = number;
+    actor.receive(w);
+    actor.receivedType.should.equal("int");
+    shared double text = 4.2;
+    Variant s = text;
+    actor.receive(s);
+    actor.receivedType.should.equal("double");
+}
+
+template isInstanceMethod(string name)
+{
+    enum isInstanceMethod = name != "__ctor" || name != "__dtor";
+}
+
+template isActorMethod(alias method)
+{
+    import std.traits : Parameters;
+    static if(Parameters!method.length != 1)
+    {
+        enum isActorMethod = false;
+    } 
+    else
+    {
+        enum isActorMethod = __traits(getProtection, method) == "public";
+    }
+}
+
+private void listen()
+{
+    import mahjong.util.log : logAspect;
+    mixin(logAspect!(LogLevel.info, "Background thread listener loop"));
+    Actor listener = new DeadEnd();
     bool shouldContinue = true;
     while(shouldContinue)
     {
+        mixin(logAspect!(LogLevel.trace, "Background thread receive event"));
         receive(
-            (Kill _) {shouldContinue = false;},
-            (shared const TurnEvent ev) { writeln("Turnevent received: ", ev.metagame.players[0].closedHand.tiles); parent.send(42);},
-            (Variant v) { writeln("Got a surprise: ", v);});
-
+            (shared const Kill _) {
+                info("Terminating background thread");
+                shouldContinue = false;
+            },
+            (shared const Actor actor) {
+                info("Switching actor");
+                listener = cast(Actor)actor; 
+            },
+            (Variant v) {
+                info("Received ", v);
+                listener.receive(v);
+            });
     }
 }
 
 private struct Kill{}
 
-class Background(T) : GameEventHandler
-{
-    this(T worker, BackgroundWorker bg)
-    {
-        _worker = worker;
-        _bg = bg;
-    }
-
-    private T _worker;
-    private BackgroundWorker _bg;
-
-	mixin HandleSimpleEvents!();
-
-    static foreach(handler; __traits(getOverloads, GameEventHandler, "handle"))
-    {
-        import std.traits;
-        static if(!isSimpleEvent!(Parameters!handler[0]))
-        {
-            pragma(msg, "Generating background method for " ~ Parameters!handler[0].stringof);
-            override void handle(Parameters!handler[0] event)
-            {
-                writeln("Handling event");
-                _worker.handle(event);
-                _bg.sendMessage(event);
-            }
-        }
-    }
-}
 

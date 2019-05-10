@@ -140,7 +140,7 @@ final class TurnEvent
     const Metagame metagame;
     const Tile drawnTile;
 
-    private bool isHandled() @property pure const
+    bool isHandled() @property pure const
     {
         return _chosenAction != Action.unknown;
     }
@@ -355,7 +355,7 @@ unittest
     isSimpleEvent!TurnEvent.should.equal(false);
 }
 
-private enum Action
+enum Action
 {
     unknown,
     discard,

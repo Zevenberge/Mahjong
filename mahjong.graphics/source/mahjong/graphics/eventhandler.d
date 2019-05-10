@@ -155,7 +155,7 @@ class UiEventHandler : GameEventHandler
 		}
 		else
 		{
-			event.handle(new NoRequest);
+			event.pass();
 		}
 	}
 
@@ -170,7 +170,7 @@ class UiEventHandler : GameEventHandler
         }
         else
         {
-            event.pass;
+            event.pass();
         }
     }
 

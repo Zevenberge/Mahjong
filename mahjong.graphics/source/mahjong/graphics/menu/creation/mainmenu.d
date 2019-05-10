@@ -25,6 +25,15 @@ in(_mainMenu !is null, "Main menu not initialised")
 	return _mainMenu;
 }
 private MainMenu _mainMenu;
+
+version(mahjong_test)
+{
+	void cleanupMainMenu()
+	{
+		_mainMenu = null;
+	}
+}
+
 MainMenu composeMainMenu(RenderWindow window, BackgroundWorker bg)
 in(_mainMenu is null, "Main menu cannot be doubly initialised")
 {
@@ -52,21 +61,29 @@ in(_mainMenu is null, "Main menu cannot be doubly initialised")
 
 private void startRiichiMahjong(BackgroundWorker bg)
 {
+	import mahjong.graphics.aiactor : runInBackground;
 	info("Riichi mahjong selected");
+	auto ai = new SimpleAI;
+	auto eventHandlers = ai.runInBackground!3(bg);
+	startRiichiMahjong(eventHandlers[]);
+}
+
+private void startRiichiMahjong(GameEventHandler[] eventHandlers)
+{
 	startGame(
         new DefaultGameOpts,
         new DefaultDrawingOpts,
-		new AiEventHandler(new SimpleAI).inBackground(bg), 
-		new AiEventHandler(new SimpleAI), 
-		new AiEventHandler(new SimpleAI));
+		eventHandlers
+		);	
 }
-///
+
+@("Does the start of riichi mahjong initialise the game properly?")
 unittest
 {
     import fluent.asserts;
     import mahjong.domain.enums;
 	setDefaultTestController;
-	startRiichiMahjong;
+	startRiichiMahjong([new AiEventHandler(new SimpleAI), new AiEventHandler(new SimpleAI), new AiEventHandler(new SimpleAI)]);
     Controller.instance.should.be.instanceOf!IdleController;
     drawingOpts.should.be.instanceOf!DefaultDrawingOpts;
     (cast(GameController)Controller.instance).gameMode.should.equal(GameMode.Riichi);

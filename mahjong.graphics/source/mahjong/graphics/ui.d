@@ -27,8 +27,7 @@ void run()
 	{
 		windowLoop: while(window.isOpen)
 		{
-			import std.stdio;
-			worker.poll((int _) {writeln("Received ", _);});
+			worker.poll();
 			Event event;
 			while(window.pollEvent(event))
 			{
