@@ -118,7 +118,6 @@ version (unittest)
 	{
 		import std.conv;
 
-		dstring[] names = ["Jan"d, "Piet"d, "Klaas"d, "David"d, "Henk"d, "Ingrid"d];
 		Player[] players;
 		for (int i = 0; i < amountOfPlayers; ++i)
 		{

@@ -189,11 +189,4 @@ class Player
         auto transaction = new Transaction(player2, 5000);
         assertThrown!AssertError(player1.applyTransaction(transaction), "Applying someone else's transaction should not be allowed.");
     }
-
-	override bool opEquals(Object o)
-	{
-		auto p = cast(Player)o;
-		if(p is null) return false;
-		return p.id == id;
-	}
 }

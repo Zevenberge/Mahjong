@@ -96,7 +96,6 @@ class UiEventHandler : GameEventHandler
         player.drawTile(wall);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
         engine.switchFlow(flow);
-        //auto event = new TurnEvent(metagame, player, player.lastTile);
         Controller.instance.should.not.be.instanceOf!TurnController;
         engine.advanceIfDone;
         player.closedHand.tiles.length.should.equal(13);
