@@ -23,7 +23,7 @@ class SimpleAI : AI
 		import std.random : randomSample;
 		if(event.player.isMahjong)
 		{
-			return TurnDecision(event.player, TurnDecision.Action.tsumo, null);
+			return TurnDecision(event.player, TurnDecision.Action.claimTsumo, null);
 		}
 		auto tile = event.player.closedHand.tiles.randomSample(1).front;
 		return TurnDecision(event.player,TurnDecision.Action.discard, tile);

@@ -12,7 +12,7 @@ struct TurnDecision
         discard,
         promoteToKan,
         declareClosedKan,
-        tsumo,
+        claimTsumo,
         declareRiichi,
         declareRedraw
     }
@@ -24,26 +24,28 @@ struct TurnDecision
 
 void apply(TurnEvent event, const TurnDecision decision)
 {
-    final switch(decision.action) with(TurnDecision.Action)
+    import mahjong.util.traits : EnumMembers;
+    import std.traits: Parameters;
+    template needsTile(string member) 
     {
-        case discard:
-            event.discard(decision.selectedTile);
-            break;
-        case promoteToKan:
-            event.promoteToKan(decision.selectedTile);
-            break;
-        case declareClosedKan:
-            event.declareClosedKan(decision.selectedTile);
-            break;
-        case tsumo:
-            event.claimTsumo();
-            break;
-        case declareRiichi:
-            event.declareRiichi(decision.selectedTile);
-            break;
-        case declareRedraw:
-            event.declareRedraw();
-            break;
+        alias params = Parameters!(__traits(getMember, event, member));
+        enum needsTile =  params.length == 1;
+    }
+    a: final switch(decision.action) with(TurnDecision.Action)
+    {
+    static foreach(member; EnumMembers!(TurnDecision.Action))
+    {
+        case member.value:
+            static if(needsTile!(member.name))
+            {
+                __traits(getMember, event, member.name)(decision.selectedTile);
+            }
+            else
+            {
+                __traits(getMember, event, member.name)();
+            }
+            break a;
+    }
     }
 }
 
