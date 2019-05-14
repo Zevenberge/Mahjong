@@ -10,19 +10,19 @@ import mahjong.graphics.opts;
 
 class MenuController : MenuControllerBase!Menu
 {
-	this(RenderWindow window, Controller pausedController, Menu menu)
+	this(Controller pausedController, Menu menu)
 	{
 		trace("Creating menu controller");
-		super(window, menu);
+		super(menu);
 		_innerController = pausedController;
 		_haze = constructHaze;
 	}
 	
-	override void draw()
+	override void draw(RenderTarget target)
 	{
-		_innerController.draw;
-		_window.draw(_haze);
-		_menu.draw(_window);
+		_innerController.draw(target);
+		target.draw(_haze);
+		_menu.draw(target);
 	}
 
 	override void roundUp() 
@@ -50,7 +50,8 @@ class MenuController : MenuControllerBase!Menu
 	override void substitute(Controller newController)
 	{
 		info("Substituting inner controller to ", newController);
-		_innerController = newController;
+		if(cast(MainMenuController)newController) super.substitute(newController);
+		else _innerController = newController;
 	}
 
 	protected RectangleShape constructHaze()

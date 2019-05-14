@@ -11,9 +11,9 @@ class GameEventHandler
 	abstract void handle(ClaimEvent event);
 	abstract void handle(KanStealEvent event);
 	abstract void handle(MahjongEvent event);
-	abstract void handle(ExhaustiveDrawEvent event);
     abstract void handle(AbortiveDrawEvent event);
 	abstract void handle(GameEndEvent event);	
+	abstract void handle(ExhaustiveDrawEvent event);
 }
 
 version(mahjong_test)

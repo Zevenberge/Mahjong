@@ -5,7 +5,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class DrawFlow : Flow
+final class DrawFlow : Flow
 {
 	this(Player player, Metagame metagame, Wall wall, 
 		INotificationService notificationService)

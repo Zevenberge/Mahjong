@@ -1,4 +1,4 @@
-﻿module mahjong.graphics.eventhandler;
+module mahjong.graphics.eventhandler;
 
 import std.experimental.logger;
 import mahjong.domain.opts;
@@ -32,7 +32,7 @@ class UiEventHandler : GameEventHandler
         if(!event.player.isRiichi)
         {
             Controller.instance.substitute(
-                new TurnController(Controller.instance.getWindow, event.metagame, event, _engine)
+                new TurnController(event.metagame, event, _engine)
                 );
         }
         else
@@ -46,7 +46,7 @@ class UiEventHandler : GameEventHandler
             {
                 event.drawnTile.display;
                 Controller.instance.substitute(
-                    new TurnOptionController(Controller.instance.getWindow, event.metagame, 
+                    new TurnOptionController(event.metagame, 
                         Controller.instance, factory, _engine)
                     );
             }
@@ -65,8 +65,7 @@ class UiEventHandler : GameEventHandler
         scope(exit) Controller.cleanUp;
         auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
-        auto engine = new Engine(metagame);
-        auto event = new TurnEvent(null, metagame, player, player.lastTile, engine);
+        auto event = new TurnEvent(metagame, player, player.lastTile);
         auto eventHandler = new UiEventHandler;
         eventHandler.handle(event);
         Controller.instance.should.be.instanceOf!TurnController;
@@ -91,14 +90,14 @@ class UiEventHandler : GameEventHandler
         metagame.initializeRound;
         player.game = new Ingame(PlayerWinds.east, "🀀🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
         player.declareRiichi(player.closedHand.tiles[0], metagame);
-        auto engine = new Engine(metagame);
+        auto eventHandler = new UiEventHandler;
+        auto engine = new Engine(metagame, [eventHandler]);
         auto wall = new MockWall(new Tile(Types.ball, Numbers.eight));
         player.drawTile(wall);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
-        auto event = new TurnEvent(flow, metagame, player, player.lastTile, engine);
-        auto eventHandler = new UiEventHandler;
-        eventHandler.handle(event);
+        engine.switchFlow(flow);
         Controller.instance.should.not.be.instanceOf!TurnController;
+        engine.advanceIfDone;
         player.closedHand.tiles.length.should.equal(13);
         player.closedHand.tiles
             .any!(tile => ComparativeTile(Types.ball, Numbers.eight).hasEqualValue(tile))
@@ -122,13 +121,11 @@ class UiEventHandler : GameEventHandler
         auto player = new Player;
         auto metagame = new Metagame([player], new DefaultGameOpts);
         metagame.initializeRound;
-        auto engine = new Engine(metagame);
         player.game = new Ingame(PlayerWinds.east, "🀀🀡🀁🀁🀕🀕🀚🀚🀌🀌🀖🀖🀗🀗"d);
         player.declareRiichi(player.closedHand.tiles[0], metagame);
         auto wall = new MockWall(new Tile(Types.ball, Numbers.nine));
         player.drawTile(wall);
-        auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
-        auto event = new TurnEvent(flow, metagame, player, player.lastTile, engine);
+        auto event = new TurnEvent(metagame, player, player.lastTile);
         auto eventHandler = new UiEventHandler;
         eventHandler.handle(event);
         Controller.instance.should.be.instanceOf!TurnOptionController;
@@ -137,14 +134,14 @@ class UiEventHandler : GameEventHandler
 	override void handle(GameStartEvent event)
 	{
 		info("UI: Handling game start event by creating an idle controller");
-		Controller.instance.substitute(new IdleController(Controller.instance.getWindow, event.metagame, _engine));
-		event.isReady = true;
+		Controller.instance.substitute(new IdleController(event.metagame, _engine));
+		event.handle;
 	}
 
 	override void handle(RoundStartEvent event)
 	{
 		clearIngameCache;
-		event.isReady = true;
+		event.handle;
 	}
 
 	override void handle(ClaimEvent event) 
@@ -153,11 +150,11 @@ class UiEventHandler : GameEventHandler
 		if(factory.areThereClaimOptions)
 		{
 			info("UI: Handling turn event by switching to the claim controller");
-			Controller.instance.substitute(new ClaimController(Controller.instance.getWindow, event.metagame, Controller.instance, factory, _engine));
+			Controller.instance.substitute(new ClaimController(event.metagame, Controller.instance, factory, _engine));
 		}
 		else
 		{
-			event.handle(new NoRequest);
+			event.pass();
 		}
 	}
 
@@ -167,12 +164,12 @@ class UiEventHandler : GameEventHandler
         {
             auto factory = new KanStealOptionsFactory(event);
             Controller.instance.substitute(
-                new KanStealOptionController(Controller.instance.getWindow, 
+                new KanStealOptionController(
                     event.metagame, Controller.instance, factory, _engine));
         }
         else
         {
-            event.pass;
+            event.pass();
         }
     }
 
@@ -216,22 +213,22 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(MahjongEvent event)
 	{
-		Controller.instance.substitute(new MahjongController(Controller.instance.getWindow, event.metagame, event, _engine));
+		Controller.instance.substitute(new MahjongController(event.metagame, event, _engine));
 	}
 
     override void handle(ExhaustiveDrawEvent event)
 	{
-		Controller.instance.substitute(new ExhaustiveDrawController(Controller.instance.getWindow, event.metagame, event, _engine));
+		Controller.instance.substitute(new ExhaustiveDrawController(event.metagame, event, _engine));
 	}
 
     override void handle(AbortiveDrawEvent event)
     {
-        Controller.instance.substitute(new AbortiveDrawController(Controller.instance.getWindow, event.metagame, event, _engine));
+        Controller.instance.substitute(new AbortiveDrawController(event.metagame, event, _engine));
     }
 
 	override void handle(GameEndEvent event) 
 	{
-		Controller.instance.substitute(new GameEndController(Controller.instance.getWindow, event.metagame, event, _engine));
+		Controller.instance.substitute(new GameEndController(event.metagame, event, _engine));
 	}
 
 }

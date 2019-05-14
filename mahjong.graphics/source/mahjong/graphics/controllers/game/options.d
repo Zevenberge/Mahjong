@@ -20,8 +20,7 @@ import mahjong.graphics.opts;
 class IngameOptionsController(Factory, string menuTitle) : MenuController 
 	if(isIngameOptionsFactory!Factory)
 {
-	this(RenderWindow window, 
-		const Metagame metagame,
+	this(const Metagame metagame,
 		Controller innerController,
 		Factory factory, Engine engine)
 	{
@@ -32,7 +31,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		}
 		menu.configureGeometry;
 		selectDefaultOption(menu, factory);
-		super(window, innerController, menu);
+		super(innerController, menu);
 		_metagame = metagame;
 		_engine = engine;
 	}
@@ -58,7 +57,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		auto idleController = cast(IdleController)_innerController;
 		if(!idleController)
 		{
-			idleController = new IdleController(_window, _metagame, _engine);
+			idleController = new IdleController(_metagame, _engine);
 		}
         instance = idleController;
 	}
@@ -77,17 +76,17 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
         }
     }
 
-	override void draw() 
+	override void draw(RenderTarget target) 
 	{
 		if(isLeadingController) 
 		{
-			super.draw;
-			drawMarkersOnRelevantTiles;
+			super.draw(target);
+			drawMarkersOnRelevantTiles(target);
 		}
-		else _innerController.draw;
+		else _innerController.draw(target);
 	}
 
-	private void drawMarkersOnRelevantTiles()
+	private void drawMarkersOnRelevantTiles(RenderTarget target)
 	{
 		auto selectedOption = cast(IRelevantTiles)_menu.selectedItem;
 		auto rectangleShape = new RectangleShape(drawingOpts.tileSize);
@@ -97,13 +96,13 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 			auto coords = tile.getCoords;
 			rectangleShape.position = coords.position;
 			rectangleShape.rotation = coords.rotation;
-			_window.draw(rectangleShape);
+			target.draw(rectangleShape);
 		}
 	}
 
 	protected override bool menuClosed() 
 	{
-		Controller.instance.substitute(new MenuController(_window, this, getPauseMenu));
+		Controller.instance.substitute(new MenuController(this, getPauseMenu));
 		return false;
 	}
 

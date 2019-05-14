@@ -6,7 +6,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class AbortiveDrawFlow : WaitForEveryPlayer!AbortiveDrawEvent
+final class AbortiveDrawFlow : WaitForEveryPlayer!AbortiveDrawEvent
 {
     this(Metagame game, INotificationService notificationService, Engine engine)
     {
@@ -63,23 +63,24 @@ class AbortiveDrawFlow : WaitForEveryPlayer!AbortiveDrawEvent
     }
 }
 
-class AbortiveDrawEvent
+final class AbortiveDrawEvent
 {
-    this(Metagame metagame)
+	import mahjong.engine.flow.traits : SimpleEvent;
+
+    this(const Metagame metagame)
     {
         this.metagame = metagame;
     }
 
     const Metagame metagame;
 
-    private bool _isHandled;
-    bool isHandled() @property
-    {
-        return _isHandled;
-    }
+	mixin SimpleEvent!();
+ }
 
-    void handle()
-    {
-        _isHandled = true;
-    }
+@("An abortive draw event is a simple event")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.flow.traits;
+    isSimpleEvent!AbortiveDrawEvent.should.equal(true);
 }

@@ -11,7 +11,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class TurnFlow : Flow
+final class TurnFlow : Flow
 {
     this(Player player, Metagame meta, INotificationService notificationService, Engine engine)
     {
@@ -127,7 +127,7 @@ private:
     }
 }
 
-class TurnEvent
+final class TurnEvent
 {
     this(const Metagame metagame, const Player player, const Tile drawnTile)
     {
@@ -140,7 +140,7 @@ class TurnEvent
     const Metagame metagame;
     const Tile drawnTile;
 
-    private bool isHandled() @property pure const
+    bool isHandled() @property pure const
     {
         return _chosenAction != Action.unknown;
     }
@@ -347,7 +347,15 @@ class TurnEvent
     }
 }
 
-private enum Action
+@("A turn event is not a simple event")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.flow.traits;
+    isSimpleEvent!TurnEvent.should.equal(false);
+}
+
+enum Action
 {
     unknown,
     discard,

@@ -7,7 +7,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class GameEndFlow : WaitForEveryPlayer!GameEndEvent
+final class GameEndFlow : WaitForEveryPlayer!GameEndEvent
 {
 	this(Metagame metagame, INotificationService notificationService, Engine engine)
 	{
@@ -27,8 +27,10 @@ class GameEndFlow : WaitForEveryPlayer!GameEndEvent
 	}
 }
 
-class GameEndEvent
+final class GameEndEvent
 {
+	import mahjong.engine.flow.traits : SimpleEvent;
+
 	this(Metagame metagame)
 	{
 		this.metagame = metagame;
@@ -36,16 +38,7 @@ class GameEndEvent
 
 	const Metagame metagame;
 
-	private bool _isHandled;
-	bool isHandled() @property
-	{
-		return _isHandled;
-	}
-
-	void handle()
-	{
-		_isHandled = true;
-	}
+	mixin SimpleEvent!();
 }
 
 unittest
@@ -85,4 +78,12 @@ unittest
 	eventHandler.gameEndEvent.handle;
 	engine.advanceIfDone;
     engine.isTerminated.should.equal(true);
+}
+
+@("A game end event is simple")
+unittest
+{
+	import fluent.asserts;
+    import mahjong.engine.flow.traits;
+	isSimpleEvent!GameEndEvent.should.equal(true);
 }

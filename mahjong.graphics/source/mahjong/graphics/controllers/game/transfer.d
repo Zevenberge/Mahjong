@@ -12,10 +12,10 @@ import mahjong.graphics.drawing.transfer;
 class TransferController(TEvent) : ResultController
     if(isSimpleEvent!TEvent)
 {
-    this(RenderWindow window, const Metagame metagame, RenderTexture background, 
+    this(const Metagame metagame, RenderTexture background, 
         TEvent event, Transaction[] transactions, Engine engine)
     {
-        super(window, metagame, background, engine);
+        super(metagame, background, engine);
         _event = event;
         _transferScreen = new TransferScreen(transactions);
     }
@@ -23,10 +23,10 @@ class TransferController(TEvent) : ResultController
     private TransferScreen _transferScreen;
     private TEvent _event;
 
-    override void draw()
+    override void draw(RenderTarget target)
     {
-        super.draw();
-        _transferScreen.draw(_window);
+        super.draw(target);
+        _transferScreen.draw(target);
     }
 
     protected override void advanceScreen()
@@ -49,6 +49,6 @@ class TransferController(TEvent) : ResultController
     private void finishRound()
     {
         _event.handle;
-        Controller.instance.substitute(new IdleController(_window, _metagame, _engine));
+        Controller.instance.substitute(new IdleController(_metagame, _engine));
     }
 }

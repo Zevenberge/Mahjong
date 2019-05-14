@@ -18,11 +18,11 @@ import mahjong.graphics.opts;
 
 class MahjongController : ResultController
 {
-	this(RenderWindow window, const Metagame metagame, MahjongEvent event, Engine engine)
+	this(const Metagame metagame, MahjongEvent event, Engine engine)
 	{
 		auto texture = freezeGameGraphicsOnATexture(metagame);
 		_event = event;
-		super(window, metagame, texture, engine);
+		super(metagame, texture, engine);
 		createResultScreens;
 	}
 
@@ -40,10 +40,10 @@ class MahjongController : ResultController
 
 	private MahjongEvent _event;
 
-	override void draw()
+	override void draw(RenderTarget target)
 	{
-		super.draw();
-		_resultScreens.front.draw(_window);
+		super.draw(target);
+		_resultScreens.front.draw(target);
 	}
 
 	protected override void advanceScreen()
@@ -81,7 +81,7 @@ class MahjongController : ResultController
 	private void finishRound()
 	{
 		Controller.instance.substitute(
-            new TransferController!MahjongEvent(_window, _metagame, _renderTexture, 
+            new TransferController!MahjongEvent(_metagame, _renderTexture, 
                 _event, _event.data.toTransactions(_metagame), _engine));
 	}
 }

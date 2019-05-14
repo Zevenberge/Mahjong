@@ -294,7 +294,7 @@ class Ingame
         (() => game.chi(chiableTile, candidate)).should.throwException!IllegalClaimException;
     }
 
-    bool isPonnable(const Tile discard) pure
+    bool isPonnable(const Tile discard) pure const
     {
         if (!canClaim(discard))
             return false;
@@ -360,7 +360,7 @@ class Ingame
         (() => game.pon(ponnableTile)).should.throwException!IllegalClaimException;
     }
 
-    bool isKannable(const Tile discard, const Wall wall)
+    bool isKannable(const Tile discard, const Wall wall) const
     {
         if (!canClaim(discard) || wall.isMaxAmountOfKansReached)
             return false;

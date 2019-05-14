@@ -2,6 +2,7 @@ module mahjong.ai.eventhandler;
 
 import mahjong.ai;
 import mahjong.engine.flow;
+import mahjong.engine.flow.traits;
 
 class AiEventHandler : GameEventHandler
 {
@@ -12,40 +13,22 @@ class AiEventHandler : GameEventHandler
 
 	private AI _ai;
 
-	override void handle(TurnEvent event)
+	import std.meta : AliasSeq;
+	static foreach(Event; AliasSeq!(TurnEvent, ClaimEvent, KanStealEvent))
 	{
-		_ai.playTurn(event);
+		override void handle(Event event)
+		{
+			event.apply(_ai.decide(event));
+		}
 	}
-	override void handle(GameStartEvent event)
-	{
-		event.isReady = true;
-	}
-	override void handle(RoundStartEvent event)
-	{
-		event.isReady = true;
-	}
-	override void handle(ClaimEvent event) 
-	{
-		_ai.claim(event);
-	}
-	override void handle(KanStealEvent event)
-	{
-		_ai.steal(event);
-	}
-	override void handle(MahjongEvent event)
-	{
-		event.handle;
-	}
-	override void handle(ExhaustiveDrawEvent event)
-	{
-		event.handle;
-	}
-    override void handle(AbortiveDrawEvent event)
-    {
-        event.handle;
-    }
-	override void handle(GameEndEvent event) 
-	{
-		event.handle;
-	}
+	
+	mixin HandleSimpleEvents!();	
+}
+
+@("The AI event handler should not be abstract")
+unittest
+{
+	import std.traits;
+	import fluent.asserts;
+	isAbstractClass!AiEventHandler.should.equal(false);
 }

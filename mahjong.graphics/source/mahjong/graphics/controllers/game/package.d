@@ -29,9 +29,8 @@ import mahjong.graphics.menu;
 
 class GameController : Controller
 {
-	protected this(RenderWindow window, const Metagame metagame, Engine engine)
+	protected this(const Metagame metagame, Engine engine)
 	{
-		super(window);
 		_metagame = metagame;
 		_engine = engine;
 	}
@@ -40,12 +39,11 @@ class GameController : Controller
 	protected const Metagame _metagame;
 	protected Engine _engine;
 
-
-	override void draw()
+	override void draw(RenderTarget target)
 	{
-		_window.clear;
-		drawGameBg(_window);
-		_metagame.draw(_window);
+		target.clear;
+		drawGameBg(target);
+		_metagame.draw(target);
 	}
 
 	final override bool handleKeyEvent(Event.KeyEvent key)
@@ -65,7 +63,7 @@ class GameController : Controller
 	protected void pauseGame()
 	{
 		auto pauseMenu = getPauseMenu;
-		auto pauseController = new MenuController(_window, this, pauseMenu);
+		auto pauseController = new MenuController(this, pauseMenu);
         pauseController.openMenu;
 	}
 

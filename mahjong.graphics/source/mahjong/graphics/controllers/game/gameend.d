@@ -16,9 +16,9 @@ import mahjong.graphics.utils : freeze;
 
 class GameEndController : ResultController
 {
-	this(RenderWindow window, const Metagame metagame, GameEndEvent event, Engine engine)
+	this(const Metagame metagame, GameEndEvent event, Engine engine)
 	{
-		super(window, metagame, freezeGameGraphicsOnATexture(metagame), engine);
+		super(metagame, freezeGameGraphicsOnATexture(metagame), engine);
 		_screen = new GameEndScreen(metagame, innerScreenBounds);
 		_event = event;
 	}
@@ -32,17 +32,17 @@ class GameEndController : ResultController
 	private GameEndEvent _event;
 	private GameEndScreen _screen;
 
-	override void draw() 
+	override void draw(RenderTarget target) 
 	{
-		super.draw;
-		_screen.draw(_window);
+		super.draw(target);
+		_screen.draw(target);
 	}
 
 	protected override void advanceScreen() 
 	{
 		info("Rounding up game.");
 		_event.handle;
-        Controller.instance.substitute(new MainMenuController(_window, composeMainMenu));
+        Controller.instance.substitute(new MainMenuController(getMainMenu()));
 	}
 }
 
@@ -63,11 +63,13 @@ unittest
 	player.draw(AmountOfPlayers(4), new RenderSprite(FloatRect()), 0);
 	auto metagame = new Metagame([player, player, player, player], new DefaultGameOpts);
 	auto window = new TestWindow;
+	composeMainMenu(window, null);
+	scope(exit) cleanupMainMenu;
 	auto event = new GameEndEvent(metagame);
     auto engine = new Engine(metagame);
     setDefaultTestController;
-	Controller.instance.substitute(new GameEndController(window, metagame, event, engine));
-	Controller.instance.draw;
+	Controller.instance.substitute(new GameEndController(metagame, event, engine));
+	Controller.instance.draw(window);
     Controller.instance.handleEvent(returnKeyPressed);
 	assert(event.isHandled, "After pressing enter, the event should have been handled.");
     Controller.instance.should.be.instanceOf!MainMenuController

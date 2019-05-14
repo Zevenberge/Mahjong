@@ -1,5 +1,6 @@
 module mahjong.ai;
 
+public import mahjong.ai.decision;
 public import mahjong.ai.eventhandler;
 
 import std.experimental.logger;
@@ -8,39 +9,34 @@ import mahjong.engine.flow;
 
 interface AI
 {
-	void playTurn(TurnEvent event);
-	void claim(ClaimEvent event);
-	void steal(KanStealEvent event);
+	const(TurnDecision) decide(const TurnEvent);
+	const(ClaimDecision) decide(const ClaimEvent);
+	const(KanStealDecision) decide(const KanStealEvent);
 }
 
 class SimpleAI : AI
 {
-	void playTurn(TurnEvent event)
+	override const(TurnDecision) decide(const TurnEvent event)
 	{
-		trace("AI: playing turn.");
-
+		import mahjong.util.log : logAspect;
+		mixin(logAspect!(LogLevel.info, "AI Turn"));
+		import std.random : randomSample;
 		if(event.player.isMahjong)
 		{
-			event.claimTsumo;
-			return;
+			return TurnDecision(event.player, TurnDecision.Action.claimTsumo, null);
 		}
-		discardTile(event);
+		auto tile = event.player.closedHand.tiles.randomSample(1).front;
+		return TurnDecision(event.player,TurnDecision.Action.discard, tile);
 	}
 
-	private void discardTile(TurnEvent event)
+	override const(KanStealDecision) decide(const KanStealEvent event)
 	{
-		auto hand = event.player.game.closedHand.tiles;
-		auto discard = uniform(0, hand.length);
-		event.discard(hand[discard]);
+		return KanStealDecision(event.player, false);
 	}
 
-	void claim(ClaimEvent event)
+	override const(ClaimDecision) decide(const ClaimEvent event)
 	{
-		event.handle(new NoRequest);
-	}
-
-	void steal(KanStealEvent event)
-	{
-		event.pass;
+		return ClaimDecision(event.player, Request.None);
 	}
 }
+

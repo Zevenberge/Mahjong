@@ -75,11 +75,6 @@ class MainMenu : Selectable!MainMenuItem
 	private Text _title;
 }
 
-MainMenu getMainMenu()
-{
-	return composeMainMenu;
-}
-
 
 
 

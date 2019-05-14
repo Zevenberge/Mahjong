@@ -6,7 +6,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.engine.notifications;
 
-class ExhaustiveDrawFlow : WaitForEveryPlayer!ExhaustiveDrawEvent
+final class ExhaustiveDrawFlow : WaitForEveryPlayer!ExhaustiveDrawEvent
 {
     this(Metagame game, INotificationService notificationService, Engine engine)
     {
@@ -28,8 +28,10 @@ class ExhaustiveDrawFlow : WaitForEveryPlayer!ExhaustiveDrawEvent
     }
 }
 
-class ExhaustiveDrawEvent
+final class ExhaustiveDrawEvent
 {
+	import mahjong.engine.flow.traits : SimpleEvent;
+
     this(const Metagame metagame)
     {
         this.metagame = metagame;
@@ -37,14 +39,13 @@ class ExhaustiveDrawEvent
 
     const Metagame metagame;
 
-    private bool _isHandled;
-	bool isHandled() @property
-	{
-		return _isHandled;
-	}
+	mixin SimpleEvent!();
+ }
 
-	void handle()
-	{
-		_isHandled = true;
-	}
+@("An exhaustive draw event is simple")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.flow.traits;
+    isSimpleEvent!ExhaustiveDrawEvent.should.equal(true);
 }

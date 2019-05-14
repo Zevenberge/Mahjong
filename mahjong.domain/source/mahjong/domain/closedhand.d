@@ -12,7 +12,7 @@ class ClosedHand
 {
 	Tile[] tiles;
 
-	size_t length() @property pure
+	size_t length() @property pure const
 	{
 		return tiles.length;
 	}
@@ -72,7 +72,7 @@ class ClosedHand
 			removeTile(otherChiTiles.second)];
 	}
 
-	bool isPonnable(const Tile discard) pure
+	bool isPonnable(const Tile discard) pure const
 	{
 		return countTilesWithEqualValue(discard) >= 2;
 	}
@@ -87,7 +87,7 @@ class ClosedHand
 		return removeTilesWithIdenticalValue!2(discard);
 	}
 
-	bool isKannable(const Tile discard) pure
+	bool isKannable(const Tile discard) pure const
 	{
 		return countTilesWithEqualValue(discard) >= 3;
 	}
@@ -127,7 +127,7 @@ class ClosedHand
 		return tiles.filter!(tile => tile.hasEqualValue(other));
 	}
 
-	private size_t countTilesWithEqualValue(const Tile other) pure
+	private size_t countTilesWithEqualValue(const Tile other) pure const
 	{
 		return tiles.count!(tile => tile.hasEqualValue(other));
 	}
