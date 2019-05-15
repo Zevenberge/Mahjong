@@ -227,7 +227,7 @@ unittest
     tile.isKanSteal.should.equal(false);
 }
 
-bool isHonour(const ComparativeTile tile) @property pure
+bool isHonour(const ComparativeTile tile) @property pure @nogc nothrow
 {
     return tile.type < Types.character;
 }
@@ -321,6 +321,77 @@ unittest
     writeln(" The isConstructive function is correct.");
 }
 
+bool areConnected(const ComparativeTile tileA, const ComparativeTile tileB) pure @nogc nothrow
+{
+    if(tileA.type != tileB.type) return false;
+    if(tileA.isHonour) return tileA.value == tileB.value;
+    auto diff = tileA.value - tileB.value;
+    return diff > -3 && diff < 3;
+}
+
+@("Two identical tiles are connected")
+unittest
+{
+    import fluent.asserts;
+    ComparativeTile(Types.wind, Winds.east)
+        .areConnected(ComparativeTile(Types.wind, Winds.east))
+        .should.equal(true);
+}
+
+@("Two constructive honours are not connected")
+unittest
+{
+    import fluent.asserts;
+    ComparativeTile(Types.wind, Winds.east)
+        .areConnected(ComparativeTile(Types.wind, Winds.south))
+        .should.equal(false);
+}
+
+@("Two tiles of different types are not connected")
+unittest
+{
+    import fluent.asserts;
+    ComparativeTile(Types.wind, Winds.east)
+        .areConnected(ComparativeTile(Types.bamboo, Numbers.one))
+        .should.equal(false);
+}
+
+@("Simples of constructive values are connected")
+unittest
+{
+    import fluent.asserts;
+    ComparativeTile(Types.bamboo, Numbers.one)
+        .areConnected(ComparativeTile(Types.bamboo, Numbers.two))
+        .should.equal(true);
+    ComparativeTile(Types.bamboo, Numbers.two)
+        .areConnected(ComparativeTile(Types.bamboo, Numbers.one))
+        .should.equal(true);
+}
+
+@("Simples of one-gap values are connected")
+unittest
+{
+    import fluent.asserts;
+    ComparativeTile(Types.bamboo, Numbers.one)
+        .areConnected(ComparativeTile(Types.bamboo, Numbers.three))
+        .should.equal(true);
+    ComparativeTile(Types.bamboo, Numbers.three)
+        .areConnected(ComparativeTile(Types.bamboo, Numbers.one))
+        .should.equal(true);
+}
+
+@("Simples of two-gap values are not connected")
+unittest
+{
+    import fluent.asserts;
+    ComparativeTile(Types.bamboo, Numbers.one)
+        .areConnected(ComparativeTile(Types.bamboo, Numbers.four))
+        .should.equal(false);
+    ComparativeTile(Types.bamboo, Numbers.four)
+        .areConnected(ComparativeTile(Types.bamboo, Numbers.one))
+        .should.equal(false);
+}
+
 bool isWind(const ComparativeTile tile) @property pure
 {
     return tile.type == Types.wind;
@@ -396,7 +467,7 @@ struct ComparativeTile
     int value;
 }
 
-bool hasEqualValue(const ComparativeTile one, const ComparativeTile other) pure
+bool hasEqualValue(const ComparativeTile one, const ComparativeTile other) pure @nogc nothrow
 {
     return one == other;
 }

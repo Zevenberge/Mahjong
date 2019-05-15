@@ -17,6 +17,7 @@
    },
    {
      "name": "unittest",
+     "versions": ["mahjong_test"],
      "targetType": "executable",
      "preBuildCommands": ["dub run unit-threaded -c gen_ut_main -- -f bin/ut.d"],
      "mainSourceFile": "bin/ut.d",
