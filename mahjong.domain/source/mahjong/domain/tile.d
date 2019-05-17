@@ -246,7 +246,7 @@ unittest
     assert(!tile.isHonour, "Tile should not have been an honour");
 }
 
-bool isTerminal(const ComparativeTile tile) @property pure
+bool isTerminal(const ComparativeTile tile) @property pure @nogc nothrow
 {
     return !tile.isHonour && (tile.value == Numbers.one || tile.value == Numbers.nine);
 }
