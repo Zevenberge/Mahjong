@@ -57,3 +57,45 @@ unittest
     [EnumMembers!Foo].map!(m => m.name).should.containOnly(["bar", "baz"]);
     [EnumMembers!Foo].map!(m => m.value).should.containOnly([Foo.bar, Foo.baz]);
 }
+
+template isConst(T)
+{
+    static if(is(T == const S, S))
+    {
+        enum isConst = true;
+    }
+    else
+    {
+        enum isConst = false;
+    }
+}
+
+@("Is a constant type const?")
+unittest
+{
+    import fluent.asserts;
+    static struct Foo{}
+    isConst!(const Object).should.equal(true);
+    isConst!(const Foo).should.equal(true);
+    isConst!(const int).should.equal(true);
+}
+
+@("Are mutable not const")
+unittest
+{
+    import fluent.asserts;
+    static struct Foo{}
+    isConst!(Object).should.equal(false);
+    isConst!(Foo).should.equal(false);
+    isConst!(int).should.equal(false);
+}
+
+enum isClass(T) = is(T == class);
+
+@("Is a class a class")
+unittest
+{
+    import fluent.asserts;
+    isClass!Object.should.equal(true);
+    isClass!int.should.equal(false);
+}
