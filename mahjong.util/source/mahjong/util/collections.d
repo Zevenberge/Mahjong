@@ -1,5 +1,9 @@
 ﻿module mahjong.util.collections;
 
+import std.range.primitives;
+import std.typecons;
+import mahjong.util.traits;
+
 struct Set(T)
 {
     private bool[T] _items;
@@ -34,16 +38,49 @@ unittest
     numbers.values.should.equal([42]);
 }
 
+auto array(size_t size, Range)(Range range) pure @nogc nothrow
+    if(isInputRange!Range)
+{
+    alias E = ElementType!Range;
+    NoGcArray!(size, E) arr;
+    foreach(element; range) 
+    {
+        arr ~= element;
+    }
+    return arr;
+}
+
+@("Can I convert a range to a nogc array")
+unittest
+{
+    import std.algorithm : map;
+    import fluent.asserts;
+    auto original = [1, 2, 3];
+    auto result = original.map!(x => x*2).array!(4);
+    result.length.should.equal(3);
+    result[0].should.equal(2);
+    result[1].should.equal(4);
+    result[2].should.equal(6);
+}
+
 struct NoGcArray(size_t maxSize, T)
 {
-    private T[maxSize] _buffer;
+    static if(isClass!T && isConst!T)
+    {
+        private Rebindable!T[maxSize] _buffer;
+    }
+    else
+    {
+        private T[maxSize] _buffer;
+    }
+
     private size_t _length;
-    size_t length() pure const @nogc nothrow
+    size_t length() @safe pure const @nogc nothrow
     {
         return _length;
     } 
 
-    void opOpAssign(string op)(T element) pure @nogc nothrow
+    void opOpAssign(string op)(T element) @safe pure @nogc nothrow
     in(_length < maxSize, "Cannot append if the buffer is fully filled.")
     {
         static if(op == "~")
@@ -57,7 +94,7 @@ struct NoGcArray(size_t maxSize, T)
         }
     }
 
-    T opIndex(size_t index)
+    T opIndex(size_t index) @safe pure @nogc nothrow
     in(index < _length, "Cannot access index greater than length")
     {
         return _buffer[index];
@@ -65,19 +102,47 @@ struct NoGcArray(size_t maxSize, T)
 
     private size_t _index;
 
-    T front() pure @nogc nothrow
+    T front() @safe pure @nogc nothrow
     {
         return this[_index];
     }
 
-    void popFront() pure @nogc nothrow
+    void popFront() @safe pure @nogc nothrow
     {
         _index++;
     }
 
-    bool empty() pure @nogc nothrow
+    bool empty() @safe pure @nogc nothrow
     {
         return _length <= _index;
+    }
+
+    static if(isClass!T)
+    {
+        void remove(T element) @safe pure @nogc nothrow
+        {
+            auto length = _length;
+            auto found = false;
+            for(size_t i = 0; i < length; ++i)
+            {
+                if(found)
+                { // Cannot be triggered in the first loop.
+                    _buffer[i-1] = _buffer[i];
+                    _buffer[i] = null; // Clean up nicely, but can be optimised away.
+                }
+                else if(_buffer[i] is element)
+                {
+                    found = true;
+                    _length--;
+                }
+            }
+        }
+
+        void remove(Range)(Range range) @safe pure @nogc nothrow
+            if(isInputRange!Range && is(ElementType!Range : T))
+        {
+            foreach(e; range) remove(e);
+        }
     }
 }
 
@@ -172,4 +237,54 @@ unittest
     array ~= 42;
     array.map!(x => x*2).sum.should.equal(924);
     array.map!(x => x*2).sum.should.equal(924);
+}
+
+@("Can I remove an element from an array?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, Object) array;
+    auto removed = new Object;
+    array ~= removed;
+    array.remove(removed);
+    array.length.should.equal(0);
+}
+
+@("Are other elements preserved?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, Object) array;
+    auto remainer = new Object;
+    auto removed = new Object;
+    array ~= remainer;
+    array ~= removed;
+    array.remove(removed);
+    array.length.should.equal(1);
+    array[0].should.equal(remainer);
+}
+
+@("Can I remove a range of elements")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, Object) array;
+    auto remainer = new Object;
+    auto removed = new Object;
+    array ~= remainer;
+    array ~= removed;
+    array.remove([removed]);
+    array.length.should.equal(1);
+    array[0].should.equal(remainer);
+}
+
+@("Can I manipulate a mutable array of const objects?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, const Object) array;
+    auto removed = new Object;
+    array ~= removed;
+    array.remove(removed);
+    array.length.should.equal(0);
 }
