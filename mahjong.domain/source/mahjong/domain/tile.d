@@ -157,7 +157,7 @@ unittest
     tile.isSelfDraw.should.equal(true);
 }
 
-bool isObtainedFromADiscard(const Tile tile) pure
+bool isObtainedFromADiscard(const Tile tile) pure @nogc nothrow
 {
     return tile._origin == Tile.Origin.discard
         || tile._origin == Tile.Origin.kanSteal;
@@ -204,7 +204,7 @@ unittest
     tile.isReplacementTileForKan.should.equal(false);
 }
 
-bool isKanSteal(const Tile tile) pure
+bool isKanSteal(const Tile tile) pure @nogc nothrow
 {
     return tile._origin == Tile.Origin.kanSteal;
 }
@@ -290,17 +290,17 @@ unittest
     assert(!tileA.hasEqualValue(tileB), "Non equal tiles were equal");
 }
 
-bool isHonourOrTerminal(const ComparativeTile tile)
+bool isHonourOrTerminal(const ComparativeTile tile) pure @nogc nothrow
 {
     return tile.isHonour || tile.isTerminal;
 }
 
-bool isSimple(const ComparativeTile tile)
+bool isSimple(const ComparativeTile tile) pure @nogc nothrow
 {
     return !tile.isHonourOrTerminal;
 }
 
-bool isConstructive(const ComparativeTile first, const ComparativeTile other) pure
+bool isConstructive(const ComparativeTile first, const ComparativeTile other) pure @nogc nothrow
 {
     return !first.isHonour && first.type == other.type &&
         abs(first.value - other.value) == 1;
