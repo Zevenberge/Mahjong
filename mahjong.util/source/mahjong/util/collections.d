@@ -78,7 +78,8 @@ struct NoGcArray(size_t maxSize, T)
     size_t length() @safe pure const @nogc nothrow
     {
         return _length;
-    } 
+    }
+    alias opDollar = length;
 
     void opOpAssign(string op)(T element) @safe pure @nogc nothrow
     in(_length < maxSize, "Cannot append if the buffer is fully filled.")
