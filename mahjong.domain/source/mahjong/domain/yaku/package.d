@@ -80,7 +80,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.set;
-    auto result = MahjongResult(true, [new NagashiManganSet]); 
+    auto result = MahjongResult(true, [nagashiMangan()]); 
     Environment env = {
     leadingWind: PlayerWinds.east, 
             ownWind: PlayerWinds.west,

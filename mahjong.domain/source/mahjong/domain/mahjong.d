@@ -76,7 +76,7 @@ body
 	{
 		if (isThirteenOrphans(sortedHand))
 		{
-			return MahjongResult(true, [new ThirteenOrphanSet(sortedHand)]);
+			return MahjongResult(true, [thirteenOrphans(sortedHand)]);
 		}
 	}
 
@@ -91,7 +91,7 @@ body
 	{ // If we don't have a mahjong using normal hands, we check whether we have seven pairs
 		if (isSevenPairs(sortedHand))
 		{
-			return MahjongResult(true, [new SevenPairsSet(sortedHand)]);
+			return MahjongResult(true, [sevenPairs(sortedHand)]);
 		}
 	}
 	return result;
@@ -188,26 +188,25 @@ private class Progress
 		this.hand = hand;
 		foreach (set; initialSets)
 		{
-			auto pon = cast(const(PonSet)) set;
-			if (pon)
-				pons ~= pon;
-			auto chi = cast(const(ChiSet)) set;
-			if (chi)
-				chis ~= chi;
+			if (set.isPon)
+				pons ~= set;
+			if (set.isChi)
+				chis ~= set;
+			// No pair because a pair cannot be open.
 		}
 	}
 
 	const(Tile)[] hand;
-	const(PairSet)[] pairs;
-	const(PonSet)[] pons;
-	const(ChiSet)[] chis;
+	const(Set)[] pairs;
+	const(Set)[] pons;
+	const(Set)[] chis;
 
 	void convertToPair(const HandSetSeperation handSetSeperation) pure
 	{
 		if (!handSetSeperation.isSeperated)
 			return;
 		hand = handSetSeperation.hand;
-		pairs ~= new PairSet(handSetSeperation.set);
+		pairs ~= pair(handSetSeperation.set);
 	}
 
 	void convertToPon(const HandSetSeperation handSetSeperation) pure
@@ -215,7 +214,7 @@ private class Progress
 		if (!handSetSeperation.isSeperated)
 			return;
 		hand = handSetSeperation.hand;
-		pons ~= new PonSet(handSetSeperation.set);
+		pons ~= pon(handSetSeperation.set);
 	}
 
 	void convertToChi(const HandSetSeperation handSetSeperation) pure
@@ -223,7 +222,7 @@ private class Progress
 		if (!handSetSeperation.isSeperated)
 			return;
 		hand = handSetSeperation.hand;
-		chis ~= new ChiSet(handSetSeperation.set);
+		chis ~= chi(handSetSeperation.set);
 	}
 
 	void subtractPair() pure
@@ -263,7 +262,7 @@ private struct HandSetSeperation
 {
 	const(Tile)[] hand;
 	const(Tile)[] set;
-	bool isSeperated() @property pure const
+	bool isSeperated() @property pure const @nogc nothrow
 	{
 		return set.length > 0;
 	}
@@ -362,7 +361,7 @@ private HandSetSeperation seperateChi(const(Tile)[] hand) pure
 			chi ~= tile;
 			if (chi.length == 3)
 			{
-				return HandSetSeperation(hand.without!((a, b) => a.id == b.id)(chi), chi);
+				return HandSetSeperation(hand.without!((a, b) => a is b)(chi), chi);
 			}
 		}
 	}
@@ -381,7 +380,7 @@ private HandSetSeperation seperateEqualSetOfGivenLength(const(Tile)[] hand, cons
 	if (equalTiles.length < distance)
 		return HandSetSeperation(hand, null);
 	auto set = equalTiles[0 .. distance];
-	return HandSetSeperation(hand.without!((a, b) => a.id == b.id)(set), set);
+	return HandSetSeperation(hand.without!((a, b) => a is b)(set), set);
 }
 
 @("Are the example hands mahjong hands?")
@@ -610,7 +609,7 @@ unittest
 
 private MahjongData calculateNagashiMangan(const Player player)
 {
-	return MahjongData(player, MahjongResult(player.isNagashiMangan, [new NagashiManganSet]));
+	return MahjongData(player, MahjongResult(player.isNagashiMangan, [nagashiMangan()]));
 }
 
 @("If the game is an exhaustive draw, a nagashi mangan is counted as a mahjong")
@@ -930,7 +929,7 @@ struct MahjongData
 		import fluent.asserts;
 
 		auto player = new Player("🀙🀚🀛🀜🀜🀝🀝🀞🀞🀟🀠🀠🀡"d);
-		auto result = MahjongResult(true, [new NagashiManganSet()]);
+		auto result = MahjongResult(true, [nagashiMangan()]);
 		auto data = MahjongData(player, result);
 		data.calculateMiniPoints(PlayerWinds.east).should.equal(30);
 	}

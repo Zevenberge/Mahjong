@@ -37,7 +37,7 @@ class OpenHand
 
 	size_t amountOfPons() @property pure const
 	{
-		return _sets.count!(s => cast(PonSet)s !is null);
+		return _sets.count!(s => s.isPon);
 	}
 
 	private ubyte _amountOfKans;
@@ -48,7 +48,7 @@ class OpenHand
 
 	size_t amountOfChis() @property pure const
 	{
-		return _sets.count!(s => cast(ChiSet)s !is null);
+		return _sets.count!(s => s.isChi);
 	}
 
 	void addPon(Tile[] tiles) pure
@@ -58,7 +58,7 @@ class OpenHand
 	}
 	body
 	{
-		_sets ~= new PonSet(tiles);
+		_sets ~= pon(tiles);
 	}
 
 	void addKan(Tile[] tiles) pure
@@ -68,7 +68,7 @@ class OpenHand
 	}
 	body
 	{
-		_sets ~= new PonSet(tiles);
+		_sets ~= pon(tiles);
 		++_amountOfKans;
 	}
 
@@ -79,7 +79,7 @@ class OpenHand
 	}
 	body
 	{
-		_sets ~= new ChiSet(tiles);
+		_sets ~= chi(tiles);
 	}
 
 	bool canPromoteToKan(const Tile tile) pure const
@@ -93,7 +93,7 @@ class OpenHand
 		{
 			if(!set.canPromoteSetToKan(kanTile)) continue;
 			_sets = _sets.remove(i);
-			_sets = _sets.insertAt(new PonSet(set.tiles ~ kanTile), i);
+			_sets = _sets.insertAt(pon(set.tiles ~ kanTile), i);
 			++_amountOfKans;
 			return;
 		}
@@ -153,28 +153,28 @@ private bool canPromoteSetToKan(const Set set, const Tile kanTile) pure
 unittest
 {
 	import mahjong.domain.creation;
-	auto pon = new PonSet("🀀🀀🀀"d.convertToTiles);
+	auto pon = .pon("🀀🀀🀀"d.convertToTiles);
 	auto kanTile = "🀀"d.convertToTiles[0];
 	assert(pon.canPromoteSetToKan(kanTile), "Pon should be promotable to kan.");
 }
 unittest
 {
 	import mahjong.domain.creation;
-	auto pon = new PonSet("🀀🀀🀀🀀"d.convertToTiles);
+	auto pon = .pon("🀀🀀🀀🀀"d.convertToTiles);
 	auto kanTile = "🀀"d.convertToTiles[0];
 	assert(!pon.canPromoteSetToKan(kanTile), "Kan should not be promotable to kan.");
 }
 unittest
 {
 	import mahjong.domain.creation;
-	auto pon = new PonSet("🀟🀟🀟"d.convertToTiles);
+	auto pon = .pon("🀟🀟🀟"d.convertToTiles);
 	auto kanTile = "🀀"d.convertToTiles[0];
 	assert(!pon.canPromoteSetToKan(kanTile), "A different pon should not be promotable to kan.");
 }
 unittest
 {
 	import mahjong.domain.creation;
-	auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
+	auto chi = .chi("🀟🀠🀡"d.convertToTiles);
 	auto kanTile = "🀟"d.convertToTiles[0];
 	assert(!chi.canPromoteSetToKan(kanTile), "A different chi should not be promotable to kan.");
 }

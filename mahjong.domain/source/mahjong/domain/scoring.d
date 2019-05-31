@@ -204,7 +204,7 @@ unittest
     player2.game = new Ingame(PlayerWinds.south);
     auto metagame = new Metagame([player1, player2], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
-    auto mahjongData = MahjongData(player1, true, [new SevenPairsSet(player1.closedHand.tiles)]);
+    auto mahjongData = MahjongData(player1, true, [sevenPairs(player1.closedHand.tiles)]);
     auto transactions = [mahjongData].toTransactions(metagame);
     transactions.length.should.equal(2);
 }
@@ -228,7 +228,7 @@ unittest
     auto metagame = new Metagame([player1, player2, player3], new DefaultBambooOpts);
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
     player1.ron(tile, metagame);
-    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(player1.closedHand.tiles)]);
+    auto mahjongData1 = MahjongData(player1, true, [sevenPairs(player1.closedHand.tiles)]);
     auto transactions = [mahjongData1].toTransactions(metagame);
     transactions.length.should.equal(2);
 }
@@ -254,8 +254,8 @@ unittest
     metagame.wall = new MockWall(new Tile(Types.ball, Numbers.one));
     player1.ron(tile, metagame);
     player3.ron(tile, metagame);
-    auto mahjongData1 = MahjongData(player1, true, [new SevenPairsSet(player1.closedHand.tiles)]);
-    auto mahjongData2 = MahjongData(player3, true, [new SevenPairsSet(player3.closedHand.tiles)]);
+    auto mahjongData1 = MahjongData(player1, true, [sevenPairs(player1.closedHand.tiles)]);
+    auto mahjongData2 = MahjongData(player3, true, [sevenPairs(player3.closedHand.tiles)]);
     auto transactions = [mahjongData1, mahjongData2].toTransactions(metagame);
     transactions.length.should.equal(3);
 }
@@ -656,7 +656,7 @@ unittest
     import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.eight);
     auto mahjongResult = MahjongData(null, false, 
-        [new ChiSet([
+        [chi([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
                     new Tile(Types.bamboo, Numbers.eight)
@@ -670,7 +670,7 @@ unittest
     import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
-        [new ChiSet([
+        [chi([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
                     new Tile(Types.bamboo, Numbers.eight)
@@ -684,7 +684,7 @@ unittest
     import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
-        [new PonSet([
+        [pon([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.six)
@@ -699,7 +699,7 @@ unittest
     import mahjong.domain.set;
     auto doraIndicator = new Tile(Types.bamboo, Numbers.five);
     auto mahjongResult = MahjongData(null, false, 
-        [new ChiSet([
+        [chi([
                     new Tile(Types.bamboo, Numbers.six),
                     new Tile(Types.bamboo, Numbers.seven),
                     new Tile(Types.bamboo, Numbers.eight)

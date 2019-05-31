@@ -158,9 +158,9 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
-    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀊🀋🀌"d.convertToTiles);
+    auto third = chi("🀍🀎🀏"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.isStraightFlush.should.equal(true);
 }
@@ -170,9 +170,9 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new PonSet("🀇🀇🀇"d.convertToTiles);
-    auto second = new PonSet("🀊🀊🀊"d.convertToTiles);
-    auto third = new PonSet("🀍🀍🀍"d.convertToTiles);
+    auto first = pon("🀇🀇🀇"d.convertToTiles);
+    auto second = pon("🀊🀊🀊"d.convertToTiles);
+    auto third = pon("🀍🀍🀍"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.isStraightFlush.should.equal(false);
 }
@@ -182,9 +182,9 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀈🀉🀊"d.convertToTiles);
-    auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
-    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto first = chi("🀈🀉🀊"d.convertToTiles);
+    auto second = chi("🀊🀋🀌"d.convertToTiles);
+    auto third = chi("🀍🀎🀏"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.isStraightFlush.should.equal(false);
 }
@@ -194,10 +194,10 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀊🀋🀌"d.convertToTiles);
-    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
-    auto other = new ChiSet("🀈🀉🀊"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀊🀋🀌"d.convertToTiles);
+    auto third = chi("🀍🀎🀏"d.convertToTiles);
+    auto other = chi("🀈🀉🀊"d.convertToTiles);
     auto result = MahjongResult(true, [first, other, second, third]);
     result.isStraightFlush.should.equal(true);
 }
@@ -207,9 +207,9 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀜🀝🀞"d.convertToTiles);
-    auto third = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀜🀝🀞"d.convertToTiles);
+    auto third = chi("🀍🀎🀏"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.isStraightFlush.should.equal(false);
 }
@@ -242,8 +242,8 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀇🀈🀉"d.convertToTiles);
     auto result = MahjongResult(true, [first, second]);
     result.hasJustTwoEqualChis.should.equal(true);
 }
@@ -253,8 +253,8 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀔🀕🀖"d.convertToTiles);
     auto result = MahjongResult(true, [first, second]);
     result.hasJustTwoEqualChis.should.equal(false);
 }
@@ -264,8 +264,8 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new PonSet("🀙🀙🀙"d.convertToTiles);
-    auto second = new PonSet("🀙🀙🀙"d.convertToTiles);
+    auto first = pon("🀙🀙🀙"d.convertToTiles);
+    auto second = pon("🀙🀙🀙"d.convertToTiles);
     auto result = MahjongResult(true, [first, second]);
     result.hasJustTwoEqualChis.should.equal(false);
 }
@@ -275,10 +275,10 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto third = new ChiSet("🀔🀕🀖"d.convertToTiles);
-    auto fourth = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀇🀈🀉"d.convertToTiles);
+    auto third = chi("🀔🀕🀖"d.convertToTiles);
+    auto fourth = chi("🀔🀕🀖"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third, fourth]);
     result.hasJustTwoEqualChis.should.equal(false);
 }
@@ -288,9 +288,9 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto third = new ChiSet("🀇🀈🀉"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀇🀈🀉"d.convertToTiles);
+    auto third = chi("🀇🀈🀉"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.hasJustTwoEqualChis.should.equal(true);
 }
@@ -305,10 +305,10 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto second = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto third = new ChiSet("🀔🀕🀖"d.convertToTiles);
-    auto fourth = new ChiSet("🀔🀕🀖"d.convertToTiles);
+    auto first = chi("🀇🀈🀉"d.convertToTiles);
+    auto second = chi("🀇🀈🀉"d.convertToTiles);
+    auto third = chi("🀔🀕🀖"d.convertToTiles);
+    auto fourth = chi("🀔🀕🀖"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third, fourth]);
     result.hasTwoTimesTwoEqualChis.should.equal(true);
 }
@@ -331,9 +331,9 @@ unittest
 {
     import mahjong.domain.set;
     import mahjong.domain.creation;
-    auto first = new ChiSet("🀊🀋🀌"d.convertToTiles);
-    auto second = new ChiSet("🀓🀔🀕"d.convertToTiles);
-    auto third = new ChiSet("🀜🀝🀞"d.convertToTiles);
+    auto first = chi("🀊🀋🀌"d.convertToTiles);
+    auto second = chi("🀓🀔🀕"d.convertToTiles);
+    auto third = chi("🀜🀝🀞"d.convertToTiles);
     auto result = MahjongResult(true, [first, second, third]);
     result.hasTripletChis.should.equal(true);
 }
@@ -343,7 +343,7 @@ unittest
 {
     import mahjong.domain.set; 
     import mahjong.domain.creation;
-    auto first = new SevenPairsSet("🀑🀑🀕🀕🀒🀒🀠🀠🀀🀀🀐🀐🀅🀅"d.convertToTiles);
+    auto first = sevenPairs("🀑🀑🀕🀕🀒🀒🀠🀠🀀🀀🀐🀐🀅🀅"d.convertToTiles);
     auto result = MahjongResult(true, [first]);
     result.hasTripletChis.should.equal(false);
 }

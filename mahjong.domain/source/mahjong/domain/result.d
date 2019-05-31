@@ -23,14 +23,15 @@ auto tiles(const MahjongResult result) @property pure
 
 bool isSevenPairs(const MahjongResult result) pure
 {
-    return result.sets.length == 1 && cast(SevenPairsSet)result.sets[0];
+    import mahjong.domain.set : isSevenPairs;
+    return result.sets.length == 1 && result.sets[0].isSevenPairs;
 }
 
 @("A result with a seven pair set is a seven pair mahjong")
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new SevenPairsSet(null)]);
+    auto result = MahjongResult(true, [sevenPairs(null)]);
     result.isSevenPairs.should.equal(true);
 }
 
@@ -38,7 +39,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new ThirteenOrphanSet(null)]);
+    auto result = MahjongResult(true, [thirteenOrphans(null)]);
     result.isSevenPairs.should.equal(false);
 }
 
@@ -46,20 +47,21 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    auto result = MahjongResult(true, [pair(null), pon(null), pon(null), pon(null), pon(null)]);
     result.isSevenPairs.should.equal(false);
 }
 
 bool isThirteenOrphans(const MahjongResult result) pure
 {
-    return result.sets.length == 1 && cast(ThirteenOrphanSet)result.sets[0];
+    import mahjong.domain.set : isThirteenOrphans;
+    return result.sets.length == 1 && result.sets[0].isThirteenOrphans;
 }
 
 @("A thirteen orphans hand is seen as such")
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new ThirteenOrphanSet(null)]);
+    auto result = MahjongResult(true, [thirteenOrphans(null)]);
     result.isThirteenOrphans.should.equal(true);
 }
 
@@ -67,7 +69,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new SevenPairsSet(null)]);
+    auto result = MahjongResult(true, [sevenPairs(null)]);
     result.isThirteenOrphans.should.equal(false);
 }
 
@@ -75,20 +77,21 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    auto result = MahjongResult(true, [pair(null), pon(null), pon(null), pon(null), pon(null)]);
     result.isThirteenOrphans.should.equal(false);
 }
 
 bool isNagashiMangan(const MahjongResult result) pure
 {
-    return result.sets.length == 1 && cast(NagashiManganSet)result.sets[0];
+    import mahjong.domain.set : isNagashiMangan;
+    return result.sets.length == 1 && result.sets[0].isNagashiMangan;
 }
 
 @("A result with a seven pair set is a seven pair mahjong")
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new NagashiManganSet()]);
+    auto result = MahjongResult(true, [nagashiMangan()]);
     result.isNagashiMangan.should.equal(true);
 }
 
@@ -96,7 +99,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new ThirteenOrphanSet(null)]);
+    auto result = MahjongResult(true, [thirteenOrphans(null)]);
     result.isNagashiMangan.should.equal(false);
 }
 
@@ -104,7 +107,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    auto result = MahjongResult(true, [pair(null), pon(null), pon(null), pon(null), pon(null)]);
     result.isNagashiMangan.should.equal(false);
 }
 
@@ -118,13 +121,13 @@ bool hasAtLeastOneChi(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
-    auto result1 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    auto result1 = MahjongResult(true, [pair(null), chi(null), pon(null), pon(null), pon(null)]);
     result1.hasAtLeastOneChi.should.equal(true);
-    auto result2 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new ChiSet(null), new PonSet(null), new PonSet(null)]);
+    auto result2 = MahjongResult(true, [pair(null), chi(null), chi(null), pon(null), pon(null)]);
     result2.hasAtLeastOneChi.should.equal(true);
-    auto result3 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new ChiSet(null), new ChiSet(null), new PonSet(null)]);
+    auto result3 = MahjongResult(true, [pair(null), chi(null), chi(null), chi(null), pon(null)]);
     result3.hasAtLeastOneChi.should.equal(true);
-    auto result4 = MahjongResult(true, [new PairSet(null), new ChiSet(null), new ChiSet(null), new ChiSet(null), new ChiSet(null)]);
+    auto result4 = MahjongResult(true, [pair(null), chi(null), chi(null), chi(null), chi(null)]);
     result4.hasAtLeastOneChi.should.equal(true);
 }
 
@@ -132,7 +135,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new PairSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null)]);
+    auto result = MahjongResult(true, [pair(null), pon(null), pon(null), pon(null), pon(null)]);
     result.hasAtLeastOneChi.should.equal(false);
 }
 
@@ -150,9 +153,9 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto result = MahjongResult(true, [new PairSet("🀐🀐"d.convertToTiles)]);
+    auto result = MahjongResult(true, [pair("🀐🀐"d.convertToTiles)]);
     result.hasValuelessPair(PlayerWinds.east, PlayerWinds.east).should.equal(true);
-    auto result2 = MahjongResult(true, [new PairSet("🀖🀖"d.convertToTiles)]);
+    auto result2 = MahjongResult(true, [pair("🀖🀖"d.convertToTiles)]);
     result2.hasValuelessPair(PlayerWinds.east, PlayerWinds.east).should.equal(true);
 }
 
@@ -161,13 +164,13 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto result = MahjongResult(true, [new PairSet("🀀🀀"d.convertToTiles)]);
+    auto result = MahjongResult(true, [pair("🀀🀀"d.convertToTiles)]);
     result.hasValuelessPair(PlayerWinds.south, PlayerWinds.west).should.equal(true);
-    auto result2 = MahjongResult(true, [new PairSet("🀁🀁"d.convertToTiles)]);
+    auto result2 = MahjongResult(true, [pair("🀁🀁"d.convertToTiles)]);
     result2.hasValuelessPair(PlayerWinds.south, PlayerWinds.west).should.equal(false);
-    auto result3 = MahjongResult(true, [new PairSet("🀂🀂"d.convertToTiles)]);
+    auto result3 = MahjongResult(true, [pair("🀂🀂"d.convertToTiles)]);
     result3.hasValuelessPair(PlayerWinds.south, PlayerWinds.west).should.equal(false);
-    auto result4 = MahjongResult(true, [new PairSet("🀄🀄"d.convertToTiles)]);
+    auto result4 = MahjongResult(true, [pair("🀄🀄"d.convertToTiles)]);
     result4.hasValuelessPair(PlayerWinds.east, PlayerWinds.east).should.equal(false);
 }
 
@@ -175,7 +178,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new SevenPairsSet(null)]);
+    auto result = MahjongResult(true, [sevenPairs(null)]);
     result.hasValuelessPair(PlayerWinds.east, PlayerWinds.north).should.equal(false);
 }
 
@@ -189,12 +192,12 @@ bool hasOnlyChis(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
-    MahjongResult(true, [new SevenPairsSet(null)]).hasOnlyChis.should.equal(false);
-    MahjongResult(true, [new PairSet(null), new ChiSet(null), 
-            new PonSet(null), new PonSet(null), new PonSet(null)])
+    MahjongResult(true, [sevenPairs(null)]).hasOnlyChis.should.equal(false);
+    MahjongResult(true, [pair(null), chi(null), 
+            pon(null), pon(null), pon(null)])
         .hasOnlyChis.should.equal(false);
-     MahjongResult(true, [new PairSet(null), new ChiSet(null), 
-            new ChiSet(null), new ChiSet(null), new ChiSet(null)])
+     MahjongResult(true, [pair(null), chi(null), 
+            chi(null), chi(null), chi(null)])
         .hasOnlyChis.should.equal(true);
 }
 
@@ -209,9 +212,9 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pair = new PairSet("🀇🀇"d.convertToTiles);
-    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
-    auto pon = new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto pair = pair("🀇🀇"d.convertToTiles);
+    auto chi = chi("🀟🀠🀡"d.convertToTiles);
+    auto pon = pon("🀄🀄🀄"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi, pon]);
     result.allSetsHaveHonoursOrATerminal.should.equal(true);
 }
@@ -221,9 +224,9 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pair = new PairSet("🀇🀇"d.convertToTiles);
-    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
-    auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto pair = pair("🀇🀇"d.convertToTiles);
+    auto chi = chi("🀟🀠🀡"d.convertToTiles);
+    auto pon = pon("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi, pon]);
     result.allSetsHaveHonoursOrATerminal.should.equal(true);
 }
@@ -233,9 +236,9 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pair = new PairSet("🀇🀇"d.convertToTiles);
-    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
-    auto pon = new PonSet("🀠🀠🀠"d.convertToTiles);
+    auto pair = pair("🀇🀇"d.convertToTiles);
+    auto chi = chi("🀟🀠🀡"d.convertToTiles);
+    auto pon = pon("🀠🀠🀠"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi, pon]);
     result.allSetsHaveHonoursOrATerminal.should.equal(false);
 }
@@ -262,7 +265,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pair = new PairSet("🀃🀃"d.convertToTiles);
+    auto pair = pair("🀃🀃"d.convertToTiles);
     auto lastTile = pair.tiles[0];
     auto result = MahjongResult(true, [pair]);
     result.isTwoSidedWait(lastTile).should.equal(false);
@@ -273,7 +276,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pon = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto pon = pon("🀐🀐🀐"d.convertToTiles);
     auto lastTile = pon.tiles[0];
     auto result = MahjongResult(true, [pon]);
     result.isTwoSidedWait(lastTile).should.equal(false);
@@ -284,7 +287,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto chi = new ChiSet("🀒🀓🀔"d.convertToTiles);
+    auto chi = chi("🀒🀓🀔"d.convertToTiles);
     auto lastTile1 = chi.tiles[0];
     auto lastTile2 = chi.tiles[2];
     auto result = MahjongResult(true, [chi]);
@@ -297,7 +300,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto chi = new ChiSet("🀒🀓🀔"d.convertToTiles);
+    auto chi = chi("🀒🀓🀔"d.convertToTiles);
     auto lastTile = chi.tiles[1];
     auto result = MahjongResult(true, [chi]);
     result.isTwoSidedWait(lastTile).should.equal(false);
@@ -308,12 +311,12 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto chiLeft = new ChiSet("🀐🀑🀒"d.convertToTiles);
+    auto chiLeft = chi("🀐🀑🀒"d.convertToTiles);
     auto lastTileLeft = chiLeft.tiles[2];
     auto resultLeft = MahjongResult(true, [chiLeft]);
     resultLeft.isTwoSidedWait(lastTileLeft).should.equal(false);
 
-    auto chiRight = new ChiSet("🀖🀗🀘"d.convertToTiles);
+    auto chiRight = chi("🀖🀗🀘"d.convertToTiles);
     auto lastTileRight = chiRight.tiles[0];
     auto resultRight = MahjongResult(true, [chiRight]);
     resultRight.isTwoSidedWait(lastTileRight).should.equal(false);
@@ -329,7 +332,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto chi= new ChiSet("🀐🀑🀒"d.convertToTiles);
+    auto chi= chi("🀐🀑🀒"d.convertToTiles);
     auto lastTile = chi.tiles[0];
     auto result = MahjongResult(true, [chi]);
     result.isPonWait(lastTile).should.equal(false);
@@ -340,7 +343,7 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pon= new PonSet("🀄🀄🀄"d.convertToTiles);
+    auto pon= pon("🀄🀄🀄"d.convertToTiles);
     auto lastTile = pon.tiles[0];
     auto result = MahjongResult(true, [pon]);
     result.isPonWait(lastTile).should.equal(true);
@@ -362,7 +365,7 @@ bool hasOnlyPons(const MahjongResult result)
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new PonSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PairSet(null)]);
+    auto result = MahjongResult(true, [pon(null), pon(null), pon(null), pon(null), pair(null)]);
     result.hasOnlyPons.should.equal(true);
 }
 
@@ -370,7 +373,7 @@ unittest
 unittest
 {
     import fluent.asserts;
-    auto result = MahjongResult(true, [new ChiSet(null), new PonSet(null), new PonSet(null), new PonSet(null), new PairSet(null)]);
+    auto result = MahjongResult(true, [chi(null), pon(null), pon(null), pon(null), pair(null)]);
     result.hasOnlyPons.should.equal(false);
 }
 
@@ -385,9 +388,9 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pair = new PairSet("🀇🀇"d.convertToTiles);
-    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
-    auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto pair = pair("🀇🀇"d.convertToTiles);
+    auto chi = chi("🀟🀠🀡"d.convertToTiles);
+    auto pon = pon("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi, pon]);
     result.allSetsHaveATerminal.should.equal(true);
 }
@@ -397,9 +400,9 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    auto pair = new PairSet("🀁🀁"d.convertToTiles);
-    auto chi = new ChiSet("🀟🀠🀡"d.convertToTiles);
-    auto pon = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto pair = pair("🀁🀁"d.convertToTiles);
+    auto chi = chi("🀟🀠🀡"d.convertToTiles);
+    auto pon = pon("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [pair, chi, pon]);
     result.allSetsHaveATerminal.should.equal(false);
 }

@@ -352,7 +352,7 @@ private bool isNineGates(const MahjongResult result)
 @("Seven pairs is not nine gates")
 unittest
 {
-    auto result = MahjongResult(true, [new SevenPairsSet(null)]);
+    auto result = MahjongResult(true, [sevenPairs(null)]);
     result.isNineGates.should.equal(false);
 }
 
@@ -360,11 +360,11 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto ones = new PonSet("🀇🀇🀇"d.convertToTiles);
-    auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
-    auto fives = new PairSet("🀋🀋"d.convertToTiles);
-    auto sixSevenEight = new ChiSet("🀌🀍🀎"d.convertToTiles);
-    auto nines = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto ones = pon("🀇🀇🀇"d.convertToTiles);
+    auto twoThreeFour = chi("🀈🀉🀊"d.convertToTiles);
+    auto fives = pair("🀋🀋"d.convertToTiles);
+    auto sixSevenEight = chi("🀌🀍🀎"d.convertToTiles);
+    auto nines = pon("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [ones, twoThreeFour, fives, sixSevenEight, nines]);
     result.isNineGates.should.equal(true);
 }
@@ -373,11 +373,11 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto ones = new PonSet("🀇🀇🀇"d.convertToTiles);
-    auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
-    auto fiveSixSeven = new ChiSet("🀋🀌🀍"d.convertToTiles);
-    auto eights = new PairSet("🀎🀎"d.convertToTiles);
-    auto nines = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto ones = pon("🀇🀇🀇"d.convertToTiles);
+    auto twoThreeFour = chi("🀈🀉🀊"d.convertToTiles);
+    auto fiveSixSeven = chi("🀋🀌🀍"d.convertToTiles);
+    auto eights = pair("🀎🀎"d.convertToTiles);
+    auto nines = pon("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [ones, twoThreeFour, fiveSixSeven, eights, nines]);
     result.isNineGates.should.equal(true);
 }
@@ -386,10 +386,10 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto ones = new PairSet("🀇🀇"d.convertToTiles);
-    auto oneTwoThree = new ChiSet("🀇🀈🀉"d.convertToTiles);
-    auto fourFiveSix = new ChiSet("🀊🀋🀌"d.convertToTiles);
-    auto sevenEightNine = new ChiSet("🀍🀎🀏"d.convertToTiles);
+    auto ones = pair("🀇🀇"d.convertToTiles);
+    auto oneTwoThree = chi("🀇🀈🀉"d.convertToTiles);
+    auto fourFiveSix = chi("🀊🀋🀌"d.convertToTiles);
+    auto sevenEightNine = chi("🀍🀎🀏"d.convertToTiles);
     auto result = MahjongResult(true, [ones, oneTwoThree, fourFiveSix, sevenEightNine, sevenEightNine]);
     result.isNineGates.should.equal(false);
 }
@@ -398,11 +398,11 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto ones = new PonSet("🀇🀇🀇"d.convertToTiles);
-    auto threeFourFive = new ChiSet("🀉🀊🀋"d.convertToTiles);
-    auto sixSevenEight = new ChiSet("🀌🀍🀎"d.convertToTiles);
-    auto sevenEightNine = new ChiSet("🀍🀎🀏"d.convertToTiles);
-    auto nines = new PairSet("🀏🀏"d.convertToTiles);
+    auto ones = pon("🀇🀇🀇"d.convertToTiles);
+    auto threeFourFive = chi("🀉🀊🀋"d.convertToTiles);
+    auto sixSevenEight = chi("🀌🀍🀎"d.convertToTiles);
+    auto sevenEightNine = chi("🀍🀎🀏"d.convertToTiles);
+    auto nines = pair("🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [ones, threeFourFive, sixSevenEight, sevenEightNine, nines]);
     result.isNineGates.should.equal(false);
 }
@@ -411,11 +411,11 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto ones = new PonSet("🀇🀇🀇🀇"d.convertToTiles);
-    auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
-    auto fiveSixSeven = new ChiSet("🀋🀌🀍"d.convertToTiles);
-    auto eights = new PairSet("🀎🀎"d.convertToTiles);
-    auto nines = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto ones = pon("🀇🀇🀇🀇"d.convertToTiles);
+    auto twoThreeFour = chi("🀈🀉🀊"d.convertToTiles);
+    auto fiveSixSeven = chi("🀋🀌🀍"d.convertToTiles);
+    auto eights = pair("🀎🀎"d.convertToTiles);
+    auto nines = pon("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [ones, twoThreeFour, fiveSixSeven, eights, nines]);
     result.isNineGates.should.equal(false);
 }
@@ -424,11 +424,11 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto ones = new PonSet("🀙🀙🀙"d.convertToTiles);
-    auto twoThreeFour = new ChiSet("🀈🀉🀊"d.convertToTiles);
-    auto fives = new PairSet("🀋🀋"d.convertToTiles);
-    auto sixSevenEight = new ChiSet("🀌🀍🀎"d.convertToTiles);
-    auto nines = new PonSet("🀏🀏🀏"d.convertToTiles);
+    auto ones = pon("🀙🀙🀙"d.convertToTiles);
+    auto twoThreeFour = chi("🀈🀉🀊"d.convertToTiles);
+    auto fives = pair("🀋🀋"d.convertToTiles);
+    auto sixSevenEight = chi("🀌🀍🀎"d.convertToTiles);
+    auto nines = pon("🀏🀏🀏"d.convertToTiles);
     auto result = MahjongResult(true, [ones, twoThreeFour, fives, sixSevenEight, nines]);
     result.isNineGates.should.equal(false);
 }
@@ -443,9 +443,9 @@ private bool isThreeBigDragons(const MahjongResult result)
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
-    auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
-    auto whites = new PonSet("🀆🀆🀆"d.convertToTiles);
+    auto greens = pon("🀅🀅🀅"d.convertToTiles);
+    auto reds = pon("🀄🀄🀄"d.convertToTiles);
+    auto whites = pon("🀆🀆🀆"d.convertToTiles);
     auto result = MahjongResult(true, [greens, reds, whites]);
     result.isThreeBigDragons.should.equal(true);
 }
@@ -454,9 +454,9 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
-    auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
-    auto whites = new PairSet("🀆🀆"d.convertToTiles);
+    auto greens = pon("🀅🀅🀅"d.convertToTiles);
+    auto reds = pon("🀄🀄🀄"d.convertToTiles);
+    auto whites = pair("🀆🀆"d.convertToTiles);
     auto result = MahjongResult(true, [greens, reds, whites]);
     result.isThreeBigDragons.should.equal(false);
 }
@@ -465,9 +465,9 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto greens = new PonSet("🀅🀅🀅"d.convertToTiles);
-    auto reds = new PonSet("🀄🀄🀄"d.convertToTiles);
-    auto bamboo = new PonSet("🀐🀐🀐"d.convertToTiles);
+    auto greens = pon("🀅🀅🀅"d.convertToTiles);
+    auto reds = pon("🀄🀄🀄"d.convertToTiles);
+    auto bamboo = pon("🀐🀐🀐"d.convertToTiles);
     auto result = MahjongResult(true, [greens, reds, bamboo]);
     result.isThreeBigDragons.should.equal(false);
 }
@@ -489,10 +489,10 @@ private bool isFourSmallWinds(const MahjongResult result)
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
-    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
-    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
-    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto easts = pon("🀀🀀🀀"d.convertToTiles);
+    auto souths = pon("🀁🀁🀁"d.convertToTiles);
+    auto wests = pon("🀂🀂🀂"d.convertToTiles);
+    auto norths = pair("🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, wests, norths]);
     result.isFourSmallWinds.should.equal(true);
 }
@@ -501,10 +501,10 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
-    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
-    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
-    auto norths = new PonSet("🀃🀃🀃"d.convertToTiles);
+    auto easts = pon("🀀🀀🀀"d.convertToTiles);
+    auto souths = pon("🀁🀁🀁"d.convertToTiles);
+    auto wests = pon("🀂🀂🀂"d.convertToTiles);
+    auto norths = pon("🀃🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, wests, norths]);
     result.isFourSmallWinds.should.equal(false);
 }
@@ -513,9 +513,9 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
-    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
-    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto easts = pon("🀀🀀🀀"d.convertToTiles);
+    auto souths = pon("🀁🀁🀁"d.convertToTiles);
+    auto norths = pair("🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, norths]);
     result.isFourSmallWinds.should.equal(false);
 }
@@ -524,10 +524,10 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
-    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
-    auto dragons = new PonSet("🀄🀄🀄"d.convertToTiles);
-    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto easts = pon("🀀🀀🀀"d.convertToTiles);
+    auto souths = pon("🀁🀁🀁"d.convertToTiles);
+    auto dragons = pon("🀄🀄🀄"d.convertToTiles);
+    auto norths = pair("🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, dragons, norths]);
     result.isFourSmallWinds.should.equal(false);
 }
@@ -542,10 +542,10 @@ private bool isFourBigWinds(const MahjongResult result)
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
-    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
-    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
-    auto norths = new PonSet("🀃🀃🀃"d.convertToTiles);
+    auto easts = pon("🀀🀀🀀"d.convertToTiles);
+    auto souths = pon("🀁🀁🀁"d.convertToTiles);
+    auto wests = pon("🀂🀂🀂"d.convertToTiles);
+    auto norths = pon("🀃🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, wests, norths]);
     result.isFourBigWinds.should.equal(true);
 }
@@ -554,10 +554,10 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
-    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
-    auto wests = new PonSet("🀂🀂🀂"d.convertToTiles);
-    auto norths = new PairSet("🀃🀃"d.convertToTiles);
+    auto easts = pon("🀀🀀🀀"d.convertToTiles);
+    auto souths = pon("🀁🀁🀁"d.convertToTiles);
+    auto wests = pon("🀂🀂🀂"d.convertToTiles);
+    auto norths = pair("🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, wests, norths]);
     result.isFourBigWinds.should.equal(false);
 }
@@ -566,10 +566,10 @@ unittest
 unittest
 {
     import mahjong.domain.creation : convertToTiles;
-    auto easts = new PonSet("🀀🀀🀀"d.convertToTiles);
-    auto souths = new PonSet("🀁🀁🀁"d.convertToTiles);
-    auto dragons = new PonSet("🀄🀄🀄"d.convertToTiles);
-    auto norths = new PonSet("🀃🀃🀃"d.convertToTiles);
+    auto easts = pon("🀀🀀🀀"d.convertToTiles);
+    auto souths = pon("🀁🀁🀁"d.convertToTiles);
+    auto dragons = pon("🀄🀄🀄"d.convertToTiles);
+    auto norths = pon("🀃🀃🀃"d.convertToTiles);
     auto result = MahjongResult(true, [easts, souths, dragons, norths]);
     result.isFourBigWinds.should.equal(false);
 }
