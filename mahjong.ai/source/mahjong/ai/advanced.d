@@ -4,13 +4,18 @@ import std.algorithm;
 import std.array;
 import std.meta;
 import std.typecons;
+import optional.optional;
 import mahjong.ai;
 import mahjong.ai.data;
 import mahjong.ai.decision;
+import mahjong.domain.analysis;
 import mahjong.domain.player;
 import mahjong.domain.tile;
+import mahjong.util.collections;
 
-version(mahjong_test)
+alias Hand = mahjong.ai.data.Hand;
+
+version(mahjong_ai_test)
 {
     import fluent.asserts;
     import mahjong.ai.testing;
@@ -28,7 +33,8 @@ TurnDecision discardUnrelatedTile(const Hand hand, const Player player) pure @no
         selectOnlyTileOfType,
         selectLonelyHonour,
         selectUnconnectedTerminal,
-        selectUnconnectedTile
+        selectUnconnectedTile,
+        selectTileNotConnectedFromSet
         ))
     {
         tile = check(hand);
@@ -155,6 +161,7 @@ unittest
     result.selectedTile.shouldBeEither(h.tiles[6], h.tiles[9]);
 }
 
+
 private const(Tile) selectOnlyTileOfType(const Hand hand) pure @nogc nothrow
 {
     foreach(set; hand.tilesByType)
@@ -248,9 +255,26 @@ private const(Tile) selectUnconnectedTile(const Hand hand) pure @nogc nothrow
 
 private const(Tile) selectTileNotConnectedFromSet(const Hand hand) pure @nogc nothrow
 {
+    alias Tiles = NoGcArray!(14, const Tile);
+    bool stripSet(ref Tiles tiles)
+    {
+        static foreach(seperate; AliasSeq!(seperatePon, seperateChi))
+        {{
+            auto set = seperate(tiles);
+            if(set.isSeperated)
+            {
+                tiles = set.unwrap.hand;
+                return true;
+            }
+        }}
+        return false;
+    }
+
     foreach(set; hand.nonHonoursByType)
     {
-        
+        auto tiles = set.array!14;
+        while(stripSet(tiles)) {}
+        if(tiles.length == 1) return tiles[0];
     }
     return null;
 }

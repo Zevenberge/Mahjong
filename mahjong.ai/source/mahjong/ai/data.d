@@ -4,7 +4,7 @@ import std.algorithm;
 import mahjong.domain.set;
 import mahjong.domain.tile;
 
-version(mahjong_test)
+version(mahjong_ai_test)
 {
     import std.array;
     import fluent.asserts;
@@ -112,6 +112,32 @@ unittest
     auto h = hand("🀄🀄🀄🀆🀆"d);
     auto result = h.nonHonoursByType.array;
     result.length.should.equal(0);
+}
+
+auto tilesByValue(Tiles)(Tiles tiles) pure @nogc nothrow
+    if(isRangeOfTiles!Tiles)
+{
+    return tiles.chunkBy!((x,y) => x.hasEqualValue(y));
+}
+
+@("All tiles by value should have one element with three tiles in a pon")
+unittest
+{
+    import mahjong.domain.creation;
+    auto result = tilesByValue("🀄🀄🀄"d.convertToTiles).array;
+    result.length.should.equal(1);
+    result[0].array.length.should.equal(3);
+}
+
+@("All tiles by value for a chi should have three elements with one tile")
+unittest
+{
+    import mahjong.domain.creation;
+    auto result = tilesByValue("🀖🀗🀘"d.convertToTiles).array;
+    result.length.should.equal(3);
+    result[0].array.length.should.equal(1);
+    result[1].array.length.should.equal(1);
+    result[2].array.length.should.equal(1);
 }
 
 struct Open

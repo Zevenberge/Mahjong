@@ -1,6 +1,6 @@
 module mahjong.ai.testing;
 
-version(mahjong_test)
+version(mahjong_ai_test)
 {
     import mahjong.ai.data;
     import mahjong.domain.creation;
