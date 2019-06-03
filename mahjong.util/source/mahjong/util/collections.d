@@ -95,7 +95,7 @@ struct NoGcArray(size_t maxSize, T)
         }
     }
 
-    T opIndex(size_t index) @safe pure @nogc nothrow
+    inout(T) opIndex(size_t index) inout @safe pure @nogc nothrow
     in(index < _length, "Cannot access index greater than length")
     {
         return _buffer[index];
@@ -116,6 +116,13 @@ struct NoGcArray(size_t maxSize, T)
     bool empty() @safe pure @nogc nothrow
     {
         return _length <= _index;
+    }
+
+    void sort(alias pred = "a < b")() pure @nogc nothrow
+    {
+        import std.algorithm : sort;
+        auto slice = _buffer[0.. _length];
+        slice.sort!pred; 
     }
 
     static if(isClass!T)
@@ -288,4 +295,79 @@ unittest
     array ~= removed;
     array.remove(removed);
     array.length.should.equal(0);
+}
+
+@("Can I sort a nogc array?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, int) array;
+    array ~= 42;
+    array ~= 1;
+    array ~= 420;
+    array ~= 100;
+    array.sort;
+    array[0].should.equal(1);
+    array[1].should.equal(42);
+    array[2].should.equal(100);
+    array[3].should.equal(420);
+}
+
+@("Can I sort a nogc array with empty elements?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, int) array;
+    array ~= 42;
+    array ~= 1;
+    array ~= 420;
+    array.sort;
+    array[0].should.equal(1);
+    array[1].should.equal(42);
+    array[2].should.equal(420);
+}
+
+auto allocate(Array)(inout Array array) pure nothrow
+{
+    import std.traits : ReturnType;
+    alias T = ReturnType!(Array.init.opIndex);
+    T[] allocated;
+    if(array.length == 0) return allocated;
+    foreach(i; 0 .. array.length)
+    {
+        allocated ~= array[i];
+    }
+    return allocated;
+}
+
+@("Can I allocate an empty array?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, const Object) array;
+    auto allocated = array.allocate;
+    allocated.length.should.equal(0);
+}
+
+@("Can I retain my elemants on a not empty array")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, Object) array;
+    auto contents = new Object;
+    array ~= contents;
+    auto allocated = array.allocate;
+    allocated.length.should.equal(1);
+    allocated[0].should.equal(contents);
+}
+
+@("Can I allocate an array with primitives")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, int) array;
+    array ~= 42;
+    auto allocated = array.allocate;
+    allocated.length.should.equal(1);
+    allocated[0].should.equal(42);
 }
