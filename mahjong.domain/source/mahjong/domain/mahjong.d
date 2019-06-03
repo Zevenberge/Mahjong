@@ -5,6 +5,9 @@ import std.algorithm;
 import std.array;
 import std.conv;
 
+import optional.optional;
+
+import mahjong.domain.analysis;
 import mahjong.domain.closedhand;
 import mahjong.domain.enums;
 import mahjong.domain.openhand;
@@ -13,9 +16,11 @@ import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.result;
 import mahjong.domain.set;
-import mahjong.domain.sort;
 import mahjong.domain.tile;
+import mahjong.util.collections;
 import mahjong.util.range;
+
+alias Set = mahjong.domain.set.Set;
 
 MahjongResult scanHandForMahjong(const Ingame player) pure
 {
@@ -57,30 +62,25 @@ unittest
 	assert(scanHandForMahjong(ingame).isMahjong, "An open chi should count towards mahjong");
 }
 
-private MahjongResult scanHandForMahjong(const(Tile)[] hand, const(Set[]) openSets) pure
-in
-{
-	assert(hand.length > 0);
-}
-out
-{
-	assert(hand.length > 0);
-}
-body
+private MahjongResult scanHandForMahjong(const(Tile)[] closedHand, const(Set[]) openSets) pure
+in(closedHand.length > 0)
+out(; closedHand.length > 0)
 { /*
 	   See if the current hand is a legit mahjong hand.
 	   */
-	auto sortedHand = sortHand(hand);
+	//auto sortedHand = sortHand(hand);
+	auto hand = closedHand.asHand;
+	hand.sort!byTypeValueAsc;
 	// Run a dedicated scan for thirteen orphans
 	if (hand.length == 14)
 	{
-		if (isThirteenOrphans(sortedHand))
+		if (isThirteenOrphans(hand))
 		{
-			return MahjongResult(true, [thirteenOrphans(sortedHand)]);
+			return MahjongResult(true, [thirteenOrphans(hand.allocate)]);
 		}
 	}
 
-	auto progress = scanRegularMahjong(new Progress(sortedHand, openSets));
+	auto progress = scanRegularMahjong(new Progress(hand, openSets));
 	const(Set)[] sets;
 	sets ~= progress.pons;
 	sets ~= progress.chis;
@@ -89,15 +89,15 @@ body
 
 	if (hand.length == 14 && !progress.isMahjong)
 	{ // If we don't have a mahjong using normal hands, we check whether we have seven pairs
-		if (isSevenPairs(sortedHand))
+		if (isSevenPairs(hand))
 		{
-			return MahjongResult(true, [sevenPairs(sortedHand)]);
+			return MahjongResult(true, [sevenPairs(hand.allocate)]);
 		}
 	}
 	return result;
 }
 
-private bool isSevenPairs(const Tile[] hand) pure
+private bool isSevenPairs(const ref Hand hand) pure
 {
 	if (hand.length != 14)
 		return false;
@@ -118,7 +118,7 @@ private bool isSevenPairs(const Tile[] hand) pure
 	return true;
 }
 
-private bool isThirteenOrphans(const Tile[] hand) pure
+private bool isThirteenOrphans(const ref Hand hand) pure
 {
 
 	if (hand.length != 14)
@@ -183,7 +183,7 @@ private bool isThirteenOrphans(const Tile[] hand) pure
 
 private class Progress
 {
-	this(const(Tile)[] hand, const(Set[]) initialSets) pure
+	this(const ref Hand hand, const(Set[]) initialSets) pure
 	{
 		this.hand = hand;
 		foreach (set; initialSets)
@@ -196,33 +196,27 @@ private class Progress
 		}
 	}
 
-	const(Tile)[] hand;
+	Hand hand;
 	const(Set)[] pairs;
 	const(Set)[] pons;
 	const(Set)[] chis;
 
-	void convertToPair(const HandSetSeperation handSetSeperation) pure
+	void convertToPair(const(HandSetSeperation*) handSetSeperation) pure
 	{
-		if (!handSetSeperation.isSeperated)
-			return;
 		hand = handSetSeperation.hand;
-		pairs ~= pair(handSetSeperation.set);
+		pairs ~= pair(handSetSeperation.set.allocate);
 	}
 
-	void convertToPon(const HandSetSeperation handSetSeperation) pure
+	void convertToPon(const(HandSetSeperation*) handSetSeperation) pure
 	{
-		if (!handSetSeperation.isSeperated)
-			return;
 		hand = handSetSeperation.hand;
-		pons ~= pon(handSetSeperation.set);
+		pons ~= pon(handSetSeperation.set.allocate);
 	}
 
-	void convertToChi(const HandSetSeperation handSetSeperation) pure
+	void convertToChi(const(HandSetSeperation*) handSetSeperation) pure
 	{
-		if (!handSetSeperation.isSeperated)
-			return;
 		hand = handSetSeperation.hand;
-		chis ~= chi(handSetSeperation.set);
+		chis ~= chi(handSetSeperation.set.allocate);
 	}
 
 	void subtractPair() pure
@@ -248,23 +242,17 @@ private class Progress
 
 	private void recoverTiles(const(Tile)[] tiles) pure
 	{
-		hand = sortHand(hand ~ tiles);
+		foreach(tile; tiles)
+		{
+			hand ~= tile;
+		}
+		hand.sort!byTypeValueAsc;
 	}
 
 	private bool _isMahjong;
 	bool isMahjong() @property pure const
 	{
 		return _isMahjong || (pairs.length == 1 && pons.length + chis.length == 4);
-	}
-}
-
-private struct HandSetSeperation
-{
-	const(Tile)[] hand;
-	const(Tile)[] set;
-	bool isSeperated() @property pure const @nogc nothrow
-	{
-		return set.length > 0;
 	}
 }
 
@@ -295,10 +283,10 @@ private Progress attemptToResolvePair(Progress progress) pure
 {
 	if (progress.hand.length < 2)
 		return progress;
-	auto pairSeperation = seperateEqualSetOfGivenLength(progress.hand, 2);
-	progress.convertToPair(pairSeperation);
+	auto pairSeperation = seperatePair(progress.hand);
 	if (!pairSeperation.isSeperated)
 		return progress;
+	progress.convertToPair(pairSeperation.unwrap);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
@@ -311,10 +299,10 @@ private Progress attemptToResolvePon(Progress progress) pure
 {
 	if (progress.hand.length < 3)
 		return progress;
-	auto ponSeperation = seperateEqualSetOfGivenLength(progress.hand, 3);
-	progress.convertToPon(ponSeperation);
+	auto ponSeperation = seperatePon(progress.hand);
 	if (!ponSeperation.isSeperated)
 		return progress;
+	progress.convertToPon(ponSeperation.unwrap);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
@@ -335,52 +323,13 @@ private Progress attemptToResolveChi(Progress progress) pure
 	auto chiSeperation = seperateChi(progress.hand);
 	if (!chiSeperation.isSeperated)
 		return progress;
-	progress.convertToChi(chiSeperation);
+	progress.convertToChi(chiSeperation.unwrap);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
 		progress.subtractChi;
 	}
 	return progress;
-}
-
-private HandSetSeperation seperateChi(const(Tile)[] hand) pure
-{
-	/*
-	   This subroutine checks whether there is a chi hidden in the beginning of the hand. 
-	   It should also take into account that there could be doubles, 
-	   i.e. 1-2-2-2-3. Subtract the chi from the initial hand.
-	*/
-
-	const(Tile)[] chi;
-	chi ~= hand[0];
-	foreach (tile; hand.filter!(t => t.type == chi[0].type))
-	{
-		if (tile.value == chi[$ - 1].value + 1)
-		{
-			chi ~= tile;
-			if (chi.length == 3)
-			{
-				return HandSetSeperation(hand.without!((a, b) => a is b)(chi), chi);
-			}
-		}
-	}
-	return HandSetSeperation(hand);
-}
-
-private HandSetSeperation seperateEqualSetOfGivenLength(const(Tile)[] hand, const int distance) pure
-{
-	/* distance = set.pair or set.pon
-	   This subroutine checks if the first few tiles form a set and then subtracts them from the inititial hand.
-	*/
-	if (hand.length < distance)
-		return HandSetSeperation(hand, null);
-	auto tile = hand[0];
-	auto equalTiles = hand.filter!(t => t.hasEqualValue(tile)).array;
-	if (equalTiles.length < distance)
-		return HandSetSeperation(hand, null);
-	auto set = equalTiles[0 .. distance];
-	return HandSetSeperation(hand.without!((a, b) => a is b)(set), set);
 }
 
 @("Are the example hands mahjong hands?")

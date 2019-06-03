@@ -4,6 +4,8 @@ import optional.optional;
 import mahjong.domain.tile;
 import mahjong.util.collections;
 
+public import mahjong.util.collections : NoGcArray;
+
 struct HandSetSeperation
 {
     Hand hand;
@@ -155,7 +157,7 @@ Optional!HandSetSeperation seperateSetWithSameValueOfGivenLength(size_t length)(
     if(hand.length < length) return no!HandSetSeperation;
     Set set;
     set ~= hand[0];
-    static foreach(i; 1 .. 3)
+    static foreach(i; 1 .. length)
     {
         if(!set[0].hasEqualValue(hand[i])) return no!HandSetSeperation;
         set ~= hand[i];
@@ -210,4 +212,16 @@ unittest
     const(Tile)[] tiles = "🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d.convertToTiles;
     ({auto hand = tiles.asHand;
     seperatePon(hand);}).should.haveExecutionTime.lessThan(5.usecs);
+}
+
+@("Can I search for a pair")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀇🀇🀊🀊"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto seperation = seperatePair(hand);
+    seperation.isSeperated.should.equal(true);
+    seperation.unwrap.set.should.containOnly(tiles[0 .. 2]);
 }

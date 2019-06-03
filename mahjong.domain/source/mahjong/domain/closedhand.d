@@ -5,7 +5,6 @@ import std.array;
 import mahjong.domain;
 import mahjong.domain.chi;
 import mahjong.domain.exceptions;
-import mahjong.domain.sort;
 import mahjong.util.range;
 
 class ClosedHand
@@ -45,7 +44,7 @@ class ClosedHand
 	private void addTile(Tile tile) pure
 	{
 		tiles ~= tile;
-		tiles.sortHand;
+		tiles.sort!byTypeValueAsc;
 		_lastTile = tile;
 	}
 

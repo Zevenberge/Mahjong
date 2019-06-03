@@ -491,6 +491,26 @@ unittest
     assert(!comparativeTile.hasEqualValue(tile), "Comparative tile should not have an equal value");
 }
 
+bool byTypeValueAsc(const ComparativeTile a, const ComparativeTile b) pure @nogc nothrow
+{
+	return a.type < b.type || 
+				(a.type == b.type && a.value < b.value);
+}
+
+@("Does byTypeValueAsc sort correctly?")
+unittest
+{
+    import std.algorithm;
+	import mahjong.domain.creation;
+    import fluent.asserts;
+	enum unsortedString = "🀡🀂🀃🀄🀁🀘🀅🀀🀏🀐🀄🀙🀆🀇"d;
+	Tile[] unsortedTiles = unsortedString.convertToTiles;
+	enum sortedString = "🀀🀁🀂🀃🀅🀄🀄🀆🀇🀏🀐🀘🀙🀡"d;
+    auto sortedTiles = sortedString.convertToTiles.map!(t => t._);
+	unsortedTiles.sort!byTypeValueAsc;
+    unsortedTiles.map!(t => t._).should.equal(sortedTiles);
+}
+
 template isRangeOfTiles(Range)
 {
     import std.range;

@@ -9,7 +9,6 @@ import mahjong.domain.chi;
 import mahjong.domain.enums;
 import mahjong.domain.exceptions;
 import mahjong.domain.mahjong;
-import mahjong.domain.sort;
 import mahjong.domain.yaku.environment;
 import mahjong.util.range;
 
