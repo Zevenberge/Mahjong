@@ -152,7 +152,7 @@ alias seperatePon = seperateSetWithSameValueOfGivenLength!3;
 alias seperatePair = seperateSetWithSameValueOfGivenLength!2;
 
 Optional!HandSetSeperation seperateSetWithSameValueOfGivenLength(size_t length)(Hand hand) 
-    @property pure @nogc nothrow
+    pure @nogc nothrow
 {
     if(hand.length < length) return no!HandSetSeperation;
     Set set;

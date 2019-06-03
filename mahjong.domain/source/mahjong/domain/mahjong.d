@@ -85,7 +85,6 @@ out(; closedHand.length > 0)
 	sets ~= progress.pons;
 	sets ~= progress.chis;
 	sets ~= progress.pairs;
-	auto result = MahjongResult(progress.isMahjong, sets);
 
 	if (hand.length == 14 && !progress.isMahjong)
 	{ // If we don't have a mahjong using normal hands, we check whether we have seven pairs
@@ -94,10 +93,11 @@ out(; closedHand.length > 0)
 			return MahjongResult(true, [sevenPairs(hand.allocate)]);
 		}
 	}
+	auto result = MahjongResult(progress.isMahjong, sets);
 	return result;
 }
 
-private bool isSevenPairs(const ref Hand hand) pure
+private bool isSevenPairs(const ref Hand hand) pure @nogc nothrow
 {
 	if (hand.length != 14)
 		return false;
@@ -118,7 +118,7 @@ private bool isSevenPairs(const ref Hand hand) pure
 	return true;
 }
 
-private bool isThirteenOrphans(const ref Hand hand) pure
+private bool isThirteenOrphans(const ref Hand hand) pure @nogc nothrow
 {
 
 	if (hand.length != 14)
@@ -240,7 +240,7 @@ private class Progress
 		chis = chis[0 .. $ - 1];
 	}
 
-	private void recoverTiles(const(Tile)[] tiles) pure
+	private void recoverTiles(const(Tile)[] tiles) pure @nogc nothrow
 	{
 		foreach(tile; tiles)
 		{
@@ -249,10 +249,9 @@ private class Progress
 		hand.sort!byTypeValueAsc;
 	}
 
-	private bool _isMahjong;
-	bool isMahjong() @property pure const
+	bool isMahjong() @property pure const @nogc nothrow
 	{
-		return _isMahjong || (pairs.length == 1 && pons.length + chis.length == 4);
+		return pairs.length == 1 && pons.length + chis.length == 4;
 	}
 }
 
