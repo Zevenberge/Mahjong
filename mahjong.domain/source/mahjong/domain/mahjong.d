@@ -5,8 +5,6 @@ import std.algorithm;
 import std.array;
 import std.conv;
 
-import optional.optional;
-
 import mahjong.domain.analysis;
 import mahjong.domain.closedhand;
 import mahjong.domain.enums;
@@ -18,6 +16,7 @@ import mahjong.domain.result;
 import mahjong.domain.set;
 import mahjong.domain.tile;
 import mahjong.util.collections : allocate;
+import mahjong.util.optional;
 import mahjong.util.range;
 
 MahjongResult scanHandForMahjong(const Ingame player) pure
@@ -201,19 +200,19 @@ private class Progress
 	const(Set)[] pons;
 	const(Set)[] chis;
 
-	void convertToPair(const(Combi*) set) pure
+	void convertToPair(ref const Combi set) pure
 	{
-		pairs ~= pair((*set).allocate);
+		pairs ~= pair(set.allocate);
 	}
 
-	void convertToPon(const(Combi*) set) pure
+	void convertToPon(ref const Combi set) pure
 	{
-		pons ~= pon((*set).allocate);
+		pons ~= pon(set.allocate);
 	}
 
-	void convertToChi(const(Combi*) set) pure
+	void convertToChi(ref const Combi set) pure
 	{
-		chis ~= chi((*set).allocate);
+		chis ~= chi(set.allocate);
 	}
 
 	void subtractPair() pure
@@ -282,7 +281,7 @@ private Progress attemptToResolvePair(Progress progress) pure
 	auto pair = seperatePair(progress.hand);
 	if (!pair.isSeperated)
 		return progress;
-	progress.convertToPair(pair.unwrap);
+	progress.convertToPair(pair.get);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
@@ -298,7 +297,7 @@ private Progress attemptToResolvePon(Progress progress) pure
 	auto pon = seperatePon(progress.hand);
 	if (!pon.isSeperated)
 		return progress;
-	progress.convertToPon(pon.unwrap);
+	progress.convertToPon(pon.get);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
@@ -311,15 +310,10 @@ private Progress attemptToResolveChi(Progress progress) pure
 {
 	if (progress.hand.length < 3)
 		return progress;
-	if (progress.hand[0].isHonour)
-	{
-		// Honours cannot be resolved in a chi.
-		return progress;
-	}
 	auto chi = seperateChi(progress.hand);
 	if (!chi.isSeperated)
 		return progress;
-	progress.convertToChi(chi.unwrap);
+	progress.convertToChi(chi.get);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
