@@ -17,10 +17,8 @@ import mahjong.domain.player;
 import mahjong.domain.result;
 import mahjong.domain.set;
 import mahjong.domain.tile;
-import mahjong.util.collections;
+import mahjong.util.collections : allocate;
 import mahjong.util.range;
-
-alias Set = mahjong.domain.set.Set;
 
 MahjongResult scanHandForMahjong(const Ingame player) pure
 {
@@ -76,23 +74,25 @@ out(; closedHand.length > 0)
 	{
 		if (isThirteenOrphans(hand))
 		{
-			return MahjongResult(true, [thirteenOrphans(hand.allocate)]);
+			return MahjongResult(true, [thirteenOrphans(closedHand)]);
 		}
 	}
 
 	auto progress = scanRegularMahjong(new Progress(hand, openSets));
-	const(Set)[] sets;
-	sets ~= progress.pons;
-	sets ~= progress.chis;
-	sets ~= progress.pairs;
 
 	if (hand.length == 14 && !progress.isMahjong)
 	{ // If we don't have a mahjong using normal hands, we check whether we have seven pairs
 		if (isSevenPairs(hand))
 		{
-			return MahjongResult(true, [sevenPairs(hand.allocate)]);
+			return MahjongResult(true, [sevenPairs(closedHand)]);
 		}
 	}
+
+	const(Set)[] sets;
+	sets ~= progress.pons;
+	sets ~= progress.chis;
+	sets ~= progress.pairs;
+
 	auto result = MahjongResult(progress.isMahjong, sets);
 	return result;
 }
@@ -201,22 +201,19 @@ private class Progress
 	const(Set)[] pons;
 	const(Set)[] chis;
 
-	void convertToPair(const(HandSetSeperation*) handSetSeperation) pure
+	void convertToPair(const(Combi*) set) pure
 	{
-		hand = handSetSeperation.hand;
-		pairs ~= pair(handSetSeperation.set.allocate);
+		pairs ~= pair((*set).allocate);
 	}
 
-	void convertToPon(const(HandSetSeperation*) handSetSeperation) pure
+	void convertToPon(const(Combi*) set) pure
 	{
-		hand = handSetSeperation.hand;
-		pons ~= pon(handSetSeperation.set.allocate);
+		pons ~= pon((*set).allocate);
 	}
 
-	void convertToChi(const(HandSetSeperation*) handSetSeperation) pure
+	void convertToChi(const(Combi*) set) pure
 	{
-		hand = handSetSeperation.hand;
-		chis ~= chi(handSetSeperation.set.allocate);
+		chis ~= chi((*set).allocate);
 	}
 
 	void subtractPair() pure
@@ -282,10 +279,10 @@ private Progress attemptToResolvePair(Progress progress) pure
 {
 	if (progress.hand.length < 2)
 		return progress;
-	auto pairSeperation = seperatePair(progress.hand);
-	if (!pairSeperation.isSeperated)
+	auto pair = seperatePair(progress.hand);
+	if (!pair.isSeperated)
 		return progress;
-	progress.convertToPair(pairSeperation.unwrap);
+	progress.convertToPair(pair.unwrap);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
@@ -298,10 +295,10 @@ private Progress attemptToResolvePon(Progress progress) pure
 {
 	if (progress.hand.length < 3)
 		return progress;
-	auto ponSeperation = seperatePon(progress.hand);
-	if (!ponSeperation.isSeperated)
+	auto pon = seperatePon(progress.hand);
+	if (!pon.isSeperated)
 		return progress;
-	progress.convertToPon(ponSeperation.unwrap);
+	progress.convertToPon(pon.unwrap);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
@@ -319,10 +316,10 @@ private Progress attemptToResolveChi(Progress progress) pure
 		// Honours cannot be resolved in a chi.
 		return progress;
 	}
-	auto chiSeperation = seperateChi(progress.hand);
-	if (!chiSeperation.isSeperated)
+	auto chi = seperateChi(progress.hand);
+	if (!chi.isSeperated)
 		return progress;
-	progress.convertToChi(chiSeperation.unwrap);
+	progress.convertToChi(chi.unwrap);
 	progress = scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
@@ -426,6 +423,18 @@ unittest
 	auto tenpaiHand = "🀀🀁🀂🀃🀄🀆🀆🀇🀏🀐🀘🀙🀡"d.convertToTiles;
 	auto emptyOpenHand = new OpenHand;
 	isPlayerTenpai(tenpaiHand, emptyOpenHand).should.equal(true);
+}
+
+@("A tenpai check should be efficient")
+unittest
+{
+	import core.time;
+	import fluent.asserts;
+	import mahjong.domain.creation;
+
+	auto tenpaiHand = "🀀🀁🀂🀃🀄🀆🀆🀇🀏🀐🀘🀙🀡"d.convertToTiles;
+	auto emptyOpenHand = new OpenHand;
+	({isPlayerTenpai(tenpaiHand, emptyOpenHand);}).should.haveExecutionTime.lessThan(1.msecs);
 }
 
 auto constructMahjongData(Metagame metagame)
