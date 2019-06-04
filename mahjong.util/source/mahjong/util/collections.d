@@ -327,7 +327,7 @@ unittest
     array[2].should.equal(420);
 }
 
-auto allocate(Array)(inout Array array) pure nothrow
+auto allocate(Array)(auto ref inout Array array) pure nothrow
 {
     import std.traits : ReturnType;
     alias T = ReturnType!(Array.init.opIndex);
