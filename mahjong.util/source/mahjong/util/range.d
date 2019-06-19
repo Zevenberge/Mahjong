@@ -136,15 +136,18 @@ template flatMap(alias fun) //if(isInputRange!(ReturnType!fun))
 	auto flatMap(Range)(Range range) if (isInputRange!Range)
 	{
 		auto mappedResult = range.map!fun;
-		static if (is(ElementType!(typeof(mappedResult)) == E[], E))
+		alias E = ElementType!(typeof(mappedResult));
+		static if(isMutable!(ElementType!E))
 		{
-			if (mappedResult.empty)
-				return null;
-			return fold!((a, b) => a ~ b)(mappedResult);
+			return mappedResult.joiner;
+		}
+		else static if(isArray!E)
+		{
+			return mappedResult.map!(x => x[]).joiner;
 		}
 		else
 		{
-			return joiner(mappedResult);
+			static assert(false, "Cannot join a range of immutable ranges.");
 		}
 	}
 }
@@ -188,6 +191,30 @@ unittest
 
 	auto counters = [Counter(), Counter(), Counter()].flatMap!(c => c.oneTwoThree);
 	counters.should.equal([1, 2, 3, 1, 2, 3, 1, 2, 3]);
+}
+
+@("Can I flatMap a range of constant objects?")
+unittest
+{
+	struct Bubble
+	{
+		const(int)[] ints;
+	}
+
+	auto flattened = [Bubble([1, 2]), Bubble([3, 4])].flatMap!(x => x.ints).array;
+	assert([1, 2, 3, 4].equal(flattened), "The two arrays should be joined");
+}
+
+@("Can I flatMap a range of constant arrays?")
+unittest
+{
+	struct Bubble
+	{
+		const(int[]) ints;
+	}
+
+	auto flattened = [Bubble([1, 2]), Bubble([3, 4])].flatMap!(x => x.ints).array;
+	assert([1, 2, 3, 4].equal(flattened), "The two arrays should be joined");
 }
 
 template atLeastOneUntil()
