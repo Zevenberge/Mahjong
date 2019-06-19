@@ -84,15 +84,16 @@ class Ingame
     OpenHand openHand; // The open pons/chis/kans 
 
     private Tile[] _discards;
-    const(Tile)[] discards() @property pure const
+    const(Tile)[] discards() @property pure const @nogc nothrow
     {
         return _discards;
     }
 
     private Tile[] _claimedDiscards;
-    private const(Tile)[] allDiscards() @property pure const
+    private auto allDiscards() @property pure const @nogc nothrow
     {
-        return discards ~ _claimedDiscards;
+        import std.range : chain;
+        return discards.chain(_claimedDiscards);
     }
 
     void discardIsClaimed(Tile tile)
@@ -101,7 +102,7 @@ class Ingame
         _claimedDiscards ~= tile;
     }
 
-    void aTileHasBeenClaimed() pure
+    void aTileHasBeenClaimed() pure @nogc nothrow
     {
         _isFirstTurnAfterRiichi = false;
     }
@@ -119,7 +120,7 @@ class Ingame
         ingame.isFirstTurnAfterRiichi.should.equal(false);
     }
 
-    bool isNagashiMangan() @property pure const
+    bool isNagashiMangan() @property pure const @nogc nothrow
     {
         return openHand.isClosedHand && allDiscards.all!(t => t.isHonour || t.isTerminal);
     }
@@ -180,7 +181,7 @@ class Ingame
         ingame.isNagashiMangan.should.equal(false);
     }
 
-    bool isClosedHand() @property pure const
+    bool isClosedHand() @property pure const @nogc nothrow
     {
         return openHand.isClosedHand;
     }
@@ -1007,17 +1008,17 @@ class Ingame
     private bool _isDoubleRiichi;
     private bool _isFirstTurnAfterRiichi;
 
-    bool isRiichi() @property pure const
+    bool isRiichi() @property pure const @nogc nothrow
     {
         return _isRiichi;
     }
 
-    bool isDoubleRiichi() @property pure const
+    bool isDoubleRiichi() @property pure const @nogc nothrow
     {
         return _isDoubleRiichi;
     }
 
-    bool isFirstTurnAfterRiichi() @property pure const
+    bool isFirstTurnAfterRiichi() @property pure const @nogc nothrow
     {
         return _isFirstTurnAfterRiichi;
     }
@@ -1065,7 +1066,7 @@ class Ingame
     }
 
     private Tile _lastTile;
-    const(Tile) lastTile() @property pure const
+    const(Tile) lastTile() @property pure const @nogc nothrow
     {
         return _lastTile;
     }
@@ -1162,7 +1163,7 @@ class Ingame
         ingame.lastTile.isSelfDraw.should.equal(true);
     }
 
-    private void startTurn() pure
+    private void startTurn() pure @nogc nothrow
     {
         if (!_isRiichi)
         {
@@ -1181,7 +1182,7 @@ class Ingame
     }
 }
 
-bool doesDiscardsOnlyContain(Ingame game, const ComparativeTile discard) pure
+bool doesDiscardsOnlyContain(Ingame game, const ComparativeTile discard) pure @nogc nothrow
 {
     return game.discards.length == 1 && game.discards[0].hasEqualValue(discard);
 }
@@ -1203,12 +1204,12 @@ unittest
         .because("there are multiple discards");
 }
 
-bool hasAllTheKans(const Ingame game, int maxAmountOfKans) pure
+bool hasAllTheKans(const Ingame game, int maxAmountOfKans) pure @nogc nothrow
 {
     return game.openHand.hasAllKans(maxAmountOfKans);
 }
 
-bool canDiscard(const Ingame game, const Tile potentialDiscard) pure
+bool canDiscard(const Ingame game, const Tile potentialDiscard) pure @nogc nothrow
 {
     if (game.isRiichi)
     {
@@ -1246,12 +1247,12 @@ unittest
     }
 }
 
-bool isEligibleForRedraw(const Ingame game, const Metagame metagame)
+bool isEligibleForRedraw(const Ingame game, const Metagame metagame) pure @nogc nothrow
 {
     return isEligibleForRedraw(game, metagame.isFirstTurn);
 }
 
-private bool isEligibleForRedraw(const Ingame game, bool isFirstTurn)
+private bool isEligibleForRedraw(const Ingame game, bool isFirstTurn) pure @nogc nothrow
 {
     return isFirstTurn && game.closedHand.hasNineOrMoreUniqueHonoursOrTerminals;
 }

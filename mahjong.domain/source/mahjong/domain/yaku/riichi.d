@@ -2,6 +2,7 @@
 
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
+import mahjong.util.collections;
 
 version(unittest)
 {
@@ -11,11 +12,13 @@ version(unittest)
     import mahjong.domain.mahjong;
 }
 
-package Yaku[] determineRiichiRelatedYakus(const Environment environment) pure
+private alias Yakus = NoGcArray!(3, Yaku);
+
+package Yakus determineRiichiRelatedYakus(ref const Environment environment) @safe pure @nogc nothrow
 {
     if(environment.isRiichi)
     {
-        Yaku[] yakus;
+        Yakus yakus;
         if(environment.isDoubleRiichi)
         {
             yakus ~= Yaku.doubleRiichi;
@@ -32,7 +35,7 @@ package Yaku[] determineRiichiRelatedYakus(const Environment environment) pure
     }
     else
     {
-        return null;
+        return Yakus.init;
     }
 }
 

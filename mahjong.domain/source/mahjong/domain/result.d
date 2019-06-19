@@ -16,12 +16,12 @@ struct MahjongResult
     }
 }
 
-auto tiles(const MahjongResult result) @property pure
+auto tiles(ref const MahjongResult result) @property pure @nogc nothrow
 {
     return result.sets.flatMap!(s => s.tiles);
 }
 
-bool isSevenPairs(const MahjongResult result) pure
+bool isSevenPairs(ref const MahjongResult result) pure @nogc nothrow
 {
     import mahjong.domain.set : isSevenPairs;
     return result.sets.length == 1 && result.sets[0].isSevenPairs;
@@ -51,7 +51,7 @@ unittest
     result.isSevenPairs.should.equal(false);
 }
 
-bool isThirteenOrphans(const MahjongResult result) pure
+bool isThirteenOrphans(ref const MahjongResult result) pure @nogc nothrow
 {
     import mahjong.domain.set : isThirteenOrphans;
     return result.sets.length == 1 && result.sets[0].isThirteenOrphans;
@@ -81,7 +81,7 @@ unittest
     result.isThirteenOrphans.should.equal(false);
 }
 
-bool isNagashiMangan(const MahjongResult result) pure
+bool isNagashiMangan(ref const MahjongResult result) pure @nogc nothrow
 {
     import mahjong.domain.set : isNagashiMangan;
     return result.sets.length == 1 && result.sets[0].isNagashiMangan;
@@ -111,7 +111,7 @@ unittest
     result.isNagashiMangan.should.equal(false);
 }
 
-bool hasAtLeastOneChi(const MahjongResult result)
+bool hasAtLeastOneChi(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : any;
     return result.sets.any!(s => s.isChi);
@@ -139,7 +139,8 @@ unittest
     result.hasAtLeastOneChi.should.equal(false);
 }
 
-bool hasValuelessPair(const MahjongResult result, PlayerWinds leadingWind, PlayerWinds ownWind)
+bool hasValuelessPair(ref const MahjongResult result, PlayerWinds leadingWind, PlayerWinds ownWind)
+    pure @nogc nothrow
 {
     import std.algorithm : filter;
     auto range = result.sets.filter!(s => s.isPair);
@@ -182,7 +183,7 @@ unittest
     result.hasValuelessPair(PlayerWinds.east, PlayerWinds.north).should.equal(false);
 }
 
-bool hasOnlyChis(const MahjongResult result)
+bool hasOnlyChis()(auto ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : all;
     return result.sets.all!(s => s.isChi || s.isPair);
@@ -201,7 +202,7 @@ unittest
         .hasOnlyChis.should.equal(true);
 }
 
-bool allSetsHaveHonoursOrATerminal(const MahjongResult result)
+bool allSetsHaveHonoursOrATerminal(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : all;
     return result.sets.all!(s => s.tiles.isAllHonour || s.tiles.hasTerminal);
@@ -243,13 +244,13 @@ unittest
     result.allSetsHaveHonoursOrATerminal.should.equal(false);
 }
 
-bool isTwoSidedWait(const MahjongResult result, const Tile lastTile)
+bool isTwoSidedWait(ref const MahjongResult result, const Tile lastTile) pure @nogc nothrow
 {
     import std.algorithm : any, countUntil;
     auto finalSet = result.finalSet(lastTile);
     if(finalSet.isChi)
     {
-        auto position = finalSet.tiles.countUntil!(t => t == lastTile);
+        auto position = finalSet.tiles.countUntil!(t => t is lastTile);
         bool isClosedWait = position == 1;
         if(isClosedWait) return false;
         bool isLowerEdgeWait = position == 2 && lastTile.value == Numbers.three;
@@ -322,7 +323,7 @@ unittest
     resultRight.isTwoSidedWait(lastTileRight).should.equal(false);
 }
 
-bool isPonWait(const MahjongResult result, const Tile lastTile)
+bool isPonWait(ref const MahjongResult result, const Tile lastTile) pure @nogc nothrow
 {
     return result.finalSet(lastTile).isPon;
 }
@@ -349,13 +350,18 @@ unittest
     result.isPonWait(lastTile).should.equal(true);
 }
 
-private const(Set) finalSet(const MahjongResult result, const Tile lastTile)
+private const(Set) finalSet(ref const MahjongResult result, const Tile lastTile)
+    pure @nogc nothrow
 {
-    import std.algorithm : any, filter;
-    return result.sets.filter!(s => s.tiles.any!(t => t == lastTile)).front;
+    import std.algorithm : any;
+    foreach(set; result.sets)
+    {
+        if(set.tiles.any!(t => t is lastTile)) return set;
+    }
+    assert(false, "The final set was not present in the mahjong result");
 }
 
-bool hasOnlyPons(const MahjongResult result)
+bool hasOnlyPons(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : all;
     return result.sets.all!(s => s.isPon || s.isPair);
@@ -377,7 +383,7 @@ unittest
     result.hasOnlyPons.should.equal(false);
 }
 
-bool allSetsHaveATerminal(const MahjongResult result)
+bool allSetsHaveATerminal(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : all;
     return result.sets.all!(s => s.tiles.hasTerminal);
@@ -407,7 +413,8 @@ unittest
     result.allSetsHaveATerminal.should.equal(false);
 }
 
-bool isMahjongWithYaku(const MahjongResult result, const Environment env)
+bool isMahjongWithYaku(ref const MahjongResult result, ref const Environment env)
+    pure @nogc nothrow
 {
     import mahjong.domain.yaku : determineYaku;
 
@@ -439,7 +446,8 @@ unittest
     import fluent.asserts;
 
     auto result = MahjongResult(false, null);
-    result.isMahjongWithYaku(Environment.init).should.equal(false);
+    auto env = Environment.init;
+    result.isMahjongWithYaku(env).should.equal(false);
 }
 
 @("A hand without yaku is not a mahjong with yaku")

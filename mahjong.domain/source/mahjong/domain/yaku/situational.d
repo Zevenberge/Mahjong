@@ -2,6 +2,7 @@
 
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
+import mahjong.util.collections;
 
 version(unittest)
 {
@@ -11,9 +12,11 @@ version(unittest)
     import mahjong.domain.mahjong;
 }
 
-package Yaku[] determineSituationalYaku(const Environment environment) pure
+private alias Yakus = NoGcArray!(4, Yaku);
+
+package Yakus determineSituationalYaku(ref const Environment environment) @safe pure @nogc nothrow
 {
-    Yaku[] yakus;
+    Yakus yakus;
     if(environment.isClosedHand && environment.isSelfDraw)
     {
         yakus ~= Yaku.menzenTsumo;

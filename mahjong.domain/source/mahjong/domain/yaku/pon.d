@@ -4,6 +4,7 @@ import mahjong.domain.enums;
 import mahjong.domain.result;
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
+import mahjong.util.collections;
 
 version(unittest)
 {
@@ -12,9 +13,12 @@ version(unittest)
     import mahjong.domain.mahjong;
 }
 
-package Yaku[] determinePonBasedYaku(const MahjongResult result, Environment environment)
+private alias Yakus = NoGcArray!(8, Yaku);
+
+package Yakus determinePonBasedYaku(ref const MahjongResult result, ref const Environment environment)
+    pure @nogc nothrow
 {
-    Yaku[] yakus;
+    Yakus yakus;
     auto amountOfFanpai = result.countFanpai(environment.leadingWind, environment.ownWind);
     for(int i = 0; i < amountOfFanpai; ++i) 
     {
@@ -165,9 +169,10 @@ unittest
     yaku.should.containOnly([Yaku.sanShokuDokou, Yaku.sanAnkou]);
 }
 
-private size_t countFanpai(const MahjongResult result, PlayerWinds leadingWind, PlayerWinds ownWind)
+private size_t countFanpai(ref const MahjongResult result, PlayerWinds leadingWind, PlayerWinds ownWind)
+    pure @nogc nothrow
 {
-    import mahjong.domain.set;
+    import mahjong.domain.set : isPon, isSetOf;
     size_t fanpai = 0;
     foreach(set; result.sets)
     {
@@ -253,10 +258,10 @@ unittest
     result.countFanpai(PlayerWinds.east, PlayerWinds.east).should.equal(2);
 }
 
-package size_t amountOfConsealedPons(const MahjongResult result)
+package size_t amountOfConsealedPons(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : count;
-    import mahjong.domain.set;
+    import mahjong.domain.set : isPon, isOpen;
     return result.sets.count!(s => s.isPon && !s.isOpen);
 }
 
@@ -306,10 +311,10 @@ unittest
     result.amountOfConsealedPons.should.equal(0);
 }
 
-package size_t amountOfKans(const MahjongResult result)
+package size_t amountOfKans(ref const MahjongResult result)  pure @nogc nothrow
 {
     import std.algorithm : count;
-    import mahjong.domain.set;
+    import mahjong.domain.set : isKan;
     return result.sets.count!(s => s.isKan);
 }
 
@@ -358,9 +363,9 @@ unittest
     result.amountOfKans.should.equal(0);
 }
 
-private bool isThreeLittleDragons(const MahjongResult result)
+private bool isThreeLittleDragons(ref const MahjongResult result) pure @nogc nothrow
 {
-    import mahjong.domain.set;
+    import mahjong.domain.set : isSetOf, isPair;
     bool pair;
     size_t pons;
     foreach(set; result.sets)
@@ -423,26 +428,34 @@ unittest
     result.isThreeLittleDragons.should.equal(false);
 }
 
-private bool hasPonInAllThreeSuits(const MahjongResult result)
+private bool hasPonInAllThreeSuits(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : any;
     import std.conv : to;
-    import mahjong.domain.set;
-    import mahjong.util.collections : Set;
-    Set!Types[Numbers] stats;
+    import mahjong.domain.set : isPon, isSetOf;
+    enum Match : byte {none = 0, bamboo = 1, ball = 2, character = 4, all = 7}
+    Match[9] matches;
     foreach(set; result.sets)
     {
         if(!set.isPon) continue;
         if(set.isSetOf(Types.dragon)) continue;
         if(set.isSetOf(Types.wind)) continue;
-        auto number = set.tiles[0].value.to!Numbers;
-        if(number !in stats)
+        switch(set.tiles[0].type)
         {
-            stats[number] = Set!Types.init;
+            case Types.ball:
+                matches[set.tiles[0].value] |= Match.ball;
+                break;
+            case Types.bamboo:
+                matches[set.tiles[0].value] |= Match.bamboo;
+                break;
+            case Types.character:
+                matches[set.tiles[0].value] |= Match.character;
+                break;
+            default:
+                assert(false, "Unknown type");
         }
-        stats[number] ~= set.tiles[0].type;
     }
-    return stats.byValue.any!(s => s.length == 3);
+    return matches[].any!(m => m == Match.all);
 }
 
 @("If I have the same pon in three suits, it should be recognized as such")

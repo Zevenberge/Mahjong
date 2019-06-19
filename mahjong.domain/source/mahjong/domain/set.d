@@ -10,7 +10,7 @@ struct Set
         this.tiles = tiles;
         _type = type;
     }
-    const Tile[] tiles;
+    const(Tile[]) tiles;
     private SetType _type;
 }
 
@@ -377,15 +377,19 @@ unittest
     assert(chiSet.miniPoints(PlayerWinds.east, PlayerWinds.north) == 0, "A chi should give no minipoints whatshowever");
 }
 
-bool isSameInDifferentType(alias typeCriterion)(const Set one, const Set two, const Set three)
+bool isSameInDifferentType(alias typeCriterion)(ref const Set one, 
+    ref const Set two, ref const Set three)
+    pure @nogc nothrow
 {
     import std.algorithm : isPermutation, all;
     if(one.tiles[0].value == two.tiles[0].value &&
         two.tiles[0].value == three.tiles[0].value)
     {
-        return isPermutation([Types.ball, Types.bamboo, Types.character], 
-            [one.tiles[0].type, two.tiles[0].type, three.tiles[0].type]) &&
-            [one, two, three].all!typeCriterion;
+        Types[3] references = [Types.ball, Types.bamboo, Types.character];
+        Types[3] actual = [one.tiles[0].type, two.tiles[0].type, three.tiles[0].type];
+        const(Set)[3] sets = [one, two, three];
+        return isPermutation(references[], actual[]) &&
+            sets[].all!typeCriterion;
     }
     return false;
 }

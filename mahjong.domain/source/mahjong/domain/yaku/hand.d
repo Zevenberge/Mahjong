@@ -4,6 +4,7 @@ import mahjong.domain.result;
 import mahjong.domain.tile;
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
+import mahjong.util.collections;
 
 version(unittest)
 {
@@ -13,9 +14,11 @@ version(unittest)
     import mahjong.domain.mahjong;
 }
 
-package Yaku[] determineWholeHandYaku(const MahjongResult mahjongResult, Environment environment)
+private alias Yakus = NoGcArray!(7, Yaku);
+
+package Yakus determineWholeHandYaku(ref const MahjongResult mahjongResult, ref const Environment environment) pure @nogc nothrow
 {
-    Yaku[] yakus;
+    Yakus yakus;
     if(environment.isClosedHand && mahjongResult.tiles.isAllSimples)
     {
         yakus ~= Yaku.tanyao;

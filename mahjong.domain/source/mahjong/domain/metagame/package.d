@@ -23,17 +23,17 @@ class Metagame
 
     package Round _round;
 
-	PlayerWinds leadingWind() @property pure const
+	PlayerWinds leadingWind() @property pure const @nogc nothrow
 	{
 		return _round.leadingWind;
 	}
 
-	uint round() @property pure const
+	uint round() @property pure const @nogc nothrow
 	{
 		return _round.number;
 	}
 
-	size_t counters() @property pure const
+	size_t counters() @property pure const @nogc nothrow
 	{
 		return _round.counters;
 	}
@@ -49,12 +49,13 @@ class Metagame
 		info("Initialised metagame");
 	}
 
-	private void placePlayers()
+	private void placePlayers() @nogc nothrow
 	{ 
-		foreach(i, player; players)
+        int i = 0;
+		foreach(player; players)
 		{
-			trace("Placing player \"", player.name.to!string, "\" (", i, ")");
-			player.playLoc = i.to!int;
+			player.playLoc = i;
+            ++i;
 		}
 	}
 
@@ -299,7 +300,7 @@ class Metagame
         metagame.amountOfRiichiSticks.should.equal(5);
     }
 
-	bool isGameOver()
+	bool isGameOver() pure const @nogc nothrow
 	{
 		return _round.leadingWind > _opts.finalLeadingWind;
 	}
@@ -321,12 +322,12 @@ class Metagame
 		}
 	}
 
-    void riichiIsDeclared() pure
+    void riichiIsDeclared() pure @nogc nothrow
     {
         _round.addRiichiStick();
     }
 
-    int amountOfRiichiSticks() @property pure const
+    int amountOfRiichiSticks() @property pure const @nogc nothrow
     {
         return _round.amountOfRiichiSticks;
     }
@@ -348,7 +349,7 @@ class Metagame
 
     private bool _isFirstTurn;
 
-    bool isFirstTurn() @property pure const
+    bool isFirstTurn() @property pure const @nogc nothrow
     {
         return _isFirstTurn;
     }
@@ -533,7 +534,7 @@ class Metagame
         return wall.canRiichiBeDeclared;
     }
 
-	bool isExhaustiveDraw() @property pure const
+	bool isExhaustiveDraw() @property pure const @nogc nothrow
 	{
         return wall && wall.isExhaustiveDraw;
 	}

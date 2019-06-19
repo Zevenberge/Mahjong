@@ -7,6 +7,7 @@ import mahjong.domain.tile;
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
 import mahjong.domain.yaku.pon;
+import mahjong.util.collections;
 
 version(unittest)
 {
@@ -15,9 +16,12 @@ version(unittest)
     import mahjong.domain.mahjong;
 }
 
-package Yaku[] determineYakuman(const MahjongResult mahjongResult, const Environment environment)
+private alias Yakus = NoGcArray!(5, Yaku);
+
+package Yakus determineYakuman(ref const MahjongResult mahjongResult, ref const Environment environment)
+    pure @nogc nothrow
 {
-    Yaku[] yakus;
+    Yakus yakus;
     if(mahjongResult.isThirteenOrphans)
     {
         yakus ~= Yaku.kokushiMusou;
@@ -308,7 +312,7 @@ unittest
     yaku.should.equal([Yaku.daiSuushii]);
 }
 
-private Yaku firstRoundYaku(const Environment environment)
+private Yaku firstRoundYaku(ref const Environment environment) pure @nogc nothrow
 {
     if(environment.isSelfDraw)
     {
@@ -327,17 +331,17 @@ private Yaku firstRoundYaku(const Environment environment)
     }
 }
 
-private bool isNineGates(const MahjongResult result)
+private bool isNineGates(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : any, count;
-    import std.array : array;
+    import mahjong.util.collections : array;
     if(result.sets.length != 5 
         || result.sets.any!(s => s.isKan)
         || !result.tiles.isAllOfSameSuit)
     {
         return false;
     }
-    auto tiles = result.tiles.array;
+    auto tiles = result.tiles.array!14;
     foreach(number; [Numbers.one, Numbers.nine])
     {
         if(tiles.count!(t => t.value == number) < 3) return false;
@@ -433,7 +437,7 @@ unittest
     result.isNineGates.should.equal(false);
 }
 
-private bool isThreeBigDragons(const MahjongResult result)
+private bool isThreeBigDragons(ref const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : count;
     return result.sets.count!(s => s.isSetOf(Types.dragon) && s.isPon) == 3;
@@ -472,7 +476,7 @@ unittest
     result.isThreeBigDragons.should.equal(false);
 }
 
-private bool isFourSmallWinds(const MahjongResult result)
+private bool isFourSmallWinds(ref const MahjongResult result) pure @nogc nothrow
 {
     bool hasPair = false;
     size_t amountOfPons;
@@ -532,7 +536,7 @@ unittest
     result.isFourSmallWinds.should.equal(false);
 }
 
-private bool isFourBigWinds(const MahjongResult result)
+private bool isFourBigWinds(const MahjongResult result) pure @nogc nothrow
 {
     import std.algorithm : count;
     return result.sets.count!(t => t.isSetOf(Types.wind) && t.isPon) == 4;

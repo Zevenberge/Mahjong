@@ -12,6 +12,7 @@ import mahjong.domain.yaku.pon;
 import mahjong.domain.yaku.riichi;
 import mahjong.domain.yaku.situational;
 import mahjong.domain.yaku.yakuman;
+import mahjong.util.collections;
 
 enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu, 
     iipeikou, sanShoukuDoujun, itsu, fanpai, chanta, rinshanKaihou, chanKan, haitei, 
@@ -20,30 +21,28 @@ enum Yaku {riichi, doubleRiichi, ippatsu, menzenTsumo, tanyao, pinfu,
     kokushiMusou, chuurenPooto, tenho, chiho, renho, suuAnkou, suuKanTsu, ryuuIisou, 
     chinrouto, tsuuIisou, daiSangen, shouSuushii, daiSuushii}
 
-const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
-in
-{
-    assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");
-}
-do
+alias Yakus = NoGcArray!(16, Yaku);
+
+Yakus determineYaku(const MahjongResult mahjongResult, const Ingame player, const Metagame metagame)
+    pure @nogc nothrow
+in(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand")
 {
     auto environment = destillEnvironment(player, metagame);
     return determineYaku(mahjongResult, environment); 
 }
 
-const(Yaku)[] determineYaku(const MahjongResult mahjongResult, const Environment environment)
-    in
-{
-    assert(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand");
-}
-body
+Yakus determineYaku(const MahjongResult mahjongResult, ref const Environment environment)
+    pure @nogc nothrow
+in(mahjongResult.isMahjong, "Yaku cannot be determined on a non mahjong hand")
 {
     import std.array : empty;
+    Yakus yakus;
     if(mahjongResult.isNagashiMangan)
     {
-        return [Yaku.nagashiMangan];
+        yakus ~= Yaku.nagashiMangan;
+        return yakus;
     }
-    Yaku[] yakus = determineYakuman(mahjongResult, environment);
+    yakus ~= determineYakuman(mahjongResult, environment);
     if(!yakus.empty) 
     {
         return yakus;
@@ -75,6 +74,27 @@ unittest
     yaku.length.should.equal(0);
 }
 
+@("Determining yaku should be fast")
+unittest
+{
+    import core.time : usecs;
+    import std.datetime.stopwatch;
+    import fluent.asserts;
+    import mahjong.domain.mahjong;
+    auto game = new Ingame(PlayerWinds.west, "🀙🀙🀙🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟"d);
+    auto result = scanHandForMahjong(game);
+    Environment env = {
+    leadingWind: PlayerWinds.east, 
+            ownWind: PlayerWinds.west,
+            lastTile: game.closedHand.tiles[0],
+            isRiichi: false,
+            isSelfDraw: false,
+            isClosedHand: true
+    };
+    auto timing = benchmark!({cast(void)determineYaku(result, env);})(1000);
+    timing[0].should.be.lessThan(30.msecs);
+}
+
 @("Nagashi mangan should be short-circuited")
 unittest
 {
@@ -92,7 +112,7 @@ unittest
     yaku.should.equal([Yaku.nagashiMangan]);
 }
 
-size_t convertToFan(const Yaku yaku, bool isClosedHand) pure
+size_t convertToFan(const Yaku yaku, bool isClosedHand) pure @nogc nothrow
 {
     final switch(yaku) with(Yaku)
     {

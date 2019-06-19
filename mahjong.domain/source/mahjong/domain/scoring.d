@@ -18,7 +18,7 @@ import mahjong.domain.mahjong;
 import mahjong.domain.opts;
 import mahjong.util.range;
 
-Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
+Scoring calculateScoring(ref const MahjongData mahjong, const Metagame metagame)
 {
     auto yaku = mahjong.result.determineYaku(mahjong.player, metagame);
     auto miniPoints = mahjong.calculateMiniPoints(metagame.leadingWind);
@@ -28,7 +28,7 @@ Scoring calculateScoring(const MahjongData mahjong, const Metagame metagame)
 
 class Scoring
 {
-    private this(const(Yaku)[] yakus, size_t miniPoints, 
+    private this(ref const(Yakus) yakus, size_t miniPoints, 
         size_t amountOfDoras, size_t amountOfCounters,
         bool isClosedHand, AmountOfPlayers amountOfPlayers)
     {
@@ -40,7 +40,7 @@ class Scoring
         _amountOfPlayers = amountOfPlayers;
     }
 
-    const(Yaku)[] yakus;
+    const(Yakus) yakus;
     const size_t miniPoints;
     const size_t amountOfDoras;
     const size_t amountOfCounters;
@@ -71,44 +71,54 @@ class Scoring
     }
 }
 
+@("Is my payment divided evenly")
 unittest
 {
-    auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 0, false, AmountOfPlayers(4));
+    Yakus yaku = [Yaku.nagashiMangan];
+    auto scoring = new Scoring(yaku, 30, 0, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.east == 4000, "Payment should be issued for a mangan");
     assert(payment.nonEast == 2000, "Payment should be issued for a mangan");
     assert(payment.ron == 8000, "Payment should be issued for a mangan");
 }
 
+@("Are counters added up to the payment")
 unittest
 {
-    auto scoring = new Scoring([Yaku.nagashiMangan], 30, 0, 1, false, AmountOfPlayers(4));
+    Yakus yaku = [Yaku.nagashiMangan];
+    auto scoring = new Scoring(yaku, 30, 0, 1, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.east == 4100, "Every player should pay 100 extra for every counter");
     assert(payment.nonEast == 2100, "Every player should pay 100 extra for every counter");
     assert(payment.ron == 8300, "A grand total of 300 extra is paid.");
 }
 
+@("Does a non limit score get calculated correctly")
 unittest
 {
-    auto scoring = new Scoring([Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou], 46, 0, 0, false, AmountOfPlayers(4));
+    Yakus yaku = [Yaku.menzenTsumo, Yaku.fanpai, Yaku.rinshanKaihou];
+    auto scoring = new Scoring(yaku, 46, 0, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.east == 3200, "3 fan 50 is 3200 for east");
     assert(payment.nonEast == 1600, "3 fan 50 is 1600 for non-east");
     assert(payment.ron == 6400, "3 fan 50 is 6400 for all");
 }
 
+@("Is the lowest limit calculated correctly?")
 unittest
 {
-    auto scoring = new Scoring([Yaku.chiiToitsu], 25, 0, 0, false, AmountOfPlayers(4));
+    Yakus yaku = [Yaku.chiiToitsu];
+    auto scoring = new Scoring(yaku, 25, 0, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     // Tsumo is not possible.
     assert(payment.ron == 1600, "2 fan 25 mp equals 2000 in a non-east ron");
 }
 
+@("If I have 5 yaku, it will be limited to a mangan")
 unittest
 {
-    auto scoring = new Scoring([Yaku.riichi], 30, 4, 0, false, AmountOfPlayers(4));
+    Yakus yaku = [Yaku.riichi];
+    auto scoring = new Scoring(yaku, 30, 4, 0, false, AmountOfPlayers(4));
     auto payment = scoring.calculatePayment(false);
     assert(payment.ron == 8000, "1 yaku + 4 dora is a mangan");
 }
@@ -473,7 +483,7 @@ unittest
     transactions.length.should.equal(0);
 }
 
-private Transaction[] mergeTransactions(Transactions)(Transactions transactions) pure
+private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
     if(isInputRange!Transactions && is(ElementType!Transactions : Transaction))
 {
     Transaction[const Player] mergedTransactions;

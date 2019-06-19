@@ -8,6 +8,8 @@ import mahjong.domain.enums;
 
 interface Opts
 {
+	Wall createWall() pure const;
+	@nogc nothrow:
 	int deadWallLength() pure const;
     int riichiBuffer() pure const;
 	int kanBuffer() pure const;
@@ -17,5 +19,4 @@ interface Opts
     int riichiFare() pure const;
 	GameMode gameMode() pure const;
 	PlayerWinds finalLeadingWind() pure const;
-    Wall createWall() pure const;
 }

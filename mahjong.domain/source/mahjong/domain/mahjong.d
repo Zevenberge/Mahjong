@@ -15,7 +15,7 @@ import mahjong.domain.player;
 import mahjong.domain.result;
 import mahjong.domain.set;
 import mahjong.domain.tile;
-import mahjong.util.collections : allocate;
+import mahjong.util.collections : allocate, NoGcArray;
 import mahjong.util.optional;
 import mahjong.util.range;
 
@@ -88,9 +88,9 @@ out(; closedHand.length > 0)
 	}
 
 	const(Set)[] sets;
-	sets ~= progress.pons;
-	sets ~= progress.chis;
-	sets ~= progress.pairs;
+	sets ~= progress.pons.map!(x => pon(x.allocate)).array;
+	sets ~= progress.chis.map!(x => chi(x.allocate)).array;
+	sets ~= progress.pairs.map!(x => pair(x.allocate)).array;
 
 	auto result = MahjongResult(progress.isMahjong, sets);
 	return result;
@@ -184,63 +184,66 @@ private class Progress
 {
 	this(const ref Hand hand, const(Set[]) initialSets) pure
 	{
+		import mahjong.util.collections : array;
 		this.hand = hand;
 		foreach (set; initialSets)
 		{
 			if (set.isPon)
-				pons ~= set;
+				pons ~= set.tiles.array!4;
 			if (set.isChi)
-				chis ~= set;
+				chis ~= set.tiles.array!4;
 			// No pair because a pair cannot be open.
 		}
 	}
 
+	alias CombiArray = NoGcArray!(4, const Combi);
+
 	Hand hand;
-	const(Set)[] pairs;
-	const(Set)[] pons;
-	const(Set)[] chis;
+	CombiArray pairs;
+	CombiArray pons;
+	CombiArray chis;
 
-	void convertToPair(ref const Combi set) pure
+	void convertToPair(ref const Combi set) pure @nogc nothrow
 	{
-		pairs ~= pair(set.allocate);
+		pairs ~= set;
 	}
 
-	void convertToPon(ref const Combi set) pure
+	void convertToPon(ref const Combi set) pure @nogc nothrow
 	{
-		pons ~= pon(set.allocate);
+		pons ~= set;
 	}
 
-	void convertToChi(ref const Combi set) pure
+	void convertToChi(ref const Combi set) pure @nogc nothrow
 	{
-		chis ~= chi(set.allocate);
+		chis ~= set;
 	}
 
-	void subtractPair() pure
+	void subtractPair() pure @nogc nothrow
 	{
 		auto pair = pairs[$ - 1];
-		recoverTiles(pair.tiles);
-		pairs = pairs[0 .. $ - 1];
+		recoverTiles(pair);
+		pairs.removeAt(pairs.length-1);
 	}
 
-	void subtractPon() pure
+	void subtractPon() pure @nogc nothrow
 	{
 		auto pon = pons[$ - 1];
-		recoverTiles(pon.tiles);
-		pons = pons[0 .. $ - 1];
+		recoverTiles(pon);
+		pons.removeAt(pons.length-1);
 	}
 
-	void subtractChi() pure
+	void subtractChi() pure @nogc nothrow
 	{
 		auto chi = chis[$ - 1];
-		recoverTiles(chi.tiles);
-		chis = chis[0 .. $ - 1];
+		recoverTiles(chi);
+		chis.removeAt(chis.length-1);
 	}
 
-	private void recoverTiles(const(Tile)[] tiles) pure @nogc nothrow
+	private void recoverTiles(ref const Combi tiles) pure @nogc nothrow
 	{
-		foreach(tile; tiles)
+		foreach(i; 0 .. tiles.length)
 		{
-			hand ~= tile;
+			hand ~= tiles[i];
 		}
 		hand.sort!byTypeValueAsc;
 	}
@@ -251,7 +254,7 @@ private class Progress
 	}
 }
 
-private Progress scanRegularMahjong(Progress progress) pure
+private Progress scanRegularMahjong(Progress progress) pure @nogc nothrow
 {
 	/*
 	   It first checks if the first two tiles form a pair (max. 1). 
@@ -274,7 +277,7 @@ private Progress scanRegularMahjong(Progress progress) pure
 	return attemptToResolveChi(progress);
 }
 
-private Progress attemptToResolvePair(Progress progress) pure
+private Progress attemptToResolvePair(Progress progress) pure @nogc nothrow
 {
 	if (progress.hand.length < 2)
 		return progress;
@@ -290,7 +293,7 @@ private Progress attemptToResolvePair(Progress progress) pure
 	return progress;
 }
 
-private Progress attemptToResolvePon(Progress progress) pure
+private Progress attemptToResolvePon(Progress progress) pure @nogc nothrow
 {
 	if (progress.hand.length < 3)
 		return progress;
@@ -306,7 +309,7 @@ private Progress attemptToResolvePon(Progress progress) pure
 	return progress;
 }
 
-private Progress attemptToResolveChi(Progress progress) pure
+private Progress attemptToResolveChi(Progress progress) pure @nogc nothrow
 {
 	if (progress.hand.length < 3)
 		return progress;

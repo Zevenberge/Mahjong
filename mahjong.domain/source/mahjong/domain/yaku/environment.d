@@ -21,7 +21,7 @@ struct Environment
     const Tile lastTile;
 }
 
-package const(Environment) destillEnvironment(const Ingame player, const Metagame metagame) pure
+package const(Environment) destillEnvironment(const Ingame player, const Metagame metagame) pure @nogc nothrow
 {
     Environment env = {
         leadingWind: metagame.leadingWind,
@@ -41,7 +41,7 @@ package const(Environment) destillEnvironment(const Ingame player, const Metagam
 }
 
 const(Environment) destillEnvironmentForPotentialRon(const Ingame player, const Tile discardedTile,
-    PlayerWinds leadingWind, bool isFirstRound, bool isLastTileBeforeExhaustiveDraw) pure
+    PlayerWinds leadingWind, bool isFirstRound, bool isLastTileBeforeExhaustiveDraw) pure @nogc nothrow
 {
     Environment env = {
         leadingWind: leadingWind,
@@ -61,7 +61,7 @@ const(Environment) destillEnvironmentForPotentialRon(const Ingame player, const 
 }
 
 const(Environment) destillEnvironmentForPotentialKanSteal(const Ingame player, const Tile kanTile,
-    PlayerWinds leadingWind, bool isFirstRound, bool isLastTileBeforeExhaustiveDraw) pure
+    PlayerWinds leadingWind, bool isFirstRound, bool isLastTileBeforeExhaustiveDraw) pure @nogc nothrow
 {
     Environment env = {
         leadingWind: leadingWind,

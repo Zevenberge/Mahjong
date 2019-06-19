@@ -7,7 +7,7 @@ import mahjong.util.collections;
 public import mahjong.util.collections : NoGcArray;
 
 alias Hand = NoGcArray!(14, const Tile);
-alias Combi = NoGcArray!(3, const Tile);
+alias Combi = NoGcArray!(4, const Tile);
 
 Hand asHand(const(Tile)[] tiles) pure @nogc nothrow
 {

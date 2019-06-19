@@ -120,12 +120,12 @@ unittest
     tile.isOwnedBy(player).should.equal(true);
 }
 
-PlayerWinds owningWind(const Tile tile) pure
+PlayerWinds owningWind(const Tile tile) pure @nogc nothrow
 {
     return tile._originalOwner.wind;
 }
 
-bool isSelfDraw(const Tile tile) pure
+bool isSelfDraw(const Tile tile) pure @nogc nothrow
 {
     return !tile.isObtainedFromADiscard;
 }
@@ -181,7 +181,7 @@ unittest
     tile.isObtainedFromADiscard.should.equal(false);
 }
 
-bool isReplacementTileForKan(const Tile tile) pure
+bool isReplacementTileForKan(const Tile tile) pure @nogc nothrow
 {
     return tile._origin == Tile.Origin.kanReplacement;
 }
@@ -406,7 +406,7 @@ unittest
     dragon.isWind.should.equal(false);
 }
 
-bool isGreen(const ComparativeTile tile) @property pure
+bool isGreen(const ComparativeTile tile) @property pure @nogc nothrow
 {
     static immutable theGreens = [
         ComparativeTile(Types.dragon, Dragons.green),

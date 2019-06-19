@@ -27,42 +27,42 @@ package struct Round
         }
     }
 
-    uint number() @property pure const
+    uint number() @property pure const @nogc nothrow
     {
         return _number;
     }
 
-    PlayerWinds leadingWind() @property pure const
+    PlayerWinds leadingWind() @property pure const @nogc nothrow
     {
         return _leadingWind;
     }
 
-    size_t roundStartingPosition() @property pure const
+    size_t roundStartingPosition() @property pure const @nogc nothrow
     {
         return _roundStartingPosition;
     }
 
-    size_t counters() @property pure const
+    size_t counters() @property pure const @nogc nothrow
     {
         return _counters;
     }
 
-    uint amountOfRiichiSticks() @property pure const
+    uint amountOfRiichiSticks() @property pure const @nogc nothrow
     {
         return _amountOfRiichiSticks;
     }
 
-    void addRiichiStick() pure
+    void addRiichiStick() pure @nogc nothrow
     {
         ++_amountOfRiichiSticks;
     }
 
-    void removeRiichiStick() pure
+    void removeRiichiStick() pure @nogc nothrow
     {
         --_amountOfRiichiSticks;
     }
 
-    this(size_t roundStartingPosition)
+    this(size_t roundStartingPosition) pure @nogc nothrow
     {
         _number = 1;
         _leadingWind = PlayerWinds.east;
@@ -76,18 +76,19 @@ private :
     PlayerWinds _leadingWind;
     size_t _roundStartingPosition;
 
-    void increment() pure
+    void increment() pure @nogc nothrow
     {
         _number++;
     }
 
-    void moveWinds(AmountOfPlayers amountOfPlayers, size_t leadingWindStartingLocation) pure
+    void moveWinds(AmountOfPlayers amountOfPlayers, size_t leadingWindStartingLocation) 
+        pure @nogc nothrow
     {
-        _roundStartingPosition = ((_roundStartingPosition - 1 + amountOfPlayers) % 
-                                    amountOfPlayers).to!int;
+        _roundStartingPosition = ((_roundStartingPosition + amountOfPlayers - 1) % 
+                                    amountOfPlayers);
         if(leadingWindStartingLocation == _roundStartingPosition)
         {
-            _leadingWind = (_leadingWind + 1).to!PlayerWinds;
+            _leadingWind = cast(PlayerWinds)(_leadingWind + 1);
             _number = 1;
         }
     }
@@ -95,17 +96,17 @@ private :
     size_t _counters;
     uint _amountOfRiichiSticks;
 
-    void addCounter() pure
+    void addCounter() pure @nogc nothrow
     {
         _counters++;
     }
 
-    void resetCounter() pure
+    void resetCounter() pure @nogc nothrow
     {
         _counters = 0;
     }
 
-    void removeRiichiSticks() pure
+    void removeRiichiSticks() pure @nogc nothrow
     {
         _amountOfRiichiSticks = 0;
     }

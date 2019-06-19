@@ -5,6 +5,7 @@ import mahjong.domain.result;
 import mahjong.domain.tile;
 import mahjong.domain.yaku;
 import mahjong.domain.yaku.environment;
+import mahjong.util.collections;
 
 version(unittest)
 {
@@ -13,9 +14,12 @@ version(unittest)
     import mahjong.domain.mahjong;
 }
 
-package Yaku[] determineChiBasedYaku(const MahjongResult result, bool isClosedHand)
+private alias Yakus = NoGcArray!(4, Yaku);
+
+package Yakus determineChiBasedYaku(ref const MahjongResult result, bool isClosedHand)
+  pure @nogc nothrow
 {
-    Yaku[] yakus;
+    Yakus yakus;
     if(result.isStraightFlush)
     {
         yakus ~= Yaku.itsu;
@@ -125,17 +129,26 @@ unittest
     yaku.length.should.equal(0);
 }
 
-private bool isStraightFlush(const MahjongResult result) pure
+private bool isStraightFlush(const MahjongResult result) pure @nogc nothrow
 {
-    import std.algorithm : any, filter;
-    import std.typecons : Tuple;
-    import mahjong.domain.set;
-    alias Straight = Tuple!(bool, "first", bool, "second", bool, "third");
-    Straight[Types] straights;
+    import std.algorithm : filter;
+    import mahjong.domain.set : isChi;
+    struct Straight
+    {
+        this(Types type) pure @nogc nothrow
+        {
+            this.type = type;
+        }
+
+        Types type;
+        bool first;
+        bool second;
+    }
+    Straight straight;
     foreach(set; result.sets.filter!(s => s.isChi))
     {
         auto tile = set.tiles[0];
-        auto straight = tile.type in straights ? straights[tile.type] : Straight();
+        if(straight.type != tile.type) straight = Straight(tile.type);
         if(tile.value == Numbers.one)
         {
             straight.first = true;
@@ -146,11 +159,10 @@ private bool isStraightFlush(const MahjongResult result) pure
         }
         if(tile.value == Numbers.seven)
         {
-            straight.third = true;
+            if(straight.first && straight.second) return true;
         }
-        straights[tile.type] = straight;
     }
-    return straights.values.any!(s => s.first && s.second && s.third);
+    return false;
 }
 
 @("One to nine in the same suit is a straight flush")
@@ -214,7 +226,7 @@ unittest
     result.isStraightFlush.should.equal(false);
 }
 
-private size_t countChiPairs(const MahjongResult mahjongResult)
+private size_t countChiPairs(ref const MahjongResult mahjongResult) pure @nogc nothrow
 {
     import mahjong.domain.set;
     // Until otherwise proven, assume that the result is reasonably sorted.
@@ -232,7 +244,7 @@ private size_t countChiPairs(const MahjongResult mahjongResult)
     return amountOfPairs;
 }
 
-private bool hasJustTwoEqualChis(const MahjongResult mahjongResult)
+private bool hasJustTwoEqualChis(ref const MahjongResult mahjongResult) pure @nogc nothrow
 {
     return mahjongResult.countChiPairs == 1;
 }
@@ -295,7 +307,7 @@ unittest
     result.hasJustTwoEqualChis.should.equal(true);
 }
 
-private bool hasTwoTimesTwoEqualChis(const MahjongResult mahjongResult)
+private bool hasTwoTimesTwoEqualChis(ref const MahjongResult mahjongResult) pure @nogc nothrow
 {
     return mahjongResult.countChiPairs == 2;
 }
@@ -313,7 +325,7 @@ unittest
     result.hasTwoTimesTwoEqualChis.should.equal(true);
 }
 
-private bool hasTripletChis(const MahjongResult mahjongResult)
+private bool hasTripletChis(ref const MahjongResult mahjongResult) pure @nogc nothrow
 {
     import mahjong.domain.set : isSameChiInDifferentType;
     if(mahjongResult.sets.length < 3) return false;

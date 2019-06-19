@@ -19,34 +19,34 @@ class OpenHand
 
 	const UUID id;
 
-	const(Tile)[] tiles() @property const
+	auto tiles() @property pure @nogc const nothrow @safe
 	{
 		return _sets.flatMap!(set => set.tiles);
 	}
 
-	bool isClosedHand() @property pure const
+	bool isClosedHand() @property pure const @nogc nothrow
 	{
 		return _sets.all!(s => !s.isOpen);
 	}
 
 	private Set[] _sets;
-	const(Set[]) sets() @property pure const
+	const(Set[]) sets() @property pure const @nogc nothrow
 	{
 		return _sets;
 	}
 
-	size_t amountOfPons() @property pure const
+	size_t amountOfPons() @property pure const @nogc nothrow
 	{
 		return _sets.count!(s => s.isPon);
 	}
 
 	private ubyte _amountOfKans;
-	size_t amountOfKans() @property pure const
+	size_t amountOfKans() @property pure const @nogc nothrow
 	{
 		return _amountOfKans;
 	}
 
-	size_t amountOfChis() @property pure const
+	size_t amountOfChis() @property pure const @nogc nothrow
 	{
 		return _sets.count!(s => s.isChi);
 	}
@@ -143,7 +143,7 @@ unittest
 	assert(openHand.amountOfKans == 1, "Hand should have one kan");
 }
 
-private bool canPromoteSetToKan(const Set set, const Tile kanTile) pure
+private bool canPromoteSetToKan(ref const Set set, const Tile kanTile) pure @nogc nothrow
 {
 	return set.tiles.length == 3 &&
 			kanTile.hasEqualValue(set.tiles[0]) &&
@@ -179,7 +179,7 @@ unittest
 	assert(!chi.canPromoteSetToKan(kanTile), "A different chi should not be promotable to kan.");
 }
 
-bool hasAllKans(const OpenHand hand, int maxAmountOfKans) pure
+bool hasAllKans(const OpenHand hand, int maxAmountOfKans) pure @nogc nothrow
 {
     return hand.amountOfKans == maxAmountOfKans;
 }

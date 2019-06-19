@@ -139,17 +139,17 @@ class Wall
 		return kanTile;
 	}
 
-    bool canRiichiBeDeclared() @property pure const
+    bool canRiichiBeDeclared() @property pure const @nogc nothrow
     {
         return (_tiles.length - _opts.deadWallLength) > _opts.riichiBuffer;
     }
 
-	bool isExhaustiveDraw() @property pure const
+	bool isExhaustiveDraw() @property pure const @nogc nothrow
 	{
 		return _tiles.length <= _opts.deadWallLength;
 	}
 
-    bool isMaxAmountOfKansReached() @property pure const
+    bool isMaxAmountOfKansReached() @property pure const @nogc nothrow
     {
         return _amountOfKans == _opts.maxAmountOfKans;
     }

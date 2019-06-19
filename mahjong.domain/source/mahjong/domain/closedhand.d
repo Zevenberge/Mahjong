@@ -166,7 +166,7 @@ unittest
 		"Trying to declare a closed kan when it is not allowed should be rewarded with an exception.");
 }
 
-bool hasNineOrMoreUniqueHonoursOrTerminals(const ClosedHand hand)
+bool hasNineOrMoreUniqueHonoursOrTerminals(const ClosedHand hand) pure @nogc nothrow
 {
     auto honoursOrTerminals = hand.tiles.filter!(t => t.isHonourOrTerminal);
     auto uniqueHonoursOrTerminals = honoursOrTerminals.uniq!((a, b) => a.hasEqualValue(b));
