@@ -69,6 +69,11 @@ struct NoGcArray(size_t maxSize, T)
     {
         private Rebindable!T[maxSize] _buffer;
     }
+    else static if(!isClass!T && isConst!T)
+    {
+        import std.traits : Unqual;
+        private Unqual!T[maxSize] _buffer;
+    }
     else
     {
         private T[maxSize] _buffer;
@@ -93,6 +98,24 @@ struct NoGcArray(size_t maxSize, T)
         {
             static assert(false, "Only concatenation supported");
         }
+    }
+
+    void opOpAssign(string op, Range)(auto ref Range range) @safe pure @nogc nothrow
+    in(_length < maxSize, "Cannot append if the buffer is fully filled.")
+    {
+        static if(op == "~")
+        {
+            foreach(element; range) { this ~= element; }
+        }
+        else
+        {
+            static assert(false, "Only concatenation supported");
+        }
+    }
+
+    this(Range)(auto ref Range range) @safe pure @nogc nothrow
+    {
+        this ~= range;
     }
 
     inout(T) opIndex(size_t index) inout @safe pure @nogc nothrow
@@ -123,6 +146,17 @@ struct NoGcArray(size_t maxSize, T)
         import std.algorithm : sort;
         auto slice = _buffer[0.. _length];
         slice.sort!pred; 
+    }
+
+    void removeAt(size_t index) @safe pure @nogc nothrow
+    in(index < _length, "Cannot remove an element after the array ended")
+    {
+        foreach(i; index .. _length - 1)
+        {
+            _buffer[i] = _buffer[i+1];
+        }
+        _buffer[_length - 1] =  T.init;
+        _length--;
     }
 
     static if(isClass!T)
@@ -286,6 +320,18 @@ unittest
     array[0].should.equal(remainer);
 }
 
+@("Can I remove an element at a set spot?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, int) array;
+    array ~= 420;
+    array ~= 42;
+    array.removeAt(0);
+    array.length.should.equal(1);
+    array[0].should.equal(42);
+}
+
 @("Can I manipulate a mutable array of const objects?")
 unittest
 {
@@ -325,6 +371,60 @@ unittest
     array[0].should.equal(1);
     array[1].should.equal(42);
     array[2].should.equal(420);
+}
+
+@("Can I have a NoGcArray that hold const value objects")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, const int) array;
+    array ~= 42;
+    array.length.should.equal(1);
+}
+
+@("Can I concatenate two arrays")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, int) array;
+    array ~= [42, 2];
+    array.length.should.equal(2);
+    array[0].should.equal(42);
+    array[1].should.equal(2);
+}
+
+@("Can I concatenate a NoGcArray without consuming it")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, int) array;
+    array ~= 42;
+    NoGcArray!(4, int) other;
+    other ~= 2;
+    array ~= other;
+    array.length.should.equal(2);
+    other.length.should.equal(1);
+    array[0].should.equal(42);
+    array[1].should.equal(2);
+}
+
+@("Is my NoGcArray an input range?")
+unittest
+{
+    import fluent.asserts;
+    NoGcArray!(4, int) array;
+    isInputRange!(typeof(array)).should.equal(true);
+    array ~= [4, 5];
+    array.should.containOnly([5, 4]);
+}
+
+@("Can I pass dynamic arrays to my nogc arrays?")
+unittest
+{
+    import fluent.asserts;
+    alias TheArray = NoGcArray!(4, int);
+    TheArray array = [2, 3, 4];
+    array.length.should.equal(3);
 }
 
 auto allocate(Array)(auto ref inout Array array) pure nothrow
