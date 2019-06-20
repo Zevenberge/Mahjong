@@ -2,6 +2,7 @@
 
 import std.algorithm;
 import std.range;
+import mahjong.domain.mahjong;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.wrappers;

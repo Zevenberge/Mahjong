@@ -9,6 +9,7 @@ import std.conv;
 
 import mahjong.domain.enums;
 import mahjong.domain;
+import mahjong.domain.mahjong;
 import mahjong.domain.metagame.round;
 import mahjong.domain.opts;
 import mahjong.domain.wrappers;

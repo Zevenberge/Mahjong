@@ -4,6 +4,7 @@ import std.experimental.logger;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.typecons;
 
 import mahjong.domain.analysis;
 import mahjong.domain.closedhand;
@@ -59,7 +60,29 @@ unittest
 	assert(scanHandForMahjong(ingame).isMahjong, "An open chi should count towards mahjong");
 }
 
-private MahjongResult scanHandForMahjong(const(Tile)[] closedHand, const(Set[]) openSets) pure
+bool isMahjong(const Ingame player) pure @nogc nothrow
+{
+	return scanHandForMahjong!(No.includeSets)(player.closedHand.tiles, player.openHand.sets);
+}
+
+@("Can I can a player for mahjong")
+unittest
+{
+	import fluent.asserts;
+	auto ingame = new Ingame(PlayerWinds.east, "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡🀓🀓🀓"d);
+	ingame.isMahjong.should.equal(true);
+}
+
+@("If a player is not mahjong, we don't get a false positive")
+unittest
+{
+	import fluent.asserts;
+	auto ingame = new Ingame(PlayerWinds.east, "🀄🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡🀓🀓🀔"d);
+	ingame.isMahjong.should.equal(false);
+}
+
+private auto scanHandForMahjong(Flag!("includeSets") includeSets = Yes.includeSets)
+	(const(Tile)[] closedHand, const(Set[]) openSets) pure nothrow
 in(closedHand.length > 0)
 out(; closedHand.length > 0)
 { /*
@@ -73,27 +96,49 @@ out(; closedHand.length > 0)
 	{
 		if (isThirteenOrphans(hand))
 		{
-			return MahjongResult(true, [thirteenOrphans(closedHand)]);
+			static if(includeSets == Yes.includeSets)
+			{
+				return MahjongResult(true, [thirteenOrphans(closedHand)]);
+			}
+			else
+			{
+				return true;
+			}
 		}
 	}
 
-	auto progress = scanRegularMahjong(new Progress(hand, openSets));
+	auto progress = Progress(hand, openSets);
+	scanRegularMahjong(progress);
 
 	if (hand.length == 14 && !progress.isMahjong)
 	{ // If we don't have a mahjong using normal hands, we check whether we have seven pairs
 		if (isSevenPairs(hand))
 		{
-			return MahjongResult(true, [sevenPairs(closedHand)]);
+			static if(includeSets == Yes.includeSets)
+			{
+				return MahjongResult(true, [sevenPairs(closedHand)]);
+			}
+			else
+			{
+				return true;
+			}
 		}
 	}
 
-	const(Set)[] sets;
-	sets ~= progress.pons.map!(x => pon(x.allocate)).array;
-	sets ~= progress.chis.map!(x => chi(x.allocate)).array;
-	sets ~= progress.pairs.map!(x => pair(x.allocate)).array;
+	static if(includeSets == No.includeSets)
+	{
+		return progress.isMahjong;
+	}
+	else
+	{
+		const(Set)[] sets;
+		sets ~= progress.pons.map!(x => pon(x.allocate)).array;
+		sets ~= progress.chis.map!(x => chi(x.allocate)).array;
+		sets ~= progress.pairs.map!(x => pair(x.allocate)).array;
 
-	auto result = MahjongResult(progress.isMahjong, sets);
-	return result;
+		auto result = MahjongResult(progress.isMahjong, sets);
+		return result;
+	}
 }
 
 private bool isSevenPairs(const ref Hand hand) pure @nogc nothrow
@@ -180,9 +225,9 @@ private bool isThirteenOrphans(const ref Hand hand) pure @nogc nothrow
 	return pairs == 1;
 }
 
-private class Progress
+private struct Progress
 {
-	this(const ref Hand hand, const(Set[]) initialSets) pure
+	this(const ref Hand hand, const(Set[]) initialSets) pure @nogc nothrow
 	{
 		import mahjong.util.collections : array;
 		this.hand = hand;
@@ -254,7 +299,7 @@ private class Progress
 	}
 }
 
-private Progress scanRegularMahjong(Progress progress) pure @nogc nothrow
+private void scanRegularMahjong(ref Progress progress) pure @nogc nothrow
 {
 	/*
 	   It first checks if the first two tiles form a pair (max. 1). 
@@ -267,62 +312,59 @@ private Progress scanRegularMahjong(Progress progress) pure @nogc nothrow
 	*/
 	if (progress.pairs.length < 1)
 	{ // Check if there is a pair, but only if there is not yet a pair.
-		progress = attemptToResolvePair(progress);
+		attemptToResolvePair(progress);
 		if (progress.isMahjong)
-			return progress;
+			return;
 	}
-	progress = attemptToResolvePon(progress);
+	attemptToResolvePon(progress);
 	if (progress.isMahjong)
-		return progress;
+		return;
 	return attemptToResolveChi(progress);
 }
 
-private Progress attemptToResolvePair(Progress progress) pure @nogc nothrow
+private void attemptToResolvePair(ref Progress progress) pure @nogc nothrow
 {
 	if (progress.hand.length < 2)
-		return progress;
+		return;
 	auto pair = seperatePair(progress.hand);
 	if (!pair.isSeperated)
-		return progress;
+		return;
 	progress.convertToPair(pair.get);
-	progress = scanRegularMahjong(progress);
+	scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
 		progress.subtractPair;
 	}
-	return progress;
 }
 
-private Progress attemptToResolvePon(Progress progress) pure @nogc nothrow
+private void attemptToResolvePon(ref Progress progress) pure @nogc nothrow
 {
 	if (progress.hand.length < 3)
-		return progress;
+		return;
 	auto pon = seperatePon(progress.hand);
 	if (!pon.isSeperated)
-		return progress;
+		return;
 	progress.convertToPon(pon.get);
-	progress = scanRegularMahjong(progress);
+	scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
 		progress.subtractPon;
 	}
-	return progress;
 }
 
-private Progress attemptToResolveChi(Progress progress) pure @nogc nothrow
+private void attemptToResolveChi(ref Progress progress) pure @nogc nothrow
 {
 	if (progress.hand.length < 3)
-		return progress;
+		return;
 	auto chi = seperateChi(progress.hand);
 	if (!chi.isSeperated)
-		return progress;
+		return;
 	progress.convertToChi(chi.get);
-	progress = scanRegularMahjong(progress);
+	scanRegularMahjong(progress);
 	if (!progress.isMahjong)
 	{
 		progress.subtractChi;
 	}
-	return progress;
 }
 
 @("Are the example hands mahjong hands?")

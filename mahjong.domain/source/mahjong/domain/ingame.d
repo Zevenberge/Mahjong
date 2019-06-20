@@ -1033,11 +1033,6 @@ class Ingame
         ingame.isFirstTurnAfterRiichi.should.equal(false);
     }
 
-    bool isMahjong() pure const
-    {
-        return scanHandForMahjong(this).isMahjong;
-    }
-
     Tile discard(const Tile discardedTile) pure
     {
         _isFirstTurnAfterRiichi = false;
