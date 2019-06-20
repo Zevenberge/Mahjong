@@ -101,7 +101,7 @@ class ClosedHand
 		return removeTilesWithIdenticalValue!3(discard);
 	}
 
-	bool canDeclareClosedKan(const Tile tile) pure const
+	bool canDeclareClosedKan(const Tile tile) pure const @nogc nothrow
 	{
 		return tiles.count!(t => tile.hasEqualValue(t)) >= 4;
 	}

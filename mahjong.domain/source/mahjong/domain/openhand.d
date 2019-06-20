@@ -82,7 +82,7 @@ class OpenHand
 		_sets ~= chi(tiles);
 	}
 
-	bool canPromoteToKan(const Tile tile) pure const
+	bool canPromoteToKan(const Tile tile) pure const @nogc nothrow
 	{
 		return _sets.any!(s => s.canPromoteSetToKan(tile));
 	}

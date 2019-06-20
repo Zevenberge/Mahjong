@@ -694,7 +694,7 @@ class Ingame
         ingame.isFuriten.should.equal(true);
     }
 
-    bool canDeclareClosedKan(const Tile tile) pure const
+    bool canDeclareClosedKan(const Tile tile) pure const @nogc nothrow
     {
         return closedHand.canDeclareClosedKan(tile);
     }
@@ -747,7 +747,7 @@ class Ingame
         ingame.lastTile.isReplacementTileForKan.should.equal(true);
     }
 
-    bool canPromoteToKan(const Tile tile) pure const
+    bool canPromoteToKan(const Tile tile) pure const @nogc nothrow
     {
         return openHand.canPromoteToKan(tile);
     }

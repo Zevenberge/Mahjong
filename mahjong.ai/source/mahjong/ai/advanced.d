@@ -12,7 +12,9 @@ import mahjong.domain.analysis;
 import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
+import mahjong.engine.flow;
 import mahjong.util.collections;
+import mahjong.util.optional;
 
 alias Hand = mahjong.ai.data.Hand;
 
@@ -22,10 +24,100 @@ version(mahjong_ai_test)
     import mahjong.ai.testing;
 }
 
-/+class AdvancedAI : AI
+class AdvancedAI : AI
 {
+    const(TurnDecision) decide(const TurnEvent event)
+    {
+        auto tsumo = claimTsumoIfPossible(event.player, event.metagame);
+        if(tsumo != none) return tsumo.get;
+        auto hand = Hand(event.player.closedHand.tiles);
+        auto discard = discardUnrelatedTile(hand, event.player);
+        auto kan = tryToFitInAKan(discard, event.player);
+        if(kan != none) return kan.get;
+        return discard;
+    }
 
-}+/
+    @("The AI should tsumo if they can.")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto player = new Player("🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d, PlayerWinds.east);
+        player.hasDrawnTheirLastTile;
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new TurnEvent(metagame, player, player.lastTile));
+        result.action.should.equal(TurnDecision.Action.claimTsumo);
+        result.player.should.equal(player);
+    }
+
+    @("If the AI cannot tsumo, they should discard a tile")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto player = new Player("🀁🀁🀆🀆🀆🀑🀑🀓🀕🀇🀙🀜🀝🀡"d, PlayerWinds.east);
+        player.hasDrawnTheirLastTile;
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new TurnEvent(metagame, player, player.lastTile));
+        result.action.should.equal(TurnDecision.Action.discard);
+        result.player.should.equal(player);
+        result.selectedTile.should.equal(player.closedHand.tiles[9]);
+    }
+
+    @("If a fourth tile is relevant, discard another")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto player = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀗🀗🀘🀜🀡"d, PlayerWinds.east);
+        auto tile = new Tile(Types.bamboo, Numbers.eight);
+        tile.isNotOwn;
+        player.pon(tile);
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new TurnEvent(metagame, player, player.lastTile));
+        result.action.should.equal(TurnDecision.Action.discard);
+        result.selectedTile.shouldBeEither(player.closedHand.tiles[9], player.closedHand.tiles[10]);
+    }
+
+    @("If the fourth tile is irrelevant, just promote it to kan")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto player = new Player("🀁🀁🀆🀆🀆🀑🀑🀓🀕🀙🀜🀝🀡"d, PlayerWinds.east);
+        auto tile = new Tile(Types.dragon, Dragons.white);
+        tile.isNotOwn;
+        player.pon(tile);
+        player.hasDrawnTheirLastTile;
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new TurnEvent(metagame, player, player.lastTile));
+        result.action.should.equal(TurnDecision.Action.promoteToKan);
+        result.player.should.equal(player);
+        result.selectedTile.should.equal(player.closedHand.tiles[2]);
+    }
+
+    const(ClaimDecision) decide(const ClaimEvent event)
+    {
+        return ClaimDecision();
+    }
+
+	const(KanStealDecision) decide(const KanStealEvent event)
+    {
+        return KanStealDecision();
+    }
+}
 
 Optional!TurnDecision claimTsumoIfPossible(const Player player, const Metagame metagame)
     pure
@@ -208,6 +300,66 @@ unittest
     result.selectedTile.shouldBeEither(h.tiles[6], h.tiles[9]);
 }
 
+Optional!TurnDecision tryToFitInAKan(const TurnDecision discard, 
+    const Player player) pure @nogc nothrow
+{
+    if(player.canPromoteToKan(discard.selectedTile))
+        return some(TurnDecision(player, TurnDecision.Action.promoteToKan, discard.selectedTile));
+    if(player.canDeclareClosedKan(discard.selectedTile))
+        return some(TurnDecision(player, TurnDecision.Action.declareClosedKan, discard.selectedTile));
+    return no!TurnDecision;
+}
+
+@("If I have an open pon and want to discard the fourth tile, why not promote it")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    auto player = new Player("🀁🀁🀆🀆🀆🀑🀑🀓🀕🀙🀜🀝🀡"d, PlayerWinds.east);
+    auto tile = new Tile(Types.dragon, Dragons.white);
+    tile.isNotOwn;
+    player.pon(tile);
+    player.hasDrawnTheirLastTile;
+    auto previousResult = TurnDecision(player, TurnDecision.Action.discard, player.closedHand.tiles[2]);
+    auto newResult = tryToFitInAKan(previousResult, player);
+    newResult.should.not.equal(no!TurnDecision);
+    newResult.unwrap.action.should.equal(TurnDecision.Action.promoteToKan);
+    newResult.unwrap.player.should.equal(player);
+    newResult.unwrap.selectedTile.should.equal(player.closedHand.tiles[2]);
+}
+
+@("If I can't make a kan out of it, I just give up.")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    auto player = new Player("🀁🀁🀆🀆🀆🀑🀑🀓🀕🀙🀙🀜🀝🀡"d, PlayerWinds.east);
+    player.hasDrawnTheirLastTile;
+    auto previousResult = TurnDecision(player, TurnDecision.Action.discard, player.closedHand.tiles[2]);
+    auto newResult = tryToFitInAKan(previousResult, player);
+    newResult.should.equal(no!TurnDecision);
+}
+
+@("If I don't need my fourth tile and want to discard it, why not declare a closed kan")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    auto player = new Player("🀁🀁🀆🀆🀆🀆🀑🀑🀓🀕🀙🀜🀝🀡"d, PlayerWinds.east);
+    player.hasDrawnTheirLastTile;
+    auto previousResult = TurnDecision(player, TurnDecision.Action.discard, player.closedHand.tiles[2]);
+    auto newResult = tryToFitInAKan(previousResult, player);
+    newResult.should.not.equal(no!TurnDecision);
+    newResult.unwrap.action.should.equal(TurnDecision.Action.declareClosedKan);
+    newResult.unwrap.player.should.equal(player);
+    newResult.unwrap.selectedTile.should.equal(player.closedHand.tiles[2]);
+}
 
 private const(Tile) selectOnlyTileOfType(ref const Hand hand) pure @nogc nothrow
 {

@@ -4,7 +4,7 @@ import optional.optional;
 
 public import optional.optional : unwrap;
 
-ref T get(T)(ref Optional!T opt) @trusted @nogc pure nothrow
+ref T get(T)(ref scope Optional!T opt) @trusted @nogc pure nothrow
 in(opt != none, "Optional should have contents")
 {
     static if(!is(T == class))
@@ -31,4 +31,15 @@ unittest
     void fun(ref int x){}
     auto x = some(42);
     fun(x.get);
+}
+
+@("Can I return a value from get")
+unittest
+{
+    int fun() @safe
+    {
+        auto x = some(42);
+        return x.get;
+    }
+    int x = fun();
 }
