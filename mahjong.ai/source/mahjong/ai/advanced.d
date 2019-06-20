@@ -26,7 +26,7 @@ version(mahjong_ai_test)
 
 }+/
 
-TurnDecision discardUnrelatedTile(const Hand hand, const Player player) pure @nogc nothrow
+TurnDecision discardUnrelatedTile(ref const Hand hand, const Player player) pure @nogc nothrow
 {
     Rebindable!(const Tile) tile;
     static foreach(check; AliasSeq!(
@@ -46,7 +46,8 @@ TurnDecision discardUnrelatedTile(const Hand hand, const Player player) pure @no
 @("Discarding an unrelated tile always decides a discard")
 unittest
 {
-    auto result = discardUnrelatedTile(hand("🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d), player);
+    auto h = hand("🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d);
+    auto result = discardUnrelatedTile(h, player);
     result.action.should.equal(TurnDecision.Action.discard);
 }
 
@@ -54,7 +55,8 @@ unittest
 unittest
 {
     auto p = player;
-    auto result = discardUnrelatedTile(hand("🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d), p);
+    auto h = hand("🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d);
+    auto result = discardUnrelatedTile(h, p);
     result.player.should.equal(p);
 }
 
@@ -77,7 +79,8 @@ unittest
 @("If I cannot determine any result, there should still be a discard")
 unittest
 {
-    auto result = discardUnrelatedTile(hand("🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀"d), player);
+    auto h = hand("🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀🀀"d);
+    auto result = discardUnrelatedTile(h, player);
     result.selectedTile.should.not.beNull;
 }
 
@@ -162,7 +165,7 @@ unittest
 }
 
 
-private const(Tile) selectOnlyTileOfType(const Hand hand) pure @nogc nothrow
+private const(Tile) selectOnlyTileOfType(ref const Hand hand) pure @nogc nothrow
 {
     foreach(set; hand.tilesByType)
     {
@@ -176,7 +179,7 @@ private const(Tile) selectOnlyTileOfType(const Hand hand) pure @nogc nothrow
     return null;
 }
 
-private const(Tile) selectLonelyHonour(const Hand hand) pure @nogc nothrow
+private const(Tile) selectLonelyHonour(ref const Hand hand) pure @nogc nothrow
 {
     foreach(set; hand.honoursByValue)
     {
@@ -190,7 +193,7 @@ private const(Tile) selectLonelyHonour(const Hand hand) pure @nogc nothrow
     return null;
 }
 
-private const(Tile) selectUnconnectedTerminal(const Hand hand) pure @nogc nothrow
+private const(Tile) selectUnconnectedTerminal(ref const Hand hand) pure @nogc nothrow
 {
     foreach(set; hand.nonHonoursByType)
     {
@@ -253,7 +256,7 @@ private const(Tile) selectUnconnectedTile(const Hand hand) pure @nogc nothrow
     return null;
 }
 
-private const(Tile) selectTileNotConnectedFromSet(const Hand hand) pure @nogc nothrow
+private const(Tile) selectTileNotConnectedFromSet(ref const Hand hand) pure @nogc nothrow
 {
     alias Tiles = NoGcArray!(14, const Tile);
     bool stripSet(ref Tiles tiles)
@@ -263,16 +266,15 @@ private const(Tile) selectTileNotConnectedFromSet(const Hand hand) pure @nogc no
             auto set = seperate(tiles);
             if(set.isSeperated)
             {
-                tiles = set.unwrap.hand;
                 return true;
             }
         }}
         return false;
     }
 
-    foreach(set; hand.nonHonoursByType)
+    foreach(suit; hand.nonHonoursByType)
     {
-        auto tiles = set.array!14;
+        auto tiles = suit.array!14;
         while(stripSet(tiles)) {}
         if(tiles.length == 1) return tiles[0];
     }

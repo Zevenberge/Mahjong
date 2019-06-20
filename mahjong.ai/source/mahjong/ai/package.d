@@ -18,6 +18,7 @@ class SimpleAI : AI
 {
 	override const(TurnDecision) decide(const TurnEvent event)
 	{
+		import mahjong.domain.mahjong;
 		import mahjong.util.log : logAspect;
 		mixin(logAspect!(LogLevel.info, "AI Turn"));
 		import std.random : randomSample;
