@@ -813,7 +813,7 @@ class Ingame
 
     private bool _isTemporaryFuriten;
 
-    bool canTsumo(const Metagame metagame) const
+    bool canTsumo(const Metagame metagame) pure const
     {
         import mahjong.domain.yaku : determineYaku;
 

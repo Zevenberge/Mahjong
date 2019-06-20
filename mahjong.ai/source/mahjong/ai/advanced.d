@@ -9,6 +9,7 @@ import mahjong.ai;
 import mahjong.ai.data;
 import mahjong.ai.decision;
 import mahjong.domain.analysis;
+import mahjong.domain.metagame;
 import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.util.collections;
@@ -25,6 +26,49 @@ version(mahjong_ai_test)
 {
 
 }+/
+
+Optional!TurnDecision claimTsumoIfPossible(const Player player, const Metagame metagame)
+    pure
+{
+    if(player.canTsumo(metagame))
+        return some(TurnDecision(player, TurnDecision.Action.claimTsumo, null));
+    else
+        return no!TurnDecision;
+}
+
+@("If they can win, the AI should claim tsumo.")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    auto player = new Player("🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d, PlayerWinds.east);
+    player.hasDrawnTheirLastTile;
+    auto result = claimTsumoIfPossible(player, metagame);
+    result.should.not.equal(no!TurnDecision);
+    result.unwrap.action.should.equal(TurnDecision.Action.claimTsumo);
+    result.unwrap.player.should.equal(player);
+}
+
+@("If the player is not allowed to tsumo, the decision is not yet made")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    auto player = new Player("🀐🀐🀐🀑🀒🀓🀔🀕🀇🀇🀜🀝🀞", PlayerWinds.east);
+    auto ponTile = new Tile(Types.character, Numbers.one);
+    ponTile.isNotOwn;
+    ponTile.isDiscarded;
+    player.pon(ponTile);
+    player.hasDrawnTheirLastTile;
+    auto result = claimTsumoIfPossible(player, metagame);
+    result.should.equal(no!TurnDecision);
+}
 
 TurnDecision discardUnrelatedTile(ref const Hand hand, const Player player) pure @nogc nothrow
 {
@@ -217,7 +261,7 @@ private const(Tile) selectUnconnectedTerminal(ref const Hand hand) pure @nogc no
     return null;
 }
 
-private const(Tile) selectUnconnectedTile(const Hand hand) pure @nogc nothrow
+private const(Tile) selectUnconnectedTile(ref const Hand hand) pure @nogc nothrow
 {
     foreach(set; hand.nonHonoursByType)
     {
