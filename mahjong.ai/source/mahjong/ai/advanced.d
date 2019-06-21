@@ -30,6 +30,8 @@ class AdvancedAI : AI
     {
         auto tsumo = claimTsumoIfPossible(event.player, event.metagame);
         if(tsumo != none) return tsumo.get;
+        auto riichi = declareRiichiIfPossible(event.player, event.metagame);
+        if(riichi != none) return riichi.get;
         auto hand = Hand(event.player.closedHand.tiles);
         auto discard = discardUnrelatedTile(hand, event.player);
         auto kan = tryToFitInAKan(discard, event.player);
@@ -40,11 +42,13 @@ class AdvancedAI : AI
     @("The AI should tsumo if they can.")
     unittest
     {
-        import fluent.asserts;
         import mahjong.domain.enums;
         import mahjong.domain.opts;
+        import mahjong.domain.wall;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
+        metagame.wall.setUp;
         auto player = new Player("🀀🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d, PlayerWinds.east);
         player.hasDrawnTheirLastTile;
         auto ai = new AdvancedAI();
@@ -56,11 +60,13 @@ class AdvancedAI : AI
     @("If the AI cannot tsumo, they should discard a tile")
     unittest
     {
-        import fluent.asserts;
         import mahjong.domain.enums;
         import mahjong.domain.opts;
+        import mahjong.domain.wall;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
+        metagame.wall.setUp;
         auto player = new Player("🀁🀁🀆🀆🀆🀑🀑🀓🀕🀇🀙🀜🀝🀡"d, PlayerWinds.east);
         player.hasDrawnTheirLastTile;
         auto ai = new AdvancedAI();
@@ -70,14 +76,36 @@ class AdvancedAI : AI
         result.selectedTile.should.equal(player.closedHand.tiles[9]);
     }
 
+    @("If the AI can declare riichi, they should")
+    unittest
+    {
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+        import mahjong.domain.wall;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
+        metagame.wall.setUp;
+        auto player = new Player("🀀🀀🀇🀇🀈🀈🀉🀉🀓🀓🀔🀔🀕🀡"d, PlayerWinds.east);
+        player.hasDrawnTheirLastTile;
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new TurnEvent(metagame, player, player.lastTile));
+        result.action.should.equal(TurnDecision.Action.declareRiichi);
+        result.player.should.equal(player);
+        result.selectedTile.shouldBeEither(player.closedHand.tiles[12],
+            player.closedHand.tiles[13]);
+    }
+
     @("If a fourth tile is relevant, discard another")
     unittest
     {
-        import fluent.asserts;
         import mahjong.domain.enums;
         import mahjong.domain.opts;
+        import mahjong.domain.wall;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
+        metagame.wall.setUp;
         auto player = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀗🀗🀘🀜🀡"d, PlayerWinds.east);
         auto tile = new Tile(Types.bamboo, Numbers.eight);
         tile.isNotOwn;
@@ -91,11 +119,13 @@ class AdvancedAI : AI
     @("If the fourth tile is irrelevant, just promote it to kan")
     unittest
     {
-        import fluent.asserts;
         import mahjong.domain.enums;
         import mahjong.domain.opts;
+        import mahjong.domain.wall;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
+        metagame.wall.setUp;
         auto player = new Player("🀁🀁🀆🀆🀆🀑🀑🀓🀕🀙🀜🀝🀡"d, PlayerWinds.east);
         auto tile = new Tile(Types.dragon, Dragons.white);
         tile.isNotOwn;
@@ -131,7 +161,6 @@ Optional!TurnDecision claimTsumoIfPossible(const Player player, const Metagame m
 @("If they can win, the AI should claim tsumo.")
 unittest
 {
-    import fluent.asserts;
     import mahjong.domain.enums;
     import mahjong.domain.opts;
 
@@ -147,7 +176,6 @@ unittest
 @("If the player is not allowed to tsumo, the decision is not yet made")
 unittest
 {
-    import fluent.asserts;
     import mahjong.domain.enums;
     import mahjong.domain.opts;
 
@@ -160,6 +188,89 @@ unittest
     player.hasDrawnTheirLastTile;
     auto result = claimTsumoIfPossible(player, metagame);
     result.should.equal(no!TurnDecision);
+}
+
+Optional!TurnDecision declareRiichiIfPossible(const Player player, const Metagame metagame)
+{
+    foreach(tile; player.closedHand.tiles)
+    {
+        if(player.canDeclareRiichi(tile, metagame))
+        {
+            return some(TurnDecision(player, TurnDecision.Action.declareRiichi, tile));
+        }
+    }
+    return no!TurnDecision;
+}
+
+@("If I can declare riichi, I will")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+    import mahjong.domain.wall;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    auto player = new Player("🀇🀇🀇🀉🀊🀋🀍🀐🀐🀒🀒🀙🀙🀙", PlayerWinds.east);
+    player.hasDrawnTheirLastTile;
+    auto result = declareRiichiIfPossible(player, metagame);
+    result.should.not.equal(no!TurnDecision);
+    result.unwrap.action.should.equal(TurnDecision.Action.declareRiichi);
+    result.unwrap.player.should.equal(player);
+    result.unwrap.selectedTile.should.equal(player.closedHand.tiles[6]);
+}
+
+@("If I can't declare riichi, I won't")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+    import mahjong.domain.wall;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    auto player = new Player("🀅🀄🀆🀇🀈🀉🀊🀋🀌🀍🀎🀏🀐🀑", PlayerWinds.east);
+    player.hasDrawnTheirLastTile;
+    auto result = declareRiichiIfPossible(player, metagame);
+    result.should.equal(no!TurnDecision);
+}
+
+@("If the wall has run out, the AI can't declare riichi either")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+    import mahjong.domain.wall;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    metagame.wall.setUp();
+    while(metagame.wall.canRiichiBeDeclared)
+    {
+        metagame.wall.drawTile;
+    }
+    auto player = new Player("🀇🀇🀇🀉🀊🀋🀍🀐🀐🀒🀒🀙🀙🀙", PlayerWinds.east);
+    player.hasDrawnTheirLastTile;
+    auto result = declareRiichiIfPossible(player, metagame);
+    result.should.equal(no!TurnDecision);
+}
+
+@("If I can declare riichi on a not so obvious tile, I still will")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+    import mahjong.domain.wall;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    auto player = new Player("🀀🀀🀀🀆🀈🀈🀍🀍🀑🀑🀖🀖🀙🀙", PlayerWinds.east);
+    player.hasDrawnTheirLastTile;
+    auto result = declareRiichiIfPossible(player, metagame);
+    result.should.not.equal(no!TurnDecision);
+    result.unwrap.action.should.equal(TurnDecision.Action.declareRiichi);
+    result.unwrap.player.should.equal(player);
+    result.unwrap.selectedTile.should.equal(player.closedHand.tiles[0]);
 }
 
 TurnDecision discardUnrelatedTile(ref const Hand hand, const Player player) pure @nogc nothrow
