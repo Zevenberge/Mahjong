@@ -192,6 +192,7 @@ unittest
 
 Optional!TurnDecision declareRiichiIfPossible(const Player player, const Metagame metagame)
 {
+    if(!player.isClosedHand) return no!TurnDecision;
     foreach(tile; player.closedHand.tiles)
     {
         if(player.canDeclareRiichi(tile, metagame))
