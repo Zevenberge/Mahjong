@@ -28,6 +28,8 @@ class AdvancedAI : AI
 {
     const(TurnDecision) decide(const TurnEvent event)
     {
+        auto redraw = declareRedrawIfPossible(event.player, event.metagame);
+        if(redraw != none) return redraw.get;
         auto tsumo = claimTsumoIfPossible(event.player, event.metagame);
         if(tsumo != none) return tsumo.get;
         auto riichi = declareRiichiIfPossible(event.player, event.metagame);
@@ -138,6 +140,22 @@ class AdvancedAI : AI
         result.selectedTile.should.equal(player.closedHand.tiles[2]);
     }
 
+    @("If the AI can declare a redraw, then it won't discard something")
+    unittest
+    {
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.initializeRound;
+        metagame.beginRound;
+        auto player = new Player("🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d, PlayerWinds.east);
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new TurnEvent(metagame, player, player.lastTile));
+        result.player.should.equal(player);
+        result.action.should.equal(TurnDecision.Action.declareRedraw);
+    }
+
     const(ClaimDecision) decide(const ClaimEvent event)
     {
         return ClaimDecision();
@@ -147,6 +165,45 @@ class AdvancedAI : AI
     {
         return KanStealDecision();
     }
+}
+
+Optional!TurnDecision declareRedrawIfPossible(const Player player, const Metagame metagame)
+    pure @nogc nothrow
+{
+    import mahjong.domain.ingame : isEligibleForRedraw;
+    if(player.isEligibleForRedraw(metagame))
+        return some(TurnDecision(player, TurnDecision.Action.declareRedraw, null));
+    return no!TurnDecision;
+}
+
+@("If the AI can rage quit, it won't hesitate")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto player = new Player("🀀🀁🀂🀃🀄🀅🀆🀇🀏🀝🀟🀟🀠🀠"d, PlayerWinds.east);
+    auto result = declareRedrawIfPossible(player, metagame);
+    result.should.not.equal(no!TurnDecision);
+    result.unwrap.player.should.equal(player);
+    result.unwrap.action.should.equal(TurnDecision.Action.declareRedraw);
+}
+
+@("If the AI cannot rage quit, it won't")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto player = new Player("🀇🀇🀔🀔🀔🀙🀚🀛🀜🀝🀞🀟🀠🀡"d, PlayerWinds.east);
+    auto result = declareRedrawIfPossible(player, metagame);
+    result.should.equal(no!TurnDecision);
 }
 
 Optional!TurnDecision claimTsumoIfPossible(const Player player, const Metagame metagame)
