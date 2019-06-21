@@ -97,7 +97,8 @@ class Player
         return metagame.canRiichiBeDeclared && game.canDeclareRiichi(potentialDiscard);
     }
 
-    Tile declareRiichi(const Tile discard, Metagame metagame) pure
+    Tile declareRiichi(const Tile discard, Metagame metagame)
+    in(canDeclareRiichi(discard, metagame), "Can only declare riichi if it's allowed")
     {
         _score -= metagame.riichiFare;
         metagame.riichiIsDeclared;
@@ -110,6 +111,7 @@ class Player
         import mahjong.domain.opts;
         auto player = new Player(30_000);
         auto metagame = new Metagame([player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
         auto ingame = new Ingame(PlayerWinds.east, "🀀🀀🀀🀆🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡"d);
         auto toBeDiscardedTile = ingame.closedHand.tiles[3];
         player.game = ingame;

@@ -118,6 +118,7 @@ class Wall
 	}
 
 	Tile drawTile() pure
+	in(_tiles.length > 0, "No tiles to draw from the wall")
 	{ 
 		Tile drawnTile = _tiles[0];
 		_tiles = _tiles[1 .. $];
@@ -126,6 +127,8 @@ class Wall
 
     private ubyte _amountOfKans;
 	Tile drawKanTile() pure
+	in(_tiles.length > 0, "No tiles to draw from the wall")
+	in(!isMaxAmountOfKansReached, "Exceeding max amount of kans")
 	{ 
 		flipDoraIndicator;
 		return getKanTile;      

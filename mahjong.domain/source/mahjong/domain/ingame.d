@@ -948,7 +948,8 @@ class Ingame
         ingame.canDeclareRiichi(toBeDiscardedTile).should.equal(false);
     }
 
-    Tile declareRiichi(const Tile discard, const Metagame metagame) pure
+    Tile declareRiichi(const Tile discard, const Metagame metagame)
+    in(canDeclareRiichi(discard), "Can only declare riichi if it's allowed")
     {
         return declareRiichi(discard, metagame.isFirstTurn);
     }
