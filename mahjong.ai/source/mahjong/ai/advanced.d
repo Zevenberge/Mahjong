@@ -163,7 +163,55 @@ class AdvancedAI : AI
 
 	const(KanStealDecision) decide(const KanStealEvent event)
     {
-        return KanStealDecision();
+        return KanStealDecision(event.player, event.player.canKanSteal(event.kanTile, event.metagame));
+    }
+
+    @("Does the AI not kan steal if they are furiten?")
+    unittest
+    {
+        void addTileToDiscard(Player game, Tile tile)
+        {
+            game.closedHand.tiles ~= tile;
+            game.discard(tile);
+        }
+
+        import mahjong.domain.creation;
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto player = new Player("🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d, PlayerWinds.east);
+        auto kanTile = "🀐"d.convertToTiles[0];
+        kanTile.isNotOwn;
+        kanTile.isDiscarded;
+        addTileToDiscard(player, "🀐"d.convertToTiles[0]);
+        auto event = new KanStealEvent(kanTile, player, metagame);
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(event);
+        result.steal.should.equal(false);
+        result.player.should.equal(player);
+    }
+
+    @("If the AI can kan steal, it will")
+    unittest
+    {
+        import mahjong.domain.enums;
+        import mahjong.domain.opts;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        auto player = new Player("🀐🀐🀑🀒🀓🀔🀕🀇🀇🀜🀝🀞"d, PlayerWinds.east);
+        auto ponTile = new Tile(Types.character, Numbers.one);
+        ponTile.isNotOwn;
+        ponTile.isDiscarded;
+        player.pon(ponTile);
+        auto kanSteal = new Tile(Types.bamboo, Numbers.one);
+        kanSteal.isNotOwn;
+        kanSteal.isDiscarded;
+        auto event = new KanStealEvent(kanSteal, player, metagame);
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(event);
+        result.steal.should.equal(true);
+        result.player.should.equal(player);
     }
 }
 
