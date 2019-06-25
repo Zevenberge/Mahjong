@@ -61,9 +61,10 @@ in(_mainMenu is null, "Main menu cannot be doubly initialised")
 
 private void startRiichiMahjong(BackgroundWorker bg)
 {
+	import mahjong.ai.advanced : AdvancedAI;
 	import mahjong.graphics.aiactor : runInBackground;
 	info("Riichi mahjong selected");
-	auto ai = new SimpleAI;
+	auto ai = new AdvancedAI;
 	auto eventHandlers = ai.runInBackground!3(bg);
 	startRiichiMahjong(eventHandlers[]);
 }
