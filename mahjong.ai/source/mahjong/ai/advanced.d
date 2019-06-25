@@ -158,7 +158,7 @@ class AdvancedAI : AI
 
     const(ClaimDecision) decide(const ClaimEvent event)
     {
-        return ClaimDecision();
+        return ClaimDecision(event.player, Request.None);
     }
 
 	const(KanStealDecision) decide(const KanStealEvent event)
