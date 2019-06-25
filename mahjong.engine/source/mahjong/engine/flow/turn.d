@@ -79,20 +79,20 @@ private:
     }
 
     void discard(const Tile tile, Engine engine)
-    in(_player.canDiscard(tile), "The move should be legal.")
+    in(_player.canDiscard(tile), "Trying to discard a tile which can't be discarded.")
     {
         auto discard = _player.discard(tile);
         engine.switchFlow(new ClaimFlow(discard, _metagame, _notificationService, engine));
     }
 
     void promoteToKan(const Tile tile, Engine engine)
-    in(_player.canPromoteToKan(tile), "The move should be legal.")
+    in(_player.canPromoteToKan(tile), "Trying to promote to kan while it can't")
     {
         engine.switchFlow(new KanStealFlow(tile, _metagame, _notificationService, engine));
     }
 
     void declareClosedKan(const Tile tile, Engine engine)
-    in(_player.canDeclareClosedKan(tile), "The move should be legal.")
+    in(_player.canDeclareClosedKan(tile), "Trying to declare closed kan while it can't")
     {
         _player.declareClosedKan(tile, _metagame.wall);
         _notificationService.notify(Notification.Kan, _player);
@@ -100,7 +100,7 @@ private:
     }
 
     void claimTsumo(Engine engine)
-    in(_player.canTsumo(_metagame), "The move should be legal.")
+    in(_player.canTsumo(_metagame), "Trying to tsumo while it can't")
     {
         info("Tsumo claimed by ", _player.name);
         _metagame.tsumo;
@@ -109,7 +109,7 @@ private:
     }
 
     void declareRiichi(const Tile tile, Engine engine)
-    in(_player.canDeclareRiichi(tile, _metagame), "The move should be legal.")
+    in(_player.canDeclareRiichi(tile, _metagame), "Trying to declare riichi while it can't")
     {
         info("Riichi declared by ", _player);
         auto discard = _player.declareRiichi(tile, _metagame);
