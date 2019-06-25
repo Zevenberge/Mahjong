@@ -387,7 +387,7 @@ class TsumoOption : AssertiveTurnOption
 
     override const(Tile)[] relevantTiles() @property
     {
-        return _player.closedHand.tiles ~ _player.openHand.tiles;
+        return _player.closedHand.tiles ~ _player.openHand.tiles.array;
     }
 }
 
