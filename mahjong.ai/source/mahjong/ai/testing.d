@@ -12,6 +12,6 @@ version(mahjong_ai_test)
 
     Player player()
     {
-         return new Player(30_000);
+         return new Player();
     }
 }

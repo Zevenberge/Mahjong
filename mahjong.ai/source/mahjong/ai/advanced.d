@@ -381,6 +381,7 @@ unittest
 
 TurnDecision discardUnrelatedTile(ref const Hand hand, const Player player) pure @nogc nothrow
 {
+    if(player.isRiichi) return discard(player.lastTile, player);
     Rebindable!(const Tile) tile;
     static foreach(check; AliasSeq!(
         selectOnlyTileOfType,
@@ -515,6 +516,25 @@ unittest
     auto h = hand("🀀🀀🀀🀒🀒🀒🀕🀖🀗🀘🀜🀜🀠🀠"d);
     auto result = discardUnrelatedTile(h, player);
     result.selectedTile.shouldBeEither(h.tiles[6], h.tiles[9]);
+}
+
+@("If the player is riichi, it will discard the last drawn tile")
+unittest
+{
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+    import mahjong.domain.wall;
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.initializeRound;
+    metagame.beginRound;
+    auto player = new Player("🀀🀆🀇🀈🀉🀍🀎🀏🀐🀑🀒🀙🀙🀙"d, PlayerWinds.east);
+    player.declareRiichi(player.closedHand.tiles[0], metagame);
+    auto drawnTile = new Tile(Types.bamboo, Numbers.four);
+    auto wall = new MockWall(drawnTile);
+    player.drawTile(wall);
+    auto hand = Hand(player.closedHand.tiles);
+    auto result = discardUnrelatedTile(hand, player);
+    result.selectedTile.should.equal(drawnTile);
 }
 
 Optional!TurnDecision tryToFitInAKan(const TurnDecision discard, 
