@@ -124,6 +124,11 @@ struct NoGcArray(size_t maxSize, T)
         return _buffer[index];
     }
 
+    auto opIndex() inout @safe pure @nogc nothrow
+    {
+        return _buffer[0 .. _length];
+    }
+
     private size_t _index;
 
     T front() @safe pure @nogc nothrow
@@ -136,7 +141,7 @@ struct NoGcArray(size_t maxSize, T)
         _index++;
     }
 
-    bool empty() @safe pure @nogc nothrow
+    bool empty() const @safe pure @nogc nothrow
     {
         return _length <= _index;
     }
@@ -194,6 +199,14 @@ unittest
     import fluent.asserts;
     NoGcArray!(4, int) array;
     array.length.should.equal(0);
+}
+
+@("A const nogcarray should also be empty")
+unittest
+{
+    import fluent.asserts;
+    const array = NoGcArray!(4, int)();
+    array.empty.should.equal(true);
 }
 
 @("Can I add to a no gc array")
@@ -470,4 +483,15 @@ unittest
     auto allocated = array.allocate;
     allocated.length.should.equal(1);
     allocated[0].should.equal(42);
+}
+
+@("Can I slice to foreach over a const array")
+unittest
+{
+    NoGcArray!(4, int) array;
+    array ~= 5;
+    const x = array;
+    foreach(e; x[])
+    {
+    }
 }
