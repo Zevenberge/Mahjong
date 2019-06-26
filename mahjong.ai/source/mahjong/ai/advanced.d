@@ -14,6 +14,7 @@ import mahjong.domain.player;
 import mahjong.domain.tile;
 import mahjong.engine.flow;
 import mahjong.util.collections;
+import mahjong.util.log;
 import mahjong.util.optional;
 
 alias Hand = mahjong.ai.data.Hand;
@@ -28,6 +29,7 @@ class AdvancedAI : AI
 {
     const(TurnDecision) decide(const TurnEvent event)
     {
+        mixin(logAspect!(LogLevel.info, "Deciding turn event."));
         auto redraw = declareRedrawIfPossible(event.player, event.metagame);
         if(redraw != none) return redraw.get;
         auto tsumo = claimTsumoIfPossible(event.player, event.metagame);
@@ -158,11 +160,13 @@ class AdvancedAI : AI
 
     const(ClaimDecision) decide(const ClaimEvent event)
     {
+        mixin(logAspect!(LogLevel.info, "Deciding claim event."));
         return ClaimDecision(event.player, Request.None);
     }
 
 	const(KanStealDecision) decide(const KanStealEvent event)
     {
+        mixin(logAspect!(LogLevel.info, "Deciding kan steal event."));
         return KanStealDecision(event.player, event.player.canKanSteal(event.kanTile, event.metagame));
     }
 
@@ -537,6 +541,22 @@ unittest
     result.selectedTile.should.equal(drawnTile);
 }
 
+@("If I can finish my suit with 0 tiles left, the AI doesn't crash")
+unittest
+{
+    auto h = hand("🀀🀀🀒🀒🀒🀖🀗🀘🀛🀜🀝🀞🀡🀡"d);
+    auto result = discardUnrelatedTile(h, player);
+    result.selectedTile.shouldBeEither(h.tiles[8], h.tiles[11]);
+}
+
+@("The same logic is also applied when the pair is before the set of four")
+unittest
+{
+    auto h = hand("🀇🀇🀒🀒🀒🀖🀗🀘🀙🀙🀜🀝🀞🀟"d);
+    auto result = discardUnrelatedTile(h, player);
+    result.selectedTile.shouldBeEither(h.tiles[10], h.tiles[13]);
+}
+
 Optional!TurnDecision tryToFitInAKan(const TurnDecision discard, 
     const Player player) pure @nogc nothrow
 {
@@ -635,11 +655,21 @@ private const(Tile) selectUnconnectedTerminal(ref const Hand hand) pure @nogc no
         set.popFront;
         foreach(s; set)
         {
-            first = second;
-            if(first.isTerminal)
+            if(second.isTerminal)
             {
-                if(!first.areConnected(s)) return first;
+                if(!second.areConnected(s)) 
+                {
+                    if(first && !first.areConnected(second))
+                    {
+                        return second;
+                    }
+                    if(!first)
+                    {
+                        return second;
+                    }
+                }
             }
+            first = second;
             second = s;
         }
         if(second && second.isTerminal)
@@ -648,6 +678,14 @@ private const(Tile) selectUnconnectedTerminal(ref const Hand hand) pure @nogc no
         }
     }
     return null;
+}
+
+@("I don't get a false positive unconnected terminal")
+unittest
+{
+    auto h = hand("🀙🀙🀜"d);
+    auto result = selectUnconnectedTerminal(h);
+    result.should.beNull;
 }
 
 private const(Tile) selectUnconnectedTile(ref const Hand hand) pure @nogc nothrow
@@ -694,8 +732,11 @@ private const(Tile) selectTileNotConnectedFromSet(ref const Hand hand) pure @nog
     alias Tiles = NoGcArray!(14, const Tile);
     bool stripSet(ref Tiles tiles)
     {
-        static foreach(seperate; AliasSeq!(seperatePon, seperateChi))
+        static foreach(seperate; AliasSeq!(seperatePon, 
+            seperateChi, 
+            seperateChiReverse))
         {{
+            if(tiles.empty) return false;
             auto set = seperate(tiles);
             if(set.isSeperated)
             {
@@ -710,6 +751,11 @@ private const(Tile) selectTileNotConnectedFromSet(ref const Hand hand) pure @nog
         auto tiles = suit.array!14;
         while(stripSet(tiles)) {}
         if(tiles.length == 1) return tiles[0];
+        if(tiles.length > 1)
+        {
+            if(!tiles[0].areConnected(tiles[1])) return tiles[0];
+            if(!tiles[$-2].areConnected(tiles[$-1])) return tiles[$-1];
+        }
     }
     return null;
 }
