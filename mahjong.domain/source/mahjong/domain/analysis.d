@@ -37,6 +37,7 @@ unittest
 
 Optional!Combi seperateChi(ref Hand hand) pure @nogc nothrow
 {
+    if(hand.empty) return no!Combi;
     if(hand[0].isHonour) return no!Combi;
     Combi chi;
     chi ~= hand[0];
@@ -126,7 +127,29 @@ unittest
 {
     import fluent.asserts;
     import mahjong.domain.creation;
-    const(Tile)[] tiles = "🀀"d.convertToTiles;
+    const(Tile)[] tiles = "🀑"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto seperation = seperateChi(hand);
+    seperation.isSeperated.should.equal(false);
+}
+
+@("The seperation is denied gracefully if I only have two tiles")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀈🀉"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto seperation = seperateChi(hand);
+    seperation.isSeperated.should.equal(false);
+}
+
+@("The seperation is denied gracefully if I have no tiles")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = ""d.convertToTiles;
     auto hand = tiles.asHand;
     auto seperation = seperateChi(hand);
     seperation.isSeperated.should.equal(false);
@@ -142,6 +165,133 @@ unittest
     ({auto hand = tiles.asHand;
     seperateChi(hand);}).should.haveExecutionTime.lessThan(5.usecs);
 }
+
+Optional!Combi seperateChiReverse(ref Hand hand) pure @nogc nothrow
+{
+    if(hand.empty) return no!Combi;
+    if(hand[$-1].isHonour) return no!Combi;
+    Combi chi;
+    chi ~= hand[$-1];
+    immutable type = chi[0].type;
+    foreach_reverse(tile; hand)
+	{
+        if(tile.type != type) return no!Combi;
+		if (tile.value == chi[$ - 1].value - 1)
+		{
+			chi ~= tile;
+			if (chi.length == 3)
+			{
+                hand.remove(chi);
+				return some(chi);
+			}
+		}
+	}
+    return no!Combi;
+}
+
+
+@("If I have only a chi, it gets seperated")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀇🀈🀉"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto set = seperateChiReverse(hand);
+    set.isSeperated.should.equal(true);
+    hand.length.should.equal(0);
+    set.unwrap.length.should.equal(3);
+    set.unwrap.should.containOnly(tiles);
+}
+
+@("If I don't have a chi, it won't get seperated")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀇🀈"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto set = seperateChiReverse(hand);
+    set.isSeperated.should.equal(false);
+    hand.length.should.equal(2);
+}
+
+@("The reverse seperation is denied gracefully if I have no tiles")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = ""d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto seperation = seperateChiReverse(hand);
+    seperation.isSeperated.should.equal(false);
+}
+
+@("If I have a chi at the end of my hand, it gets seperated")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀞🀞🀟🀠🀡"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto set = seperateChiReverse(hand);
+    set.isSeperated.should.equal(true);
+    hand.length.should.equal(2);
+    set.unwrap.length.should.equal(3);
+    hand.should.containOnly(tiles[0 .. 2]);
+    set.unwrap.should.containOnly(tiles[2 .. $]);
+}
+
+@("Honours cannot be resolved into a backwards chi")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀀🀁🀂"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto seperation = seperateChiReverse(hand);
+    seperation.isSeperated.should.equal(false);
+}
+
+@("Honours followed by a chi is still a chi")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀀🀁🀂🀇🀈🀉"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto seperation = seperateChiReverse(hand);
+    seperation.isSeperated.should.equal(true);
+    hand.should.containOnly(tiles[0 .. 3]);
+    seperation.unwrap.should.containOnly(tiles[3 .. $]);
+}
+
+@("If I have duplicates in my chi, I can still destill it in reverse")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀇🀈🀈🀉🀉"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto set = seperateChiReverse(hand);
+    set.isSeperated.should.equal(true);
+    hand.length.should.equal(2);
+    set.unwrap.length.should.equal(3);
+    set.unwrap.should.containOnly([tiles[0], tiles[2], tiles[4]]);
+    hand.should.containOnly([tiles[1], tiles[3]]);
+}
+
+@("For different types a backwards chi cannot be resolved")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.creation;
+    const(Tile)[] tiles = "🀇🀑🀒"d.convertToTiles;
+    auto hand = tiles.asHand;
+    auto seperation = seperateChiReverse(hand);
+    seperation.isSeperated.should.equal(false);
+}
+
 
 alias seperatePon = seperateSetWithSameValueOfGivenLength!3;
 alias seperatePair = seperateSetWithSameValueOfGivenLength!2;
