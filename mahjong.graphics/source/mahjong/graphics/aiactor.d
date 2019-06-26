@@ -69,8 +69,6 @@ class ApplyOnUiThreadActor : Actor
             {
                 event.apply(decision);
             }
-            //events.filter!(e => e.player is decision.player)
-            //    .each(e => apply(e, decision));
             if(events.all!(e => e.isHandled))
             {
                 events.length = 0;
