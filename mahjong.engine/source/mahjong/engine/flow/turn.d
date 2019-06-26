@@ -38,7 +38,6 @@ final class TurnFlow : Flow
         auto player = new Player();
         player.startGame(PlayerWinds.east);
         auto metagame = new Metagame([player], new DefaultGameOpts);
-        auto tile = new Tile(Types.dragon, Dragons.green);
         auto engine = new Engine(metagame);
         auto flow = new TurnFlow(player, metagame, new NullNotificationService, engine);
         engine.switchFlow(flow);
