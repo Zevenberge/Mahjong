@@ -6,6 +6,7 @@ import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
 import mahjong.graphics.menu.creation.mainmenu;
 import mahjong.graphics.opts;
+import mahjong.util.log;
 
 void run()
 {
@@ -63,16 +64,6 @@ void run()
 		critical("Application error");
 		writeThrowable(e);
 		throw e;
-	}
-}
-
-private void writeThrowable(Throwable t)
-{
-	while(t !is null)
-	{
-		error(t.msg, "\n", t.file, " at ", t.line	);
-		error("Stacktrace: \n", t.info);
-		t = t.next;
 	}
 }
 
