@@ -235,11 +235,11 @@ private class PlayerVisuals
             auto positionOfFirstDiscard = calculatePositionForTheFirstDiscard;
             auto yCoordinateOfBottomOfLastDiscard = positionOfFirstDiscard.y + 
                 drawingOpts.amountOfDiscardLines * drawingOpts.tileSize.y;
-            auto unrotatedFinalPoint = Vector2f(styleOpts.center.x - widthOfStick/2f,
+			// Let the rendertarget take care of the rotation. Assume first-person perspective here.
+            auto finalPosition = Vector2f(styleOpts.center.x - widthOfStick/2f,
                 yCoordinateOfBottomOfLastDiscard + 5f);
-            auto finalPosition = _rotationAroundCenter.transformPoint(unrotatedFinalPoint);
-            info("Riichi stick final position = ", finalPosition);
-            auto finalCoords = FloatCoords(finalPosition, _rotation);
+            auto finalCoords = FloatCoords(finalPosition, 0f);
+			info("Riichi stick final position = ", finalCoords);
             auto animation = new Storyboard([
                 parallel([
                             _riichiStick.moveTo(finalCoords, 30),
