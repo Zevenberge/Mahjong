@@ -495,3 +495,66 @@ unittest
     {
     }
 }
+
+void removeInPlace(T)(ref T[] array, T element) @safe pure nothrow @nogc
+    if(is(T == class))
+{
+    import std.algorithm.mutation : remove;
+    array = array.remove!(e => e is element);
+}
+
+@("Can I remove an element from the array in place?")
+unittest
+{
+    import fluent.asserts;
+    Object[] arr;
+    arr ~= new Object;
+    auto ptr = arr.ptr;
+    arr.removeInPlace(arr[0]);
+    arr.length.should.equal(0);
+    arr.ptr.should.equal(ptr);
+}
+
+@("Can I remove an element from a larger the array in place?")
+unittest
+{
+    import fluent.asserts;
+    Object[] arr;
+    auto remainer = new Object;
+    arr ~= new Object;
+    arr ~= remainer;
+    auto ptr = arr.ptr;
+    arr.removeInPlace(arr[0]);
+    arr.length.should.equal(1);
+    arr[0].should.equal(remainer);
+    arr.ptr.should.equal(ptr);
+}
+
+@("Can I remove the last element from the array in place?")
+unittest
+{
+    import fluent.asserts;
+    Object[] arr;
+    auto remainer = new Object;
+    arr ~= remainer;
+    arr ~= new Object;
+    auto ptr = arr.ptr;
+    arr.removeInPlace(arr[1]);
+    arr.length.should.equal(1);
+    arr[0].should.equal(remainer);
+    arr.ptr.should.equal(ptr);
+}
+
+@("If I try to remove an element that doesn't exist, nothing happens")
+unittest
+{
+    import fluent.asserts;
+    Object[] arr;
+    auto remainer = new Object;
+    arr ~= new Object;
+    arr ~= new Object;
+    auto ptr = arr.ptr;
+    arr.removeInPlace(remainer);
+    arr.length.should.equal(2);
+    arr.ptr.should.equal(ptr);
+}

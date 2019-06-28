@@ -42,24 +42,6 @@ unittest
 			"The max function is independent on order");
 }
 
-T remove(alias pred, T)(ref T[] array, const T element)
-{
-	foreach (i, e; array)
-	{
-		if (pred(e, element))
-		{
-			array = array[0 .. i] ~ array[i + 1 .. $];
-			return e;
-		}
-	}
-	return T.init;
-}
-
-unittest
-{
-
-}
-
 template without(alias equality = (a, b) => a == b)
 {
 	T[] without(T)(T[] arr, T[] exclusion)

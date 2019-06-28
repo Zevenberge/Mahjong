@@ -18,7 +18,24 @@ class ClosedHand
 
 	Tile removeTile(const Tile tile) pure
 	{
-		return tiles.remove!((a,b) => a is b)(tile);
+		import mahjong.util.collections : removeInPlace;
+		auto returnTile = tiles.find!("a is b")(tile).front;
+		tiles.removeInPlace(returnTile);
+		return returnTile;
+	}
+
+	@("Can I remove a tile from the hand and return its non-const value")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.domain.creation;
+		auto hand = new ClosedHand;
+		hand.tiles = "🀀🀀🀀🀙🀙🀙🀟🀟🀠🀠🀡🀡🀡🀡"d.convertToTiles;
+		const tileToRemove = hand.tiles[5];
+		Tile tile = hand.removeTile(tileToRemove);
+		tile.should.equal(tileToRemove);
+		hand.length.should.equal(13);
+		hand.tiles.should.not.contain([tileToRemove]);
 	}
 
 	void closeHand() pure

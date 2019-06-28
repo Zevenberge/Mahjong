@@ -10,6 +10,7 @@ import mahjong.domain.enums;
 import mahjong.domain.exceptions;
 import mahjong.domain.mahjong;
 import mahjong.domain.yaku.environment;
+import mahjong.util.collections;
 import mahjong.util.range;
 
 class Ingame
@@ -98,7 +99,7 @@ class Ingame
 
     void discardIsClaimed(Tile tile)
     {
-        _discards.remove!((a, b) => a == b)(tile);
+        _discards.removeInPlace(tile);
         _claimedDiscards ~= tile;
     }
 
