@@ -14,6 +14,7 @@ import mahjong.graphics.coords;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
+import mahjong.util.collections : removeInPlace;
 import mahjong.util.range;
 
 alias drawOpenHand = draw;
@@ -130,7 +131,7 @@ class SetVisual
 		if(isClosedKan) return;
 		auto isKan = _set.length == 4;
 		auto tileFromOtherPlayer = _set.first!(t => !t.isOwnedBy(ingame));
-		_set.remove!((a, b) => a == b)(tileFromOtherPlayer);
+		_set = _set.filter!(t => t !is tileFromOtherPlayer).array;
 		auto differenceInWinds = (tileFromOtherPlayer.owningWind - ingame.wind + _amountOfPlayers) 
 			% _amountOfPlayers;
 		auto location = differenceInWinds - 1;

@@ -5,7 +5,7 @@ import std.experimental.logger;
 import std.format;
 import std.range;
 import std.uuid;
-import mahjong.util.range;
+import mahjong.util.collections;
 
 class Animation
 {
@@ -35,7 +35,7 @@ class Animation
 	private void onDone()
 	{
 		trace("Animation (", objectId, ") finished.");
-		_animations.remove!((a,b) => a == b)(this);
+		_animations.removeInPlace(this);
 	}
 
 	abstract bool done() @property;
@@ -84,23 +84,26 @@ unittest
 
 void addUniqueAnimation(Animation anime)
 {
-	_animations.remove!((a,b) => a.objectId == b.objectId)(anime);
+	_animations = _animations.remove!(a => a.objectId == anime.objectId);
 	_animations ~= anime;
 }
 
 unittest
 {
 	import fluent.asserts;
+	scope(exit) _animations = null;
 	auto objectId = randomUUID;
 	auto dummyAnimation1 = new DummyAnimation(1);
 	dummyAnimation1.objectId = objectId;
 	addUniqueAnimation(dummyAnimation1);
 	_animations.should.equal([dummyAnimation1]).because("The animation should have been added");
-	_animations = null;
 }
 
+@("Can I use a unique animation to overrule the other")
 unittest
 {
+	import fluent.asserts;
+	scope(exit) _animations = null;
 	auto objectId = randomUUID;
 	auto dummyAnimation1 = new DummyAnimation(1);
 	dummyAnimation1.objectId = objectId;
@@ -108,10 +111,9 @@ unittest
 	dummyAnimation2.objectId = objectId;
 	_animations = [dummyAnimation1];
 	addUniqueAnimation(dummyAnimation2);
-	assert(_animations.length == 1, "There should be only one surviving animation");
+	_animations.length.should.equal(1).because("there should be only one surviving animation");
 	assert(_animations[0] == dummyAnimation2, "The first should be swapped with the second");
 	assert(_animations[0] != dummyAnimation1, "The first should have been killed");
-	_animations = null;
 }
 
 void addIfNonExistent(Animation anime)
@@ -123,14 +125,16 @@ void addIfNonExistent(Animation anime)
 	}
 }
 
+@("Can I add a new animation that doesn't exist yet?")
 unittest
 {
+	import fluent.asserts;
+	scope(exit) _animations = null;
 	auto objectId = randomUUID;
 	auto dummyAnimation1 = new DummyAnimation(1);
 	dummyAnimation1.objectId = objectId;
 	addIfNonExistent(dummyAnimation1);
-	assert(_animations == [dummyAnimation1], "The animation should have been added");
-	_animations = null;
+	_animations.should.equal([dummyAnimation1]).because("it should have been added");
 }
 
 unittest

@@ -8,7 +8,6 @@ import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.popup.popup;
 import mahjong.graphics.i18n;
-import mahjong.util.range : remove;
 
 class PopupService : INotificationService
 {
