@@ -20,6 +20,7 @@ import mahjong.domain;
 import mahjong.domain.enums;
 import mahjong.engine;
 import mahjong.graphics.controllers.controller;
+import mahjong.graphics.controllers.game.pause;
 import mahjong.graphics.controllers.menu;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
@@ -60,11 +61,23 @@ class GameController : Controller
 		return false;
 	}
 
+	@("If I press escape, the pause menu is overlaid")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.graphics.opts;
+		import mahjong.test.key;
+		scope(exit) Controller.cleanUp;
+        styleOpts = new DefaultStyleOpts;
+		auto controller = new TestGameController();
+		Controller.instance.substitute(controller);
+		controller.handleEvent(escapeKeyPressed);
+		controller.has!PauseOverlay.should.equal(true);
+	}
+
 	protected void pauseGame()
 	{
-		auto pauseMenu = getPauseMenu;
-		auto pauseController = new MenuController(this, pauseMenu);
-        pauseController.openMenu;
+		Controller.instance.add(new PauseOverlay());
 	}
 
 	protected abstract void handleGameKey(Event.KeyEvent key);
@@ -85,4 +98,22 @@ class GameController : Controller
     {
         return _metagame.gameMode;
     }
+}
+
+version(unittest)
+{
+	class TestGameController : GameController
+	{
+		this()
+		{
+			import mahjong.domain.opts;
+			import mahjong.engine.flow.eventhandler;
+			import mahjong.engine.notifications;
+			auto engine = new Engine([new TestEventHandler, new TestEventHandler],
+				new DefaultGameOpts, new NullNotificationService);
+			super(engine.metagame, engine);
+		}
+
+		protected override void handleGameKey(Event.KeyEvent key) {}
+	}
 }

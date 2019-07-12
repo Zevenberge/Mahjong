@@ -15,7 +15,6 @@ import dsfml.system.vector2;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.enums.geometry;;
 import mahjong.graphics.manipulation;
-import mahjong.graphics.menu.creation.pausemenu;
 import mahjong.graphics.opts;
 import mahjong.graphics.selections.selectable;
 import mahjong.graphics.text;
@@ -23,6 +22,35 @@ import mahjong.util.range;
 
 class Menu : Selectable!MenuItem
 {
+	this(T : MenuItem)(string title, T[] menuItems)
+	{
+		foreach(item; menuItems)
+		{
+			addOption(item);
+		}
+	}
+
+	@("If I supply the menu items, they get set")
+	unittest
+	{
+		import fluent.asserts;
+		auto items = [new DelegateMenuItem("Yes", (){}), 
+			new DelegateMenuItem("No", (){})];
+		auto menu = new Menu("Continue?", items);
+		menu.opts.should.equal(items);
+	}
+
+	@("The first menu option gets selected by default")
+	unittest
+	{
+		import fluent.asserts;
+		auto items = [new DelegateMenuItem("Yes", (){}), 
+			new DelegateMenuItem("No", (){})];
+		auto menu = new Menu("Continue?", items);
+		menu.selectedItem.should.equal(items[0]);
+	}
+
+	deprecated("Use the constructor with menu items instead")
 	this(string title)
 	{
 		_title = new Text;
@@ -67,6 +95,7 @@ class Menu : Selectable!MenuItem
 
 Menu getPauseMenu()
 {
+	import mahjong.graphics.controllers.game.pause;
 	return composePauseMenu;
 }
 
@@ -85,7 +114,7 @@ void spaceMenuItems(T : MenuItem)(T[] menuItems)
 				(FloatRect(0, 0, screenSize.x, screenSize.y));
 		++i;
 	}
-	trace("Arranged the manu items");
+	trace("Arranged the menu items");
 }
 
 
