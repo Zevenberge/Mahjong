@@ -34,6 +34,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		super(innerController, menu);
 		_metagame = metagame;
 		_engine = engine;
+		trace("Constructed ingame options controller");
 	}
 
 	private void selectDefaultOption(Menu menu, Factory factory)
@@ -151,6 +152,7 @@ interface IRelevantTiles
 	const(Tile)[] relevantTiles() @property;
 }
 
+@("Is a factory that supplies valid options a valid factory?")
 unittest
 {
 	class ValidOption : DelegateMenuItem, IRelevantTiles
@@ -174,6 +176,8 @@ unittest
 	}
 	assert(isIngameOptionsFactory!ValidFactory, "The factory and its options are valid, so the template should return true.");
 }
+
+@("If a factory does not supply an options property, it is not valid")
 unittest
 {
 	class ValidOption : DelegateMenuItem, IRelevantTiles
@@ -197,6 +201,8 @@ unittest
 	}
 	assert(!isIngameOptionsFactory!InValidFactory, "The factory is not valid, so the template should return false.");
 }
+
+@("If a factory supplies invalid options, it is not valid.")
 unittest
 {
 	class InvalidOption : DelegateMenuItem
@@ -215,6 +221,8 @@ unittest
 	}
 	assert(!isIngameOptionsFactory!ValidFactory, "The options is not valid, so the template should return false.");
 }
+
+@("If the factory provides no menu items, it is not valid")
 unittest
 {
 	class InvalidOption : IRelevantTiles
@@ -239,6 +247,7 @@ template hasDefaultOption(Factory)
 	enum bool hasDefaultOption = __traits(compiles, (Factory.init).defaultOption);
 }
 
+@("If my factory has no default, it is seen as such")
 unittest
 {
 	class FactoryWithoutDefaultOption
@@ -249,6 +258,7 @@ unittest
 	assert(!hasDefaultOption!FactoryWithoutDefaultOption, "The factory has no default option");
 }
 
+@("If my factory has a default option, it is introspected as such.")
 unittest
 {
 	class FactoryWithDefaultOption
