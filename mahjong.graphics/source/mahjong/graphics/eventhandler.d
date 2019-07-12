@@ -22,8 +22,6 @@ in(eventHandlers.length > 0, "Non-player event handlers should be supplied")
 
 class UiEventHandler : GameEventHandler
 {
-    private this() {}
-
     private Engine _engine;
 
 	override void handle(TurnEvent event) 
@@ -146,6 +144,7 @@ class UiEventHandler : GameEventHandler
 
 	override void handle(ClaimEvent event) 
 	{
+        trace("Received claim event");
 		auto factory = new ClaimOptionFactory(event.player, event.tile, event.metagame, event);
 		if(factory.areThereClaimOptions)
 		{
