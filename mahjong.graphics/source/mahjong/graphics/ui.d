@@ -66,11 +66,3 @@ void run()
 		throw e;
 	}
 }
-
-static ~this()
-{
-	if(Controller.instance !is null)
-	{
-		Controller.instance.roundUp;
-	}
-}
