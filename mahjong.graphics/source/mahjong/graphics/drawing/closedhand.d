@@ -31,9 +31,7 @@ void moveTile(const Tile tile, size_t i, size_t total)
 	auto newCoords = FloatCoords(calculatePosition(total, i.to!int));
 	if(coords != newCoords)
 	{
-		auto anime = new MovementAnimation(tile.getFrontSprite, newCoords, 10);
-		anime.objectId = tile.id;
-		anime.addIfNonExistent;
+		tile.move(newCoords, 10);
 	}
 }
 
