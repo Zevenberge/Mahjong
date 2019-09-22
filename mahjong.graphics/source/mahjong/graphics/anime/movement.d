@@ -59,7 +59,6 @@ class MovementAnimation : Animation
 
 		float calculateRotationPerFrame(float init, float target)
 		{
-			import std.math : abs;
 			if(init - target > 180f)
 			{
 				return calculateDelta(init - 360f, target);
