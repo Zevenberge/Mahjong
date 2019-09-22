@@ -56,7 +56,7 @@ class OpenHandVisuals
         _amountOfPlayers = amountOfPlayers;
 	}
 
-	void draw(RenderTarget view)
+	final void draw(RenderTarget view)
 	{
 		updateIfNecessary;
 		_sets.each!(s => s.draw(view));
@@ -100,12 +100,12 @@ class SetVisual
 		placeSet(previous, ingame);
 	}
 
-	void draw(RenderTarget view)
+	final void draw(RenderTarget view)
 	{
 		_set.each!(t => t.drawTile(view));
 	}
 
-	void update(const(Set) set, const Ingame ingame)
+	final void update(const(Set) set, const Ingame ingame)
 	{
 		if(set.tiles.length == _set.length) return;
 		placeAdditionalKanTile(set.tiles.back, ingame);

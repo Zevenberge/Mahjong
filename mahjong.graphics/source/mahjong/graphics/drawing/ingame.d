@@ -94,7 +94,7 @@ private IngameDrawable getDrawable(const Ingame ingame,
 	return _ingameDrawables[ingame.id];
 }
 
-private class IngameDrawable
+private final class IngameDrawable
 {
 	size_t previousAmountOfDiscards;
 	
@@ -132,7 +132,6 @@ private class IngameDrawable
 
 	private void animateLastDiscard()
 	{
-		trace("Starting the animation of the last discard");
 		auto tile = _game.discards[$-1];
 		auto coords = getNewCoords;
 		tile.move(coords);

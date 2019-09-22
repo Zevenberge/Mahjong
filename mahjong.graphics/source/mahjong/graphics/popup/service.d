@@ -16,7 +16,7 @@ class PopupService : INotificationService
 
     private mixin template Notify(Args...)
     {
-        void notify(Args args)
+        final void notify(Args args)
         {
             info("Notifying about ", args[0]);
             auto popup = createPopup(args);
