@@ -94,23 +94,14 @@ abstract class Popup : Overlay
 	{
         _text = text;
         _splash = splash;
-		_animation = constructAnimation();
-		addAnimation(_animation);
+		auto animation = constructAnimation();
+		addAnimation(animation);
 	}
 
 	private Text _text;
 	private Sprite _splash;
 	
     protected abstract Animation constructAnimation();
-
-	private Animation _animation;
-
-	final Animation animation() @property pure
-	{
-		return _animation;
-	}
-
-	alias animation this;
 
 	final override void draw(RenderTarget target)
 	{
