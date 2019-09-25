@@ -149,8 +149,8 @@ version(unittest)
         auto selectedTile = player.closedHand.tiles[indexOfDiscard];
         auto engine = new Engine(metagame);
         writeln("Selecting ", selectedTile);
-        return new TurnOptionFactory(selectedTile,
-            new TurnEvent(metagame, player, selectedTile), canCancel);
+        if(canCancel) return TurnOptionFactory.forDiscard(selectedTile, new TurnEvent(metagame, player, selectedTile), null);
+        return TurnOptionFactory.forRiichi(selectedTile, new TurnEvent(metagame, player, selectedTile)); 
     }
 }
 
