@@ -25,7 +25,6 @@ class IngameOptionsController(Factory, string menuTitle) : GameController
 		super(metagame, engine);
 		_menu = new Menu(menuTitle, factory.options, styleOpts);
 		selectDefaultOption(factory);
-		_haze = constructHaze;
 		trace("Constructed ingame options controller");
 	}
 
@@ -42,7 +41,6 @@ class IngameOptionsController(Factory, string menuTitle) : GameController
 	}
 
 	private Menu _menu;
-	private RectangleShape _haze;
 
 	protected override void handleGameKey(Event.KeyEvent key)
 	{
@@ -75,7 +73,6 @@ class IngameOptionsController(Factory, string menuTitle) : GameController
 		if(!isPaused) 
 		{
 			drawMarkersOnRelevantTiles(target);
-			target.draw(_haze);
 			_menu.draw(target);
 		}
 	}
@@ -92,16 +89,6 @@ class IngameOptionsController(Factory, string menuTitle) : GameController
 			rectangleShape.rotation = coords.rotation;
 			target.draw(rectangleShape);
 		}
-	}
-
-	private RectangleShape constructHaze() 
-	{
-		auto margin = Vector2f(styleOpts.ingameMenuMargin, styleOpts.ingameMenuMargin);
-		auto menuBounds = _menu.getGlobalBounds;
-		auto haze = new RectangleShape(menuBounds.size + margin*2);
-		haze.fillColor = styleOpts.ingameMenuHazeColor;
-		haze.position = menuBounds.position - margin;
-		return haze;
 	}
 }
 

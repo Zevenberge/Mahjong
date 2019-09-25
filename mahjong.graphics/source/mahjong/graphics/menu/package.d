@@ -27,8 +27,7 @@ class Menu : Selectable!MenuItem
 		}
 		createTitle(title);
 		spaceMenuItems(opts, styleOpts);
-		_haze = new RectangleShape(styleOpts.screenSize.toVector2f);
-		_haze.fillColor = styleOpts.menuHazeColor;
+		constructHaze;
 	}
 
 	@("If I supply the menu items, they get set")
@@ -98,6 +97,16 @@ class Menu : Selectable!MenuItem
 		_title = new Text;
 		_title.setTitle(title);
 		_title.setFont(fontKanji);
+	}
+
+	private void constructHaze() 
+	{
+		import mahjong.graphics.conv : size, position;
+		auto margin = Vector2f(styleOpts.ingameMenuMargin, styleOpts.ingameMenuMargin);
+		auto menuBounds = this.getGlobalBounds;
+		_haze = new RectangleShape(menuBounds.size + margin*2);
+		_haze.fillColor = styleOpts.ingameMenuHazeColor;
+		_haze.position = menuBounds.position - margin;
 	}
 	
 	final void addOption(MenuItem item)
