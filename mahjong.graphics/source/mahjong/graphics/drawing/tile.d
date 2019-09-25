@@ -48,17 +48,12 @@ FloatCoords getCoords(const Tile tile)
 	return getTileVisuals(tile).getCoords;
 }
 
-Sprite getFrontSprite(const Tile tile)
-{
-	return getTileVisuals(tile)._sprite;
-}
-
 FloatRect getGlobalBounds(const Tile tile) 
 {
 	return  getTileVisuals(tile).getGlobalBounds;
 }
 
-void move(const Tile tile, FloatCoords finalCoords)
+void move(const Tile tile, FloatCoords finalCoords, int duration = 15)
 {
 	auto sprite = getFrontSprite(tile);
 	auto animation = new MovementAnimation(sprite, finalCoords, 15);
@@ -78,7 +73,12 @@ bool isRotated(const Tile tile) @property
     return visual.isRotated;
 }
 
-private class TileVisuals
+private Sprite getFrontSprite(const Tile tile)
+{
+	return getTileVisuals(tile)._sprite;
+}
+
+private final class TileVisuals
 {
 	private Sprite _sprite;
 	private Sprite _backSprite;
@@ -143,20 +143,15 @@ private class TileVisuals
 	
 	private void updateCoords()
 	{
+		// A tile is manipulated by its front sprite,
+		// E.g. by animations.
+		// Propagate the change to the back sprite.
 		auto spriteCoords = _sprite.getFloatCoords;
 		if(_coords != spriteCoords)
 		{
 			trace("Front sprite updated.");
 			_coords = spriteCoords;
 			_backSprite.setFloatCoords(_coords);
-			return;
-		}
-		auto backSpriteCoords = _backSprite.getFloatCoords;
-		if(_coords != backSpriteCoords)
-		{
-			trace("Back sprite updated");
-			_coords = backSpriteCoords;
-			_sprite.setFloatCoords(_coords);
 			return;
 		}
 	}

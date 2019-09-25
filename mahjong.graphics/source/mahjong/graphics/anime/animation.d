@@ -83,6 +83,7 @@ unittest
 }
 
 void addUniqueAnimation(Animation anime)
+in(!anime.objectId.empty)
 {
 	_animations = _animations.remove!(a => a.objectId == anime.objectId);
 	_animations ~= anime;
