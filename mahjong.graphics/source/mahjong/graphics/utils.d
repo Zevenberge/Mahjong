@@ -1,6 +1,7 @@
 module mahjong.graphics.utils;
 
-import dsfml.graphics : Transform, RenderTexture, Vector2u, Vector2f, Vector2;
+import std.traits;
+import dsfml.graphics;
 import mahjong.graphics.opts : styleOpts;
 
 Transform unity()
@@ -94,4 +95,18 @@ unittest
 	import std.math;
 	auto vector = Vector2f(100, 100);
 	vector.normalized.should.equal(Vector2f(1,1)*SQRT1_2);
+}
+
+T bottom(T)(const Rect!T rect) @property pure
+	if(isNumeric!T)
+{
+	return rect.top + rect.height;
+}
+
+@("Can I calculate the bottom")
+unittest
+{
+	import fluent.asserts;
+	FloatRect(100, 200, 300, 400).bottom.should.equal(600);
+	IntRect(100, 150, 200, 250).bottom.should.equal(400);
 }
