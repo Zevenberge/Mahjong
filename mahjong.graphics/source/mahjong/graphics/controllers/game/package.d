@@ -21,7 +21,7 @@ import mahjong.domain.enums;
 import mahjong.engine;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game.pause;
-import mahjong.graphics.controllers.menu;
+import mahjong.graphics.controllers.mainmenu;
 import mahjong.graphics.drawing.background;
 import mahjong.graphics.drawing.game;
 import mahjong.graphics.drawing.player;

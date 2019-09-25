@@ -3,7 +3,7 @@ module mahjong.graphics.ui;
 import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
-import mahjong.graphics.controllers.menu.mainmenucontroller;
+import mahjong.graphics.controllers.mainmenu;
 import mahjong.graphics.menu.creation.mainmenu;
 import mahjong.graphics.opts;
 import mahjong.util.log;

@@ -10,7 +10,6 @@ import mahjong.domain.chi;
 import mahjong.engine.flow.claim;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
-import mahjong.graphics.controllers.menu;
 import mahjong.graphics.drawing.closedhand;
 import mahjong.graphics.drawing.tile;
 import mahjong.graphics.conv;

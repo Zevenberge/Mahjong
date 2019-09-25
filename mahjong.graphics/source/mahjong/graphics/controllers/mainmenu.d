@@ -1,15 +1,20 @@
-module mahjong.graphics.controllers.menu.menucontrollerbase;
+module mahjong.graphics.controllers.mainmenu;
 
+import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
-/+
-abstract class MenuControllerBase(TMenu) : Controller
+import mahjong.graphics.menu.mainmenu;
+
+class MainMenuController : Controller
 {
-	this(TMenu menu)
+	this(MainMenu mainMenu)
 	{
-		_menu = menu;
+		trace("Creating Main Menu controller");
+		_menu = mainMenu;
 	}
-	
+
+	private MainMenu _menu;
+
 	override void draw(RenderTarget target)
 	{
 		target.clear;
@@ -27,10 +32,10 @@ abstract class MenuControllerBase(TMenu) : Controller
 				_menu.selectNext;
 				break;
 			case Return:
-				optionSelected;
+				_menu.selectedItem.select;
 				break;
 			case Escape:
-				return menuClosed;
+				return true;
 			default:
 		}
 		return false;
@@ -39,15 +44,4 @@ abstract class MenuControllerBase(TMenu) : Controller
 	override void roundUp() {}
 	
 	override void yield() {}
-	
-	protected TMenu _menu;
-	
-	protected void optionSelected()
-	{
-		_menu.selectedItem.select;
-	} 
-	
-	protected abstract bool menuClosed();
-		
 }
-+/

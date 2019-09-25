@@ -7,7 +7,7 @@ import mahjong.engine;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers;
 import mahjong.graphics.controllers.game;
-import mahjong.graphics.controllers.menu.mainmenucontroller;
+import mahjong.graphics.controllers.mainmenu;
 import mahjong.graphics.drawing.gameend;
 import mahjong.graphics.drawing.result;
 import mahjong.graphics.menu.creation.mainmenu;

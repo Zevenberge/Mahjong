@@ -8,7 +8,6 @@ import mahjong.domain.metagame;
 import mahjong.engine;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.game;
-import mahjong.graphics.controllers.menu;
 import mahjong.graphics.popup.popup;
 
 class PopupController : GameController
