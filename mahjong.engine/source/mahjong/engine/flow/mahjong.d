@@ -165,7 +165,7 @@ unittest
 
 		private bool _isGameOver;
 
-		override bool isGameOver()
+		override bool isGameOver() const pure nothrow @nogc
 		{
 			return _isGameOver;
 		}

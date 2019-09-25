@@ -124,6 +124,7 @@ final class KanStealFlow : Flow
     {
         import fluent.asserts;
         import mahjong.domain.enums;
+        import mahjong.domain.mahjong;
         import mahjong.domain.opts;
         import mahjong.domain.wall;
         auto kanPlayer = new Player("🀀🀀🀀🀒🀒🀒🀖🀗🀘🀙🀙🀠🀠"d);

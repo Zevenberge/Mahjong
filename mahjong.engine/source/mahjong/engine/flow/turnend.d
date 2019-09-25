@@ -51,7 +51,7 @@ version(unittest)
 	{
 		this(bool nagashiMangan)
 		{
-			super([new Player(), new Player()], new DefaultGameOpts);
+			super([new Player("🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙"d), new Player("🀀🀁🀂🀃🀄🀄🀆🀆🀇🀏🀐🀘🀙"d)], new DefaultGameOpts);
             if(!nagashiMangan)
             {
                 players.each!(p => p.isNotNagashiMangan);
