@@ -33,7 +33,7 @@ unittest
     import mahjong.graphics.anime.animation;
     import mahjong.graphics.drawing.player;
     setDefaultTestController;
-    scope(exit) setDefaultTestController;
+    scope(exit) Controller.instance.cleanUp;
     scope(exit) clearAllAnimations;
     import std.typecons : BlackHole;
     scope(exit) clearPlayerCache;
@@ -51,7 +51,7 @@ unittest
     import fluent.asserts;
     import mahjong.graphics.anime.animation;
     setDefaultTestController;
-    scope(exit) setDefaultTestController;
+    scope(exit) Controller.instance.cleanUp;
     scope(exit) clearAllAnimations;
     auto service = new PopupService;
     service.notify(Notification.ExhaustiveDraw);
