@@ -9,7 +9,7 @@ import std.experimental.logger;
 import dsfml.graphics;
 
 import mahjong.graphics.cache.font;
-import mahjong.graphics.enums.geometry;;
+import mahjong.graphics.enums.geometry;
 import mahjong.graphics.manipulation;
 import mahjong.graphics.opts;
 import mahjong.graphics.selections.selectable;
@@ -100,7 +100,7 @@ class Menu : Selectable!MenuItem
 		_title.setFont(fontKanji);
 	}
 	
-	void addOption(MenuItem item)
+	final void addOption(MenuItem item)
 	{
 		opts ~= item;
 	}
