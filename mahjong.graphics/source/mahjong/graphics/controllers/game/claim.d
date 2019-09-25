@@ -193,13 +193,6 @@ class ClaimOption : MenuItem, IRelevantTiles
 		_event = event;
 	}
 
-	override void select()
-	{
-		apply();
-	}
-
-	protected abstract void apply();
-
 	private ClaimEvent _event;
 
 	abstract const(Tile)[] relevantTiles() @property;
@@ -213,7 +206,7 @@ class NoClaimOption : ClaimOption
 		super("Pass", styleOpts, claimEvent);
 	}
 
-	protected override void apply()
+	final override void select() 
 	{
 		_event.pass();
 	}
@@ -241,7 +234,7 @@ class RonClaimOption : ClaimOption
 
 	private const Player _player;
 
-	protected override void apply()
+	final override void select() 
 	{
 		_event.ron();
 	}
@@ -276,7 +269,7 @@ class KanClaimOption : ClaimOption
 	private const Player _player;
 	private const Tile _discard;
 
-	protected override void apply()
+	final override void select() 
 	{
 		_event.kan();
 	}
@@ -314,7 +307,7 @@ class PonClaimOption : ClaimOption
 	private const Player _player;
 	private const Tile _discard;
 
-	protected override void apply()
+	final override void select() 
 	{
 		_event.pon();
 	}
@@ -350,7 +343,7 @@ class ChiClaimOption : ClaimOption
 
 	private const ChiCandidate _chiCandidate;
 
-	protected override void apply()
+	final override void select() 
 	{
 		_event.chi(_chiCandidate);
 	}
