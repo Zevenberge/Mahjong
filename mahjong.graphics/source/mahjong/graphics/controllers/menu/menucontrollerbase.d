@@ -2,7 +2,7 @@ module mahjong.graphics.controllers.menu.menucontrollerbase;
 
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
-
+/+
 abstract class MenuControllerBase(TMenu) : Controller
 {
 	this(TMenu menu)
@@ -50,3 +50,4 @@ abstract class MenuControllerBase(TMenu) : Controller
 	protected abstract bool menuClosed();
 		
 }
++/
