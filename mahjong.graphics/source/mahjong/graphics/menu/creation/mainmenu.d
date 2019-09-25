@@ -45,7 +45,7 @@ in(_mainMenu is null, "Main menu cannot be doubly initialised")
 		addOption(new MainMenuItem("Riichi Mahjong", styleOpts,
 				() => startRiichiMahjong(bg), riichiFile, IntRect(314,0,2*screen.x,2*screen.y)));
 		addOption(new MainMenuItem("Bamboo Battle", styleOpts,
-				(&startBambooBattle).toDelegate, bambooFile, IntRect(314,0,4*screen.x,4*screen.y)));
+				() => startBambooBattle(bg), bambooFile, IntRect(314,0,4*screen.x,4*screen.y)));
 		addOption(new MainMenuItem("Thunder Thrill", styleOpts,
 				(&startThunderThrill).toDelegate, eightPlayerFile, IntRect(100,0,768,768)));
 		addOption(new MainMenuItem("Simple Mahjong", styleOpts,
@@ -90,21 +90,30 @@ unittest
     (cast(GameController)Controller.instance).gameMode.should.equal(GameMode.Riichi);
 }
 
-private void startBambooBattle()
+private void startBambooBattle(BackgroundWorker bg)
 {
+	import mahjong.ai.advanced : AdvancedAI;
+	import mahjong.graphics.aiactor : runInBackground;
 	info("Bamboo battle selected");
+	auto ai = new AdvancedAI;
+	auto eventHandlers = ai.runInBackground!1(bg);
+	startBambooBattle(eventHandlers[]);
+}
+
+private void startBambooBattle(GameEventHandler[] eventHandlers)
+{
 	startGame(
         new DefaultBambooOpts,
         new BambooDrawingOpts,
-		new AiEventHandler(new SimpleAI));
+		eventHandlers);
 }
-///
+
 unittest
 {
     import fluent.asserts;
     import mahjong.domain.enums;
 	setDefaultTestController;
-	startBambooBattle;
+	startBambooBattle([new AiEventHandler(new SimpleAI), new AiEventHandler(new SimpleAI)]);
     Controller.instance.should.be.instanceOf!IdleController;
     drawingOpts.should.be.instanceOf!BambooDrawingOpts;
     (cast(GameController)Controller.instance).gameMode.should.equal(GameMode.Bamboo);
@@ -112,7 +121,7 @@ unittest
 
 private void startGame(
     const Opts gameOpts, DrawingOpts drawingOpts,
-    GameEventHandler[] eventHandlers...)
+    GameEventHandler[] eventHandlers)
 {
     .drawingOpts = drawingOpts;
 	bootEngine(eventHandlers, gameOpts);
