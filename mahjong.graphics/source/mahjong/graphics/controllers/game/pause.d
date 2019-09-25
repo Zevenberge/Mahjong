@@ -4,7 +4,6 @@ import std.experimental.logger;
 import dsfml.graphics;
 import mahjong.graphics.controllers.controller;
 import mahjong.graphics.controllers.menu.mainmenucontroller;
-import mahjong.graphics.controllers.menu.menucontroller;
 import mahjong.graphics.conv;
 import mahjong.graphics.menu;
 import mahjong.graphics.menu.creation.mainmenu;
@@ -242,39 +241,3 @@ class PauseOverlay : Overlay
         isHandled.should.equal(false);
     }
 }
-
-/+
-private Menu _pauseMenu;
-Menu composePauseMenu()
-{
-	if(_pauseMenu !is null) return _pauseMenu;
-	info("Composing pause menu");
-    auto menuItems = [
-        new DelegateMenuItem("Continue", styleOpts, {continueGame;}),
-        new DelegateMenuItem("Quit", styleOpts, {quitGame;})
-    ];
-	_pauseMenu = new Menu("", menuItems, styleOpts);
-	info("Composed pause menu");
-	return _pauseMenu;
-}
-
-private void continueGame()
-{
-	trace("Continuing game");
-	auto menuController = cast(MenuController)Controller.instance;
-	if(menuController !is null)
-	{
-		menuController.closeMenu;
-	}
-	trace("Closed menu");
-}
-
-private void quitGame()
-{
-	import mahjong.graphics.menu.creation.mainmenu;
-	trace("Quitting game");
-	Controller.instance.roundUp;
-	Controller.instance.substitute(new MainMenuController(getMainMenu()));
-	trace("Returned to the main menu");
-}
-+/
