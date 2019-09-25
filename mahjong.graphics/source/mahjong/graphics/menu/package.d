@@ -28,6 +28,7 @@ class Menu : Selectable!MenuItem
 		createTitle(title);
 		spaceMenuItems(opts, styleOpts);
 		constructHaze;
+		selectOpt;
 	}
 
 	@("If I supply the menu items, they get set")
@@ -90,6 +91,22 @@ class Menu : Selectable!MenuItem
 		auto titleBounds = menu._title.getGlobalBounds;
 		titleBounds.position.should.not.equal(Vector2f(0,0));
 		titleBounds.bottom.should.be.lessThan(items[0].name.position.y);
+	}
+
+	@("On constructing, the first option is highlighted")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.graphics.conv;
+		import mahjong.graphics.utils;
+		auto items = [new DelegateMenuItem("Yes", new DefaultStyleOpts, (){}), 
+			new DelegateMenuItem("No", new DefaultStyleOpts, (){})];
+		auto menu = new Menu("Continue?", items, new DefaultStyleOpts);
+		menu.selection.visual.should.not.beNull;
+		auto visualBounds = menu.selection.visual.getGlobalBounds;
+		visualBounds.position.should.not.equal(Vector2f(0,0));
+		visualBounds.top.should.be.lessThan(items[0].getGlobalBounds.top);
+		visualBounds.bottom.should.be.greaterThan(items[0].name.position.y);
 	}
 
 	private void createTitle(string title)
