@@ -13,8 +13,28 @@ alias TurnOptionController = IngameOptionsController!(TurnOptionFactory, "");
 
 class TurnOptionFactory
 {
-    this(const Tile selectedTile, 
-        TurnEvent turnEvent, bool canCancel)
+    static TurnOptionFactory forDiscard(const Tile selectedTile, 
+        TurnEvent turnEvent, TurnController turnController)
+    {
+        return new TurnOptionFactory(selectedTile, turnEvent, turnController);
+    }
+
+    // For discard options at the end of the turn. Add a cancel option.
+    private this(const Tile selectedTile, 
+        TurnEvent turnEvent, TurnController turnController)
+    {
+        this(selectedTile, turnEvent);
+        addCancelOption(turnController);
+    }
+
+    static TurnOptionFactory forRiichi(const Tile drawnTile, TurnEvent turnEvent)
+    {
+        return new TurnOptionFactory(drawnTile, turnEvent);
+    }
+
+    // If the player is riichi. Don't add a cancel option.
+    private this(const Tile selectedTile, 
+        TurnEvent turnEvent)
     {
         auto player = turnEvent.player;
         auto metagame = turnEvent.metagame;
@@ -25,7 +45,6 @@ class TurnOptionFactory
         addDeclareRedrawOption(player, metagame, turnEvent);
         addDiscardOption(selectedTile, turnEvent);
         _isDiscardTheOnlyOption = _options.length == 1;
-        if(canCancel) addCancelOption;
     }
 
     private void addTsumoOption(const Player player, TurnEvent turnEvent)
@@ -76,9 +95,9 @@ class TurnOptionFactory
         }
     }
 
-    private void addCancelOption()
+    private void addCancelOption(TurnController turnController)
     {
-        _options ~= new CancelOption;
+        _options ~= new CancelOption(turnController);
     }
 
     private TurnOption[] _options;
@@ -287,14 +306,16 @@ class TurnOption : MenuItem, IRelevantTiles
 
 class CancelOption : TurnOption
 {
-    this()
+    this(TurnController turnController)
     {
         super("Cancel");
     }
 
+    private TurnController _turnController;
+
     final override void select() 
     {
-        (cast(TurnOptionController)Controller.instance).closeMenu;
+        Controller.instance.substitute(_turnController);
     }
 
     override const(Tile)[] relevantTiles() @property
@@ -312,7 +333,6 @@ class AssertiveTurnOption : TurnOption
 
     final override void select() 
     {
-        (cast(TurnOptionController)Controller.instance).finishedSelecting;
         apply;
     }
 

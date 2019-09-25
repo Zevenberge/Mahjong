@@ -58,7 +58,7 @@ class TurnController : GameController
 				selectNext;
 				break;
 			case Return:
-				selectedItem.confirm(_event, true, _engine);
+				confirm(_event, true, _engine);
 				break;
 			default:
 				// Do nothing
@@ -66,20 +66,20 @@ class TurnController : GameController
 		}
 	}
 
-	mixin Select!(const Tile);
-}
+	private void confirm(TurnEvent event, bool canCancel, Engine engine)
+	{
+	    auto factory = TurnOptionFactory.forDiscard(selectedItem, event, this);
+	    if(factory.isDiscardTheOnlyOption)
+	    {
+	        discardSelectedTile(event, selectedItem, engine);
+	    }   
+	    else
+	    {
+	        showTurnOptionMenu(factory, event.metagame, engine);
+	    }
+	}
 
-void confirm(const(Tile) selectedItem, TurnEvent event, bool canCancel, Engine engine)
-{
-    auto factory = new TurnOptionFactory(selectedItem, event, canCancel);
-    if(factory.isDiscardTheOnlyOption)
-    {
-        discardSelectedTile(event, selectedItem, engine);
-    }   
-    else
-    {
-        showTurnOptionMenu(factory, event.metagame, engine);
-    }
+	mixin Select!(const Tile);
 }
 
 private void discardSelectedTile(TurnEvent event, const(Tile) selectedItem, Engine engine)
@@ -92,5 +92,5 @@ private void discardSelectedTile(TurnEvent event, const(Tile) selectedItem, Engi
 private void showTurnOptionMenu(TurnOptionFactory factory, const(Metagame) metagame, Engine engine)
 {
     Controller.instance.substitute(
-        new TurnOptionController(metagame, Controller.instance, factory, engine));
+        new TurnOptionController(metagame, factory, engine));
 }

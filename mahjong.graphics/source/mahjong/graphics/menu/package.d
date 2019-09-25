@@ -161,12 +161,12 @@ class Menu : Selectable!MenuItem
 	private Text _title;
 	private RectangleShape _haze;
 }
-
+/+
 Menu getPauseMenu()
 {
 	import mahjong.graphics.controllers.game.pause;
 	return composePauseMenu;
-}
+}+/
 
 deprecated("Supply an instance of StyleOpts instead")
 void spaceMenuItems(T : MenuItem)(T[] menuItems)

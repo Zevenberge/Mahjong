@@ -35,7 +35,7 @@ class UiEventHandler : GameEventHandler
         }
         else
         {
-            auto factory = new TurnOptionFactory(event.drawnTile, event, false);
+            auto factory = TurnOptionFactory.forRiichi(event.drawnTile, event);
             if(factory.isDiscardTheOnlyOption)
             {
                 event.discard(event.drawnTile);
@@ -44,8 +44,7 @@ class UiEventHandler : GameEventHandler
             {
                 event.drawnTile.display;
                 Controller.instance.substitute(
-                    new TurnOptionController(event.metagame, 
-                        Controller.instance, factory, _engine)
+                    new TurnOptionController(event.metagame, factory, _engine)
                     );
             }
         }
@@ -149,7 +148,7 @@ class UiEventHandler : GameEventHandler
 		if(factory.areThereClaimOptions)
 		{
 			info("UI: Handling turn event by switching to the claim controller");
-			Controller.instance.substitute(new ClaimController(event.metagame, Controller.instance, factory, _engine));
+			Controller.instance.substitute(new ClaimController(event.metagame, factory, _engine));
 		}
 		else
 		{
@@ -164,7 +163,7 @@ class UiEventHandler : GameEventHandler
             auto factory = new KanStealOptionsFactory(event);
             Controller.instance.substitute(
                 new KanStealOptionController(
-                    event.metagame, Controller.instance, factory, _engine));
+                    event.metagame, factory, _engine));
         }
         else
         {

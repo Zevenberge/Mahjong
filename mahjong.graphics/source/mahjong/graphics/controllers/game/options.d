@@ -17,69 +17,68 @@ import mahjong.graphics.conv;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
 
-class IngameOptionsController(Factory, string menuTitle) : MenuController 
+class IngameOptionsController(Factory, string menuTitle) : GameController 
 	if(isIngameOptionsFactory!Factory)
 {
 	this(const Metagame metagame,
-		Controller innerController,
 		Factory factory, Engine engine)
 	{
-		auto menu = new Menu(menuTitle, factory.options, styleOpts);
-		selectDefaultOption(menu, factory);
-		super(innerController, menu);
-		_metagame = metagame;
-		_engine = engine;
+		super(metagame, engine);
+		_menu = new Menu(menuTitle, factory.options, styleOpts);
+		selectDefaultOption(factory);
+		_haze = constructHaze;
 		trace("Constructed ingame options controller");
 	}
 
-	private void selectDefaultOption(Menu menu, Factory factory)
+	private void selectDefaultOption(Factory factory)
 	{
 		static if(hasDefaultOption!Factory)
 		{
-			menu.selectOption(factory.defaultOption);
+			_menu.selectOption(factory.defaultOption);
 		}
 		else
 		{
-			menu.selectOption(factory.options.back);
+			_menu.selectOption(factory.options.back);
 		}
 	}
 
-	private const Metagame _metagame;
-	private Engine _engine;
+	private Menu _menu;
+	private RectangleShape _haze;
 
-	void finishedSelecting()
+	protected override void handleGameKey(Event.KeyEvent key)
+	{
+		switch(key.code) with (Keyboard.Key)
+		{
+			case Up:
+				_menu.selectPrevious;
+				break;
+			case Down:
+				_menu.selectNext;
+				break;
+			case Return:
+				finishedSelecting;
+				_menu.selectedItem.select;
+				break;
+			default:
+				break;
+		}
+	}
+
+	private void finishedSelecting()
 	{
 		info("Finished selecting an option. Swapping out idle controller.");
-		auto idleController = cast(IdleController)_innerController;
-		if(!idleController)
-		{
-			idleController = new IdleController(_metagame, _engine);
-		}
-        instance = idleController;
+		substitute(new IdleController(_metagame, _engine));
 	}
-
-    override void substitute(Controller newController)
-    {
-        if(auto menuController = cast(MenuController)newController)
-        {
-            // A new menu is opened. Close this one and open the new one.
-            closeMenu;
-            instance.substitute(newController);
-        }
-        else
-        {
-            _innerController = newController;
-        }
-    }
 
 	override void draw(RenderTarget target) 
 	{
-		if(isLeadingController) 
+		super.draw(target);
+		if(!isPaused) 
 		{
-			super.draw(target);
 			drawMarkersOnRelevantTiles(target);
+			target.draw(_haze);
+			_menu.draw(target);
 		}
-		else _innerController.draw(target);
 	}
 
 	private void drawMarkersOnRelevantTiles(RenderTarget target)
@@ -96,13 +95,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		}
 	}
 
-	protected override bool menuClosed() 
-	{
-		Controller.instance.substitute(new MenuController(this, getPauseMenu));
-		return false;
-	}
-
-	protected override RectangleShape constructHaze() 
+	private RectangleShape constructHaze() 
 	{
 		auto margin = Vector2f(styleOpts.ingameMenuMargin, styleOpts.ingameMenuMargin);
 		auto menuBounds = _menu.getGlobalBounds;

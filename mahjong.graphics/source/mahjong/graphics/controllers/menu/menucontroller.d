@@ -7,7 +7,7 @@ import mahjong.graphics.controllers.menu;
 import mahjong.graphics.conv;
 import mahjong.graphics.menu;
 import mahjong.graphics.opts;
-
+/+
 class MenuController : MenuControllerBase!Menu
 {
 	this(Controller pausedController, Menu menu)
@@ -67,4 +67,4 @@ class MenuController : MenuControllerBase!Menu
 		return _innerController;
 	}
 	private RectangleShape _haze;
-}
+}+/

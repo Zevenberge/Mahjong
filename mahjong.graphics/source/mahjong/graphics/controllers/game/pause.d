@@ -243,7 +243,7 @@ class PauseOverlay : Overlay
     }
 }
 
-
+/+
 private Menu _pauseMenu;
 Menu composePauseMenu()
 {
@@ -277,3 +277,4 @@ private void quitGame()
 	Controller.instance.substitute(new MainMenuController(getMainMenu()));
 	trace("Returned to the main menu");
 }
++/
