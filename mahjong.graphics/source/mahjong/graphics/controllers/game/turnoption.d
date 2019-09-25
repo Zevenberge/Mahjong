@@ -330,13 +330,6 @@ class AssertiveTurnOption : TurnOption
     {
         super(displayName);
     }
-
-    final override void select() 
-    {
-        apply;
-    }
-
-    protected abstract void apply();
 }
 
 class PromoteToKanOption : AssertiveTurnOption
@@ -353,7 +346,7 @@ class PromoteToKanOption : AssertiveTurnOption
     private const Tile _selectedTile;
     private TurnEvent _event;
 
-    protected override void apply() 
+    final override void select() 
     {
         _event.promoteToKan(_selectedTile);
     }
@@ -378,7 +371,7 @@ class DeclareClosedKanOption : AssertiveTurnOption
     private const Tile _selectedTile;
     private TurnEvent _event;
 
-    protected override void apply() 
+    final override void select() 
     {
         _event.declareClosedKan(_selectedTile);
     }
@@ -401,7 +394,7 @@ class TsumoOption : AssertiveTurnOption
     private const Player _player;
     private TurnEvent _event;
 
-    protected override void apply() 
+    final override void select() 
     {
         _event.claimTsumo;
     }
@@ -424,7 +417,7 @@ class RiichiOption : AssertiveTurnOption
     private const Tile _selectedTile;
     private TurnEvent _event;
 
-    protected override void apply() 
+    final override void select() 
     {
         _event.declareRiichi(_selectedTile);
     }
@@ -445,7 +438,7 @@ class DeclareRedrawOption : AssertiveTurnOption
 
     private TurnEvent _event;
 
-    protected override void apply() 
+    final override void select() 
     {
         _event.declareRedraw;
     }
@@ -468,7 +461,7 @@ class DiscardOption : AssertiveTurnOption
     private const Tile _selectedTile;
     private TurnEvent _event;
 
-    protected override void apply() 
+    final override void select() 
     {
         _event.discard(_selectedTile);
     }
