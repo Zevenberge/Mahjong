@@ -58,7 +58,6 @@ unittest
     Controller.instance.has!GamePopup.should.equal(true);
 }
 
-
 private Popup createPopup(Notification notification, const Player player)
 {
     auto msg = notification.translate;

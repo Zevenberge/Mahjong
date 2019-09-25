@@ -154,6 +154,22 @@ private abstract class PopupAnimation : Storyboard
     }
 }
 
+@("If the popup finishes, the overlay is removed from the controller.")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.engine.notifications;
+    import mahjong.graphics.anime.animation;
+    setDefaultTestController;
+    scope(exit) setDefaultTestController;
+    scope(exit) clearAllAnimations;
+    styleOpts = new DefaultStyleOpts;
+    auto service = new PopupService;
+    service.notify(Notification.ExhaustiveDraw);
+    foreach(i; 0 .. 1000) animateAllAnimations;
+    Controller.instance.has!GamePopup.should.equal(false);
+}
+
 private class PlayerPopupAnimation : PopupAnimation
 {
 	this(Popup popup)

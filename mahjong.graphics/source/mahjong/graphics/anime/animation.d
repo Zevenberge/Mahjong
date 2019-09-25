@@ -159,10 +159,12 @@ unittest
 void animateAllAnimations()
 {
 	trace("Animating animations");
-	foreach(animation; _animations)
+	for(size_t i = 0; i < _animations.length; )
 	{
+		auto animation = _animations[i];
 		trace("Animating ", animation);
 		animation.animate;
+		if(!animation.done) ++i;
 	}
 }
 
@@ -176,6 +178,18 @@ unittest
 	assert(dummyAnimation2.amountOfFrames == 1, "The second animation still has a frame left");
 	assert(_animations == [dummyAnimation2], "The completed animations should have been removed");
 	_animations = null;
+}
+
+@("Can I still handle animations if they are removed during the animating")
+unittest
+{
+	scope(exit) clearAllAnimations;
+	auto animation0 = new DummyAnimation(1);
+	auto dummyAnimation1 = new DummyAnimation(1);
+	auto dummyAnimation2 = new DummyAnimation(2);
+	_animations = [dummyAnimation1, dummyAnimation2, animation0];
+	animateAllAnimations;
+	assert(_animations == [dummyAnimation2], "The completed animations should have been removed");
 }
 
 private Animation[] _animations;
