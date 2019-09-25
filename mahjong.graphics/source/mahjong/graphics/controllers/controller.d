@@ -168,7 +168,7 @@ abstract class Controller
         return _overlays.any!(o => cast(TOVerlay)o !is null);
     }
 
-    void substitute(Controller newController)
+    final void substitute(Controller newController)
     {
         newController._overlays = _overlays;
         _overlays = null;
