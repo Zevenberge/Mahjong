@@ -10,7 +10,7 @@ Texture infoTexture;
 Texture splashTexture;
 Texture stickTexture;
 
-static this()
+shared static this()
 {
 	infoTexture = new Texture;
 	load(infoTexture, infoBgFile);

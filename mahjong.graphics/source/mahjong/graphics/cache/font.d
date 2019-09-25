@@ -15,7 +15,7 @@ alias pointsFont = fontReg;
 alias kanjiFont = fontKanji;
 alias infoFont = fontInfo;
 
-static this()
+shared static this()
 {
 	// Load different fonts so that we do not need to load them every screen.. 
 	fontReg = new Font;
