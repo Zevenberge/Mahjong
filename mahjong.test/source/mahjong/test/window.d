@@ -16,3 +16,8 @@ class TestWindow : RenderWindow
 		// Do nothing, we are testing!
 	}
 }
+
+Event windowClosed()
+{
+	return Event(Event.EventType.Closed);
+}

@@ -10,10 +10,10 @@ import mahjong.graphics.opts;
 
 class MenuItem
 {
-	this(string displayName)
+	this(string displayName, StyleOpts styleOpts)
 	{
 		trace("Constructing menu item ", displayName);
-		setText(displayName);
+		setText(displayName, styleOpts);
 		description = displayName;
 	}
 
@@ -36,7 +36,7 @@ class MenuItem
 
 	abstract void select();
 
-	private void setText(string displayName)
+	private void setText(string displayName, StyleOpts styleOpts)
 	{
 		auto text = new Text;
 		with(text)
@@ -56,9 +56,9 @@ class MenuItem
 class DelegateMenuItem : MenuItem
 {
 	alias Action = void delegate();
-	this(string displayName, Action action)
+	this(string displayName, StyleOpts styleOpts, Action action)
 	{
-		super(displayName);
+		super(displayName, styleOpts);
 		_func = action;
 	}
 	private Action _func;
@@ -73,9 +73,10 @@ class MainMenuItem : DelegateMenuItem
 {
 	Sprite background;
 	
-	this(string displayName, Action action, string resourceFile, IntRect textureRect)
+	this(string displayName, StyleOpts styleOpts, Action action, 
+		string resourceFile, IntRect textureRect)
 	{
-		super(displayName, action);
+		super(displayName, styleOpts, action);
 		auto texture = new Texture;
 		texture.loadFromFile(resourceFile, textureRect);
 		texture.setSmooth(true);

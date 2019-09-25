@@ -23,43 +23,48 @@ class ClaimOptionFactory
 {
 	this(const Player player, const Tile discard, const Metagame metagame, ClaimEvent claimEvent)
 	{
+		auto styleOpts = .styleOpts;
 		player.closedHand.displayHand;
-		addRonOption(player, discard, metagame, claimEvent);
-		addKanOption(player, discard, metagame.wall, claimEvent);
-		addPonOption(player, discard, claimEvent);
-		addChiOptions(player, discard, metagame, claimEvent);
+		addRonOption(player, discard, metagame, styleOpts, claimEvent);
+		addKanOption(player, discard, metagame.wall, styleOpts, claimEvent);
+		addPonOption(player, discard, styleOpts, claimEvent);
+		addChiOptions(player, discard, metagame, styleOpts, claimEvent);
 		_areThereClaimOptions = !_options.empty;
-		addDefaultOption(claimEvent);
+		addDefaultOption(styleOpts, claimEvent);
 	}
 
-	private void addRonOption(const Player player, const Tile discard, const Metagame metagame, ClaimEvent claimEvent)
+	private void addRonOption(const Player player, const Tile discard, 
+		const Metagame metagame, StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
-		if(player.isRonnable(discard, metagame)) _options ~= new RonClaimOption(player, claimEvent);
+		if(player.isRonnable(discard, metagame)) _options ~= new RonClaimOption(player, styleOpts, claimEvent);
 	}
 
-	private void addKanOption(const Player player, const Tile discard, const Wall wall, ClaimEvent claimEvent)
+	private void addKanOption(const Player player, const Tile discard, 
+		const Wall wall, StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
-		if(player.isKannable(discard, wall)) _options~= new KanClaimOption(player, discard, claimEvent);
+		if(player.isKannable(discard, wall)) _options~= new KanClaimOption(player, discard, styleOpts, claimEvent);
 	}
 
-	private void addPonOption(const Player player, const Tile discard, ClaimEvent claimEvent)
+	private void addPonOption(const Player player, const Tile discard, 
+		StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
-		if(player.isPonnable(discard)) _options ~= new PonClaimOption(player, discard, claimEvent);
+		if(player.isPonnable(discard)) _options ~= new PonClaimOption(player, discard, styleOpts, claimEvent);
 	}
 
-	private void addChiOptions(const Player player, const Tile discard, const Metagame metagame, ClaimEvent claimEvent)
+	private void addChiOptions(const Player player, const Tile discard, 
+		const Metagame metagame, StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
 		if(!player.isChiable(discard, metagame)) return;
 		auto candidates = determineChiCandidates(player.game.closedHand.tiles, discard);
 		foreach(candidate; candidates)
 		{
-			_options ~= new ChiClaimOption(candidate, claimEvent);
+			_options ~= new ChiClaimOption(candidate, styleOpts, claimEvent);
 		}
 	}
 
-	private void addDefaultOption(ClaimEvent claimEvent)
+	private void addDefaultOption(StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
-		_options ~= new NoClaimOption(claimEvent);
+		_options ~= new NoClaimOption(styleOpts, claimEvent);
 	}
 
 	private ClaimOption[] _options;
@@ -182,9 +187,9 @@ unittest
 
 class ClaimOption : MenuItem, IRelevantTiles
 {
-	this(string displayName, ClaimEvent event)
+	this(string displayName, StyleOpts styleOpts, ClaimEvent event)
 	{
-		super(displayName);
+		super(displayName, styleOpts);
 		_event = event;
 	}
 
@@ -205,9 +210,9 @@ class ClaimOption : MenuItem, IRelevantTiles
 private:
 class NoClaimOption : ClaimOption
 {
-	this(ClaimEvent claimEvent)
+	this(StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
-		super("Pass", claimEvent);
+		super("Pass", styleOpts, claimEvent);
 	}
 
 	protected override void apply()
@@ -224,19 +229,16 @@ class NoClaimOption : ClaimOption
 @("No claim option has no relevant tiles")
 unittest
 {
-	import mahjong.graphics.opts;
-
-    styleOpts = new DefaultStyleOpts;
-	auto noClaim = new NoClaimOption(null);
+	auto noClaim = new NoClaimOption(new DefaultStyleOpts, null);
 	assert(noClaim.relevantTiles.empty, "When not claiming anything, there should be no relevant tiles");
 }
 
 class RonClaimOption : ClaimOption
 {
-	this(const Player player, ClaimEvent claimEvent)
+	this(const Player player, StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
 		_player = player;
-		super("Ron", claimEvent);
+		super("Ron", styleOpts, claimEvent);
 	}
 
 	private const Player _player;
@@ -260,17 +262,17 @@ unittest
 	auto player = new Player();
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞"d.convertToTiles;
-	auto ronOption = new RonClaimOption(player, null);
+	auto ronOption = new RonClaimOption(player, new DefaultStyleOpts, null);
 	assert(ronOption.relevantTiles.length == 13, "All of the player's on hand tiles should be relevant");
 }
 
 class KanClaimOption : ClaimOption
 {
-	this(const Player player, const Tile discard, ClaimEvent claimEvent)
+	this(const Player player, const Tile discard, StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
-		super("Kan", claimEvent);
+		super("Kan", styleOpts, claimEvent);
 	}
 
 	private const Player _player;
@@ -296,7 +298,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
-	auto kanOption = new KanClaimOption(player, discard, null);
+	auto kanOption = new KanClaimOption(player, discard, new DefaultStyleOpts, null);
 	assert(kanOption.relevantTiles.length == 3, "For a kan, only three tiles are relevant");
 	assert(kanOption.relevantTiles.all!(t => discard.hasEqualValue(t)), "The relevant tiles should all have the same value as the discard");
 	assert(!kanOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
@@ -304,11 +306,11 @@ unittest
 
 class PonClaimOption : ClaimOption
 {
-	this(const Player player, const Tile discard, ClaimEvent claimEvent)
+	this(const Player player, const Tile discard, StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
 		_player = player;
 		_discard = discard;
-		super("Pon", claimEvent);
+		super("Pon", styleOpts, claimEvent);
 	}
 
 	private const Player _player;
@@ -334,7 +336,7 @@ unittest
 	player.startGame(PlayerWinds.east);
 	player.game.closedHand.tiles = "🀀🀀🀀🀓🀔🀕🀅🀅🀜🀝🀝🀞🀞🀟🀟🀟"d.convertToTiles;
 	auto discard = "🀟"d.convertToTiles[0];
-	auto ponOption = new PonClaimOption(player, discard, null);
+	auto ponOption = new PonClaimOption(player, discard, new DefaultStyleOpts, null);
 	assert(ponOption.relevantTiles.length == 2, "For a pon, only three tiles are relevant");
 	assert(ponOption.relevantTiles.all!(t => discard.hasEqualValue(t)), "The relevant tiles should all have the same value as the discard");
 	assert(!ponOption.relevantTiles.any!(t => discard == t), "The discard itself should not be part of the relevant tiles");
@@ -342,10 +344,10 @@ unittest
 
 class ChiClaimOption : ClaimOption
 {
-	this(const ChiCandidate chiCandidate, ClaimEvent claimEvent)
+	this(const ChiCandidate chiCandidate, StyleOpts styleOpts, ClaimEvent claimEvent)
 	{
 		_chiCandidate = chiCandidate;
-		super("Chi", claimEvent);
+		super("Chi", styleOpts, claimEvent);
 	}
 
 	private const ChiCandidate _chiCandidate;

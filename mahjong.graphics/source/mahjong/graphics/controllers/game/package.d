@@ -45,6 +45,7 @@ class GameController : Controller
 		target.clear;
 		drawGameBg(target);
 		_metagame.draw(target);
+		drawOverlays(target);
 	}
 
 	final override bool handleKeyEvent(Event.KeyEvent key)
@@ -73,11 +74,70 @@ class GameController : Controller
 		Controller.instance.substitute(controller);
 		controller.handleEvent(escapeKeyPressed);
 		controller.has!PauseOverlay.should.equal(true);
+		controller.isPaused.should.equal(true);
+	}
+
+	@("If I press escape twice, the pause menu is gone")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.graphics.opts;
+		import mahjong.test.key;
+		scope(exit) Controller.cleanUp;
+        styleOpts = new DefaultStyleOpts;
+		auto controller = new TestGameController();
+		Controller.instance.substitute(controller);
+		controller.handleEvent(escapeKeyPressed);
+		controller.handleEvent(escapeKeyPressed);
+		controller.has!PauseOverlay.should.equal(false);
+		controller.isPaused.should.equal(false);
+	}
+
+	@("If I press enter, it gets propagated to the overlay")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.graphics.opts;
+		import mahjong.test.key;
+		scope(exit) Controller.cleanUp;
+        styleOpts = new DefaultStyleOpts;
+		auto controller = new TestGameController();
+		Controller.instance.substitute(controller);
+		controller.handleEvent(escapeKeyPressed);
+		controller.handleEvent(returnKeyPressed);
+		controller.has!PauseOverlay.should.equal(false);
+		controller.isPaused.should.equal(false);
+	}
+
+	@("If I navigate the menu, it gets propagated to the overlay")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.graphics.menu.creation.mainmenu;
+		import mahjong.graphics.opts;
+		import mahjong.test.key;
+        styleOpts = new DefaultStyleOpts;
+		scope(exit) Controller.cleanUp;
+		composeMainMenu(null, null);
+        scope(exit) cleanupMainMenu;
+        styleOpts = new DefaultStyleOpts;
+		auto controller = new TestGameController();
+		Controller.instance.substitute(controller);
+		controller.handleEvent(escapeKeyPressed);
+		controller.handleEvent(downKeyPressed);
+		controller.handleEvent(returnKeyPressed);
+		Controller.instance.should.not.equal(controller);
 	}
 
 	protected void pauseGame()
 	{
-		Controller.instance.add(new PauseOverlay());
+		import mahjong.graphics.opts;
+		this.add(new PauseOverlay(styleOpts));
+	}
+
+	protected final bool isPaused() @safe pure @nogc nothrow
+	{
+		return this.has!PauseOverlay;
 	}
 
 	protected abstract void handleGameKey(Event.KeyEvent key);
@@ -87,6 +147,19 @@ class GameController : Controller
 		info("Rouding up game comtroller.");
 		_engine.terminateGame;
 		clearCache;
+		removeAllOverlays();
+	}
+
+	@("If I round up my game, all overlays are removed.")
+	unittest
+	{
+		import fluent.asserts;
+		import mahjong.graphics.opts;
+		auto controller = new TestGameController;
+		auto overlay = new PauseOverlay(new DefaultStyleOpts);
+		controller.add(overlay);
+		controller.roundUp;
+		controller.has(overlay).should.equal(false);
 	}
 
 	override void yield() 

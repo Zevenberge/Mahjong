@@ -52,6 +52,7 @@ private:
 
     void advance(Engine engine)
     {
+        info("Advancing to ", _event._chosenAction);
         final switch (_event._chosenAction)
         {
         case Action.unknown:

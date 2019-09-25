@@ -15,6 +15,8 @@ class PopupController : GameController
 {
 	this(GameController underlying, 
 		Popup popup)
+	in(underlying, "Cannot depend on null underlying controller")
+	in(!cast(PopupController)underlying, "Popupception")
 	{
 		_underlying = underlying;
 		_popup = popup;
@@ -22,7 +24,7 @@ class PopupController : GameController
 	}
 
 	private Popup _popup;
-	private GameController _underlying;
+	private Controller _underlying;
 
 	override void draw(RenderTarget target) 
 	{
@@ -33,6 +35,7 @@ class PopupController : GameController
 
 	override void roundUp()
 	{
+		info("Rounding up popup controller");
 		_underlying.roundUp;
 	}
 
@@ -46,17 +49,19 @@ class PopupController : GameController
 
 	override void substitute(Controller newController)
 	{
-		if(auto menu = cast(MenuController)newController)
+		/+if(auto menu = cast(MenuController)newController)
 		{
 			warning("Switching the inner controller to the menu's inner controller ", 
 				menu.innerController);
-			_underlying = cast(GameController)menu.innerController;
+			newController = menu.innerController;
 		}
 		else
 		{
 			trace("Switching the inner controller to the supplied controller ", newController);
-			_underlying = cast(GameController)newController;
-		}
+		}+/
+		if(this is newController) return;
+		assert(!cast(PopupController)newController, "Creating pop-up ception");
+		_underlying = newController;
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) 
@@ -67,7 +72,10 @@ class PopupController : GameController
 		}
 		else
 		{
-			_underlying.handleKeyEvent(key);
+			if(auto gameController = cast(GameController)_underlying)
+			{
+				gameController.handleKeyEvent(key);
+			}
 		}
 	}
 }

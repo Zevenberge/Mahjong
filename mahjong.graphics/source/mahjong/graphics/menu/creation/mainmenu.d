@@ -42,15 +42,15 @@ in(_mainMenu is null, "Main menu cannot be doubly initialised")
 	auto screen = styleOpts.screenSize;
 	with(_mainMenu)
 	{
-		addOption(new MainMenuItem("Riichi Mahjong", 
+		addOption(new MainMenuItem("Riichi Mahjong", styleOpts,
 				() => startRiichiMahjong(bg), riichiFile, IntRect(314,0,2*screen.x,2*screen.y)));
-		addOption(new MainMenuItem("Bamboo Battle", 
+		addOption(new MainMenuItem("Bamboo Battle", styleOpts,
 				(&startBambooBattle).toDelegate, bambooFile, IntRect(314,0,4*screen.x,4*screen.y)));
-		addOption(new MainMenuItem("Thunder Thrill", 
+		addOption(new MainMenuItem("Thunder Thrill", styleOpts,
 				(&startThunderThrill).toDelegate, eightPlayerFile, IntRect(100,0,768,768)));
-		addOption(new MainMenuItem("Simple Mahjong", 
+		addOption(new MainMenuItem("Simple Mahjong", styleOpts,
 				(&startSimpleMahjong).toDelegate, chineseFile, IntRect(314,0,2*screen.x,2*screen.y)));
-		addOption(new MainMenuItem("Quit", 
+		addOption(new MainMenuItem("Quit", styleOpts,
 				() => quit(window), quitFile, IntRect(150,0,700,700)));
 	}
 	trace("Constructed all options.");

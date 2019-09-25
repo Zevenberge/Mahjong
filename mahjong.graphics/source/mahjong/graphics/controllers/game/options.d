@@ -24,12 +24,7 @@ class IngameOptionsController(Factory, string menuTitle) : MenuController
 		Controller innerController,
 		Factory factory, Engine engine)
 	{
-		auto menu = new Menu(menuTitle);
-		foreach(option; factory.options)
-		{
-			menu.addOption(option);
-		}
-		menu.configureGeometry;
+		auto menu = new Menu(menuTitle, factory.options, styleOpts);
 		selectDefaultOption(menu, factory);
 		super(innerController, menu);
 		_metagame = metagame;
@@ -159,7 +154,7 @@ unittest
 	{
 		this()
 		{
-			super("", (){});
+			super("", new DefaultStyleOpts, (){});
 		}
 
 		const(Tile)[] relevantTiles() @property
@@ -184,7 +179,7 @@ unittest
 	{
 		this()
 		{
-			super("", (){});
+			super("", new DefaultStyleOpts, (){});
 		}
 
 		const(Tile)[] relevantTiles() @property
@@ -209,7 +204,7 @@ unittest
 	{
 		this()
 		{
-			super("", (){});
+			super("", new DefaultStyleOpts, (){});
 		}
 	}
 	class ValidFactory

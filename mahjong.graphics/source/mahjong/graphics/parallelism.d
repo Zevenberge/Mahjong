@@ -166,8 +166,9 @@ template isActorMethod(alias method)
 
 private void listen()
 {
-    import mahjong.util.log : logAspect;
+    import mahjong.util.log : logAspect, writeThrowable;
     mixin(logAspect!(LogLevel.info, "Background thread listener loop"));
+    scope(failure) info("Background thread died due to an error.");
     Actor listener = new DeadEnd();
     bool shouldContinue = true;
     while(shouldContinue)
@@ -184,7 +185,15 @@ private void listen()
             },
             (Variant v) {
                 info("Received ", v);
-                listener.receive(v);
+                try
+                {
+                    listener.receive(v);
+                }
+                catch(Throwable e)
+                {
+                    writeThrowable(e);
+                    throw e;
+                }
             });
     }
 }

@@ -4,6 +4,7 @@ import mahjong.domain.tile;
 import mahjong.engine.flow;
 import mahjong.graphics.controllers.game;
 import mahjong.graphics.menu.menuitem;
+import mahjong.graphics.opts;
 
 alias KanStealOptionController = IngameOptionsController!(KanStealOptionsFactory, "");
 
@@ -16,9 +17,10 @@ class KanStealOptionsFactory
     }
     do
     {
+        auto styleOpts = .styleOpts;
         _options = [
-            new StealOption(event.player.closedHand.tiles ~ event.kanTile, event),
-            new PassOption(event)
+            new StealOption(event.player.closedHand.tiles ~ event.kanTile, styleOpts, event),
+            new PassOption(styleOpts, event)
         ];
     }
 
@@ -53,9 +55,9 @@ unittest
 
 abstract class KanStealOption : MenuItem, IRelevantTiles
 {
-    this(string displayName, const(Tile)[] relevantTiles)
+    this(string displayName, StyleOpts styleOpts, const(Tile)[] relevantTiles)
     {
-        super(displayName);
+        super(displayName, styleOpts);
         _relevantTiles = relevantTiles;
     }
 
@@ -68,9 +70,9 @@ abstract class KanStealOption : MenuItem, IRelevantTiles
 
 final class StealOption : KanStealOption
 {
-    this(const(Tile)[] relevantTiles, KanStealEvent event)
+    this(const(Tile)[] relevantTiles, StyleOpts styleOpts, KanStealEvent event)
     {
-        super("Steal", relevantTiles);
+        super("Steal", styleOpts, relevantTiles);
         _event = event;
     }
 
@@ -84,9 +86,9 @@ final class StealOption : KanStealOption
 
 final class PassOption : KanStealOption
 {
-    this(KanStealEvent event)
+    this(StyleOpts styleOpts, KanStealEvent event)
     {
-        super("Pass", null);
+        super("Pass", styleOpts, null);
         _event = event;
     }
 

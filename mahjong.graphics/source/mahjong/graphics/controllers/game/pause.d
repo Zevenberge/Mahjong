@@ -12,33 +12,25 @@ import mahjong.graphics.opts;
 
 class PauseOverlay : Overlay
 {
-    this()
+    this(StyleOpts styleOpts)
     {
         info("Composing pause menu");
-	    _pauseMenu = new Menu("");
-	    with(_pauseMenu)
-	    {
-	    	addOption(new DelegateMenuItem("Continue", &continueGame));
-	    	addOption(new DelegateMenuItem("Quit", &quitGame));
-	    }
+	    _pauseMenu = new Menu("", [
+                new DelegateMenuItem("Continue", styleOpts, &continueGame),
+	    	    new DelegateMenuItem("Quit", styleOpts, &quitGame)
+            ], styleOpts);	    
 	    trace("Constructed all options.");
-	    _pauseMenu.configureGeometry;
-        _haze = new RectangleShape(styleOpts.screenSize.toVector2f);
-		_haze.fillColor = styleOpts.menuHazeColor;
-	    info("Composed pause menu");
     }
 
     @("When I start the pause menu, continue is selected")
     unittest
     {
         import fluent.asserts;
-        styleOpts = new DefaultStyleOpts;
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         overlay._pauseMenu.selectedItem.description.should.equal("Continue");
     }
 
     private Menu _pauseMenu;
-    private RectangleShape _haze;
 
     private void continueGame()
     {
@@ -49,17 +41,14 @@ class PauseOverlay : Overlay
     unittest
     {
         import fluent.asserts;
-        styleOpts = new DefaultStyleOpts;
         scope(exit) Controller.cleanUp;
         auto controller = new TestController;
         Controller.instance.substitute(controller);
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         Controller.instance.add(overlay);
         overlay.continueGame;
         Controller.instance.has(overlay).should.equal(false);
         Controller.instance.should.equal(controller);
-        import core.memory;
-        GC.collect;
     }
 
     private void quitGame()
@@ -79,7 +68,7 @@ class PauseOverlay : Overlay
         composeMainMenu(null, null);
         scope(exit) cleanupMainMenu;
         Controller.instance.substitute(new TestController);
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         Controller.instance.add(overlay);
         overlay.quitGame;
         Controller.instance.should.be.instanceOf!MainMenuController;
@@ -94,7 +83,7 @@ class PauseOverlay : Overlay
         composeMainMenu(null, null);
         scope(exit) cleanupMainMenu;
         Controller.instance.substitute(new TestController);
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         Controller.instance.add(overlay);
         overlay.quitGame;
         Controller.instance.has(overlay).should.equal(false);
@@ -102,7 +91,6 @@ class PauseOverlay : Overlay
 
     override void draw(RenderTarget target) 
     {
-        target.draw(_haze);
         _pauseMenu.draw(target);
     }
 
@@ -113,15 +101,15 @@ class PauseOverlay : Overlay
         import mahjong.test.window;
         styleOpts = new DefaultStyleOpts;
         auto window = new TestWindow();
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         overlay.draw(window);
-        window.drawnObjects.should.contain(overlay._haze);
         window.drawnObjects.length.should.be.greaterThan(3);
     }
 
-    override bool handle(Event.KeyEvent key)
+    override bool handle(Event event)
     {
-        switch(key.code) with (Keyboard.Key)
+        if(event.type != Event.EventType.KeyReleased) return false;
+        switch(event.key.code) with (Keyboard.Key)
 		{
 			case Up:
 				_pauseMenu.selectPrevious;
@@ -145,9 +133,8 @@ class PauseOverlay : Overlay
     {
         import fluent.asserts;
         import mahjong.test.key;
-        styleOpts = new DefaultStyleOpts;
-        auto overlay = new PauseOverlay();
-        auto isHandled = overlay.handle(gKeyPressed.key);
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
+        auto isHandled = overlay.handle(gKeyPressed);
         isHandled.should.equal(true);
     }
 
@@ -156,12 +143,11 @@ class PauseOverlay : Overlay
     {
         import fluent.asserts;
         import mahjong.test.key;
-        styleOpts = new DefaultStyleOpts;
-        auto overlay = new PauseOverlay();
-        auto isHandled = overlay.handle(downKeyPressed.key);
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
+        auto isHandled = overlay.handle(downKeyPressed);
         isHandled.should.equal(true);
         overlay._pauseMenu.selectedItem.description.should.equal("Quit");
-        overlay.handle(downKeyPressed.key);
+        overlay.handle(downKeyPressed);
         overlay._pauseMenu.selectedItem.description.should.equal("Quit");
     }
 
@@ -170,13 +156,12 @@ class PauseOverlay : Overlay
     {
         import fluent.asserts;
         import mahjong.test.key;
-        styleOpts = new DefaultStyleOpts;
-        auto overlay = new PauseOverlay();
-        overlay.handle(downKeyPressed.key);
-        auto isHandled = overlay.handle(upKeyPressed.key);
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
+        overlay.handle(downKeyPressed);
+        auto isHandled = overlay.handle(upKeyPressed);
         isHandled.should.equal(true);
         overlay._pauseMenu.selectedItem.description.should.equal("Continue");
-        overlay.handle(upKeyPressed.key);
+        overlay.handle(upKeyPressed);
         overlay._pauseMenu.selectedItem.description.should.equal("Continue");
     }
 
@@ -185,13 +170,12 @@ class PauseOverlay : Overlay
     {
         import fluent.asserts;
         import mahjong.test.key;
-        styleOpts = new DefaultStyleOpts;
         scope(exit) Controller.cleanUp;
         auto controller = new TestController;
         Controller.instance.substitute(controller);
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         Controller.instance.add(overlay);
-        auto isHandled = overlay.handle(escapeKeyPressed.key);
+        auto isHandled = overlay.handle(escapeKeyPressed);
         isHandled.should.equal(true);
         Controller.instance.has(overlay).should.equal(false);
         Controller.instance.should.equal(controller);
@@ -202,14 +186,13 @@ class PauseOverlay : Overlay
     {
         import fluent.asserts;
         import mahjong.test.key;
-        styleOpts = new DefaultStyleOpts;
         scope(exit) Controller.cleanUp;
         auto controller = new TestController;
         Controller.instance.substitute(controller);
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         Controller.instance.add(overlay);
-        overlay.handle(downKeyPressed.key);
-        auto isHandled = overlay.handle(escapeKeyPressed.key);
+        overlay.handle(downKeyPressed);
+        auto isHandled = overlay.handle(escapeKeyPressed);
         isHandled.should.equal(true);
         Controller.instance.has(overlay).should.equal(false);
         Controller.instance.should.equal(controller);
@@ -220,13 +203,12 @@ class PauseOverlay : Overlay
     {
         import fluent.asserts;
         import mahjong.test.key;
-        styleOpts = new DefaultStyleOpts;
         scope(exit) Controller.cleanUp;
         auto controller = new TestController;
         Controller.instance.substitute(controller);
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         Controller.instance.add(overlay);
-        auto isHandled = overlay.handle(returnKeyPressed.key);
+        auto isHandled = overlay.handle(returnKeyPressed);
         isHandled.should.equal(true);
         Controller.instance.has(overlay).should.equal(false);
         Controller.instance.should.equal(controller);
@@ -243,12 +225,21 @@ class PauseOverlay : Overlay
         scope(exit) cleanupMainMenu;
         auto controller = new TestController;
         Controller.instance.substitute(controller);
-        auto overlay = new PauseOverlay();
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
         Controller.instance.add(overlay);
-        overlay.handle(downKeyPressed.key);
-        auto isHandled = overlay.handle(returnKeyPressed.key);
+        overlay.handle(downKeyPressed);
+        auto isHandled = overlay.handle(returnKeyPressed);
         isHandled.should.equal(true);
         Controller.instance.should.be.instanceOf!MainMenuController;
+    }
+
+    @("Doing something else than key release does nothing")
+    unittest
+    {
+        import fluent.asserts;
+        auto overlay = new PauseOverlay(new DefaultStyleOpts);
+        auto isHandled = overlay.handle(Event(Event.EventType.Resized));
+        isHandled.should.equal(false);
     }
 }
 
@@ -258,14 +249,11 @@ Menu composePauseMenu()
 {
 	if(_pauseMenu !is null) return _pauseMenu;
 	info("Composing pause menu");
-	_pauseMenu = new Menu("");
-	with(_pauseMenu)
-	{
-		addOption(new DelegateMenuItem("Continue", {continueGame;}));
-		addOption(new DelegateMenuItem("Quit", {quitGame;}));
-	}
-	trace("Constructed all options.");
-	_pauseMenu.configureGeometry;
+    auto menuItems = [
+        new DelegateMenuItem("Continue", styleOpts, {continueGame;}),
+        new DelegateMenuItem("Quit", styleOpts, {quitGame;})
+    ];
+	_pauseMenu = new Menu("", menuItems, styleOpts);
 	info("Composed pause menu");
 	return _pauseMenu;
 }

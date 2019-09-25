@@ -42,8 +42,9 @@ class TurnController : GameController
 		target.clear;
 		drawGameBg(target);
 		selectOpt;
-		selection.draw(target);
+		if(!isPaused) selection.draw(target);
 		_metagame.draw(target);
+		drawOverlays(target);
 	}
 
 	protected override void handleGameKey(Event.KeyEvent key) 

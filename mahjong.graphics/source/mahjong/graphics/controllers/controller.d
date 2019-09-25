@@ -8,16 +8,41 @@ abstract class Controller
 {
 	final bool handleEvent(Event event)
 	{
+        if(event.type == event.EventType.Closed) return true;
+        if(propagateToOverlays(event)) return false;
 		switch(event.type) with(event.EventType)
 		{
-			case Closed:
-				return true;
 			case KeyReleased:
 				return handleKeyEvent(event.key);
 			default:
 				return false;
 		}
 	}
+
+    @("If I close the window, the controller should acknowledge it")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.test.window;
+        auto controller = new TestController;
+        controller.handleEvent(windowClosed).should.equal(true);
+    }
+
+    @("If I close the window while there are overlays, the controller should still acknowledge it")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.test.window;
+        auto controller = new TestController;
+        controller.add(new SomeOverlay);
+        controller.handleEvent(windowClosed).should.equal(true);
+    }
+
+    private bool propagateToOverlays(Event event)
+    {
+        import std.algorithm.iteration : fold;
+        return _overlays.fold!((handled, overlay) => overlay.handle(event) || handled)(false);
+    }
 	
 	protected abstract bool handleKeyEvent(Event.KeyEvent key);
 	
@@ -81,6 +106,53 @@ abstract class Controller
         controller._overlays.empty.should.equal(true);
     }
 
+    protected final void removeAllOverlays() @safe pure nothrow @nogc
+    {
+        _overlays = null;
+    }
+
+    protected final void drawOverlays(RenderTarget target)
+    {
+        foreach(overlay; _overlays)
+        {
+            overlay.draw(target);
+        }
+    }
+
+    @("I can draw my overlays")
+    unittest
+    {
+        import fluent.asserts;
+        import mahjong.test.window;
+        class MyOverlay : Overlay
+        {
+            this(Drawable d)
+            {
+                this.d = d;
+            }
+
+            Drawable d;
+
+            override void draw(RenderTarget target) 
+            {
+                target.draw(d);
+            }
+
+            override bool handle(Event event)
+            {
+                return false;
+            }
+        }
+        auto txt = new Text();
+        auto target = new TestWindow();
+        auto overlay = new MyOverlay(txt);
+        auto controller = new TestController;
+        controller.add(overlay);
+        controller.drawOverlays(target);
+        target.drawnObjects.length.should.equal(1);
+        target.drawnObjects[0].should.equal(txt);
+    }
+
     version(unittest)
     {
         final bool has(Overlay overlay)
@@ -88,12 +160,12 @@ abstract class Controller
             import std.algorithm: any;
             return _overlays.any!(o => o is overlay);
         }
+    }
 
-        final bool has(TOVerlay : Overlay)()
-        {
-            import std.algorithm: any;
-            return _overlays.any!(o => cast(TOVerlay)o !is null);
-        }
+    final bool has(TOVerlay : Overlay)() @safe pure @nogc nothrow
+    {
+        import std.algorithm: any;
+        return _overlays.any!(o => cast(TOVerlay)o !is null);
     }
 
     void substitute(Controller newController)
@@ -169,7 +241,7 @@ abstract class Controller
 abstract class Overlay
 {
     abstract void draw(RenderTarget target);
-    abstract bool handle(Event.KeyEvent key);
+    abstract bool handle(Event event);
 }
 
 class NullController : Controller
@@ -227,7 +299,7 @@ version(unittest)
         {
         }
 
-        override bool handle(Event.KeyEvent key)
+        override bool handle(Event event)
         {
             return false;
         }

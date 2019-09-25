@@ -278,7 +278,8 @@ class TurnOption : MenuItem, IRelevantTiles
 {
     this(string displayName)
     {
-        super(displayName);
+        import mahjong.graphics.opts;
+        super(displayName, styleOpts);
     }
 
     abstract const(Tile)[] relevantTiles() @property;
