@@ -20,13 +20,44 @@ class PopupService : INotificationService
         {
             info("Notifying about ", args[0]);
             auto popup = createPopup(args);
-            auto gameController = cast(GameController)Controller.instance;
-            if(gameController){
-                Controller.instance.substitute(new PopupController(gameController, popup));
-            }
+            Controller.instance.add(popup);
         }
     }
 }
+
+@("If I notify about a player popup, the controller has a player popup")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.domain.wrappers;
+    import mahjong.graphics.anime.animation;
+    import mahjong.graphics.drawing.player;
+    setDefaultTestController;
+    scope(exit) setDefaultTestController;
+    scope(exit) clearAllAnimations;
+    import std.typecons : BlackHole;
+    scope(exit) clearPlayerCache;
+    auto renderTarget = new BlackHole!RenderTarget;
+    auto service = new PopupService;
+    auto player = new Player();
+    player.draw(AmountOfPlayers(2), renderTarget, 0f);
+    service.notify(Notification.Chi, player);
+    Controller.instance.has!PlayerPopup.should.equal(true);
+}
+
+@("If I notify about a general game popup, the controller has a game popup")
+unittest
+{
+    import fluent.asserts;
+    import mahjong.graphics.anime.animation;
+    setDefaultTestController;
+    scope(exit) setDefaultTestController;
+    scope(exit) clearAllAnimations;
+    auto service = new PopupService;
+    service.notify(Notification.ExhaustiveDraw);
+    Controller.instance.has!GamePopup.should.equal(true);
+}
+
 
 private Popup createPopup(Notification notification, const Player player)
 {

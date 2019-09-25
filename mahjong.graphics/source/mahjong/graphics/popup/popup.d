@@ -2,13 +2,14 @@
 
 import std.experimental.logger;
 import std.typecons;
-import dsfml.graphics : Text, Sprite, Texture, RenderTarget, RenderStates, Drawable, Color;
+import dsfml.graphics : Event, Text, Sprite, Texture, RenderTarget, RenderStates, Drawable, Color;
 import dsfml.system : Vector2f;
 import mahjong.domain.player;
 import mahjong.graphics.anime.animation;
 import mahjong.graphics.anime.story;
 import mahjong.graphics.cache.font;
 import mahjong.graphics.cache.texture;
+import mahjong.graphics.controllers.controller;
 import mahjong.graphics.coords;
 import mahjong.graphics.conv;
 import mahjong.graphics.drawing.player;
@@ -87,7 +88,7 @@ class GamePopup : Popup
     }
 }
 
-abstract class Popup : Drawable
+abstract class Popup : Overlay
 {
 	this(Text text, Sprite splash)
 	{
@@ -111,17 +112,22 @@ abstract class Popup : Drawable
 
 	alias animation this;
 
-	final void draw(RenderTarget target, RenderStates states)
+	final override void draw(RenderTarget target)
 	{
 		trace("Coordinates of the splash: ", _splash.getGlobalBounds);
 		trace("Color of the splash: ", _splash.color);
 		trace("Coordinates of the text: ", _text.getGlobalBounds);
 		trace("Color of the text: ", _text.getColor);
-		_splash.draw(target, states);
+        target.draw(_splash);
 		trace("Drawn sprite");
-		_text.draw(target, states);
+		target.draw(_text);
 		trace("Drawn text");
 	}
+
+    final override bool handle(Event event)
+    {
+        return false;
+    }
 }
 
 private void loadSplashTexture() 
@@ -130,16 +136,32 @@ private void loadSplashTexture()
 	info("Loading splash texture for popup"); 
 	splashTexture = new Texture; 
 	splashTexture.loadFromFile(splashFile); 
-} 
+}
 
-private class PlayerPopupAnimation : Storyboard
+private abstract class PopupAnimation : Storyboard
+{
+    this(Popup popup, Animation[] animations)
+    {
+        super(animations);
+        _popup = popup;
+    }
+
+    private Popup _popup;
+
+    protected final override void animationsFinished()
+    {
+        Controller.instance.remove(_popup);
+    }
+}
+
+private class PlayerPopupAnimation : PopupAnimation
 {
 	this(Popup popup)
 	{
 		info("Starting player-induced pop up animation");
 		auto newSplashCoords = FloatCoords(popup._splash.position.transitionTowardCenter(100), 0);
 		auto newTextCoords = FloatCoords(popup._text.position.transitionTowardCenter(100), 0);
-		super([
+		super(popup, [
 				[popup._splash.appear(30),
 				    popup._text.appear(30),
 				    popup._splash.moveTo(newSplashCoords, 60),
@@ -162,14 +184,14 @@ private Vector2f transitionTowardCenter(const Vector2f origin, float diagonalDis
 	return origin + movement;
 }
 
-private class GamePopupAnimation : Storyboard
+private class GamePopupAnimation : PopupAnimation
 {
     this(Popup popup)
     {
         info("Starting game-induced pop up animation");
         auto newSplashCoords = FloatCoords(popup._splash.position + Vector2f(-50, 0), 0);
         auto newTextCoords = FloatCoords(popup._text.position + Vector2f(-50, 0), 0);
-        super([
+        super(popup, [
                 [popup._splash.appear(25),
                     popup._text.appear(25),
                     popup._splash.moveTo(newSplashCoords, 50),

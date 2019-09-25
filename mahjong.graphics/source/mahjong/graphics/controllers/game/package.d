@@ -7,7 +7,6 @@ public import mahjong.graphics.controllers.game.gameend;
 public import mahjong.graphics.controllers.game.idle;
 public import mahjong.graphics.controllers.game.kansteal;
 public import mahjong.graphics.controllers.game.mahjong;
-public import mahjong.graphics.controllers.game.popup;
 public import mahjong.graphics.controllers.game.options;
 public import mahjong.graphics.controllers.game.result;
 public import mahjong.graphics.controllers.game.transfer;

@@ -36,7 +36,10 @@ class Animation
 	{
 		trace("Animation (", objectId, ") finished.");
 		_animations.removeInPlace(this);
+		animationsFinished;
 	}
+
+	protected void animationsFinished() {}
 
 	abstract bool done() @property;
 	
@@ -202,6 +205,11 @@ version(unittest)
 		{
 			return amountOfFrames == 0;
 		}
+	}
+
+	void clearAllAnimations()
+	{
+		_animations = null;
 	}
 }
 
