@@ -23,6 +23,9 @@ version(mahjong_ai_test)
 {
     import fluent.asserts;
     import mahjong.ai.testing;
+    import mahjong.domain.enums;
+    import mahjong.domain.opts;
+    import mahjong.domain.wall;
 }
 
 class AdvancedAI : AI
@@ -46,10 +49,6 @@ class AdvancedAI : AI
     @("The AI should tsumo if they can.")
     unittest
     {
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
-        import mahjong.domain.wall;
-
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         metagame.wall = new Wall(new DefaultGameOpts);
         metagame.wall.setUp;
@@ -64,10 +63,6 @@ class AdvancedAI : AI
     @("If the AI cannot tsumo, they should discard a tile")
     unittest
     {
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
-        import mahjong.domain.wall;
-
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         metagame.wall = new Wall(new DefaultGameOpts);
         metagame.wall.setUp;
@@ -83,10 +78,6 @@ class AdvancedAI : AI
     @("If the AI can declare riichi, they should")
     unittest
     {
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
-        import mahjong.domain.wall;
-
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         metagame.wall = new Wall(new DefaultGameOpts);
         metagame.wall.setUp;
@@ -103,10 +94,6 @@ class AdvancedAI : AI
     @("If a fourth tile is relevant, discard another")
     unittest
     {
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
-        import mahjong.domain.wall;
-
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         metagame.wall = new Wall(new DefaultGameOpts);
         metagame.wall.setUp;
@@ -123,10 +110,6 @@ class AdvancedAI : AI
     @("If the fourth tile is irrelevant, just promote it to kan")
     unittest
     {
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
-        import mahjong.domain.wall;
-
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         metagame.wall = new Wall(new DefaultGameOpts);
         metagame.wall.setUp;
@@ -145,9 +128,6 @@ class AdvancedAI : AI
     @("If the AI can declare a redraw, then it won't discard something")
     unittest
     {
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
-
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         metagame.initializeRound;
         metagame.beginRound;
@@ -180,8 +160,6 @@ class AdvancedAI : AI
         }
 
         import mahjong.domain.creation;
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
 
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto player = new Player("🀐🀐🀑🀒🀓🀔🀕🀖🀗🀘🀘🀘🀘"d, PlayerWinds.east);
@@ -199,9 +177,6 @@ class AdvancedAI : AI
     @("If the AI can kan steal, it will")
     unittest
     {
-        import mahjong.domain.enums;
-        import mahjong.domain.opts;
-
         auto metagame = new Metagame([new Player], new DefaultGameOpts);
         auto player = new Player("🀐🀐🀑🀒🀓🀔🀕🀇🀇🀜🀝🀞"d, PlayerWinds.east);
         auto ponTile = new Tile(Types.character, Numbers.one);
