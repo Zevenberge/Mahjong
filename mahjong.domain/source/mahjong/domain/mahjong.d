@@ -22,12 +22,15 @@ import mahjong.util.range;
 
 MahjongResult scanHandForMahjong(const Ingame player) pure
 {
-	return scanHandForMahjong(player.closedHand.tiles, player.openHand.sets);
+	auto hand = player.closedHand.tiles.asHand;
+	return scanHandForMahjong(hand, player.openHand.sets);
 }
 
 MahjongResult scanHandForMahjong(const Ingame player, const Tile discard) pure
 {
-	return scanHandForMahjong(player.closedHand.tiles ~ discard, player.openHand.sets);
+	auto hand = player.closedHand.tiles.asHand;
+	hand ~= discard;
+	return scanHandForMahjong(hand, player.openHand.sets);
 }
 
 @("Does an open pon count towards a mahjong")
@@ -62,10 +65,11 @@ unittest
 
 bool isMahjong(const Ingame player) pure @nogc nothrow
 {
-	return scanHandForMahjong!(No.includeSets)(player.closedHand.tiles, player.openHand.sets);
+	auto hand = player.closedHand.tiles.asHand;
+	return scanHandForMahjong!(No.includeSets)(hand, player.openHand.sets);
 }
 
-@("Can I can a player for mahjong")
+@("Can I scan a player for mahjong")
 unittest
 {
 	import fluent.asserts;
@@ -81,15 +85,33 @@ unittest
 	ingame.isMahjong.should.equal(false);
 }
 
+bool isMahjongIfTheyHad(const Ingame player, const Tile tile) pure @nogc nothrow
+{
+	auto hand = player.closedHand.tiles.asHand;
+	hand ~= tile;
+	return scanHandForMahjong!(No.includeSets)(hand, player.openHand.sets);
+}
+
+@("Can I add a tile to get a mahjong")
+unittest
+{
+	import fluent.asserts;
+	auto ingame = new Ingame(PlayerWinds.east, "🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡🀓🀓🀓"d);
+	ingame.isMahjongIfTheyHad(new Tile(Types.dragon, Dragons.red)).should.equal(true);
+}
+
+@("If I'm not mahjong even with the extra tile, I get notifies")
+unittest
+{
+	import fluent.asserts;
+	auto ingame = new Ingame(PlayerWinds.east, "🀄🀄🀚🀚🀚🀝🀝🀝🀡🀡🀓🀓🀔"d);
+	ingame.isMahjongIfTheyHad(new Tile(Types.dragon, Dragons.white)).should.equal(false);
+}
+
 private auto scanHandForMahjong(Flag!("includeSets") includeSets = Yes.includeSets)
-	(const(Tile)[] closedHand, const(Set[]) openSets) pure nothrow
-in(closedHand.length > 0)
-out(; closedHand.length > 0)
-{ /*
-	   See if the current hand is a legit mahjong hand.
-	   */
-	//auto sortedHand = sortHand(hand);
-	auto hand = closedHand.asHand;
+	(ref Hand hand, const(Set[]) openSets) pure nothrow
+in(hand.length > 0)
+{ 
 	hand.sort!byTypeValueAsc;
 	// Run a dedicated scan for thirteen orphans
 	if (hand.length == 14)
@@ -98,7 +120,7 @@ out(; closedHand.length > 0)
 		{
 			static if(includeSets == Yes.includeSets)
 			{
-				return MahjongResult(true, [thirteenOrphans(closedHand)]);
+				return MahjongResult(true, [thirteenOrphans(hand.allocate)]);
 			}
 			else
 			{
@@ -116,7 +138,7 @@ out(; closedHand.length > 0)
 		{
 			static if(includeSets == Yes.includeSets)
 			{
-				return MahjongResult(true, [sevenPairs(closedHand)]);
+				return MahjongResult(true, [sevenPairs(hand.allocate)]);
 			}
 			else
 			{
@@ -381,7 +403,7 @@ unittest  // Check whether the example hands are seen as mahjong hands.
 		foreach (line; output)
 		{
 			assert(line.length == 14, "A complete hand is 14 tiles");
-			auto hand = convertToTiles(line);
+			auto hand = convertToTiles(line).asHand;
 			bool isMahjong;
 			isMahjong = scanHandForMahjong(hand, null).isMahjong;
 			assert(isHand == isMahjong, "For %s, the mahjong should be %s".format(line, isHand));
@@ -437,7 +459,11 @@ bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
 {
 	import mahjong.domain.creation : allTiles;
 
-	return allTiles.any!(tile => scanHandForMahjong(closedHand ~ tile, openHand.sets).isMahjong);
+	return allTiles.any!((tile) {
+		auto hand = closedHand.asHand;
+		hand ~= tile;
+		return scanHandForMahjong!(No.includeSets)(hand, openHand.sets);
+	});
 }
 
 @("Is the player tenpai")

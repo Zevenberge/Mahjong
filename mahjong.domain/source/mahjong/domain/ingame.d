@@ -190,12 +190,12 @@ class Ingame
     /*
      Normal functions related to claiming tiles.
      */
-    private bool canClaim(const Tile tile) pure const
+    private bool canClaim(const Tile tile) pure const @nogc nothrow
     {
         return !isOwn(tile) && !_isRiichi;
     }
 
-    private bool isOwn(const Tile tile) pure const
+    private bool isOwn(const Tile tile) pure const @nogc nothrow
     {
         return tile.isOwnedBy(this);
     }
@@ -798,13 +798,13 @@ class Ingame
         return .isPlayerTenpai(closedHand.tiles, openHand);
     }
 
-    bool isFuriten() @property pure const
+    bool isFuriten() @property pure const @nogc nothrow
     {
         if (_isTemporaryFuriten)
             return true;
         foreach (tile; allDiscards)
         {
-            if (.scanHandForMahjong(this, tile).isMahjong)
+            if (this.isMahjongIfTheyHad(tile))
             {
                 return true;
             }
@@ -1168,7 +1168,7 @@ class Ingame
         }
     }
 
-    private bool isLegitMahjongClaim(const Tile tile, const Environment environment) const
+    private bool isLegitMahjongClaim(const Tile tile, const Environment environment) pure const
     {
         import mahjong.domain.result : isMahjongWithYaku;
 

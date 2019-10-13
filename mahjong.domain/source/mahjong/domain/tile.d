@@ -105,7 +105,7 @@ unittest
     assert(!tile.isIdentical(anotherTile), "Tile was a different tile");
 }
 
-bool isOwnedBy(const Tile tile, const Ingame player) pure
+bool isOwnedBy(const Tile tile, const Ingame player) pure @nogc nothrow
 {
     return tile._originalOwner is player;
 }
