@@ -141,7 +141,47 @@ class AdvancedAI : AI
     const(ClaimDecision) decide(const ClaimEvent event)
     {
         mixin(logAspect!(LogLevel.info, "Deciding claim event."));
+        if(event.player.isRonnable(event.tile, event.metagame))
+        {
+            return ClaimDecision(event.player, Request.Ron);
+        }
         return ClaimDecision(event.player, Request.None);
+    }
+
+    @("If a tile is not relevant, the AI should skip it by default")
+    unittest
+    {
+        import mahjong.domain.creation;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
+        metagame.wall.setUp;
+        auto player = new Player("🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d, PlayerWinds.east);
+        auto discardedTile = "🀓"d.convertToTiles[0];
+        discardedTile.isNotOwn;
+        discardedTile.isDiscarded;
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new ClaimEvent(discardedTile, player, metagame));
+        result.request.should.equal(Request.None);
+        result.player.should.equal(player);
+    }
+
+    @("The AI should ron if they can.")
+    unittest
+    {
+        import mahjong.domain.creation;
+
+        auto metagame = new Metagame([new Player], new DefaultGameOpts);
+        metagame.wall = new Wall(new DefaultGameOpts);
+        metagame.wall.setUp;
+        auto player = new Player("🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d, PlayerWinds.east);
+        auto discardedTile = "🀀"d.convertToTiles[0];
+        discardedTile.isNotOwn;
+        discardedTile.isDiscarded;
+        auto ai = new AdvancedAI();
+        auto result = ai.decide(new ClaimEvent(discardedTile, player, metagame));
+        result.request.should.equal(Request.Ron);
+        result.player.should.equal(player);
     }
 
 	const(KanStealDecision) decide(const KanStealEvent event)
