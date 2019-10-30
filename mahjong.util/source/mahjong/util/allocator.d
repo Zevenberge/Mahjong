@@ -267,3 +267,61 @@ unittest
     }
     instance.should.not.beNull;
 }
+
+struct GCAllocator
+{
+    // Have the same semantics as the normal allocator
+    this() @disable;
+    this(this) @disable;
+
+    this(bool willFunctionCorrectly) @safe pure @nogc nothrow
+    {
+    }
+
+    auto create(T, Args...)(Args args)
+    {
+        return new T(args);
+    }
+}
+
+@("Can my allocator create a class")
+unittest
+{
+    static class Fixture{}
+    import fluent.asserts;
+    auto allocator = GCAllocator(true);
+    auto instance = allocator.create!Fixture;
+    instance.should.be.instanceOf!Fixture;
+    instance.should.not.beNull;
+}
+
+@("Can I pass data to the gc created instance")
+unittest
+{
+    static class Fixture
+    {
+        this(int offsetOfTheUniverse) pure @nogc nothrow
+        {
+            x = offsetOfTheUniverse;
+        }
+        private int x;
+        int doThings()
+        {
+            return 42 + x;
+        }
+    }
+    import fluent.asserts;
+    auto allocator = GCAllocator(true);
+    auto instance = allocator.create!Fixture(50);
+    instance.doThings.should.equal(92);
+}
+
+enum isAllocator(T) = is(T == Allocator) || is(T == GCAllocator);
+
+@("Is an allocator an allocator")
+unittest
+{
+    static assert(isAllocator!Allocator);
+    static assert(isAllocator!GCAllocator);
+    static assert(!isAllocator!int);
+}
