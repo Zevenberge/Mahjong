@@ -8,7 +8,7 @@ enum Winds {east, south, west, north};
 enum Dragons {green, red, white};
 enum Numbers {one, two, three, four, five, six, seven, eight, nine};
 
-int amountOfTiles(const Types type) pure
+int amountOfTiles(const Types type) pure @nogc nothrow
 {
 	final switch(type) with(Types)
 	{

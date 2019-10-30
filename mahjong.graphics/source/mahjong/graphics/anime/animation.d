@@ -4,12 +4,13 @@ import std.algorithm;
 import std.experimental.logger;
 import std.format;
 import std.range;
+import std.typecons;
 import std.uuid;
 import mahjong.util.collections;
 
 class Animation
 {
-	UUID objectId;
+	Rebindable!(const Object) object;
 	
 	void animate()
 	{
@@ -34,7 +35,6 @@ class Animation
 
 	private void onDone()
 	{
-		trace("Animation (", objectId, ") finished.");
 		_animations.removeInPlace(this);
 		animationsFinished;
 	}
@@ -86,9 +86,9 @@ unittest
 }
 
 void addUniqueAnimation(Animation anime)
-in(!anime.objectId.empty)
+in(anime.object != null)
 {
-	_animations = _animations.remove!(a => a.objectId == anime.objectId);
+	_animations = _animations.remove!(a => a.object is anime.object);
 	_animations ~= anime;
 }
 
@@ -96,9 +96,9 @@ unittest
 {
 	import fluent.asserts;
 	scope(exit) _animations = null;
-	auto objectId = randomUUID;
+	auto object = new Object;
 	auto dummyAnimation1 = new DummyAnimation(1);
-	dummyAnimation1.objectId = objectId;
+	dummyAnimation1.object = object;
 	addUniqueAnimation(dummyAnimation1);
 	_animations.should.equal([dummyAnimation1]).because("The animation should have been added");
 }
@@ -108,11 +108,11 @@ unittest
 {
 	import fluent.asserts;
 	scope(exit) _animations = null;
-	auto objectId = randomUUID;
+	auto object = new Object;
 	auto dummyAnimation1 = new DummyAnimation(1);
-	dummyAnimation1.objectId = objectId;
+	dummyAnimation1.object = object;
 	auto dummyAnimation2 = new DummyAnimation(1);
-	dummyAnimation2.objectId = objectId;
+	dummyAnimation2.object = object;
 	_animations = [dummyAnimation1];
 	addUniqueAnimation(dummyAnimation2);
 	_animations.length.should.equal(1).because("there should be only one surviving animation");
@@ -122,9 +122,8 @@ unittest
 
 void addIfNonExistent(Animation anime)
 {
-	if(_animations.filter!(a => a.objectId == anime.objectId).empty)
+	if(_animations.filter!(a => a.object is anime.object).empty)
 	{
-		trace("Added animation (", anime.objectId, ") to the list");
 		_animations ~= anime;
 	}
 }
@@ -134,20 +133,20 @@ unittest
 {
 	import fluent.asserts;
 	scope(exit) _animations = null;
-	auto objectId = randomUUID;
+	auto object = new Object;
 	auto dummyAnimation1 = new DummyAnimation(1);
-	dummyAnimation1.objectId = objectId;
+	dummyAnimation1.object = object;
 	addIfNonExistent(dummyAnimation1);
 	_animations.should.equal([dummyAnimation1]).because("it should have been added");
 }
 
 unittest
 {
-	auto objectId = randomUUID;
+	auto object = new Object;
 	auto dummyAnimation1 = new DummyAnimation(1);
-	dummyAnimation1.objectId = objectId;
+	dummyAnimation1.object = object;
 	auto dummyAnimation2 = new DummyAnimation(1);
-	dummyAnimation2.objectId = objectId;
+	dummyAnimation2.object = object;
 	_animations = [dummyAnimation1];
 	addIfNonExistent(dummyAnimation2);
 	assert(_animations.length == 1, "There should be only one surviving animation");

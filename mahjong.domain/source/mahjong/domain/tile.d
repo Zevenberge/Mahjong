@@ -2,12 +2,11 @@ module mahjong.domain.tile;
 
 import std.conv;
 import std.math;
-import std.uuid;
 
 import mahjong.domain.enums;
 import mahjong.domain.ingame;
 
-class Tile
+final class Tile
 {
     private enum Origin
     {
@@ -18,7 +17,6 @@ class Tile
     }
     const ComparativeTile _;
     alias _ this;
-    const UUID id;
 
     int dora = 0;
 
@@ -34,24 +32,23 @@ class Tile
         }
     }
     
-    this(Types type, int value)
+    this(Types type, int value) pure @nogc nothrow
     {
-        id = randomUUID;
         this._ = ComparativeTile(type, value);
     }
 
-    void close() pure 
+    void close() pure @nogc nothrow
     {
         _isOpen = false;
     }
     
-    void open() pure
+    void open() pure @nogc nothrow
     {
         _isOpen = true;
     }
 
     private bool _isOpen = false;
-    bool isOpen() @property pure const
+    bool isOpen() @property pure const @nogc nothrow
     {
         return _isOpen;
     }
@@ -61,31 +58,26 @@ class Tile
         import std.format;
         return format!"%s-%s"(type, value);
     }
-    
-    bool isIdentical(const Tile other) pure const
-    {
-        return id == other.id;
-    }
 
-    void isDrawnBy(Ingame player) pure
+    void isDrawnBy(Ingame player) pure @nogc nothrow
     {
         _origin = Origin.drawn;
         _originalOwner = player;
     }
 
-    void isKanReplacementFor(Ingame player) pure
+    void isKanReplacementFor(Ingame player) pure @nogc nothrow
     {
         _origin = Origin.kanReplacement;
         _originalOwner = player;
     }
 
-    void isDiscarded() pure
+    void isDiscarded() pure @nogc nothrow
     {
         _origin = Origin.discard;
         _isOpen = true;
     }
 
-    void isStolenFromKan() pure
+    void isStolenFromKan() pure @nogc nothrow
     {
         _origin = Origin.kanSteal;
         _isOpen = true;
@@ -97,15 +89,7 @@ class Tile
     }
 }
 
-unittest
-{
-    auto tile = new Tile(Types.wind, 4);
-    assert(tile.isIdentical(tile), "Tile was not identical with itself");
-    auto anotherTile = new Tile(Types.wind, 4);
-    assert(!tile.isIdentical(anotherTile), "Tile was a different tile");
-}
-
-bool isOwnedBy(const Tile tile, const Ingame player) pure
+bool isOwnedBy(const Tile tile, const Ingame player) pure @nogc nothrow
 {
     return tile._originalOwner is player;
 }

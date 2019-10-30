@@ -87,7 +87,7 @@ class OpenHand
 		return _sets.any!(s => s.canPromoteSetToKan(tile));
 	}
 
-	void promoteToKan(Tile kanTile)
+	void promoteToKan(Tile kanTile) nothrow
 	{
 		foreach(i, set; _sets)
 		{
@@ -97,16 +97,16 @@ class OpenHand
 			++_amountOfKans;
 			return;
 		}
-		throw new SetNotFoundException(kanTile);
+		assert(false, "Could not find a set corresponding to the tile");
 	}
 
-	const(Set) findCorrespondingPon(const(Tile) tile) const
+	const(Set) findCorrespondingPon(const(Tile) tile) const nothrow
 	{
 		foreach(set; _sets)
 		{
 			if(set.canPromoteSetToKan(tile)) return set;
 		}
-		throw new SetNotFoundException(tile);
+		assert(false, "Could not find a set corresponding to the tile");
 
 	}
 }

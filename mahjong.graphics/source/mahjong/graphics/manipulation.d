@@ -196,10 +196,7 @@ void rotateToPlayer(ref Sprite sprite, const int playLoc)
 }
 void rotateToPlayer(const Tile tile, const int playLoc)
 {
-	trace("Rotating tile ", tile.id," to player");
 	auto coords = tile.getCoords;
-	trace("Obtained the coords of tile ", tile.id);
-	trace("Is drawing opts null? ", drawingOpts is null);
 	coords.rotation = playLoc * drawingOpts.rotationPerPlayer;
 	tile.setCoords(coords);
 }
@@ -217,8 +214,6 @@ void addRotateToPlayer(ref Sprite sprite, const int playLoc)
 void addRotateToPlayer(const Tile tile, const int playLoc)
 {
 	auto coords = tile.getCoords;
-	trace("Obtained the coords of tile ", tile.id);
-	trace("Is drawing opts set? ", drawingOpts is null);
 	coords.rotation += playLoc * drawingOpts.rotationPerPlayer;
 	tile.setCoords(coords);
 }
