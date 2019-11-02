@@ -455,15 +455,22 @@ version (unittest)
 	}
 }
 
-bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand)
+bool isPlayerTenpai(const(Tile)[] closedHand, const OpenHand openHand) pure @nogc nothrow
 {
 	import mahjong.domain.creation : allTiles;
-
-	return allTiles.any!((tile) {
+	import mahjong.util.allocator : Allocator;
+	auto allocator = Allocator(true);
+	foreach(value; allTiles)
+	{
+		auto tile = allocator.create!Tile(value.type, value.value);
 		auto hand = closedHand.asHand;
 		hand ~= tile;
-		return scanHandForMahjong!(No.includeSets)(hand, openHand.sets);
-	});
+		if(scanHandForMahjong!(No.includeSets)(hand, openHand.sets))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 @("Is the player tenpai")
@@ -499,7 +506,7 @@ unittest
 
 	auto tenpaiHand = "🀀🀁🀂🀃🀄🀆🀆🀇🀏🀐🀘🀙🀡"d.convertToTiles;
 	auto emptyOpenHand = new OpenHand;
-	({isPlayerTenpai(tenpaiHand, emptyOpenHand);}).should.haveExecutionTime.lessThan(1.msecs);
+	({cast(void)isPlayerTenpai(tenpaiHand, emptyOpenHand);}).should.haveExecutionTime.lessThan(1.msecs);
 }
 
 auto constructMahjongData(Metagame metagame)

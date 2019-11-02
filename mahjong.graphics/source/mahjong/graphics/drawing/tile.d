@@ -1,5 +1,6 @@
 module mahjong.graphics.drawing.tile;
 
+import std.algorithm;
 import std.experimental.logger;
 import std.uuid;
 import dsfml.graphics;
@@ -19,7 +20,7 @@ import mahjong.graphics.meta;
 alias drawTile = draw;
 void draw(const Tile tile, RenderTarget view)
 {
-	getTileVisuals(tile).draw(tile, view);
+	getTileVisuals(tile).draw(view);
 }
 
 void display(const Tile tile)
@@ -34,7 +35,7 @@ void dontDisplay(const Tile tile)
 
 void clearTileCache()
 {
-	_tiles.clear;
+	_tiles.length = 0;
 	trace("Cleared tiles cache");
 }
 
@@ -57,7 +58,7 @@ void move(const Tile tile, FloatCoords finalCoords, int duration = 15)
 {
 	auto sprite = getFrontSprite(tile);
 	auto animation = new MovementAnimation(sprite, finalCoords, 15);
-	animation.objectId = tile.id;
+	animation.object = tile;
 	addUniqueAnimation(animation);
 }
 
@@ -82,16 +83,21 @@ private final class TileVisuals
 {
 	private Sprite _sprite;
 	private Sprite _backSprite;
-	
-	void initialise(const Tile stone)
+	private const Tile _tile;
+
+	this(const Tile tile)
 	{
-		trace("Initialising tile visual for tile ", stone.id);
+		_tile = tile;
+		initialise();
+	}
+	
+	void initialise()
+	{
 		loadTilesTexture;
 		_sprite = new Sprite(tilesTexture);
-		_sprite.textureRect = getTextureRect(stone);
+		_sprite.textureRect = getTextureRect(_tile);
 		_sprite.setSize(tile.displayWidth);
 		_backSprite = initialiseNewBackSprite;
-		trace("Initialised tile visual for tile ", stone.id);
 	}
 	
 	mixin delegateCoords!([_sprite.stringof, _backSprite.stringof]);
@@ -101,10 +107,10 @@ private final class TileVisuals
 		return _sprite.getGlobalBounds;
 	}
 
-	void draw(const Tile tile, RenderTarget view)
+	void draw(RenderTarget view)
 	{
 		updateCoords;
-		if(shouldDrawFrontSprite(tile))
+		if(shouldDrawFrontSprite())
 		{
 			view.draw(_sprite); 
 		}
@@ -114,29 +120,29 @@ private final class TileVisuals
 		}
 	}
 
-	private bool shouldDrawFrontSprite(const Tile tile)
+	private bool shouldDrawFrontSprite() pure const @nogc nothrow
 	{
-		return tile.isOpen || _shouldBeDisplayed;
+		return _tile.isOpen || _shouldBeDisplayed;
 	}
 
 	private bool _shouldBeDisplayed;
-	void display()
+	void display() pure @nogc nothrow
 	{
 		_shouldBeDisplayed = true;
 	}
 
-	void dontDisplay()
+	void dontDisplay() pure @nogc nothrow
 	{
 		_shouldBeDisplayed = false;
 	}
 
     private bool _isRotated;
-    bool isRotated() pure const @property
+    bool isRotated() pure const @property @nogc nothrow
     {
         return _isRotated;
     }
 
-    void rotate()
+    void rotate() pure @nogc nothrow
     {
         _isRotated = true;
     }
@@ -159,15 +165,17 @@ private final class TileVisuals
 
 private TileVisuals getTileVisuals(const Tile tile)
 {
-	if(tile.id !in _tiles)
+	auto visuals = _tiles.filter!(t => t._tile is tile);
+	if(visuals.empty)
 	{
-		trace("Generating new tiles visual for \n", tile.id);
-		auto tileVisuals = new TileVisuals;
-		tileVisuals.initialise(tile);
-		_tiles[tile.id] = tileVisuals;
+		auto tileVisuals = new TileVisuals(tile);
+		_tiles ~= tileVisuals;
 		return tileVisuals;
 	}
-	return _tiles[tile.id];
+	else
+	{
+		return visuals.front;
+	}
 }
 
 private IntRect getTextureRect(const Tile stone)
@@ -224,7 +232,7 @@ private void loadTilesTexture()
 	}
 }
 
-private TileVisuals[UUID] _tiles;
+private TileVisuals[] _tiles;
 
 
 

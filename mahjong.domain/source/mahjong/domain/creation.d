@@ -6,22 +6,43 @@ import std.random;
 import std.string;
 import mahjong.domain.enums;
 import mahjong.domain.tile;
+import mahjong.util.allocator;
 
-auto allTiles() pure
+auto allTiles() pure @nogc nothrow
 {
-    import std.algorithm : map;
-    import std.range : iota;
-    import mahjong.util.range : flatMap;
-    return iota(Types.wind, Types.ball+1)
-        .map!(type => cast(Types)type)
-        .flatMap!(type =>
-            iota(type.amountOfTiles).map!(value => new Tile(type, value)));
+    struct Result
+    {
+        private int type = Types.wind;
+        private int value = Winds.east;
+
+        ComparativeTile front() pure const @nogc nothrow
+        {
+            return ComparativeTile(cast(Types)type, value);
+        }
+
+        void popFront() pure @nogc nothrow
+        {
+            ++value;
+            if(value == amountOfTiles(cast(Types)type))
+            {
+                value = 0;
+                ++type;
+            }
+        }
+
+        bool empty() pure const @nogc nothrow
+        {
+            return type == (Types.ball + 1);
+        }
+    }
+    return Result();
 }
 
 unittest
 {
     import std.algorithm : any;
     import fluent.asserts;
+    auto allocator = Allocator(true);
     auto aWind = ComparativeTile(Types.wind, Winds.east);
     allTiles.any!(tile => aWind.hasEqualValue(tile)).should.equal(true);
     auto aDragon = ComparativeTile(Types.dragon, Dragons.green);
@@ -46,7 +67,7 @@ void setUpWall(ref Tile[] wall, int dups = 4)
 	{
         foreach(tile; allTiles)
         {
-            wall ~= tile;
+            wall ~= new Tile(tile.type, tile.value);
         }
 	}
 	defineDoras(wall);

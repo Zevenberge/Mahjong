@@ -109,8 +109,7 @@ class ResultScreen
 		auto isClosedHand = _mahjongData.player.isClosedHand;
 		createFanTexts(scoring, isClosedHand);
 		createMiscTexts(scoring, isClosedHand);
-		_animation.objectId = randomUUID;
-		addUniqueAnimation(_animation);
+		addAnimation(_animation);
 	}
 
 	private void createFanTexts(Scoring scoring, bool isClosedHand)

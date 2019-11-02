@@ -78,8 +78,7 @@ class TransferScreen
 	private void composeAnimation()
 	{
 		_animation = new ParallelAnimation(_transfers.map!(t => t.animation).array);
-		_animation.objectId = randomUUID;
-		addUniqueAnimation(_animation);
+		addAnimation(_animation);
 	}
 
 	private Transfer[] _transfers;

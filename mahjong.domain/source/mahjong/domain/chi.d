@@ -25,14 +25,14 @@ ChiCandidate[] determineChiCandidates(const(Tile)[] hand, const Tile discard) pu
 	return candidates;
 }
 
-bool isChi(ChiCandidate candidate, const Tile discard) pure
+bool isChi(ChiCandidate candidate, const Tile discard) pure @nogc nothrow
 {
 	auto isSameType = discard.type == candidate.first.type
 		&& discard.type == candidate.second.type;
 	auto isHonour = discard.isHonour;
-	auto values = [candidate.first.value, candidate.second.value, discard.value];
+	const(int)[3] values = [candidate.first.value, candidate.second.value, discard.value];
 	auto minValue = min(values[0], values[1], values[2]);
-	auto hasConstructiveValues = values.any!(v => v == minValue +1) 
-		&& values.any!(v => v == minValue+2);
+	auto hasConstructiveValues = values[].any!(v => v == minValue +1) 
+		&& values[].any!(v => v == minValue+2);
 	return isSameType && !isHonour && hasConstructiveValues;
 }
