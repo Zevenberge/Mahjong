@@ -74,7 +74,7 @@ class Ingame
 
     const UUID id;
     // Ingame variables.
-    const PlayerWinds wind; // What wind the player has. Initialise it with a value of -1 to allow easy assert(ingame.wind >= 0).
+    const PlayerWinds wind;
 
     bool isEast() @property pure const
     {

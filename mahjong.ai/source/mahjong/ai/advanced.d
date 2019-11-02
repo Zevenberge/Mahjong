@@ -780,6 +780,105 @@ private TurnDecision discard(const Tile tile, const Player player) pure @nogc no
     return TurnDecision(player, TurnDecision.Action.discard, tile);
 }
 
+private Optional!ClaimDecision ponIfBeneficial(const ClaimEvent event)
+{
+    bool isLeadingWind = event.tile.isWind && event.tile.value == event.metagame.leadingWind;
+    bool isOwnWind = event.tile.isWind && event.tile.value == event.player.wind;
+    if(event.tile.isDragon || isLeadingWind || isOwnWind)
+    {
+        return some(ClaimDecision(event.player, Request.Pon));
+    }
+    return no!ClaimDecision;
+}
+
+@("If a tile is not relevant, it should not be ponned")
+unittest
+{
+    import mahjong.domain.creation;
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    metagame.wall.setUp;
+    auto player = new Player("🀀🀀🀁🀁🀁🀅🀅🀅🀄🀄🀄🀆🀆"d, PlayerWinds.east);
+    auto discardedTile = "🀓"d.convertToTiles[0];
+    discardedTile.isNotOwn;
+    discardedTile.isDiscarded;
+    auto event = new ClaimEvent(discardedTile, player, metagame);
+    auto decision = ponIfBeneficial(event);
+    decision.should.equal(no!ClaimDecision);
+}
+
+@("If a pon results in a fanpai, just grab it")
+unittest
+{
+    import mahjong.domain.creation;
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    metagame.wall.setUp;
+    auto player = new Player("🀇🀇🀈🀌🀌🀊🀙🀙🀜🀓🀓🀆🀆"d, PlayerWinds.east);
+    auto discardedTile = "🀆"d.convertToTiles[0];
+    discardedTile.isNotOwn;
+    discardedTile.isDiscarded;
+    auto event = new ClaimEvent(discardedTile, player, metagame);
+    auto decision = ponIfBeneficial(event);
+    decision.should.not.equal(no!ClaimDecision);
+    decision.get.player.should.equal(player);
+    decision.get.request.should.equal(Request.Pon);
+}
+
+@("If a pon results in a fanpai because the leading wind matches, just grab it")
+unittest
+{
+    import mahjong.domain.creation;
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    metagame.wall.setUp;
+    auto player = new Player("🀇🀇🀈🀌🀌🀊🀙🀙🀜🀓🀓🀀🀀"d, PlayerWinds.south);
+    auto discardedTile = "🀀"d.convertToTiles[0];
+    discardedTile.isNotOwn;
+    discardedTile.isDiscarded;
+    auto event = new ClaimEvent(discardedTile, player, metagame);
+    auto decision = ponIfBeneficial(event);
+    decision.should.not.equal(no!ClaimDecision);
+    decision.get.player.should.equal(player);
+    decision.get.request.should.equal(Request.Pon);
+}
+
+@("If the wind is not special, be careful about grabbing it.")
+unittest
+{
+    import mahjong.domain.creation;
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    metagame.wall.setUp;
+    auto player = new Player("🀇🀇🀈🀌🀌🀊🀙🀚🀜🀓🀓🀃🀃"d, PlayerWinds.south);
+    auto discardedTile = "🀃"d.convertToTiles[0];
+    discardedTile.isNotOwn;
+    discardedTile.isDiscarded;
+    auto event = new ClaimEvent(discardedTile, player, metagame);
+    auto decision = ponIfBeneficial(event);
+    decision.should.equal(no!ClaimDecision);
+}
+
+@("If a pon results in a fanpai because the player wind matches, just grab it")
+unittest
+{
+    import mahjong.domain.creation;
+    auto metagame = new Metagame([new Player], new DefaultGameOpts);
+    metagame.wall = new Wall(new DefaultGameOpts);
+    metagame.wall.setUp;
+    auto player = new Player("🀇🀇🀈🀌🀌🀊🀙🀙🀜🀓🀓🀁🀁"d, PlayerWinds.south);
+    auto discardedTile = "🀁"d.convertToTiles[0];
+    discardedTile.isNotOwn;
+    discardedTile.isDiscarded;
+    auto event = new ClaimEvent(discardedTile, player, metagame);
+    auto decision = ponIfBeneficial(event);
+    decision.should.not.equal(no!ClaimDecision);
+    decision.get.player.should.equal(player);
+    decision.get.request.should.equal(Request.Pon);
+}
+
+
+
 version(mahjong_test)
 {
     void shouldBeEither(T, U...)(T actual, U expected, 

@@ -397,6 +397,7 @@ bool isWind(const ComparativeTile tile) @property pure
     return tile.type == Types.wind;
 }
 
+@("Is a wind a wind?")
 unittest
 {
     import fluent.asserts;
@@ -404,6 +405,21 @@ unittest
     wind.isWind.should.equal(true);
     auto dragon = ComparativeTile(Types.dragon, Dragons.white);
     dragon.isWind.should.equal(false);
+}
+
+bool isDragon(const ComparativeTile tile) @property pure @nogc nothrow
+{
+    return tile.type == Types.dragon;
+}
+
+@("Is dragons a dragon?")
+unittest
+{
+    import fluent.asserts;
+    auto dragon = ComparativeTile(Types.dragon, Dragons.white);
+    dragon.isDragon.should.equal(true);
+    auto wind = ComparativeTile(Types.wind, Winds.west);
+    wind.isDragon.should.equal(false);
 }
 
 bool isGreen(const ComparativeTile tile) @property pure @nogc nothrow
