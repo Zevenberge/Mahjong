@@ -8,7 +8,7 @@ import mahjong.domain.player;
 import mahjong.domain.wrappers;
 import mahjong.util.range;
 
-inout(Player) currentPlayer(inout(Metagame) metagame) @property pure
+inout(Player) currentPlayer(inout(Metagame) metagame) @property pure @nogc nothrow
 {
     with(metagame)
     {
@@ -16,7 +16,7 @@ inout(Player) currentPlayer(inout(Metagame) metagame) @property pure
     }
 }
 
-Player currentPlayer(Metagame metagame, Player player) @property
+Player currentPlayer(Metagame metagame, Player player) @property @nogc nothrow
 {
     with(metagame)
     {
@@ -25,7 +25,7 @@ Player currentPlayer(Metagame metagame, Player player) @property
     return player;
 }
 
-inout(Player) nextPlayer(inout Metagame metagame) @property pure
+inout(Player) nextPlayer(inout Metagame metagame) @property pure @nogc nothrow
 {
     with(metagame)
     {
@@ -45,23 +45,57 @@ unittest
     metagame.nextPlayer.wind.should.equal(PlayerWinds.south);
 }
 
-auto otherPlayers(Metagame metagame) pure
+struct OtherPlayers(Metagame)
 {
-    auto currentPlayer = metagame.currentPlayer;
-    return metagame.players.filter!(p => p != currentPlayer);
+    private this(Metagame metagame, const Player playerToExclude)
+    {
+        _metagame = metagame;
+        _playerToExclude = playerToExclude;
+        _index = 0;
+        if(front is playerToExclude) popFront;
+    }
+
+    private Metagame _metagame;
+    private const Player _playerToExclude;
+    private size_t _index;
+
+    auto front() pure @nogc nothrow
+    {
+        assert(!empty);
+        return _metagame.players[_index];
+    }
+
+    void popFront() pure @nogc nothrow
+    {
+        _index++;
+        if(!empty && front is _playerToExclude)
+        {
+            popFront;
+        }
+    }
+
+    bool empty() pure @nogc nothrow
+    {
+        return _index >= _metagame.players.length;
+    }
 }
 
-auto otherPlayers(const Metagame metagame, const Player player) pure
+auto otherPlayers(Metagame metagame) pure @nogc nothrow
 {
-    return metagame.players.filter!(p => p != player);
+    return OtherPlayers!(Metagame)(metagame, metagame.currentPlayer);
 }
 
-AmountOfPlayers amountOfPlayers(const Metagame metagame) @property pure
+auto otherPlayers(const Metagame metagame, const Player player) pure @nogc nothrow
+{
+    return OtherPlayers!(const Metagame)(metagame, player);
+}
+
+AmountOfPlayers amountOfPlayers(const Metagame metagame) @property pure @nogc nothrow
 {
     return AmountOfPlayers(metagame.players.length);
 }
 
-package inout(Player) eastPlayer(inout(Metagame) metagame) @property pure
+package inout(Player) eastPlayer(inout(Metagame) metagame) @property pure @nogc nothrow
 {
     with(metagame)
     {
@@ -69,10 +103,10 @@ package inout(Player) eastPlayer(inout(Metagame) metagame) @property pure
     }
 }
 
-auto playersByTurnOrder(Metagame metagame) @property
+auto playersByTurnOrder(Metagame metagame) @property pure @nogc nothrow
 {
     return metagame.players.cycle
-        .find(metagame.currentPlayer)
+        .find!"a is b"(metagame.currentPlayer)
         .atLeastOneUntil(metagame.currentPlayer);
 }
 
@@ -91,12 +125,12 @@ unittest
         );
 }
 
-bool isAnyPlayerNagashiMangan(const Metagame metagame)
+bool isAnyPlayerNagashiMangan(const Metagame metagame) pure @nogc nothrow
 {
     return metagame.players.any!(p => p.isNagashiMangan);
 }
 
-bool isAnyPlayerMahjong(const Metagame metagame)
+bool isAnyPlayerMahjong(const Metagame metagame) pure @nogc nothrow
 {
     return metagame.players.any!(p => p.isMahjong);
 }

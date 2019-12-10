@@ -63,7 +63,7 @@ template first(alias pred)
 
 size_t indexOf(Range, E)(Range range, E element) if (isInputRange!Range)
 {
-	return range.countUntil!(e => e == element);
+	return range.countUntil!(e => e is element);
 }
 
 unittest
@@ -201,17 +201,43 @@ unittest
 
 template atLeastOneUntil()
 {
+	struct Result(Range, Needle)
+	{
+		this(Range range, Needle needle)
+		{
+			_range = range;
+			_needle = needle;
+			_isOnePassed = false;
+		}
+
+		private Range _range;
+		private Needle _needle;
+		private bool _isOnePassed;
+
+		Needle front()
+		{
+			return _range.front;
+		}
+
+		void popFront()
+		{
+			assert(!empty);
+			_isOnePassed = true;
+			_range.popFront;
+		}
+
+		bool empty()
+		{
+			if(_range.empty) return true;
+			return _isOnePassed && _range.front is _needle;
+		}
+	}
+
 	auto atLeastOneUntil(Range, Needle)(Range range, Needle needle)
 	{
 		static assert(isInputRange!Range,
 				"An input range should be supplied instead of " ~ Range.stringof);
-		bool isOnePassed = false;
-		return range.until!((x, y) {
-			if (isOnePassed)
-				return x == y;
-			isOnePassed = true;
-			return false;
-		})(needle);
+		return Result!(Range, Needle)(range, needle);
 	}
 }
 
