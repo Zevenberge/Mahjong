@@ -503,7 +503,7 @@ private Transaction[] mergeTransactions(Transactions)(Transactions transactions)
 
 class Transaction
 {
-    this(const Player player, const int amount) pure
+    this(const Player player, const int amount) pure @nogc nothrow
     {
         this.player = player;
         this.amount = amount;
@@ -524,7 +524,7 @@ class Transaction
         else static assert(false, "Operator " ~ op ~ " not supported");
     }
 
-    bool isPayment() pure const @property
+    bool isPayment() pure const @property @nogc nothrow
     {
         return amount < 0;
     }

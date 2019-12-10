@@ -44,20 +44,9 @@ class Metagame
 		this.players = players;
         _opts = opts;
 		info("Initialising metagame");
-		placePlayers;
         _round = Round.createRandom(this.amountOfPlayers);
         _leadingWindStartingLocation = _round.roundStartingPosition;
 		info("Initialised metagame");
-	}
-
-	private void placePlayers() @nogc nothrow
-	{ 
-        int i = 0;
-		foreach(player; players)
-		{
-			player.playLoc = i;
-            ++i;
-		}
 	}
 
     private bool _isInitialised;

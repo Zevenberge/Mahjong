@@ -11,7 +11,7 @@ class ClosedHand
 {
 	Tile[] tiles;
 
-	size_t length() @property pure const
+	size_t length() @property pure const @nogc nothrow
 	{
 		return tiles.length;
 	}
@@ -38,12 +38,12 @@ class ClosedHand
 		hand.tiles.should.not.contain([tileToRemove]);
 	}
 
-	void closeHand() pure
+	void closeHand() pure @nogc nothrow
 	{
 		tiles.each!(t => t.close);
 	}
 
-	void showHand() pure
+	void showHand() pure @nogc nothrow
 	{
 		tiles.each!(t => t.open);
 	}
@@ -87,7 +87,7 @@ class ClosedHand
 			removeTile(otherChiTiles.second)];
 	}
 
-	bool isPonnable(const Tile discard) pure const
+	bool isPonnable(const Tile discard) pure const @nogc nothrow
 	{
 		return countTilesWithEqualValue(discard) >= 2;
 	}

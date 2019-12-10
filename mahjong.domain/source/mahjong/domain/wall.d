@@ -15,19 +15,18 @@ class Wall
 {
     private const Opts _opts;
 	private Tile[] _tiles;
-	const(Tile)[] tiles() @property pure const
+	const(Tile)[] tiles() @property pure const @nogc nothrow
 	{
 		return _tiles;
 	}
 
-	this(const Opts opts) pure
+	this(const Opts opts) pure @nogc nothrow
 	{
-        debug trace("Constructing the wall");
         _opts = opts;
 	}
 
 	
-	size_t length() @property pure const
+	size_t length() @property pure const @nogc nothrow
 	{
 		return _tiles.length;
 	}
@@ -101,12 +100,12 @@ class Wall
 		this._tiles = twall;
 	}
 	
-	protected void flipFirstDoraIndicator() pure
+	protected void flipFirstDoraIndicator() pure @nogc nothrow
 	{
 		_tiles[$-5].open;
 	}   
 	
-	protected void flipDoraIndicator() pure
+	protected void flipDoraIndicator() pure @nogc nothrow
 	{
 		auto indexOfLastOpenedDoraIndicator = _tiles.countUntil!(t => t.isOpen);
 		_tiles[indexOfLastOpenedDoraIndicator-2].open;
@@ -117,7 +116,7 @@ class Wall
 		return _tiles.filter!(t => t.isOpen).array;
 	}
 
-	Tile drawTile() pure
+	Tile drawTile() pure @nogc nothrow
 	in(_tiles.length > 0, "No tiles to draw from the wall")
 	{ 
 		Tile drawnTile = _tiles[0];
@@ -126,7 +125,7 @@ class Wall
 	}
 
     private ubyte _amountOfKans;
-	Tile drawKanTile() pure
+	Tile drawKanTile() pure @nogc nothrow
 	in(_tiles.length > 0, "No tiles to draw from the wall")
 	in(!isMaxAmountOfKansReached, "Exceeding max amount of kans")
 	{ 
@@ -134,7 +133,7 @@ class Wall
 		return getKanTile;      
 	}
 	
-	protected Tile getKanTile() pure
+	protected Tile getKanTile() pure @nogc nothrow
 	{
         _amountOfKans++;
 		Tile kanTile = _tiles[$-1];

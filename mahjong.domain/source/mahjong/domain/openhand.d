@@ -100,7 +100,7 @@ class OpenHand
 		assert(false, "Could not find a set corresponding to the tile");
 	}
 
-	const(Set) findCorrespondingPon(const(Tile) tile) const nothrow
+	const(Set) findCorrespondingPon(const(Tile) tile) pure const @nogc nothrow
 	{
 		foreach(set; _sets)
 		{

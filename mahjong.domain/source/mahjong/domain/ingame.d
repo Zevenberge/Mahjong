@@ -200,7 +200,7 @@ class Ingame
         return tile.isOwnedBy(this);
     }
 
-    bool isChiable(const Tile discard) pure const
+    bool isChiable(const Tile discard) pure const @nogc nothrow
     {
         if (!canClaim(discard))
             return false;
@@ -295,7 +295,7 @@ class Ingame
         (() => game.chi(chiableTile, candidate)).should.throwException!IllegalClaimException;
     }
 
-    bool isPonnable(const Tile discard) pure const
+    bool isPonnable(const Tile discard) pure const @nogc nothrow
     {
         if (!canClaim(discard))
             return false;
@@ -361,7 +361,7 @@ class Ingame
         (() => game.pon(ponnableTile)).should.throwException!IllegalClaimException;
     }
 
-    bool isKannable(const Tile discard, const Wall wall) const
+    bool isKannable(const Tile discard, const Wall wall) const @nogc nothrow
     {
         if (!canClaim(discard) || wall.isMaxAmountOfKansReached)
             return false;

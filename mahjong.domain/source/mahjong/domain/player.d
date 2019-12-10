@@ -14,9 +14,8 @@ class Player
 	const UUID id;
 	const dstring name = "Cal"d;
 
-	int playLoc = -10;
 	private int _score;
-	int score() @property pure const
+	int score() @property pure const @nogc nothrow
 	{
 		return _score;
 	}
@@ -56,13 +55,13 @@ class Player
 		game = new Ingame(wind);
 	}
 
-	int wind() @property pure const
+	int wind() @property pure const @nogc nothrow
 	{
 		if(game is null) return -1;
 		return game.wind;
 	}
 
-	bool isChiable(const Tile discard, const Metagame metagame) pure const
+	bool isChiable(const Tile discard, const Metagame metagame) pure const @nogc nothrow
 	{
 		if(metagame.nextPlayer !is this) return false;
 		return game.isChiable(discard);
