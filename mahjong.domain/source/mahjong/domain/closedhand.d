@@ -16,7 +16,7 @@ class ClosedHand
 		return tiles.length;
 	}
 
-	Tile removeTile(const Tile tile) pure
+	Tile removeTile(const Tile tile) pure @nogc nothrow
 	{
 		import mahjong.util.collections : removeInPlace;
 		auto returnTile = tiles.find!("a is b")(tile).front;
@@ -71,15 +71,14 @@ class ClosedHand
 		return _lastTile;
 	}
 
-	bool isChiable(const Tile discard) pure const
+	bool isChiable(const Tile discard) pure const @nogc nothrow
 	{
-		return !determineChiCandidates(tiles, discard).empty;
+		return tiles.isChiable(discard);
 	}
 
-	Tile[] removeChiTiles(const ChiCandidate otherChiTiles) pure
+	Tile[2] removeChiTiles(const ChiCandidate otherChiTiles) pure @nogc nothrow
 	out(tiles)
 	{
-		assert(tiles.length == 2, "Two tiles should have been removed");
 		assert(tiles[0] !is null && tiles[1] !is null, "The tiles should have a value");
 	}
 	do
@@ -103,7 +102,7 @@ class ClosedHand
 		return removeTilesWithIdenticalValue!2(discard);
 	}
 
-	bool isKannable(const Tile discard) pure const
+	bool isKannable(const Tile discard) pure const @nogc nothrow
 	{
 		return countTilesWithEqualValue(discard) >= 3;
 	}
@@ -143,7 +142,7 @@ class ClosedHand
 		return tiles.filter!(tile => tile.hasEqualValue(other));
 	}
 
-	private size_t countTilesWithEqualValue(const Tile other) pure const
+	private size_t countTilesWithEqualValue(const Tile other) pure const @nogc nothrow
 	{
 		return tiles.count!(tile => tile.hasEqualValue(other));
 	}

@@ -2,6 +2,7 @@
 
 import std.algorithm;
 import std.array;
+import std.typecons;
 import mahjong.domain.tile;
 import mahjong.util.range;
 
@@ -11,18 +12,44 @@ struct ChiCandidate
 	const Tile second;
 }
 
-ChiCandidate[] determineChiCandidates(const(Tile)[] hand, const Tile discard) pure
+bool isChiable(const(Tile)[] hand, const Tile discard) pure @nogc nothrow
 {
-	if(discard.isHonour) return null;
+	return determineChis!(No.returnSets)(hand, discard);
+}
+
+ChiCandidate[] determineChiCandidates(const(Tile)[] hand, const Tile discard) pure nothrow
+{
+	return determineChis!(Yes.returnSets)(hand, discard);
+}
+
+private auto determineChis(Flag!"returnSets" returnSets)(const(Tile)[] hand, const Tile discard) pure nothrow
+{
+	if(discard.isHonour)
+	{
+		static if(returnSets == Yes.returnSets)
+			return null;
+		else
+			return false;
+	}
 	static immutable distance = [-2, -1, 1, 2];
-	ChiCandidate[] candidates;
+	static if(returnSets == Yes.returnSets)
+		ChiCandidate[] candidates;
 	for(int i = 0; i < 3; ++i)
 	{
 		auto firstTile = hand.first!(t => t.type == discard.type && t.value == discard.value + distance[i]);
 		auto secondTile = hand.first!(t => t.type == discard.type && t.value == discard.value + distance[i+1]);
-		if(firstTile !is null && secondTile !is null) candidates ~= ChiCandidate(firstTile, secondTile);
+		if(firstTile !is null && secondTile !is null)
+		{
+			static if(returnSets == Yes.returnSets)
+				candidates ~= ChiCandidate(firstTile, secondTile);
+			else
+				return true;
+		}
 	}
-	return candidates;
+	static if(returnSets == Yes.returnSets)
+		return candidates;
+	else 
+		return false;
 }
 
 bool isChi(ChiCandidate candidate, const Tile discard) pure @nogc nothrow

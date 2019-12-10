@@ -777,12 +777,12 @@ void notifyPlayersAboutMissedTile(Metagame metagame, const Tile tile)
     }
 }
 
-int riichiFare(const Metagame metagame) @property pure
+int riichiFare(const Metagame metagame) @property pure @nogc nothrow
 {
     return metagame._opts.riichiFare;
 }
 
-GameMode gameMode(const Metagame metagame) @property pure
+GameMode gameMode(const Metagame metagame) @property pure @nogc nothrow
 {
     return metagame._opts.gameMode;
 }

@@ -122,7 +122,7 @@ class Player
         metagame.amountOfRiichiSticks.should.equal(1);
     }
 
-    void abortGame(Metagame metagame)
+    void abortGame(const Metagame metagame) pure @nogc nothrow
     {
         if(isRiichi)
         {
@@ -156,10 +156,10 @@ class Player
         player.score.should.equal(30_000);
     }
 
-	void applyTransaction(const Transaction transaction)
+	void applyTransaction(const Transaction transaction) pure @nogc nothrow
 	in
 	{
-		assert(transaction.player == this, "The transaction was applied to the wrong player.");
+		assert(transaction.player is this, "The transaction was applied to the wrong player.");
 	}
 	body
 	{
